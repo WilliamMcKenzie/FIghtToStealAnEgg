@@ -103,7 +103,7 @@ return {
 
 	-- the map (Server/Map.luau builds it from Shared/MapData, made by tools/map_gen.py)
 	Map = {
-		HideLineup = true, -- move tools/lineup.luau's workspace.World (and a Baseplate) out of the way in Play
+		HideLineup = true, -- move tools/lineup.luau's workspace.World (and a Baseplate) out of the way when the map is built (Edit: into ServerStorage.MovedByMapBaker)
 		LiquidSlow = 0.8, -- walking through a biome's liquid (water, magma): this much of your speed (QM, Oct 24)
 		LiquidSink = 1, -- and you sink this far into it, below its surface
 	},
