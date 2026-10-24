@@ -30,6 +30,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Shared = script.Parent:FindFirstChild("Shared") or ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local MapData = require(Shared.MapData)
+local WorldColors = require(Shared.WorldColors)
 
 local Map = {}
 Map.data = MapData
@@ -74,7 +75,13 @@ local function texture(part, face, image, tile, key, z, aligned)
 	if aligned then
 		local corner = part.Position - part.Size / 2
 		if face == Enum.NormalId.Top or face == Enum.NormalId.Bottom then
-			t.OffsetStudsU, t.OffsetStudsV = corner.X % tile, corner.Z % tile
+			-- (a Top texture runs from the part's +x +z corner toward -x and -z, measured in
+			-- Studio: this offset puts every part's checker on one world-wide board, whatever
+			-- its size; the half tile mirrors the checker back the right way round, which the
+			-- studs, symmetric, don't need)
+			local far = part.Position + part.Size / 2
+			local half = if image == STUDS then 0 else tile / 2
+			t.OffsetStudsU, t.OffsetStudsV = (half - far.X) % tile, (half - far.Z) % tile
 		elseif face == Enum.NormalId.Front or face == Enum.NormalId.Back then
 			t.OffsetStudsU, t.OffsetStudsV = corner.X % tile, corner.Y % tile
 		else
@@ -274,7 +281,10 @@ local function loadStone()
 	end
 end
 
--- one stone block, its centre at `centre` (a CFrame: position and tilt), `size` studs
+-- one stone block, its centre at `centre` (a CFrame: position and tilt), `size` studs.
+-- Each block takes its own shade of its colour (a Shade attribute, kept by Shared/
+-- WorldColors when it repaints), so a pillar reads as many stones (QM, Oct 24); picked
+-- from where it stands, so the layout's own random numbers don't change.
 local function stone(parent, centre, size, key, collide)
 	local p
 	if stoneTemplate then
@@ -282,10 +292,13 @@ local function stone(parent, centre, size, key, collide)
 		p.Size = size
 		p.CFrame = centre * CFrame.new(0, -lift * size.Y, 0)
 		p:SetAttribute("ColorKey", key)
-		p.Color = color(key)
 	else
 		p = block("Stone", parent, centre, size, key, ALL, false)
 	end
+	local at = centre.Position
+	local shade = Random.new(math.floor(at.X * 7.3 + at.Y * 13.1 + at.Z * 17.9)):NextNumber(0.86, 1.1)
+	p:SetAttribute("Shade", math.round(shade * 100) / 100)
+	p.Color = WorldColors.shaded(color(key), p)
 	p.Name = "Stone"
 	p.Anchored = true
 	p.CanCollide = collide ~= false
@@ -607,23 +620,21 @@ local function baseFurniture(parent)
 		Map.sign(zone, CFrame.new(x + 14, 0, z - size / 2 - 3), title, 13)
 		zone.Parent = training
 	end
-	-- the spawn, in the dirt yard (a stud below the grass)
+	-- the spawn: an invisible point in the dirt yard (QM, Oct 24: no spawn plate), you
+	-- land on the floor under it
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "SpawnLocation"
 	spawn.Anchored = true
 	spawn.Neutral = true
 	spawn.Duration = 0
 	spawn.Size = Vector3.new(10, 1, 10)
-	spawn.CFrame = CFrame.new(base.Spawn[1], -0.5, base.Spawn[2])
-	spawn.Material = Enum.Material.SmoothPlastic
-	spawn:SetAttribute("ColorKey", "Dirt")
-	spawn.Color = color("Dirt")
-	spawn.TopSurface = Enum.SurfaceType.Smooth
+	spawn.CFrame = CFrame.new(base.Spawn[1], 1, base.Spawn[2])
+	spawn.Transparency = 1
+	spawn.CanCollide, spawn.CanQuery, spawn.CanTouch = false, false, false
 	local decal = spawn:FindFirstChildOfClass("Decal")
 	if decal then
 		decal:Destroy()
 	end
-	texture(spawn, Enum.NormalId.Top, STUDS, 1, nil, 2, true)
 	spawn.Parent = parent
 end
 

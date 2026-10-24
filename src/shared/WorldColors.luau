@@ -34,11 +34,21 @@ function WorldColors.create()
 	return folder
 end
 
+-- a part's colour: its key's, lightened or darkened by its Shade attribute if it has one
+-- (Server/Map gives each stone block its own)
+function WorldColors.shaded(color, thing)
+	local shade = thing:GetAttribute("Shade")
+	if typeof(shade) ~= "number" then
+		return color
+	end
+	return Color3.new(math.min(1, color.R * shade), math.min(1, color.G * shade), math.min(1, color.B * shade))
+end
+
 local function paint(key, color)
 	for _, thing in workspace:GetDescendants() do
 		if thing:GetAttribute("ColorKey") == key then
 			if thing:IsA("BasePart") then
-				thing.Color = color
+				thing.Color = WorldColors.shaded(color, thing)
 			elseif thing:IsA("Texture") then
 				thing.Color3 = color
 			end
@@ -55,7 +65,7 @@ function WorldColors.paintAll(folder)
 		local color = key and folder:GetAttribute(key)
 		if typeof(color) == "Color3" then
 			if thing:IsA("BasePart") then
-				thing.Color = color
+				thing.Color = WorldColors.shaded(color, thing)
 			elseif thing:IsA("Texture") then
 				thing.Color3 = color
 			end
