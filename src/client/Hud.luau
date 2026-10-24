@@ -203,6 +203,7 @@ end
 count("Power")
 count("Cash")
 
+Popups.abbreviate = Hud.abbreviate
 Popups.init(root, hudFrames)
 gui.Parent = player:WaitForChild("PlayerGui")
 

@@ -1,7 +1,7 @@
 -- Draws every boss and training mob: the server only has an invisible body in
 -- workspace.Bosses (server/Bosses.luau) or workspace.Mobs (server/Training.luau); here
 -- each gets its model (the Horse driver with the animal's own data from Shared/Animals,
--- by its Model, Size and Tint attributes, so idle, walk and gallop blend by its speed),
+-- by its Model, ModelSize and Tint attributes, so idle, walk and gallop blend by its speed),
 -- stood on the ground under the body and facing its way. When its Health drops it
 -- flashes white and the damage pops up over its head; at 0 it sinks and shrinks. A
 -- sleeping boss (Asleep) has Zzz floating over it.
@@ -15,7 +15,6 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Config = require(Shared.Config)
 local Horse = require(Shared.Animals.Horse)
 
 -- Recolours (a mob's Tint): each part's colour through fn, the rest of the data shared
@@ -32,7 +31,7 @@ local TINTS = {
 }
 local kinds = {} -- [model .. size .. tint] = Horse variant
 local function kindOf(body)
-	local model, size, tint = body:GetAttribute("Model"), body:GetAttribute("Size") or 1, body:GetAttribute("Tint")
+	local model, size, tint = body:GetAttribute("Model"), body:GetAttribute("ModelSize") or 1, body:GetAttribute("Tint")
 	if not model then
 		return nil
 	end

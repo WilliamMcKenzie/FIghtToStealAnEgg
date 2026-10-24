@@ -174,6 +174,9 @@ return {
 			Turn = 4,
 			Strength = 2,
 			Respawn = 20, -- seconds after it dies before it's back asleep on its dais
+			Attacks = { -- (Server/BossAttacks) melee: kite it and step out of its pecks
+				{ Kind = "Slam", Every = 2.2, Range = 14, Radius = 11, Windup = 0.8, Damage = 20 },
+			},
 		},
 		Desert = {
 			Name = "Dune Scorpion",
@@ -186,6 +189,19 @@ return {
 			Turn = 3.5,
 			Strength = 6,
 			Respawn = 25,
+			Attacks = { -- melee and ranged: a sting slam up close, venom spat in fans
+				{ Kind = "Slam", Every = 2.6, Range = 16, Radius = 13, Windup = 0.75, Damage = 25 },
+				{
+					Kind = "Shot",
+					Every = 1.9,
+					Count = 3,
+					Spread = 16,
+					Speed = 38,
+					Size = 2.4,
+					Damage = 15,
+					Range = 150,
+				},
+			},
 		},
 		Ice = {
 			Name = "Ice Golem",
@@ -198,6 +214,19 @@ return {
 			Turn = 3,
 			Strength = 20,
 			Respawn = 30,
+			Attacks = { -- ranged and bombs: ice shards, and frost circles under your feet
+				{
+					Kind = "Shot",
+					Every = 2.3,
+					Count = 5,
+					Spread = 13,
+					Speed = 42,
+					Size = 2.4,
+					Damage = 22,
+					Range = 170,
+				},
+				{ Kind = "Bombs", Every = 4.2, Count = 3, Radius = 10, Windup = 1.4, Damage = 40, Scatter = 26 },
+			},
 		},
 		Lava = {
 			Name = "Volcano Tortoise",
@@ -210,6 +239,11 @@ return {
 			Turn = 2.5,
 			Strength = 60,
 			Respawn = 35,
+			Attacks = { -- all of it: a crushing stomp, magma novas, a rain of bombs
+				{ Kind = "Slam", Every = 3.2, Range = 22, Radius = 20, Windup = 1, Damage = 55 },
+				{ Kind = "Nova", Every = 4.5, Count = 14, Speed = 30, Size = 3, Damage = 30, Range = 190 },
+				{ Kind = "Bombs", Every = 3.6, Count = 5, Radius = 12, Windup = 1.3, Damage = 50, Scatter = 34 },
+			},
 		},
 	},
 	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home, heals and sleeps
@@ -229,6 +263,21 @@ return {
 		},
 		Reward = { Meadow = 100, Desert = 600, Ice = 3000, Lava = 15000 },
 		PenShows = 24, -- most eggs sat in a pen
+	},
+
+	-- saving (Server/Data): the DataStore's name (a new name starts everyone fresh)
+	Data = {
+		Store = "Players_v1",
+		AutoSave = 90, -- seconds
+	},
+
+	-- rebirth (Server/Data, the Rebirth popup): cash needed is Cost x Growth ^ rebirths so far;
+	-- it resets your cash, Strength and training grounds, and each rebirth makes every hit
+	-- train StrengthBonus more (0.5: 1.5x after one, 2x after two)
+	Rebirth = {
+		Cost = 25000,
+		Growth = 3,
+		StrengthBonus = 0.5,
 	},
 
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit

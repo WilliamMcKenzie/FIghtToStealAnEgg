@@ -15,6 +15,7 @@ local Sword = require(Shared.Weapons.Sword)
 local WorldColors = require(Shared.WorldColors)
 local Bosses = require(script.Bosses)
 local Combat = require(script.Combat)
+local Data = require(script.Data)
 local Eggs = require(script.Eggs)
 local Map = require(script.Map)
 local Pens = require(script.Pens)
@@ -26,6 +27,7 @@ WorldColors.create() -- workspace.WorldColors: live world colours (after the map
 Pens.start(map)
 Eggs.start(map)
 Training.start(map)
+Data.start() -- (after Training: it loads over the grounds' defaults)
 
 local remote = Instance.new("RemoteEvent")
 remote.Name = "Slash"

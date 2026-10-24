@@ -96,8 +96,11 @@ local function lay(nest, biome)
 			return
 		end
 		egg:Destroy()
-		lock(player, biome)
-		Bosses.wake(biome)
+		-- (with its boss dead and not yet back, there's no fight: the egg's yours)
+		if Bosses.alive(biome) then
+			lock(player, biome)
+			Bosses.wake(biome)
+		end
 		task.delay(Config.Eggs.Respawn, lay, nest, biome)
 	end)
 end

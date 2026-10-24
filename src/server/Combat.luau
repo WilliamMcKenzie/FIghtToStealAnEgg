@@ -10,6 +10,7 @@
 --   Combat.remove(body)
 --   Combat.slash(player, yaw, c)     -- a player's slash along world yaw `yaw`
 --   Combat.train(player, amount)     -- adds Strength (and updates Power)
+--   Combat.refresh(player)           -- updates Power after Strength is set directly
 --   Combat.damage(player) -> number
 
 local Players = game:GetService("Players")
@@ -37,11 +38,18 @@ local function showPower(player)
 	player:SetAttribute("Power", Combat.damage(player))
 end
 
+-- (each rebirth makes every hit train Config.Rebirth.StrengthBonus more)
 function Combat.train(player, amount)
 	if amount and amount > 0 then
-		player:SetAttribute("Strength", (player:GetAttribute("Strength") or 0) + amount)
+		local bonus = 1 + (player:GetAttribute("Rebirths") or 0) * Config.Rebirth.StrengthBonus
+		player:SetAttribute("Strength", (player:GetAttribute("Strength") or 0) + amount * bonus)
 		showPower(player)
 	end
+end
+
+-- (after Strength is set from outside: loaded, or reset by a rebirth)
+function Combat.refresh(player)
+	showPower(player)
 end
 
 function Combat.join(player)

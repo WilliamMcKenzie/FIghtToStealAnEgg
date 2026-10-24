@@ -16,10 +16,14 @@
 
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
 local Popups = {}
+Popups.abbreviate = tostring -- (Hud hands its own over before init: 1.5K, 12M...)
 
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local BOLD = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Bold)
@@ -438,13 +442,16 @@ local function buildRebirth()
 		Position = UDim2.fromOffset(200, 0),
 		Size = UDim2.fromOffset(700, 40),
 	})
-	-- each stat: what you have -> what you'll have
+	-- each stat: what you have -> what you'll have (QM, Oct 24: a rebirth resets your cash,
+	-- Strength and training grounds; every hit trains more for each one: Config.Rebirth)
 	local rows = {
-		{ "Cash", "0", "0", Color3.fromRGB(255, 120, 110) },
-		{ "Power", "1x", "1.5x", Color3.fromRGB(150, 245, 90) },
+		{ "Cash", Color3.fromRGB(255, 120, 110) },
+		{ "Power", Color3.fromRGB(150, 245, 90) },
 	}
+	local labels = {}
 	for i, row in rows do
 		local y = 60 + (i - 1) * 108
+		labels[row[1]] = {}
 		for side = 0, 1 do
 			local x = 110 + side * 520
 			local pill =
@@ -457,10 +464,10 @@ local function buildRebirth()
 			img.Size = UDim2.fromOffset(100, 100)
 			img.ZIndex = 3
 			img.Parent = body
-			Popups.text(pill, {
-				Text = if side == 0 then row[2] else row[3],
+			labels[row[1]][side] = Popups.text(pill, {
+				Text = "",
 				TextSize = 52,
-				TextColor3 = if side == 0 then WHITE else row[4],
+				TextColor3 = if side == 0 then WHITE else row[2],
 				Position = UDim2.fromOffset(64, 0),
 				Size = UDim2.new(1, -72, 1, 0),
 				TextXAlignment = Enum.TextXAlignment.Left,
@@ -481,7 +488,6 @@ local function buildRebirth()
 	})
 	local set =
 		Popups.bar(body, { Position = UDim2.fromOffset(90, 440), Size = UDim2.fromOffset(470, 70) }, "Cash", GREEN)
-	set(0, 500)
 	local rebirths = Popups.text(body, {
 		Text = "You have 0 rebirths",
 		TextSize = 28,
@@ -489,12 +495,36 @@ local function buildRebirth()
 		Position = UDim2.fromOffset(700, 400),
 		Size = UDim2.fromOffset(300, 36),
 	})
-	Popups.button(body, { Position = UDim2.fromOffset(700, 440), Size = UDim2.fromOffset(300, 80) }, "REBIRTH", GREY)
+	local remote = ReplicatedStorage:WaitForChild("Rebirth", 10)
+	local busy = false
+	Popups.button(
+		body,
+		{ Position = UDim2.fromOffset(700, 440), Size = UDim2.fromOffset(300, 80) },
+		"REBIRTH",
+		GREY,
+		function()
+			if busy or not remote then
+				return
+			end
+			busy = true
+			pcall(remote.InvokeServer, remote)
+			busy = false
+		end
+	)
 	local function count()
-		rebirths.Text = string.format("You have %d rebirths", player:GetAttribute("Rebirths") or 0)
+		local r = player:GetAttribute("Rebirths") or 0
+		local c = Config.Rebirth
+		local cost = math.floor(c.Cost * c.Growth ^ r)
+		rebirths.Text = string.format("You have %d rebirths", r)
+		labels.Cash[0].Text = Popups.abbreviate(player:GetAttribute("Cash") or 0)
+		labels.Cash[1].Text = "0"
+		labels.Power[0].Text = string.format("%gx", 1 + r * c.StrengthBonus)
+		labels.Power[1].Text = string.format("%gx", 1 + (r + 1) * c.StrengthBonus)
+		set(math.min(player:GetAttribute("Cash") or 0, cost), cost)
 	end
 	count()
 	player:GetAttributeChangedSignal("Rebirths"):Connect(count)
+	player:GetAttributeChangedSignal("Cash"):Connect(count)
 end
 
 -- ---- opening and closing ------------------------------------------------------------

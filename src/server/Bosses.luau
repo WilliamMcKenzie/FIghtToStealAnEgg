@@ -1,12 +1,13 @@
 -- Bosses, on the server: each is an invisible anchored body in workspace.Bosses (its
 -- hitbox and position, replicated), with attributes Kind (its Config.Bosses entry),
--- Model and Size (what clients draw: client/BossView.luau), Name, Health, MaxHealth,
+-- Model and ModelSize (what clients draw: client/BossView.luau), Name, Health, MaxHealth,
 -- Radius, and for an arena's boss Biome and Asleep. The HUD's boss bar shows the
 -- nearest awake one.
 --
 -- Each biome's boss sleeps on its dais (Map's BossSpot) until it's woken: someone steals
 -- one of its eggs, or hits it (Server/Eggs locks them into its fight). Awake, it chases
--- the nearest player locked into its fight, never leaving its arena. With nobody left in
+-- the nearest player locked into its fight, never leaving its arena, and attacks
+-- (Config.Bosses[biome].Attacks, Server/BossAttacks). With nobody left in
 -- the fight for Config.BossCalmDown seconds it walks home, heals and sleeps. At 0 health
 -- it dies (Bosses.defeated fires: the fight's players go free) and comes back asleep
 -- Respawn seconds later.
@@ -14,6 +15,7 @@
 --   Bosses.spawn(kind, player)       -- a boss in front of the player (the /boss command)
 --   Bosses.arena(biome, spot, bounds) -- a biome's sleeping boss on its spot
 --   Bosses.wake(biome)
+--   Bosses.alive(biome) -> its boss is up (not dead, waiting to respawn)
 --   Bosses.defeated                  -- BindableEvent: Event(biome)
 --   Bosses.engaged                   -- BindableEvent: Event(player, biome), on a hit
 
@@ -23,6 +25,7 @@ local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local BossAttacks = require(script.Parent.BossAttacks)
 local Combat = require(script.Parent.Combat)
 
 local Bosses = {}
@@ -88,7 +91,7 @@ local function make(kind, at, yaw)
 	body.CFrame = CFrame.new(at + Vector3.new(0, size.Y / 2, 0)) * CFrame.Angles(0, yaw, 0)
 	body:SetAttribute("Kind", kind)
 	body:SetAttribute("Model", c.Model)
-	body:SetAttribute("Size", c.Size)
+	body:SetAttribute("ModelSize", c.Size)
 	body:SetAttribute("Name", c.Name or c.Model)
 	body:SetAttribute("Health", c.Health)
 	body:SetAttribute("MaxHealth", c.Health)
@@ -136,6 +139,16 @@ function Bosses.arena(biome, spot, bounds)
 	return body
 end
 
+-- is this biome's boss there to fight (not dead and waiting to come back)?
+function Bosses.alive(biome)
+	for _, b in live do
+		if b.biome == biome then
+			return true
+		end
+	end
+	return false
+end
+
 function Bosses.wake(biome)
 	for body, b in live do
 		if b.biome == biome and body:GetAttribute("Asleep") then
@@ -178,11 +191,13 @@ RunService.Heartbeat:Connect(function(dt)
 			continue
 		end
 		local target, distance = nearestPlayer(pos, b.biome)
+		-- (its attacks, Server/BossAttacks: a slam's wind-up holds it still)
+		local hold = b.biome ~= nil and BossAttacks.update(body, b, dt, BossAttacks.fighters(b.biome))
 		if target then
 			b.calm = 0
 			local offset = (target.Position - pos) * Vector3.new(1, 0, 1)
 			turnToward(b, offset, dt)
-			if distance - c.Radius > c.StopAt then
+			if not hold and distance - c.Radius > c.StopAt then
 				local step = math.min(c.Speed * dt, distance - c.Radius - c.StopAt)
 				-- (it walks where it faces, so it curves round rather than sliding sideways)
 				pos += CFrame.Angles(0, b.yaw, 0).LookVector * step

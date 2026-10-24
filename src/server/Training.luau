@@ -7,7 +7,7 @@
 -- rebirth will clear); the client keeps its gate solid for you until then
 -- (client/Barriers.luau).
 --
--- Mobs are invisible bodies in workspace.Mobs (attributes Model, Size, Tint, Name,
+-- Mobs are invisible bodies in workspace.Mobs (attributes Model, ModelSize, Tint, Name,
 -- Health, MaxHealth, Radius, Ground), drawn by client/BossView.luau like the bosses.
 -- They amble about their yard; one that falls is back Respawn seconds later.
 --
@@ -47,7 +47,7 @@ local function spawnMob(name, x, z, half)
 	local yaw = rng:NextNumber(-math.pi, math.pi)
 	body.CFrame = CFrame.new(at) * CFrame.Angles(0, yaw, 0)
 	body:SetAttribute("Model", g.Mob)
-	body:SetAttribute("Size", g.Size)
+	body:SetAttribute("ModelSize", g.Size)
 	body:SetAttribute("Tint", g.Tint)
 	body:SetAttribute("Name", g.Name or g.Mob)
 	body:SetAttribute("Health", g.Health)
@@ -89,11 +89,12 @@ local function dummyTarget(model)
 	local wobbling = false
 	Combat.add(body, function(player)
 		Combat.train(player, Config.Training.Grounds.Dummies.Strength)
-		if wobbling then
+		local character = player.Character
+		if wobbling or not character then
 			return
 		end
 		wobbling = true
-		local look = (pivot.Position - player.Character:GetPivot().Position) * Vector3.new(1, 0, 1)
+		local look = (pivot.Position - character:GetPivot().Position) * Vector3.new(1, 0, 1)
 		local axis = if look.Magnitude > 0.01 then Vector3.new(0, 1, 0):Cross(look.Unit) else Vector3.xAxis
 		for _, angle in { 12, -6, 3, 0 } do
 			local base = CFrame.new(pivot.Position.X, pivot.Position.Y, pivot.Position.Z)
