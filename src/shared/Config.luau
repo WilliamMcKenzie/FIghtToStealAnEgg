@@ -169,13 +169,15 @@ return {
 			Size = 2.4, -- (about 25 studs tall)
 			Health = 800,
 			Speed = 10,
-			StopAt = 4,
+			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 7,
 			Turn = 4,
 			Strength = 2,
 			Respawn = 20, -- seconds after it dies before it's back asleep on its dais
-			Attacks = { -- (Server/BossAttacks) melee: kite it and step out of its pecks
-				{ Kind = "Slam", Every = 2.2, Range = 14, Radius = 11, Windup = 0.8, Damage = 20 },
+			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
+			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
+			Attacks = {
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
 			},
 		},
 		Desert = {
@@ -184,23 +186,15 @@ return {
 			Size = 1.6,
 			Health = 4000,
 			Speed = 11,
-			StopAt = 5,
+			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 10,
 			Turn = 3.5,
 			Strength = 6,
 			Respawn = 25,
-			Attacks = { -- melee and ranged: a sting slam up close, venom spat in fans
-				{ Kind = "Slam", Every = 2.6, Range = 16, Radius = 13, Windup = 0.75, Damage = 25 },
-				{
-					Kind = "Shot",
-					Every = 1.9,
-					Count = 3,
-					Spread = 16,
-					Speed = 38,
-					Size = 2.4,
-					Damage = 15,
-					Range = 150,
-				},
+			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
+			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
+			Attacks = {
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 20 },
 			},
 		},
 		Ice = {
@@ -209,23 +203,15 @@ return {
 			Size = 1.3,
 			Health = 20000,
 			Speed = 9,
-			StopAt = 5,
+			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 9,
 			Turn = 3,
 			Strength = 20,
 			Respawn = 30,
-			Attacks = { -- ranged and bombs: ice shards, and frost circles under your feet
-				{
-					Kind = "Shot",
-					Every = 2.3,
-					Count = 5,
-					Spread = 13,
-					Speed = 42,
-					Size = 2.4,
-					Damage = 22,
-					Range = 170,
-				},
-				{ Kind = "Bombs", Every = 4.2, Count = 3, Radius = 10, Windup = 1.4, Damage = 40, Scatter = 26 },
+			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
+			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
+			Attacks = {
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 35 },
 			},
 		},
 		Lava = {
@@ -234,15 +220,15 @@ return {
 			Size = 2.6,
 			Health = 100000,
 			Speed = 8,
-			StopAt = 6,
+			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 15,
 			Turn = 2.5,
 			Strength = 60,
 			Respawn = 35,
-			Attacks = { -- all of it: a crushing stomp, magma novas, a rain of bombs
-				{ Kind = "Slam", Every = 3.2, Range = 22, Radius = 20, Windup = 1, Damage = 55 },
-				{ Kind = "Nova", Every = 4.5, Count = 14, Speed = 30, Size = 3, Damage = 30, Range = 190 },
-				{ Kind = "Bombs", Every = 3.6, Count = 5, Radius = 12, Windup = 1.3, Damage = 50, Scatter = 34 },
+			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
+			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
+			Attacks = {
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 60 },
 			},
 		},
 	},

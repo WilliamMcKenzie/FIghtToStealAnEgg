@@ -2,6 +2,8 @@
 -- RotMG-style "bombs" with floor indicators, then all of it). Each boss's Attacks in
 -- Config.Bosses is a list of these, each on its own timer:
 --
+--   Contact { Every, Reach, Damage }: everyone in the fight within Reach studs of its edge
+--         takes Damage, at most every Every seconds (QM, Oct 24: all bosses, for now).
 --   Slam  { Every, Range, Radius, Windup, Damage }: when a fighter is within Range, it
 --         stops, a red circle grows in front of it for Windup seconds, then everything
 --         inside takes Damage. Step out of the circle.
@@ -162,7 +164,19 @@ function BossAttacks.update(body, b, dt, list)
 		end
 		local toward = flat(target.root.Position - pos)
 		toward = if toward.Magnitude > 0.01 then toward.Unit else Vector3.new(0, 0, -1)
-		if a.Kind == "Slam" then
+		if a.Kind == "Contact" then
+			-- too close and it hurts: everyone within Reach of its edge, every Every seconds
+			local hit = false
+			for _, f in list do
+				if flat(f.root.Position - pos).Magnitude - b.c.Radius <= a.Reach then
+					f.humanoid:TakeDamage(a.Damage)
+					hit = true
+				end
+			end
+			if hit then
+				b.timers[i] = a.Every
+			end
+		elseif a.Kind == "Slam" then
 			if edge <= a.Range then
 				b.timers[i] = a.Every
 				b.still = a.Windup + 0.25
