@@ -256,13 +256,13 @@ return {
 			},
 		},
 		Desert = {
-			Name = "Dune Scorpion",
-			Model = "Scorpion",
-			Size = 1.6,
+			Name = "Cactus Boss",
+			Model = "CactusBoss", -- (LassoAPet's, QM Oct 24)
+			Size = 2.4, -- (about 29 studs tall)
 			Health = 4000,
 			Speed = 11,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
-			Radius = 10,
+			Radius = 13,
 			Turn = 3.5,
 			Strength = 6,
 			Respawn = 25,
@@ -273,13 +273,13 @@ return {
 			},
 		},
 		Ice = {
-			Name = "Ice Golem",
-			Model = "IceGolem",
-			Size = 1.3,
+			Name = "Elder Boar",
+			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
+			Size = 2, -- (about 27 studs tall, 40 long)
 			Health = 20000,
 			Speed = 9,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
-			Radius = 9,
+			Radius = 12,
 			Turn = 3,
 			Strength = 20,
 			Respawn = 30,
@@ -290,13 +290,13 @@ return {
 			},
 		},
 		Lava = {
-			Name = "Volcano Tortoise",
-			Model = "VolcanoTortoise",
-			Size = 2.6,
+			Name = "Lava Wyrm",
+			Model = "LavaWyrm", -- (LassoAPet's, QM Oct 24)
+			Size = 1.4, -- (about 16 studs tall, 60 long)
 			Health = 100000,
 			Speed = 8,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
-			Radius = 15,
+			Radius = 10,
 			Turn = 2.5,
 			Strength = 60,
 			Respawn = 35,
