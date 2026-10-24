@@ -2,8 +2,8 @@
 
 `MapEditor.html` edits the game's map, `maps/world.map` (QM, Oct 24). Open it in a browser
 (it's one self-contained file), paint the floor a 4-stud checker square at a time, place
-and move props, ruins, nests and bosses, tweak any colour, then **Download .map** and send it
-over. Walls, pillars, arches and barriers are shown but fixed (tools/map_gen.py lays them out).
+and move every mesh (props, pillars, arches, ruins, nests, bosses), tweak any colour, then **Download .map** and send it
+over. Walls and barriers are shown but fixed (tools/map_gen.py lays them out).
 
 On this Mac: `python3 tools/mapeditor/serve.py` serves it at http://localhost:3000, opening the
 game's current `maps/world.map`. Its **Save to game** button writes `maps/world.map`, bakes
@@ -32,8 +32,10 @@ JSON, one row of cells and one object per line so diffs read well:
 - `tiles`: `{ id, area, key (a Config.WorldColors key; key .. "Checker" is its checker), top, liquid? }`
 - `colours`: `{ key: [r, g, b] }`, the colours changed from Config.WorldColors (they win)
 - `areas`: the base's pens, training grounds and spawn; each biome's bounds and boss-circle radius
-- `objects`: `Prop` (item, x, z, yaw, scale, style, y only when pinned), `Ruin`, `Nest`, `Boss`
-- `fixed`: walls, the base's ring, pillars, arches, barriers, wall height, gateway half-width
+- `objects`: `Prop` (item, x, z, yaw, scale, style, y only when pinned), `Pillar` (style, kind,
+  size, height, yaw, scale, y), `Arch` (style, yaw, scale, y), `Ruin`, `Nest`, `Boss`
+- `fixed`: walls, barriers, wall height, gateway half-width (older files also had pillars and
+  arches here: `tools/map_migrate.py` moves them into `objects`, and the editor does it on open)
 - `saved`: when the editor wrote it (the game warns if the baked map isn't MapData's)
 
 `src/shared/MapFile.luau` is the parser.

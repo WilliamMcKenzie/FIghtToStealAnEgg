@@ -41,11 +41,13 @@ def sprites():
             R.prop(sc, it, 0, 0, 0, 0, 1, st)
             out.append(("%s_%s" % (it, st) if stony else it, sc))
     _, _, pillars, arches, _ = M.walls_and_pillars()
-    for st, _, _, size, height, kind in sorted({(p[0], 0, 0, p[3], p[4], p[5]) for p in pillars}):
-        sc = R.Scene()
-        R.pillar(sc, np.random.default_rng(size * 7 + len(st)), st, 0, 0, size, height, kind)
-        out.append(("Pillar_%s_%s_%g" % (st, kind, size), sc))
-    for st in sorted({a[0] for a in arches}):
+    # (every style of each pillar: they're objects in the editor, any style can go anywhere)
+    for size, height, kind in sorted({(p[3], p[4], p[5]) for p in pillars}):
+        for st in STYLES:
+            sc = R.Scene()
+            R.pillar(sc, np.random.default_rng(int(size) * 7 + len(st)), st, 0, 0, size, height, kind)
+            out.append(("Pillar_%s_%s_%g" % (st, kind, size), sc))
+    for st in STYLES:
         sc = R.Scene()
         R.arch(sc, np.random.default_rng(3), st, 0, 0)
         out.append(("Arch_%s" % st, sc))

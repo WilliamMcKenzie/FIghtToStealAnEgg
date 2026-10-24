@@ -935,11 +935,21 @@ function Map.build(data)
 	walls(folder("Walls", map))
 	local rng = Random.new(24)
 	local pillars = folder("Pillars", map)
+	-- (each built at the origin, then turned, scaled and moved to its spot: they're
+	-- objects in the map editor now, QM Oct 24)
+	local function put(model, x, z, yaw, scale, y)
+		model.WorldPivot = CFrame.identity
+		if scale and scale ~= 1 then
+			model:ScaleTo(scale)
+		end
+		model:PivotTo(CFrame.new(x, y or 0, z) * CFrame.Angles(0, math.rad(yaw or 0), 0))
+	end
 	for _, p in MapData.Pillars do
-		pillar(pillars, p[1], p[2], p[3], p[4], if p[6] == "gate" then ARCH_SPRING + 6 else p[5], p[6], rng)
+		local height = if p[6] == "gate" then ARCH_SPRING + 6 else p[5]
+		put(pillar(pillars, p[1], 0, 0, p[4], height, p[6], rng), p[2], p[3], p[7], p[8], p[9])
 	end
 	for _, a in MapData.Arches do
-		arch(pillars, a[1], a[2], a[3], rng)
+		put(arch(pillars, a[1], 0, 0, rng), a[2], a[3], a[4], a[5], a[6])
 	end
 	local base = folder("Base", map)
 	baseFurniture(base)

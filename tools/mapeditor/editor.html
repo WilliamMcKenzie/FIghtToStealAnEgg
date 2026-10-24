@@ -153,7 +153,8 @@ const BUNDLE = /*BUNDLE*/null;
 // ---------------------------------------------------------------------------------------------
 // World Map Editor (QM, Oct 24): paints the game's .map (maps/world.map in the repo). Each cell
 // is one 4-stud checker square; colours, studs and the meshes' top-down pictures match the game
-// seen from straight above. Walls, pillars, arches and barriers are fixed (tools/map_gen.py).
+// seen from straight above. Every mesh (pillars and arches too) is an object; only the walls
+// and barriers are fixed (tools/map_gen.py).
 // ---------------------------------------------------------------------------------------------
 const DEFAULTS = BUNDLE.colours; // Config.WorldColors (and the eggs'), as the game has them
 let C = Object.assign({}, DEFAULTS); // with the map's own colours over them (M.colours)
@@ -190,6 +191,10 @@ function parseMap(text) {
     const row = d.rows[r];
     for (let c = 0; c < cols; c++) g[r * cols + c] = idx[row[c]] || 0;
   }
+  // (older files kept pillars and arches in `fixed`: they're objects now, QM Oct 24)
+  for (const [style, x, z, size, height, kind] of d.fixed.pillars || []) d.objects.push({ type: "Pillar", style, kind, x, z, size, height });
+  for (const [style, x, z] of d.fixed.arches || []) d.objects.push({ type: "Arch", style, x, z });
+  delete d.fixed.pillars; delete d.fixed.arches;
   const head = {};
   for (const k of Object.keys(d)) if (!["tiles", "areas", "objects", "fixed", "rows", "colours"].includes(k)) head[k] = d[k];
   return { m: { head, colours: d.colours || {}, tiles: d.tiles, areas: d.areas, objects: d.objects, fixed: d.fixed, origin: d.origin, cell: d.cell, cols, rows }, g };
@@ -385,8 +390,11 @@ function spriteFor(o) {
   if (o.type === "Prop") return propSprite(o);
   if (o.type === "Nest") return sprites["Nest_" + o.area];
   if (o.type === "Boss") return sprites["Boss_" + o.area];
+  if (o.type === "Pillar") return sprites[`Pillar_${o.style}_${o.kind}_${o.size}`] || Object.entries(sprites).find(([n]) => n.startsWith("Pillar_") && n.endsWith(`_${o.kind}_${o.size}`))?.[1];
+  if (o.type === "Arch") return sprites["Arch_" + o.style] || sprites.Arch_Base;
   return null;
 }
+const pillarLabel = (o) => `${o.kind[0].toUpperCase() + o.kind.slice(1)} pillar`;
 function drawSprite(g, s, x, z, yaw, scale, alpha = 1) {
   if (!s || !s.img) return;
   tint(s);
@@ -494,7 +502,6 @@ function wallEdges(g) {
   for (const [, x0, z0, x1, z1] of f.walls) g.strokeRect(Math.min(x0, x1) - LIP, Math.min(z0, z1) - LIP, Math.abs(x1 - x0) + 2 * LIP, Math.abs(z1 - z0) + 2 * LIP);
 }
 
-function pillarSprite(p) { return sprites[`Pillar_${p[0]}_${p[5]}_${p[3]}`]; }
 
 function draw() {
   dirty = false;
@@ -543,15 +550,14 @@ function draw() {
   }
   if (view.furniture) drawFurniture(ctx);
   // objects: ruins, nests, props, bosses
-  const order = { Ruin: 0, Nest: 1, Prop: 2, Boss: 3 };
-  const objs = M.objects.filter((o) => view.props || o.type === "Boss" || o.type === "Nest").sort((a, b) => order[a.type] - order[b.type]);
+  const order = { Ruin: 0, Nest: 1, Prop: 2, Pillar: 3, Boss: 4, Arch: 5 };
+  const shown = (o) => o.type === "Pillar" ? view.fixed : o.type === "Arch" ? view.arches : o.type === "Prop" || o.type === "Ruin" ? view.props : true;
+  const objs = M.objects.filter(shown).sort((a, b) => order[a.type] - order[b.type]);
   for (const o of objs) {
     if (o.x < v.x0 - 80 || o.x > v.x1 + 80 || o.z < v.z0 - 80 || o.z > v.z1 + 80) continue;
     if (o.type === "Ruin") drawRuin(ctx, o);
-    else drawSprite(ctx, spriteFor(o), o.x, o.z, o.yaw, o.scale);
+    else drawSprite(ctx, spriteFor(o), o.x, o.z, o.yaw, o.scale, o.type === "Arch" ? 0.85 : 1);
   }
-  if (view.fixed) for (const p of M.fixed.pillars) drawSprite(ctx, pillarSprite(p), p[1], p[2], 0, 1);
-  if (view.arches) for (const a of M.fixed.arches) drawSprite(ctx, sprites["Arch_" + a[0]], a[1], a[2], 0, 1, 0.85);
   if (view.barriers) {
     ctx.setLineDash([3, 2]); ctx.strokeStyle = "rgba(255,80,60,0.9)"; ctx.lineWidth = Math.max(0.5, 2 / cam.zoom);
     for (const b of M.fixed.barriers) { const w = b[4] || M.fixed.gateHalf * 2; ctx.beginPath(); ctx.moveTo(b[2] - w / 2, b[3]); ctx.lineTo(b[2] + w / 2, b[3]); ctx.stroke(); }
@@ -694,6 +700,8 @@ function newObject(x, z, ghost) {
   x = snap(x); z = snap(z);
   const area = areaAt(x, z), style = $("style").value || (area === "Base" ? "Base" : area);
   if (placing.type === "Prop") return { type: "Prop", item: placing.item, x, z, yaw: ghost ? 0 : Math.round(Math.random() * 360), scale: 1, style };
+  if (placing.type === "Pillar") return { type: "Pillar", style, kind: placing.kind, x, z, size: placing.size, height: placing.height };
+  if (placing.type === "Arch") return { type: "Arch", style, x, z };
   if (placing.type === "Ruin") return { type: "Ruin", style, x, z, length: 24, yaw: 0, height: 7.5, seed: Math.floor(Math.random() * 1e6) };
   const biome = biomeAt(z);
   if (biome === "Base") return ghost ? null : { error: "Nests and bosses go in a biome, not the base." };
@@ -889,15 +897,17 @@ function buildTray() {
     }
   } else {
     const items = BUNDLE.items.map((it) => ({ type: "Prop", item: it, label: it.replace(/([a-z])([A-Z])/g, "$1 $2") }));
-    const sets = [["Props", items], ["Ruins", [{ type: "Ruin", label: "Brick wall" }]], ["Fight", [{ type: "Nest", label: "Nest" }, { type: "Boss", label: "Boss" }]]];
+    const stone = BUNDLE.pillars.map(([kind, size, height]) => ({ type: "Pillar", kind, size, height, label: pillarLabel({ kind }) }));
+    stone.push({ type: "Arch", label: "Arch" });
+    const sets = [["Props", items], ["Stone", stone], ["Ruins", [{ type: "Ruin", label: "Brick wall" }]], ["Fight", [{ type: "Nest", label: "Nest" }, { type: "Boss", label: "Boss" }]]];
     for (const [name, list] of sets) {
       const g = document.createElement("div"); g.className = "group";
       g.innerHTML = `<div class="label">${name}</div><div class="items"></div>`;
       for (const it of list) {
-        const b = document.createElement("button"); b.className = "sw obj" + (placing && placing.type === it.type && placing.item === it.item ? " on" : "");
+        const b = document.createElement("button"); b.className = "sw obj" + (placing && placing.type === it.type && placing.item === it.item && placing.kind === it.kind ? " on" : "");
         b.title = `Place: ${it.label}`;
         const img = document.createElement("img");
-        const spr = it.type === "Prop" ? (sprites[it.item] || sprites[it.item + "_Base"]) : it.type === "Nest" ? sprites.Nest_Meadow : it.type === "Boss" ? sprites.Boss_Meadow : null;
+        const spr = it.type === "Prop" ? (sprites[it.item] || sprites[it.item + "_Base"]) : it.type === "Pillar" || it.type === "Arch" ? spriteFor({ ...it, style: "Base" }) : it.type === "Nest" ? sprites.Nest_Meadow : it.type === "Boss" ? sprites.Boss_Meadow : null;
         if (spr) img.src = spriteUrl(spr) || ""; else { const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); x.translate(16, 16); x.scale(1.1, 1.1); drawRuin(x, { x: 0, z: 0, length: 24, yaw: 30, style: "Base", seed: 7 }); img.src = c.toDataURL(); }
         b.appendChild(img);
         const s = document.createElement("span"); s.textContent = it.label; b.appendChild(s);
@@ -988,7 +998,7 @@ function inspect() {
   const h = document.createElement("h2"); h.className = "title"; box.appendChild(h);
   if (selected) {
     const o = selected;
-    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : `${o.area} ${o.type.toLowerCase()}`;
+    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : o.type === "Pillar" ? pillarLabel(o) : o.type === "Arch" ? "Arch" : `${o.area} ${o.type.toLowerCase()}`;
     const set = (k) => (v) => nudgeSelected((x) => { if (v === null) delete x[k]; else x[k] = v; });
     box.appendChild(field("X", o.x, set("x")));
     box.appendChild(field("Z", o.z, set("z")));
@@ -1000,6 +1010,15 @@ function inspect() {
       box.appendChild(field("Height", o.y === undefined ? "" : o.y, set("y")));
       const n = document.createElement("div"); n.className = "note";
       n.textContent = o.y === undefined ? `Stands on the ground under it (${groundAt(o.x, o.z)}). Set a height to pin it.` : "Pinned at that height: clear it to stand on the ground.";
+      box.appendChild(n);
+    } else if (o.type === "Pillar" || o.type === "Arch") {
+      box.appendChild(field("Style", o.style, set("style"), BUNDLE.styles));
+      box.appendChild(field("Yaw", o.yaw || 0, set("yaw")));
+      box.appendChild(scaleRow(o));
+      if (o.type === "Pillar" && o.kind !== "gate") box.appendChild(field("Height", o.height, set("height")));
+      box.appendChild(field("Raise", o.y || 0, (v) => set("y")(v ? v : null)));
+      const n = document.createElement("div"); n.className = "note";
+      n.textContent = o.type === "Arch" ? "Spans a 48-stud gateway, its feet on the two gate pillars." : o.kind === "gate" ? "A gate pillar is always tall enough for an arch." : "Height is to the top of its capital, before scaling.";
       box.appendChild(n);
     } else if (o.type === "Ruin") {
       box.appendChild(field("Style", o.style, set("style"), BUNDLE.styles));
@@ -1024,7 +1043,7 @@ function inspect() {
     const n = document.createElement("div"); n.className = "note";
     n.textContent = placing.type === "Boss" ? "Click in a biome to move its boss there." : "Click the map to place one. Style picks the stone's colours (Auto: the area it's in).";
     box.appendChild(n);
-    const spr = placing.type === "Prop" ? (sprites[placing.item] || sprites[placing.item + "_" + ($("style").value || "Meadow")]) : placing.type === "Nest" ? sprites.Nest_Meadow : null;
+    const spr = placing.type === "Prop" ? (sprites[placing.item] || sprites[placing.item + "_" + ($("style").value || "Meadow")]) : placing.type === "Pillar" || placing.type === "Arch" ? spriteFor({ ...placing, style: $("style").value || "Meadow" }) : placing.type === "Nest" ? sprites.Nest_Meadow : null;
     if (spr) colourList(box, spr.keys, "Its colours");
     return;
   }

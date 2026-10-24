@@ -570,8 +570,8 @@ MAP_CELL = 4  # the .map's cells: one checker square each (the floors' 8-stud ce
 
 def export_map(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruins):
     """The whole layout as a .map (maps/world.map: the map editor's format, tools/mapeditor).
-    Tiles and objects are editable there; `fixed` (walls, pillars, arches, barriers) is
-    shown but kept as this lays it out."""
+    Tiles and objects (pillars and arches too) are editable there; `fixed` (walls,
+    barriers) is shown but kept as this lays it out."""
     xs = [-(b["W"] / 2 + OUT_T) for b in BIOMES] + [-BASE_HALF - OUT_T]
     X0 = int(min(xs))
     Z0 = int(BIOMES[-1]["zn"] - OUT_T)  # the north edge
@@ -619,6 +619,10 @@ def export_map(g_base, grids, walls, ring, pillars, arches, barriers, prop_list,
         if (tops[ch] if ch != "." else WALL_H) != y:
             o["y"] = y  # (only when it isn't standing on the ground under it)
         objects.append(o)
+    for st, x, z, size, h, kind in pillars:
+        objects.append({"type": "Pillar", "style": st, "kind": kind, "x": x, "z": z, "size": size, "height": h})
+    for st, x, z in arches:
+        objects.append({"type": "Arch", "style": st, "x": x, "z": z})
     for st, x, z, length, yaw, h, seed in ruins:
         objects.append({"type": "Ruin", "style": st, "x": x, "z": z, "length": length, "yaw": yaw, "height": h, "seed": seed})
     data = {
@@ -629,8 +633,7 @@ def export_map(g_base, grids, walls, ring, pillars, arches, barriers, prop_list,
         "areas": meta,
         "objects": objects,
         "fixed": {"wallHeight": WALL_H, "gateHalf": GATE_HALF, "walls": [list(w) for w in walls],
-                  "ring": [list(w) for w in ring], "pillars": [list(p) for p in pillars],
-                  "arches": [list(a) for a in arches], "barriers": [list(b) for b in barriers]},
+                  "ring": [list(w) for w in ring], "barriers": [list(b) for b in barriers]},
         "rows": ["".join(r) for r in cells],
     }
     return data

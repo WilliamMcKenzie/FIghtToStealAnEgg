@@ -5,7 +5,7 @@
 -- A .map is JSON: a grid of 4-stud cells (one checker square each), `rows` north to
 -- south, one character a cell ("." is no floor: under the walls), each character a tile
 -- from `tiles` ({ id, area, key (ColorKey), top, liquid? }); the areas' settings; the
--- objects placed on it (Prop, Ruin, Nest, Boss); `colours`, the ColorKeys QM changed from
+-- objects placed on it (Prop, Ruin, Pillar, Arch, Nest, Boss); `colours`, the ColorKeys QM changed from
 -- Config.WorldColors ({ key: [r, g, b] }: they win over Config's); and `fixed`: walls, pillars, arches and
 -- barriers, shown in the editor but laid out by tools/map_gen.py.
 --
@@ -92,8 +92,10 @@ function MapFile.decode(text)
 		GateHalf = fixed.gateHalf,
 		Walls = fixed.walls,
 		Ring = fixed.ring,
-		Pillars = fixed.pillars,
-		Arches = fixed.arches,
+		-- { style, x, z, size, height, kind, yaw, scale, y } and { style, x, z, yaw, scale, y }:
+		-- objects now (QM, Oct 24: every mesh adjustable); older files had them in `fixed`
+		Pillars = table.clone(fixed.pillars or {}),
+		Arches = table.clone(fixed.arches or {}),
 		Barriers = fixed.barriers,
 		Areas = {},
 		Props = {},
@@ -163,6 +165,13 @@ function MapFile.decode(text)
 			table.insert(data.Props, { o.item, o.x, o.z, y, o.yaw or 0, o.scale or 1, o.style or "Base" })
 		elseif o.type == "Ruin" then
 			table.insert(data.Ruins, { o.style, o.x, o.z, o.length, o.yaw or 0, o.height, o.seed or 1 })
+		elseif o.type == "Pillar" then
+			table.insert(
+				data.Pillars,
+				{ o.style, o.x, o.z, o.size, o.height, o.kind, o.yaw or 0, o.scale or 1, o.y or 0 }
+			)
+		elseif o.type == "Arch" then
+			table.insert(data.Arches, { o.style, o.x, o.z, o.yaw or 0, o.scale or 1, o.y or 0 })
 		elseif o.type == "Nest" and byName[o.area] and byName[o.area].Nests then
 			table.insert(byName[o.area].Nests, { o.x, o.z })
 		elseif o.type == "Boss" and byName[o.area] then

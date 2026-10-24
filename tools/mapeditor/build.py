@@ -31,7 +31,11 @@ def main():
                          data_url(os.path.join(HERE, "sprites", name + "_id.png"))]
     items = sorted({n.split("_")[0] for n in meta["sprites"] if not n.split("_")[0] in ("Pillar", "Arch", "Nest", "Boss")})
     stud = float(re.search(r"StudTransparency = ([\d.]+)", config).group(1))
+    world_map = json.load(open(os.path.join(ROOT, "maps", "world.map")))
+    pillars = sorted({(o["kind"], o["size"], o["height"]) for o in world_map["objects"] if o["type"] == "Pillar"},
+                     key=lambda p: ("joint", "corner", "transition", "gate", "rubble").index(p[0]) if p[0] in ("joint", "corner", "transition", "gate", "rubble") else 9)
     bundle = {
+        "pillars": [list(p) for p in pillars],
         "colours": meta["colours"],
         "keys": keys,
         "world": world_keys,
