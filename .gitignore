@@ -1,0 +1,11 @@
+# Studio places and their locks (the open place in Studio is the source of truth)
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
+# build output and scratch
+/build/
+*.tmp
+.DS_Store
+__pycache__/
+tools/studio/_*.luau

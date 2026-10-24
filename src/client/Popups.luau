@@ -24,8 +24,6 @@ local Popups = {}
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local BOLD = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Bold)
 local INK = Color3.fromRGB(14, 12, 16) -- outlines
-local PANEL = Color3.fromRGB(40, 41, 51)
-local CARD = Color3.fromRGB(27, 28, 35)
 local WHITE = Color3.new(1, 1, 1)
 -- gradient base colours: each is drawn as a hue-shifted ramp (see ramp())
 local GREEN = Color3.fromRGB(122, 222, 58)
@@ -34,7 +32,6 @@ local RED = Color3.fromRGB(232, 52, 62)
 local GOLD = Color3.fromRGB(246, 186, 66)
 local MINT = Color3.fromRGB(160, 238, 104)
 local TEAL = Color3.fromRGB(88, 216, 192)
-local PANEL_TONE = Color3.fromRGB(40, 41, 52)
 local BLUR = 14
 local ICONS = { -- (the HUD counters' art, cropped to the icon)
 	Power = "rbxassetid://108359754385647",
@@ -113,7 +110,30 @@ function Popups.text(parent, props)
 end
 
 -- a card: a darker rounded panel (or a coloured one) inside a popup
+-- QM's dark background (assets/ui/DarkPanel.png: a radial gradient in a black rounded
+-- outline), 9-sliced so it stretches to any size with its corners and outline intact
+local DARK_PANEL = "rbxassetid://76862497378032"
+local DARK_SLICE = Rect.new(26, 26, 490, 492)
+local function darkPanel(props, sliceScale)
+	local img = Instance.new("ImageLabel")
+	img.BackgroundTransparency = 1
+	img.Image = DARK_PANEL
+	img.ScaleType = Enum.ScaleType.Slice
+	img.SliceCenter = DARK_SLICE
+	img.SliceScale = sliceScale
+	for k, v in props do
+		img[k] = v
+	end
+	return img
+end
+
+-- a card inside a popup: QM's dark panel, or with `colors` a coloured one (hue-shifted)
 function Popups.card(parent, props, colors)
+	if not colors then
+		local img = darkPanel(props, 0.5)
+		img.Parent = parent
+		return img
+	end
 	local f = Instance.new("Frame")
 	f.BackgroundColor3 = WHITE
 	f.BorderSizePixel = 0
@@ -122,7 +142,7 @@ function Popups.card(parent, props, colors)
 	end
 	corner(f, 14)
 	outline(f, 4)
-	gradient(f, colors or CARD) -- (the dark cards hue-shift too, just more quietly)
+	gradient(f, colors)
 	f.Parent = parent
 	return f
 end
@@ -201,14 +221,18 @@ Popups.GREEN, Popups.GREY, Popups.GOLD, Popups.MINT = GREEN, GREY, GOLD, MINT
 -- a progress bar with an icon on its left end and "have/need" on it; returns a setter
 function Popups.bar(parent, props, icon, colors)
 	local back = Popups.card(parent, props)
-	back:FindFirstChildOfClass("UICorner").CornerRadius = UDim.new(0, 30)
+	local track = Instance.new("Frame") -- (inside the card's outline)
+	track.BackgroundTransparency = 1
+	track.Position = UDim2.fromOffset(5, 5)
+	track.Size = UDim2.new(1, -10, 1, -10)
+	track.Parent = back
 	local fill = Instance.new("Frame")
 	fill.BackgroundColor3 = WHITE
 	fill.BorderSizePixel = 0
 	fill.Size = UDim2.fromScale(0, 1)
 	corner(fill, 30)
 	gradient(fill, colors or TEAL)
-	fill.Parent = back
+	fill.Parent = track
 	local label = Popups.text(back, { Text = "0/0", TextSize = 38, Size = UDim2.fromScale(1, 1), ZIndex = 3 })
 	if icon then
 		local img = Instance.new("ImageLabel")
@@ -248,14 +272,7 @@ local function frame(name, title, size)
 	local scale = Instance.new("UIScale")
 	scale.Parent = holder
 
-	local panel = Instance.new("Frame")
-	panel.Name = "Panel"
-	panel.BackgroundColor3 = PANEL
-	panel.BorderSizePixel = 0
-	panel.Size = UDim2.fromScale(1, 1)
-	corner(panel, 18)
-	outline(panel, 8)
-	gradient(panel, PANEL_TONE)
+	local panel = darkPanel({ Name = "Panel", Size = UDim2.fromScale(1, 1) }, 0.8)
 	panel.Parent = holder
 
 	Popups.text(holder, {
