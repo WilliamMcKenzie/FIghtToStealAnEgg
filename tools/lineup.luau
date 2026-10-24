@@ -64,6 +64,66 @@ local ITEMS = {
 			colour = "Stone",
 			id = "rbxassetid://105263626724475",
 		} },
+	RuinPillarBroken = { {
+			piece = "Stone",
+			colour = "Stone",
+			id = "rbxassetid://71809041788816",
+		} },
+	RuinPillar = { {
+			piece = "Stone",
+			colour = "Stone",
+			id = "rbxassetid://136637132455471",
+		} },
+	Boulders = { {
+			piece = "Rock",
+			colour = "StoneDark",
+			id = "rbxassetid://112785217700205",
+		} },
+	Monolith = { {
+			piece = "Stone",
+			colour = "LavaPillar",
+			id = "rbxassetid://92495539582984",
+		}, {
+			piece = "Runes",
+			colour = "Rune",
+			id = "rbxassetid://119294021401659",
+		} },
+	Cactus = { {
+			piece = "Body",
+			colour = "CactusGreen",
+			id = "rbxassetid://108070594105370",
+		}, {
+			piece = "Flowers",
+			colour = "CactusFlower",
+			id = "rbxassetid://140520028203187",
+		} },
+	CactusBarrel = { {
+			piece = "Body",
+			colour = "CactusGreen",
+			id = "rbxassetid://99514847520822",
+		}, {
+			piece = "Flowers",
+			colour = "CactusFlower",
+			id = "rbxassetid://84291563273442",
+		} },
+	SnowPine = { {
+			piece = "Trunk",
+			colour = "PineTrunk",
+			id = "rbxassetid://105243423855795",
+		}, {
+			piece = "Needles",
+			colour = "SnowPineNeedles",
+			id = "rbxassetid://77665111637907",
+		}, {
+			piece = "Snow",
+			colour = "Snow",
+			id = "rbxassetid://118289739143518",
+		} },
+	DeadTree = { {
+			piece = "Wood",
+			colour = "DeadWood",
+			id = "rbxassetid://139771638447721",
+		} },
 }
 local PROPS = { { "StoneRubble", -60, -36, 20 }, { "StoneBlockLow", -48, -36, 0 }, { "StoneBlock", -36, -36, 0 }, { "PineTall", 36, -36, 0 }, { "PineShort", 52, -36, 40 } }
 
