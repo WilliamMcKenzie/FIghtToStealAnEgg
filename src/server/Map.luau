@@ -1,8 +1,9 @@
 -- Builds the map in game from Shared/MapData (laid out by tools/map_gen.py; QM, Oct 24):
 -- the base (spawn plaza, pens, training grounds, its ring wall and gateway), and the
--- biome arenas north of it (Meadow, Desert, Ice, Lava), each walled, with stone pillars at
--- every corner and joint, a gateway (two big pillars and an arch) between biomes, a
--- barrier in each gateway for egg holders (Server/Eggs), egg nests and the boss's spot.
+-- biome arenas north of it (Meadow, Desert, Ice, Lava), walled down their sides (stone
+-- pillars at the corners and joints, big ones where one biome opens onto the next; no
+-- walls between them), a gateway (two big pillars and an arch) from the base, a barrier
+-- where areas meet for those in a fight (Server/Eggs), egg nests and the boss's spot.
 --
 -- Everything goes in workspace.Map, rebuilt fresh on every start, so the place file
 -- never needs the map saved in it. The lineup from tools/lineup.luau (workspace.World)
@@ -137,16 +138,34 @@ local function floors(parent)
 			local x0, z0, sx, sz = rect[2], rect[3], rect[4], rect[5]
 			-- (only raised tiles show their sides; the lowest one's are always buried)
 			local faces = if top > lowest then ALL else { Enum.NormalId.Top }
-			local glow = key == "LavaLow"
-			local p = box(key, f, x0, FLOOR_BOTTOM, z0, x0 + sx, top, z0 - sz, key, if glow then {} else faces)
-			p.Locked = true
-			if glow then
-				-- lava glows: Neon, only a faint checker on top (as LassoAPet's)
-				p.Material = Enum.Material.Neon
+			if tile[3] then
+				-- a liquid (water, magma): a see-through surface you wade through, its bed
+				-- LiquidSink below it (client/Liquid.luau slows you in it)
+				local bed = top - Config.Map.LiquidSink
+				local floor = box(key, f, x0, FLOOR_BOTTOM - 2, z0, x0 + sx, bed, z0 - sz, key, { Enum.NormalId.Top })
+				floor.Locked = true
+				floor:SetAttribute("Liquid", true)
+				local p = box(key, f, x0, bed, z0, x0 + sx, top - 0.2, z0 - sz, key, {})
+				p.Name = key .. "Surface"
+				p.Locked = true
+				p.CanCollide = false
+				p:SetAttribute("Liquid", true)
 				local t = texture(p, Enum.NormalId.Top, CHECKER, 8, key .. "Checker", 1, true)
-				t.Transparency = 0.55
-				p:SetAttribute("Lava", true)
+				if area.Name == "Lava" then
+					-- magma glows: Neon, only a faint checker on top (as LassoAPet's lava)
+					p.Material = Enum.Material.Neon
+					p.Transparency = 0.15
+					t.Transparency = 0.55
+					p:SetAttribute("Lava", true)
+				else
+					p.Material = Enum.Material.Glass
+					p.Transparency = 0.35
+					t.Transparency = 0.5
+				end
+				continue
 			end
+			local p = box(key, f, x0, FLOOR_BOTTOM, z0, x0 + sx, top, z0 - sz, key, faces)
+			p.Locked = true
 		end
 	end
 end
@@ -661,7 +680,7 @@ local function biomeFurniture(parent)
 		p.CanTouch = false
 		p.Material = Enum.Material.ForceField
 		p.Color = Color3.fromRGB(255, 80, 60)
-		p.Size = Vector3.new(MapData.GateHalf * 2, 40, 6)
+		p.Size = Vector3.new(b[5] or MapData.GateHalf * 2, 40, 6)
 		p.CFrame = CFrame.new(b[3], 18, b[4])
 		p:SetAttribute("South", b[1])
 		p:SetAttribute("North", b[2])

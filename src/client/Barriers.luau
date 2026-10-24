@@ -1,6 +1,6 @@
 -- What only you see and bump into (QM, Oct 24):
 -- - Locked into a boss's fight (your LockedIn attribute: you stole one of its eggs or
---   hit it; server/Eggs.luau), red barriers stand in that biome's gateways until the
+--   hit it; server/Eggs.luau), red barriers stand across that biome's ways out until the
 --   boss is dead. Everyone else walks through, unless they join the fight too. They're
 --   local parts, so they only block you.
 -- - A training ground you haven't bought keeps its gate shut (a local bar across it),

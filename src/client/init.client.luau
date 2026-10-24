@@ -23,6 +23,7 @@ local SwingPose = require(script.SwingPose)
 require(script.BossView)
 require(script.Hud)
 require(script.Barriers)
+require(script.Liquid)
 local remote = ReplicatedStorage:WaitForChild("Slash")
 
 local player = Players.LocalPlayer

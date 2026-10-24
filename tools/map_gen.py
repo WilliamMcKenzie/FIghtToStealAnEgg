@@ -9,11 +9,13 @@ Layout (studs, y up, north is -z):
   training grounds at the south end, and the gateway out at the north end, where a short
   corridor runs to the first biome.
 - The biomes, in a line north: Meadow, Desert, Ice, Lava. Each is a roughly square arena,
-  wider than deep, bigger the further you go. The boss's dais is in the middle (a flush
-  floor ringed by a raised stone ring), egg nests sit in the corners and along the sides.
-  A wall (a raised plateau, its cap the top) runs round each; a divider between two
-  biomes has a gateway: two big stone pillars and an arch, in LassoAPet's portal style.
-  Pillars also stand at every wall corner and joint, so walls of different widths meet.
+  wider than deep, bigger the further you go, the boss's circle (plain ground) in the
+  middle and egg nests in the corners and along the sides. Walls (raised plateaus) run
+  down their sides only: one biome opens straight onto the next, a big stone pillar
+  either side where the side walls step out (QM, Oct 24). The Meadow's south wall has a
+  gateway from the base: two big pillars and an arch, in LassoAPet's portal style.
+- Floors (QM, Oct 24: simple): at most three tiles a biome, a stud apart, and maybe a
+  liquid (water, magma) that sinks and slows you.
 - Floors, as LassoAPet's World 3 (tools/world3_course.py there): a quasicrystal cut into
   bands (tools/quasicrystal.py), on 8-stud cells, kept to QM's layered rule (tiles only
   ever touch tiles one step either side of them, diagonals too: check() asserts it).
@@ -47,7 +49,7 @@ RING_SEGMENTS = 40  # its wall, as straight pieces (two left out at the north: t
 RING_T = 40  # the base wall's thickness (a plateau round the circle)
 GATE_HALF = 24  # every gateway's opening: 48 wide
 CORRIDOR_END = -BASE_R - 48  # the corridor from the base runs to the Meadow's south wall
-DIV_T = 24  # a divider (the wall between two biomes) is this thick
+DIV_T = 24  # the Meadow's south wall (where the base's corridor meets it) is this thick
 OUT_T = 48  # outer walls: a wide plateau
 WALL_H = 10  # walls stand this high above the floor (their cap the last stud)
 
@@ -60,40 +62,47 @@ PEN_SIZE = 56
 TRAINING = [("Dummies", -112), ("Meadow", -56), ("Desert", 0), ("Ice", 56), ("Lava", 112)]  # (name, centre x)
 TRAIN_Z = 184  # their centres' z
 TRAIN_SIZE = 48
-TRAIN_FLOOR = {"Dummies": "TrainFloor", "Meadow": "MeadowGround", "Desert": "DesertGround", "Ice": "IceGround", "Lava": "LavaGround"}
+TRAIN_FLOOR = {"Dummies": "TrainFloor", "Meadow": "MeadowGrass", "Desert": "DesertSand", "Ice": "IceSnow", "Lava": "LavaRock"}
 PLAZA_R = 40
 PATH_RING = (112, 128)  # the base's ring path (inner, outer radius)
 TRAIN_PATH = (148, 160)  # the path along the training grounds' gates (z from, to)
 
-# Each biome: interior width (x) and depth (z), its quasicrystal (angles, scale), the bands'
-# cuts (rising: below the first is the low tile, above the last the high one), how much
-# the floor rises toward the walls, the boss dais's radius, its egg nests.
+# Each biome (QM, Oct 24: simple floors, at most three tiles and maybe a liquid): its
+# interior width (x) and depth (z), its tiles (suffix, ladder step, liquid?) from low to
+# high (heights are step - 1: -1, 0, +1), the quasicrystal (angles, scale) and its cuts
+# into bands (one per step, rising), the floor rising toward the walls, the boss's circle
+# (plain ground: its `centre` tile), its egg nests. `ground` is the everyday tile: the
+# circle, the nests and the seams between biomes are flat ground.
+# A liquid sinks you a little and slows you (client/Liquid.luau).
 BIOMES = [
-    dict(name="Meadow", W=352, D=288, angles=5, scale=11, cuts=(0.18, 0.66), bowl=0.18, dais=48, nests=4),
-    dict(name="Desert", W=400, D=320, angles=7, scale=13, cuts=(0.16, 0.62), bowl=0.2, dais=56, nests=6),
-    dict(name="Ice", W=448, D=352, angles=8, scale=14, cuts=(0.22, 0.7), bowl=0.18, dais=64, nests=6),
-    dict(name="Lava", W=512, D=384, angles=9, scale=15, cuts=(0.2, 0.64), bowl=-0.16, dais=72, nests=8),
+    dict(name="Meadow", W=352, D=288, tiles=[("Water", 0, True), ("Grass", 1, False), ("Dirt", 1, False)],
+         ground=1, centre=2, angles=5, scale=11, cuts=(0.07,), bowl=0.0, dais=48, nests=4),
+    dict(name="Desert", W=400, D=320, tiles=[("DryGrass", 0, False), ("Sand", 1, False), ("Sandstone", 2, False)],
+         ground=1, centre=1, angles=7, scale=13, cuts=(0.18, 0.76), bowl=0.2, dais=56, nests=6),
+    dict(name="Ice", W=448, D=352, tiles=[("ColdGrass", 0, False), ("Snow", 1, False), ("Glacier", 2, False)],
+         ground=1, centre=1, angles=8, scale=14, cuts=(0.2, 0.8), bowl=0.18, dais=64, nests=6),
+    dict(name="Lava", W=512, D=384, tiles=[("Magma", 0, True), ("Rock", 1, False), ("Basalt", 2, False)],
+         ground=1, centre=1, angles=9, scale=15, cuts=(0.12, 0.74), bowl=-0.16, dais=72, nests=8),
 ]
-RING_W = 16  # the raised ring round each dais
 NEST_CLEAR = 24  # flat ground round a nest
-NEST_PAD = 12  # its straw patch
-GATE_CLEAR = 40  # flat ground inside each gateway
+GATE_CLEAR = 40  # flat ground inside the Meadow's gateway
+SEAM = 16  # flat ground either side of the line where two biomes meet
 
-# biome tiles by index: (suffix, ladder step); heights are step - 1 (-1, 0, +1)
-TILES = [("Low", 0), ("Ground", 1), ("High", 2), ("Arena", 1), ("Inlay", 1), ("Ring", 2), ("Nest", 1)]
-LADDER = [t[1] for t in TILES]
-FIXED_FROM = 3  # tiles from here on are stamped features (the terrain works round them)
 # the base's tiles: (key, top)
 BASE_TILES = [("Grass", 0), ("BaseGrassLight", 0), ("Dirt", 0), ("Plaza", 1), ("PlazaInlay", 1), ("PenFloor", 1)] + [
     (TRAIN_FLOOR[name], 1) for name, _ in TRAINING]
 
-# where each biome sits: its south (near) interior edge, north (far) edge
+# where each biome sits: its south (near) interior edge, north (far) edge. Only the Meadow
+# has a south wall (the base's corridor ends at it); the rest open straight onto the
+# biome before (QM, Oct 24: no walls between biomes), each a little wider.
 z = CORRIDOR_END - DIV_T
 for b in BIOMES:
     b["zs"] = z
     b["zn"] = z - b["D"]
     b["cz"] = (b["zs"] + b["zn"]) / 2
-    z = b["zn"] - DIV_T
+    b["steps"] = [t[1] for t in b["tiles"]]
+    z = b["zn"]
+assert all(a["W"] <= c["W"] <= a["W"] + 2 * OUT_T for a, c in zip(BIOMES, BIOMES[1:]))
 
 
 # ---- the layered rule (LassoAPet tools/world3_course.py) -----------------------------
@@ -314,44 +323,44 @@ def nests(b):
 
 def biome(b, index):
     W = b["W"]
-    # (its south gateway's floor too: the gap in the wall it shares with the last area)
-    g = Grid(-W // 2, W // 2, b["zs"] + DIV_T, b["zn"])
+    # (the Meadow's south gateway's floor too: the gap in its wall)
+    g = Grid(-W // 2, W // 2, b["zs"] + (DIV_T if index == 0 else 0), b["zn"])
     dx, dz = g.x, g.z - b["cz"]
     r = np.hypot(dx, dz)
     room = g.z < b["zs"]
     g.inside = room | (np.abs(g.x) < GATE_HALF)
-    # the quasicrystal, centred on the boss; the floor rising toward the walls
+    # the quasicrystal, centred on the boss, cut into a band per step; the floor rising
+    # (or falling) toward the walls
     edge = np.maximum(np.abs(dx) / (W / 2), np.abs(dz) / (b["D"] / 2))
     q = value(dx, dz, b["angles"], b["scale"]) + b["bowl"] * (edge - 0.5)
     qs = np.quantile(q[room], b["cuts"])
-    g.tile = np.searchsorted(qs, q).astype(int)
-    g.tile = blocky(tidy(g.tile, g.inside), g.inside)
-    g.tile = despeck(lower(g.tile, g.inside), g.inside)
-    # stamped features: flat ground inside the gateways and round the nests, the dais
-    # (an inlaid floor: a finer quasicrystal) and the raised ring round it
-    fixed = np.zeros_like(g.inside)
-    clear = (np.hypot(g.x, g.z - b["zs"]) < GATE_CLEAR) | ~room
+    step = np.searchsorted(qs, q).astype(int)
+    step = blocky(tidy(step, g.inside), g.inside)
+    step = despeck(lower(step, g.inside), g.inside)
+    # flat ground (a step from anything, so nothing round it changes): the boss's
+    # circle, round the nests, the gateway, the seams with the biomes either side
+    centre = r < b["dais"]
+    flat = centre | ~room
+    if index == 0:
+        flat |= np.hypot(g.x, g.z - b["zs"]) < GATE_CLEAR
+    else:
+        flat |= g.z > b["zs"] - SEAM
     if index < len(BIOMES) - 1:
-        clear |= np.hypot(g.x, g.z - b["zn"]) < GATE_CLEAR
+        flat |= g.z < b["zn"] + SEAM
     for nx_, nz_ in nests(b):
-        d = np.hypot(g.x - nx_, g.z - nz_)
-        clear |= d < NEST_CLEAR
-        g.tile[d < NEST_PAD] = 6
-        fixed |= d < NEST_PAD
-    g.tile[clear & ~fixed] = 1
-    fixed |= clear
-    ring = (r >= b["dais"]) & (r < b["dais"] + RING_W)
-    dais = r < b["dais"]
-    inlay = value(dx, dz, b["angles"] * 2, 3.2) > 0.6
-    g.tile[dais] = np.where(inlay[dais], 4, 3)
-    g.tile[ring] = 5
-    fixed |= ring | dais
-    step = np.array(LADDER)[g.tile]
-    step = raise_(step, g.inside, fixed)
-    g.tile = np.where(fixed, g.tile, step)  # (terrain tiles are their own steps: 0, 1, 2)
-    free = g.inside & ~fixed
-    g.tile = np.where(free, despeck(g.tile.copy(), free), g.tile)
-    check(b["name"], np.array(LADDER)[g.tile], g.inside)
+        flat |= np.hypot(g.x - nx_, g.z - nz_) < NEST_CLEAR
+    ground = b["steps"][b["ground"]]
+    step[flat] = ground
+    free = g.inside & ~flat
+    step = np.where(free, despeck(step.copy(), free), step)
+    # steps to tiles: each band's tile, the circle its own
+    by_step = {}
+    for k, s_ in enumerate(b["steps"]):
+        by_step.setdefault(s_, k)
+    by_step[ground] = b["ground"]
+    g.tile = np.vectorize(by_step.get)(step)
+    g.tile[centre] = b["centre"]
+    check(b["name"], np.array(b["steps"])[g.tile], g.inside)
     return g
 
 
@@ -382,22 +391,29 @@ def walls_and_pillars():
         pillars.append(("Base", sx * (GATE_HALF + 12), -BASE_R - 2, 24, 34, "gate"))
     arches.append(("Base", 0, -BASE_R - 2))
     # the biomes
-    prev_half = GATE_HALF + 48  # (the corridor's outer edge)
     for i, b in enumerate(BIOMES):
         name, half, zs, zn = b["name"], b["W"] / 2, b["zs"], b["zn"]
-        # its south wall (shared with the last area), a gateway in it
-        span = max(half, prev_half) + OUT_T
-        for sx in (-1, 1):
-            x0, x1 = sorted((sx * GATE_HALF, sx * span))
-            walls.append((name, x0, zs + DIV_T, x1, zs))
-            pillars.append((name, sx * (GATE_HALF + 12), zs + DIV_T / 2, 24, 36, "gate"))
-        arches.append((name, 0, zs + DIV_T / 2))
-        barriers.append(((BIOMES[i - 1]["name"] if i else "Base"), name, 0, zs + DIV_T / 2))
-        # inner corners where it meets the walls either side (covering the step in width)
-        for sx in (-1, 1):
-            pillars.append((name, sx * half, zs, 22, 26, "corner"))
-            if i and BIOMES[i - 1]["W"] / 2 != half:
-                pillars.append((BIOMES[i - 1]["name"], sx * BIOMES[i - 1]["W"] / 2, zs + DIV_T, 22, 26, "corner"))
+        if i == 0:
+            # the Meadow's south wall, at the corridor's end: a gateway in it
+            for sx in (-1, 1):
+                x0, x1 = sorted((sx * GATE_HALF, sx * (half + OUT_T)))
+                walls.append((name, x0, zs + DIV_T, x1, zs))
+                pillars.append((name, sx * (GATE_HALF + 12), zs + DIV_T / 2, 24, 36, "gate"))
+                pillars.append((name, sx * half, zs, 22, 26, "corner"))
+            arches.append((name, 0, zs + DIV_T / 2))
+            barriers.append(("Base", name, 0, zs + DIV_T / 2, 2 * GATE_HALF))
+        else:
+            # open onto the biome before: a big pillar either side, set into the side
+            # walls where they step out, and (for the fight) a barrier right across
+            prev = BIOMES[i - 1]
+            narrow = prev["W"] / 2
+            for sx in (-1, 1):
+                if half > narrow:
+                    # (behind the step: the wider wall's corner, filled in)
+                    x0, x1 = sorted((sx * (narrow + OUT_T), sx * (half + OUT_T)))
+                    walls.append((prev["name"], x0, zs + OUT_T, x1, zs))
+                pillars.append((name, sx * (narrow + 4), zs, 26, 32, "transition"))
+            barriers.append((prev["name"], name, 0, zs, 2 * narrow))
         # its side walls, in pieces with a pillar at each joint
         n = max(1, round(b["D"] / 112))
         for sx in (-1, 1):
@@ -405,12 +421,6 @@ def walls_and_pillars():
             walls.append((name, x0, zs, x1, zn))
             for k in range(1, n):
                 pillars.append((name, sx * (half + 3), zs - k * b["D"] / n, 14, 18, "joint"))
-        # joints along the south divider, between the corner and the gateway
-        for sx in (-1, 1):
-            mid = (GATE_HALF + 24 + half) / 2
-            if half - GATE_HALF > 150:
-                pillars.append((name, sx * mid, zs + DIV_T / 2, 16, 20, "joint"))
-        prev_half = half
         if i == len(BIOMES) - 1:
             # the far wall: a gateway for the next world, sealed with rubble for now
             for sx in (-1, 1):
@@ -472,28 +482,40 @@ def props(grids):
                 it = pick(rng, dress["top"])
                 out.append((it, x, z, WALL_H, rng.uniform(0, 360), rng.uniform(*SCALE[it]), name))
                 z -= rng.uniform(18, 32)
-        # round the dais's ring: standing ruins (or monoliths), cover to kite the boss round
-        r = b["dais"] + RING_W / 2
+        steps = np.array(b["steps"])[g.tile]
+
+        def ground_y(x, z):
+            i = min(g.nx - 1, max(0, int((x - g.x0) // CELL)))
+            j = min(g.nz - 1, max(0, int((g.z0 - z) // CELL)))
+            return int(steps[i, j]) - 1
+
+        # just outside the boss's circle: standing ruins (or monoliths), cover to kite it round
+        r = b["dais"] + 8
         for k in range(6):
             a = (k + 0.5) / 6 * 2 * math.pi
             it = dress["ring"] if k % 2 == 0 or name == "Lava" else "RuinPillarBroken"
             yaw = math.degrees(-a) + 90 if it == "Monolith" else rng.uniform(0, 360)
-            out.append((it, math.cos(a) * r, b["cz"] + math.sin(a) * r, 1, yaw, 1.0, name))
-        # the floor: on raised ground, clear of the dais, nests, gateways and walls
-        spots = [(i, j) for i in range(g.nx) for j in range(g.nz) if g.inside[i, j] and g.tile[i, j] == 2]
+            x, z = math.cos(a) * r, b["cz"] + math.sin(a) * r
+            out.append((it, x, z, ground_y(x, z), yaw, 1.0, name))
+        # the floor: on its highest ground (never in a liquid), clear of the circle, nests,
+        # gateways and walls
+        high = max(s_ for s_, (_, _, wet) in zip(b["steps"], b["tiles"]) if not wet)
+        dry = np.array([not t[2] for t in b["tiles"]])[g.tile]
+        spots = [(i, j) for i in range(g.nx) for j in range(g.nz)
+                 if g.inside[i, j] and steps[i, j] == high and dry[i, j] and g.tile[i, j] != b["centre"]]
         rng.shuffle(spots)
         taken = [(x, z, 26) for x, z in nests(b)] + [(0, b["zs"], 56), (0, b["zn"], 56)]
         placed = 0
         for i, j in spots:
             x, z = float(g.x[i, j]), float(g.z[i, j])
-            if math.hypot(x, z - b["cz"]) < b["dais"] + RING_W + 24:
+            if math.hypot(x, z - b["cz"]) < b["dais"] + 32:
                 continue
             if abs(x) > half - 20 or z > b["zs"] - 20 or z < b["zn"] + 20:
                 continue
             if any(math.hypot(x - tx, z - tz) < tr for tx, tz, tr in taken):
                 continue
             it = pick(rng, dress["floor"])
-            out.append((it, x, z, 1, rng.uniform(0, 360), rng.uniform(*SCALE[it]), name))
+            out.append((it, x, z, high - 1, rng.uniform(0, 360), rng.uniform(*SCALE[it]), name))
             taken.append((x, z, 40))
             placed += 1
             if placed >= dress["n"]:
@@ -542,7 +564,7 @@ def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruin
     w("-- GENERATED by tools/map_gen.py (QM, Oct 24): edit that and re-run it, not this.")
     w("-- The map's layout, built in game by Server/Map.luau. Studs; y up; north is -z.")
     w("-- Floor = { tile, x0, z0 (south edge), size x, size z }: the part runs from x0 east")
-    w("-- and z0 north. Tiles = { ColorKey, top }: Key .. \"Checker\" is its checker's colour.")
+    w("-- and z0 north. Tiles = { ColorKey, top, liquid? }: Key .. \"Checker\" is its checker's colour.")
     w("return {")
     w("\tWallHeight = %d," % WALL_H)
     w("\tGateHalf = %d," % GATE_HALF)
@@ -553,7 +575,8 @@ def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruin
         w('\t\t\tName = "%s",' % name)
         for line in extra:
             w("\t\t\t" + line)
-        w("\t\t\tTiles = { %s }," % ", ".join('{ "%s", %d }' % t for t in tiles))
+        w("\t\t\tTiles = { %s }," % ", ".join(
+            '{ "%s", %d%s }' % (t[0], t[1], ", true" if len(t) > 2 and t[2] else "") for t in tiles))
         w("\t\t\tFloor = {")
         for p in g.floor():
             w("\t\t\t\t{ %d, %s, %s, %s, %s }," % (p[0] + 1, *(lua_num(v) for v in p[1:])))
@@ -568,10 +591,9 @@ def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruin
         "TrainSize = %d," % TRAIN_SIZE,
     ])
     for b, g in zip(BIOMES, grids):
-        area(b["name"], [(b["name"] + s, LADDER[i] - 1) for i, (s, _) in enumerate(TILES)], g, [
+        area(b["name"], [(b["name"] + s, st - 1, wet) for s, st, wet in b["tiles"]], g, [
             "Boss = { 0, %s }," % lua_num(b["cz"]),
             "DaisRadius = %d," % b["dais"],
-            "RingWidth = %d," % RING_W,
             "Nests = { %s }," % ", ".join("{ %s, %s }" % (lua_num(x), lua_num(z)) for x, z in nests(b)),
             "Bounds = { %s, %s, %s, %s }," % (lua_num(-b["W"] / 2), lua_num(b["zs"]), lua_num(b["W"] / 2), lua_num(b["zn"])),
         ])
@@ -593,8 +615,8 @@ def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruin
     w("\t},")
     w("\t-- an arch over each gateway, between its pillars: { style, x, z }")
     w("\tArches = { %s }," % ", ".join('{ "%s", %s, %s }' % (a[0], lua_num(a[1]), lua_num(a[2])) for a in arches))
-    w("\t-- each gateway's barrier (for egg holders): { south area, north area, x, z }")
-    w("\tBarriers = { %s }," % ", ".join('{ "%s", "%s", %s, %s }' % (a[0], a[1], lua_num(a[2]), lua_num(a[3])) for a in barriers))
+    w("\t-- the barriers between areas (for those in a fight): { south area, north area, x, z, width }")
+    w("\tBarriers = { %s }," % ", ".join('{ "%s", "%s", %s }' % (a[0], a[1], ", ".join(lua_num(v) for v in a[2:])) for a in barriers))
     w("\t-- { item, x, z, ground y, yaw (degrees), scale, style }: ServerStorage.WorldAssets meshes")
     w("\tProps = {")
     for p in prop_list:
@@ -662,7 +684,7 @@ def preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colou
 
     tiles_of("Base", g_base, BASE_TILES)
     for b, g in zip(BIOMES, grids):
-        tiles_of(b["name"], g, [(b["name"] + t[0], LADDER[i] - 1) for i, t in enumerate(TILES)])
+        tiles_of(b["name"], g, [(b["name"] + t[0], t[1] - 1) for t in b["tiles"]])
     wall_key = {"Base": "WallDirt"}
     cap_key = {"Base": "Grass"}
     for b in BIOMES:
@@ -730,19 +752,19 @@ def main():
     n = len(g_base.floor()) + sum(len(g.floor()) for g in grids)
     print("wrote", os.path.relpath(path, ROOT), "-", n, "floor parts,", len(walls) + len(ring), "walls,", len(pillars), "pillars,", len(prop_list), "props")
     for b, g in zip(BIOMES, grids):
-        counts = {TILES[k][0]: int(((g.tile == k) & g.inside).sum()) for k in range(len(TILES))}
+        counts = {t[0]: int(((g.tile == k) & g.inside).sum()) for k, t in enumerate(b["tiles"])}
         print(" ", b["name"], "z", b["zs"], "to", b["zn"], "parts", len(g.floor()), counts)
     colours = config_colours()
     whole = preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colours, s=0.5)
     near = preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colours, s=2.0,
-                   crop=(BASE_R + RING_T + 8, BIOMES[0]["zn"] - DIV_T - 8))
+                   crop=(BASE_R + RING_T + 8, BIOMES[0]["zn"] - 8))
     for od in out_dirs:
         os.makedirs(od, exist_ok=True)
         whole.save(os.path.join(od, "map_overview.png"))
         near.save(os.path.join(od, "map_base_meadow.png"))
     for i, b in enumerate(BIOMES):
         im = preview(g_base, grids[:], walls, ring, pillars, arches, prop_list, ruins, colours, s=1.5,
-                     crop=(b["zs"] + DIV_T + 16, b["zn"] - DIV_T - 16))
+                     crop=(b["zs"] + DIV_T + 16, b["zn"] - 16))
         for od in out_dirs:
             im.save(os.path.join(od, "map_%d_%s.png" % (i + 1, b["name"].lower())))
 

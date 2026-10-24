@@ -1,7 +1,7 @@
 -- Eggs and the fight they start (QM, Oct 24). Every nest round a biome's edges holds an
 -- egg. Hold E to steal it: it rides on your back, the biome's boss wakes, and you're
--- locked into its fight (player attribute LockedIn = the biome): red barriers in its
--- gateways, drawn and solid only for you (client/Barriers.luau), keep you in until the
+-- locked into its fight (player attribute LockedIn = the biome): red barriers across its
+-- ways out, drawn and solid only for you (client/Barriers.luau), keep you in until the
 -- boss is dead. Anyone who hits the boss is locked in too, so a group fights it together.
 -- With the boss dead everyone in its fight goes free; carry the egg into your pen for
 -- its reward (Config.Eggs.Reward). Die holding an egg and it's lost (and you're out of
