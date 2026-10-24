@@ -150,6 +150,102 @@ local ITEMS = {
 			colour = "BoneDark",
 			id = "rbxassetid://92502971536719",
 		} },
+	Torch = { {
+			piece = "Iron",
+			colour = "Iron",
+			id = "rbxassetid://136247146081608",
+		}, {
+			piece = "Bowl",
+			colour = "IronDark",
+			id = "rbxassetid://105881210227894",
+		}, {
+			piece = "Flame",
+			colour = "DungeonFlame",
+			id = "rbxassetid://128769639957207",
+		} },
+	WallTorch = { {
+			piece = "Iron",
+			colour = "Iron",
+			id = "rbxassetid://74735514856321",
+		}, {
+			piece = "Cup",
+			colour = "IronDark",
+			id = "rbxassetid://107991357044004",
+		}, {
+			piece = "Flame",
+			colour = "DungeonFlame",
+			id = "rbxassetid://72503443041324",
+		} },
+	Shackles = { {
+			piece = "Iron",
+			colour = "Iron",
+			id = "rbxassetid://109420858839379",
+		}, {
+			piece = "Chains",
+			colour = "IronDark",
+			id = "rbxassetid://71947898321792",
+		} },
+	HumanSkull = { {
+			piece = "Bone",
+			colour = "Bone",
+			id = "rbxassetid://90944768527720",
+		}, {
+			piece = "Dark",
+			colour = "BoneDark",
+			id = "rbxassetid://92037232654945",
+		} },
+	Candelabra = { {
+			piece = "Gold",
+			colour = "Gold",
+			id = "rbxassetid://98114069437511",
+		}, {
+			piece = "Wax",
+			colour = "CandleWax",
+			id = "rbxassetid://131348795793615",
+		}, {
+			piece = "Flame",
+			colour = "CandleFlame",
+			id = "rbxassetid://81889661123344",
+		} },
+	Candles = { {
+			piece = "Wax",
+			colour = "CandleWax",
+			id = "rbxassetid://109558627599036",
+		}, {
+			piece = "Flame",
+			colour = "CandleFlame",
+			id = "rbxassetid://128609793117985",
+		} },
+	CandlePodium = { {
+			piece = "Stone",
+			colour = "ForestPodium",
+			id = "rbxassetid://99633488827715",
+		}, {
+			piece = "Trim",
+			colour = "ForestPodiumDark",
+			id = "rbxassetid://88143679685592",
+		}, {
+			piece = "Wax",
+			colour = "ForestCandleWax",
+			id = "rbxassetid://95111698884192",
+		}, {
+			piece = "Flame",
+			colour = "ForestFlame",
+			id = "rbxassetid://132965915146641",
+		} },
+	ForestCandle = { {
+			piece = "Dish",
+			colour = "ForestPodiumDark",
+			id = "rbxassetid://86242149643175",
+		}, {
+			piece = "Wax",
+			colour = "ForestCandleWax",
+			id = "rbxassetid://138093369736607",
+		}, {
+			piece = "Flame",
+			colour = "ForestFlame",
+			id = "rbxassetid://76725309403001",
+		} },
 	PalmTree = { {
 			piece = "Trunk",
 			colour = "ForestTrunk",
@@ -191,6 +287,34 @@ local ITEMS = {
 			piece = "Fruit",
 			colour = "ForestFruit",
 			id = "rbxassetid://72799685534058",
+		} },
+	Kelp = { {
+			piece = "Blades",
+			colour = "Kelp",
+			id = "rbxassetid://105477058328270",
+		}, {
+			piece = "BladesDark",
+			colour = "KelpDark",
+			id = "rbxassetid://110706428008714",
+		} },
+	Starfish = { {
+			piece = "Body",
+			colour = "Starfish",
+			id = "rbxassetid://135880318832322",
+		} },
+	Sponges = { {
+			piece = "Rock",
+			colour = "SpongeRock",
+			id = "rbxassetid://121219085983932",
+		}, {
+			piece = "Tubes",
+			colour = "Sponge",
+			id = "rbxassetid://128820852736423",
+		} },
+	Coral = { {
+			piece = "Coral",
+			colour = "Coral",
+			id = "rbxassetid://79966937354073",
 		} },
 }
 local PROPS = { { "StoneRubble", -60, -36, 20 }, { "StoneBlockLow", -48, -36, 0 }, { "StoneBlock", -36, -36, 0 }, { "PineTall", 36, -36, 0 }, { "PineShort", 52, -36, 40 } }
