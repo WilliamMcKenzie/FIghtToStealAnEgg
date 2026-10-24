@@ -45,6 +45,7 @@ sys.path.insert(0, HERE)
 from quasicrystal import value  # noqa: E402
 
 CELL = 8
+STEP_H = 0.5  # studs between floor tiers (QM, Oct 24: half a stud, was 1)
 
 # ---- the layout ------------------------------------------------------------------------
 
@@ -91,7 +92,7 @@ GATE_CLEAR = 24  # flat ground inside the Meadow's gateway
 SEAM = 16  # flat ground either side of the line where two biomes meet
 
 # the base's tiles: (key, top): the lineup's grass, its dirt a stud lower (QM, Oct 24)
-BASE_TILES = [("Grass", 0), ("Dirt", -1)]
+BASE_TILES = [("Grass", 0), ("Dirt", -0.5)]
 
 # where each biome sits: its south (near) interior edge, north (far) edge. Only the Meadow
 # has a south wall (shared with the base, the gateway in it); the rest open straight onto
@@ -493,7 +494,7 @@ def props(grids):
         def ground_y(x, z):
             i = min(g.nx - 1, max(0, int((x - g.x0) // CELL)))
             j = min(g.nz - 1, max(0, int((g.z0 - z) // CELL)))
-            return int(steps[i, j]) - 1
+            return (int(steps[i, j]) - 1) * STEP_H
 
         # just outside the boss's circle: standing ruins (or monoliths), cover to kite it round
         r = b["dais"] + 8
@@ -521,7 +522,7 @@ def props(grids):
             if any(math.hypot(x - tx, z - tz) < tr for tx, tz, tr in taken):
                 continue
             it = pick(rng, dress["floor"])
-            out.append((it, x, z, high - 1, rng.uniform(0, 360), rng.uniform(*SCALE[it]), name))
+            out.append((it, x, z, (high - 1) * STEP_H, rng.uniform(0, 360), rng.uniform(*SCALE[it]), name))
             taken.append((x, z, 28))
             placed += 1
             if placed >= dress["n"]:
@@ -591,7 +592,7 @@ def export_map(g_base, grids, walls, ring, pillars, arches, barriers, prop_list,
     cells = [["."] * cols for _ in range(rows)]
     areas = [("Base", [tile("Base", k, t) for k, t in BASE_TILES], g_base)]
     for b, g in zip(BIOMES, grids):
-        areas.append((b["name"], [tile(b["name"], b["name"] + s, st - 1, wet) for s, st, wet in b["tiles"]], g))
+        areas.append((b["name"], [tile(b["name"], b["name"] + s, (st - 1) * STEP_H, wet) for s, st, wet in b["tiles"]], g))
     for name, chars, g in areas:
         for i in range(g.nx):
             for j in range(g.nz):
@@ -761,7 +762,7 @@ def preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colou
 
     tiles_of("Base", g_base, BASE_TILES)
     for b, g in zip(BIOMES, grids):
-        tiles_of(b["name"], g, [(b["name"] + t[0], t[1] - 1) for t in b["tiles"]])
+        tiles_of(b["name"], g, [(b["name"] + t[0], (t[1] - 1) * STEP_H) for t in b["tiles"]])
     wall_key = {"Base": "WallDirt"}
     cap_key = {"Base": "Grass"}
     for b in BIOMES:

@@ -309,7 +309,9 @@ function paintCells(c0, r0, c1, r1) {
   dirty = true;
 }
 
-// QM's layered rule: no two touching cells (diagonals too) more than a step apart
+// QM's layered rule: no two touching cells (diagonals too) more than a step apart (half a
+// stud since QM, Oct 24)
+const STEP = 0.5;
 function checkRule() {
   bad = [];
   // (walls stand apart from the rule: it's about the floor's steps)
@@ -324,7 +326,7 @@ function checkRule() {
       const rr = r + dr, cc = c + dc;
       if ((dr || dc) && rr >= 0 && cc >= 0 && rr < rows && cc < cols) {
         const k2 = cells[rr * cols + cc];
-        if (k2 && Math.abs(top[k2 - 1] - h) > 1) { wrong = true; break; }
+        if (k2 && Math.abs(top[k2 - 1] - h) > STEP + 1e-6) { wrong = true; break; }
       }
     }
     if (wrong) bad.push(r * cols + c);
@@ -1089,7 +1091,7 @@ function inspect() {
   if (!t.wall) box.appendChild(field("Liquid", t.liquid ? "yes" : "no", (v) => editTile("liquid")(v === "yes"), ["no", "yes"]));
   box.appendChild(field("Area", t.area, editTile("area"), M.areas.map((a) => a.name)));
   const n = document.createElement("div"); n.className = "note";
-  n.textContent = t.wall ? "A wall rises from below the floor to Top, its cap the last stud. Paint it anywhere; None takes it away." : "Top is the floor's height in studs. Changing it moves every cell of this tile.";
+  n.textContent = t.wall ? "A wall rises from below the floor to Top, its cap the last stud. Paint it anywhere; None takes it away." : "Top is the floor's height in studs (tiers are half a stud apart). Changing it moves every cell of this tile.";
   box.appendChild(n);
   colourList(box, t.wall ? [t.key, t.key + "Checker", t.cap, t.cap + "Checker"] : [t.key, t.key + "Checker"], "Its colours");
 }
@@ -1127,15 +1129,26 @@ function changed() {
 }
 // served by tools/mapeditor/serve.py on this Mac: Save goes straight into the game
 const LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+let mapVersion = ""; // the server's version of the map this tab opened (serve.py)
 async function download() {
   if (!M) return;
   const text = dumpMap();
   if (LOCAL) {
     toast("Saving into the game...");
     try {
-      const r = await fetch("/save", { method: "POST", body: text });
+      // (against the version this tab opened: the server merges in anything changed since)
+      const r = await fetch("/save", { method: "POST", body: text, headers: { "X-Map-Base": mapVersion } });
       const msg = await r.text();
-      if (r.ok) { BUNDLE.map = text; try { localStorage.removeItem(DRAFT); } catch (e) { /* */ } }
+      if (r.ok) {
+        mapVersion = r.headers.get("X-Map-Version") || mapVersion;
+        BUNDLE.map = text;
+        try { localStorage.removeItem(DRAFT); } catch (e) { /* */ }
+        if (r.headers.get("X-Map-Merged") === "1") {
+          // the file had other changes too: open the merged map so this tab carries them
+          const m = await fetch("/world.map", { cache: "no-store" });
+          if (m.ok) { mapVersion = m.headers.get("X-Map-Version") || mapVersion; BUNDLE.map = await m.text(); load(BUNDLE.map, "world.map", true); }
+        }
+      }
       toast(msg);
       return;
     } catch (e) { toast("Couldn't reach the local server, downloading instead."); }
@@ -1180,7 +1193,7 @@ if (LOCAL) {
 async function start() {
   // (on this Mac: the game's map as it is now, not the copy baked into this page)
   if (LOCAL) {
-    try { const r = await fetch("/world.map", { cache: "no-store" }); if (r.ok) { BUNDLE.map = await r.text(); load(BUNDLE.map, "world.map", true); } } catch (e) { /* the baked-in copy */ }
+    try { const r = await fetch("/world.map", { cache: "no-store" }); if (r.ok) { mapVersion = r.headers.get("X-Map-Version") || ""; BUNDLE.map = await r.text(); load(BUNDLE.map, "world.map", true); } } catch (e) { /* the baked-in copy */ }
   }
 try {
   const d = JSON.parse(localStorage.getItem(DRAFT) || "null");
