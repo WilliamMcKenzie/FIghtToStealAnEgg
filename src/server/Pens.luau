@@ -2,7 +2,7 @@
 -- server). Each player who joins gets the first free one (player attribute Pen) and its
 -- sign shows their name; the eggs they bring home sit in rows inside it.
 --
---   Pens.start(map)                       -- once, after Map.build()
+--   Pens.start(map)                       -- once, after Map.ensure()
 --   Pens.of(player) -> the pen Model or nil
 --   Pens.addEgg(player, biome, makeEgg)   -- one more egg sat in their pen
 

@@ -217,6 +217,99 @@ def animal(scene, model, at, scale, yaw, extra_colours):
         scene.box(key, R0 @ pos + at, size, R0 @ R, mode="plain")
 
 
+# ---- pieces (as Server/Map.luau's), also the map editor's sprites (tools/mapeditor) ----------
+
+def pillar(scene, rng, st, x, z, size, height, kind):
+    """A pillar of rough stone blocks, as Map.luau's pillar()."""
+    J = lambda a: (rng.random() * 2 - 1) * a  # noqa: E731
+    U = lambda a, b: rng.uniform(a, b)  # noqa: E731
+    light, dark = pillar_keys(st)
+    pick = lambda: dark if rng.random() < 0.3 else light  # noqa: E731
+    if kind == "gate":
+        height = ARCH_SPRING + 6
+    if kind == "rubble":
+        for _ in range(9):
+            s = U(6, 11)
+            stone(scene, pick(), (x + J(M.GATE_HALF - 6), s * 0.35 + U(0, max(0.1, height - s * 0.6)), z + J(4)),
+                  (s, s * U(0.7, 1), s * U(0.8, 1.1)), rot_xyz(math.radians(J(25)), math.radians(U(0, 90)), math.radians(J(25))))
+        return
+    plinth = max(2, height * 0.12)
+    stone(scene, dark, (x, plinth / 2, z), (size + 3, plinth, size + 3))
+    y = plinth
+    capH = max(2, size * 0.15)
+    shaftTop = height - capH * 2
+    course = 0
+    while y < shaftTop - 0.5:
+        hh = min(10, max(3, size * U(0.45, 0.7)))
+        if shaftTop - (y + hh) < 2.5:
+            hh = shaftTop - y
+        tilt = rot_xyz(math.radians(J(1.5)), math.radians(J(4)), math.radians(J(1.5)))
+        if size >= 18:
+            cut = 0.5 + J(0.12)
+            for side in (0, 1):
+                a0, a1 = (0, cut) if side == 0 else (cut, 1)
+                w = (a1 - a0) * size - 0.15
+                mid = -size / 2 + (a0 + a1) / 2 * size
+                along = course % 2 == 0
+                off = np.array([mid, 0, 0]) if along else np.array([0, 0, mid])
+                s = np.array([w, hh, size]) if along else np.array([size, hh, w])
+                inset = U(0, 0.6)
+                stone(scene, pick(), np.array([x + J(0.3), y + hh / 2, z + J(0.3)]) + off, s - [inset, 0, inset], tilt)
+        else:
+            stone(scene, pick(), (x + J(0.4), y + hh / 2, z + J(0.4)), (size * U(0.94, 1), hh, size * U(0.94, 1)), tilt)
+        y += hh
+        course += 1
+    stone(scene, light, (x, y + capH / 2, z), (size + 1.5, capH, size + 1.5), rot_y(J(3)))
+    y += capH
+    stone(scene, dark, (x, y + capH / 2, z), (size + 3, capH, size + 3), rot_y(J(3)))
+    y += capH
+    if kind == "gate":
+        stone(scene, light, (x, y + 1.5, z), (size * 0.55, 3, size * 0.55), rot_y(45 + J(4)))
+
+
+def arch(scene, rng, st, x, z):
+    """An arch over a gateway, as Map.luau's arch()."""
+    light, dark = pillar_keys(st)
+    rIn, n, depth = M.GATE_HALF, 7, 14
+    rOut = rIn + 9
+    for i in range(n):
+        a0, a1 = math.pi * i / n + 0.012, math.pi * (i + 1) / n - 0.012
+        am, rm = (a0 + a1) / 2, (rIn + rOut) / 2
+        key_ = i == (n - 1) // 2
+        pos = (x + math.cos(am) * rm, ARCH_SPRING + 10 + math.sin(am) * rm * ARCH_SQUASH, z)
+        tan = np.array([-math.sin(am), math.cos(am) * ARCH_SQUASH, 0])
+        tan /= np.linalg.norm(tan)
+        up = np.cross([0, 0, 1], tan)
+        R = np.stack([tan, up, np.cross(tan, up)], 1)
+        length = (a1 - a0) * rm * (1 + ARCH_SQUASH) / 2 + 1.2
+        size = (length, rOut - rIn + (3 if key_ else rng.uniform(-0.4, 0.6)), depth + (2 if key_ else 0))
+        stone(scene, dark if key_ or rng.random() < 0.3 else light, pos, size, R)
+
+
+def nest(scene, rng, x, z, egg=None):
+    """A straw nest (and its egg), as Map.luau's nest()."""
+    J = lambda a: (rng.random() * 2 - 1) * a  # noqa: E731
+    scene.cylinder_y("Straw", (x, 0.5, z), 5.5, 1)
+    for i in range(14):
+        a = (i + rng.uniform(-0.3, 0.3)) / 14 * 2 * math.pi
+        r = 5.6 + rng.uniform(-0.3, 0.3)
+        R = rot_y(math.degrees(-a)) @ rot_xyz(math.radians(J(20)), 0, math.radians(J(12)))
+        scene.box("Wood" if i % 3 == 0 else "StrawDark", (x + math.cos(a) * r, 1.1 + rng.uniform(0, 0.5), z + math.sin(a) * r), (0.8, 0.8, rng.uniform(4, 5.5)), R, mode="plain")
+    if egg:
+        scene.ellipsoid(egg, (x, 1 + 3.3 / 2, z), (1.3, 1.65, 1.3))
+
+
+def prop(scene, item, x, z, gy, yaw, scale, st):
+    """A prop from assets/meshes (pieces.json), stone pieces in its style's pillar colours."""
+    R = rot_y(yaw)
+    for p in PIECES[item]:
+        key = p["colour"]
+        if st != "Base" and key in ("Stone", "StoneDark"):
+            key = st + ("Pillar" if key == "Stone" else "PillarDark")
+        V, F = obj(p["obj"])
+        scene.mesh(key, V, F, scale, R, np.array([x, gy, z]), mode="glow" if key == "Rune" else "plain")
+
+
 # ---- the build (as Server/Map.luau) ------------------------------------------------------
 
 def build():
@@ -258,68 +351,11 @@ def build():
         scene.box(key, (cx, (FLOOR_BOTTOM + h - 1) / 2, cz), (length, h - 1 - FLOOR_BOTTOM, thick), R, faces=["left", "right", "front", "back"])
         scene.box(cap, (cx, h - 0.5, cz), (length + 2 * LIP, 1, thick + 2 * LIP), R)
 
-    # pillars
+    # pillars and arches
     for st, x, z, size, height, kind in pillars:
-        light, dark = pillar_keys(st)
-        pick = lambda: dark if rng.random() < 0.3 else light  # noqa: E731
-        if kind == "gate":
-            height = ARCH_SPRING + 6
-        if kind == "rubble":
-            for _ in range(9):
-                s = U(6, 11)
-                stone(scene, pick(), (x + J(M.GATE_HALF - 6), s * 0.35 + U(0, max(0.1, height - s * 0.6)), z + J(4)),
-                      (s, s * U(0.7, 1), s * U(0.8, 1.1)), rot_xyz(math.radians(J(25)), math.radians(U(0, 90)), math.radians(J(25))))
-            continue
-        plinth = max(2, height * 0.12)
-        stone(scene, dark, (x, plinth / 2, z), (size + 3, plinth, size + 3))
-        y = plinth
-        capH = max(2, size * 0.15)
-        shaftTop = height - capH * 2
-        course = 0
-        while y < shaftTop - 0.5:
-            hh = min(10, max(3, size * U(0.45, 0.7)))
-            if shaftTop - (y + hh) < 2.5:
-                hh = shaftTop - y
-            tilt = rot_xyz(math.radians(J(1.5)), math.radians(J(4)), math.radians(J(1.5)))
-            if size >= 18:
-                cut = 0.5 + J(0.12)
-                for side in (0, 1):
-                    a0, a1 = (0, cut) if side == 0 else (cut, 1)
-                    w = (a1 - a0) * size - 0.15
-                    mid = -size / 2 + (a0 + a1) / 2 * size
-                    along = course % 2 == 0
-                    off = np.array([mid, 0, 0]) if along else np.array([0, 0, mid])
-                    s = np.array([w, hh, size]) if along else np.array([size, hh, w])
-                    inset = U(0, 0.6)
-                    stone(scene, pick(), np.array([x + J(0.3), y + hh / 2, z + J(0.3)]) + off, s - [inset, 0, inset], tilt)
-            else:
-                stone(scene, pick(), (x + J(0.4), y + hh / 2, z + J(0.4)), (size * U(0.94, 1), hh, size * U(0.94, 1)), tilt)
-            y += hh
-            course += 1
-        stone(scene, light, (x, y + capH / 2, z), (size + 1.5, capH, size + 1.5), rot_y(J(3)))
-        y += capH
-        stone(scene, dark, (x, y + capH / 2, z), (size + 3, capH, size + 3), rot_y(J(3)))
-        y += capH
-        if kind == "gate":
-            stone(scene, light, (x, y + 1.5, z), (size * 0.55, 3, size * 0.55), rot_y(45 + J(4)))
-
-    # arches
+        pillar(scene, rng, st, x, z, size, height, kind)
     for st, x, z in arches:
-        light, dark = pillar_keys(st)
-        rIn, n, depth = M.GATE_HALF, 7, 14
-        rOut = rIn + 9
-        for i in range(n):
-            a0, a1 = math.pi * i / n + 0.012, math.pi * (i + 1) / n - 0.012
-            am, rm = (a0 + a1) / 2, (rIn + rOut) / 2
-            key_ = i == (n - 1) // 2
-            pos = (x + math.cos(am) * rm, ARCH_SPRING + 10 + math.sin(am) * rm * ARCH_SQUASH, z)
-            tan = np.array([-math.sin(am), math.cos(am) * ARCH_SQUASH, 0])
-            tan /= np.linalg.norm(tan)
-            up = np.cross([0, 0, 1], tan)
-            R = np.stack([tan, up, np.cross(tan, up)], 1)
-            length = (a1 - a0) * rm * (1 + ARCH_SQUASH) / 2 + 1.2
-            size = (length, rOut - rIn + (3 if key_ else U(-0.4, 0.6)), depth + (2 if key_ else 0))
-            stone(scene, dark if key_ or rng.random() < 0.3 else light, pos, size, R)
+        arch(scene, rng, st, x, z)
 
     # ruins
     for st, x, z, length, yaw, height, seed in ruins:
@@ -346,24 +382,12 @@ def build():
 
     # props
     for item, x, z, gy, yaw, scale, st in props:
-        R = rot_y(yaw)
-        for p in PIECES[item]:
-            key = p["colour"]
-            if st != "Base" and key in ("Stone", "StoneDark"):
-                key = st + ("Pillar" if key == "Stone" else "PillarDark")
-            V, F = obj(p["obj"])
-            scene.mesh(key, V, F, scale, R, np.array([x, gy, z]), mode="glow" if key == "Rune" else "plain")
+        prop(scene, item, x, z, gy, yaw, scale, st)
 
     # nests and their eggs
     for b in M.BIOMES:
         for x, z in M.nests(b):
-            scene.cylinder_y("Straw", (x, 0.5, z), 5.5, 1)
-            for i in range(14):
-                a = (i + U(-0.3, 0.3)) / 14 * 2 * math.pi
-                r = 5.6 + U(-0.3, 0.3)
-                R = rot_y(math.degrees(-a)) @ rot_xyz(math.radians(J(20)), 0, math.radians(J(12)))
-                scene.box("Wood" if i % 3 == 0 else "StrawDark", (x + math.cos(a) * r, 1.1 + U(0, 0.5), z + math.sin(a) * r), (0.8, 0.8, U(4, 5.5)), R, mode="plain")
-            scene.ellipsoid("Egg" + b["name"], (x, 1 + 3.3 / 2, z), (1.3, 1.65, 1.3))
+            nest(scene, rng, x, z, "Egg" + b["name"])
 
     # pens and training grounds: fences, dummies, the spawn pad
     def fence(cx, cz, size, top, gate):

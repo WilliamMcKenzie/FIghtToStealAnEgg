@@ -11,7 +11,7 @@
 -- Health, MaxHealth, Radius, Ground), drawn by client/BossView.luau like the bosses.
 -- They amble about their yard; one that falls is back Respawn seconds later.
 --
---   Training.start(map)   -- once, after Map.build()
+--   Training.start(map)   -- once, after Map.ensure()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

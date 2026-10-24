@@ -9,7 +9,7 @@
 --
 -- Player attributes: HeldEgg (biome name), LockedIn (biome name), Eggs (eggs brought home).
 --
---   Eggs.start(map)   -- once, after Map.build()
+--   Eggs.start(map)   -- once, after Map.ensure()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

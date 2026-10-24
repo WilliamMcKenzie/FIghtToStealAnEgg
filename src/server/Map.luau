@@ -1,27 +1,33 @@
--- Builds the map in game from Shared/MapData (laid out by tools/map_gen.py; QM, Oct 24):
+-- Builds the map from Shared/MapData (maps/world.map, edited in tools/mapeditor; QM, Oct 24):
 -- the base (spawn plaza, pens, training grounds, its ring wall and gateway), and the
 -- biome arenas north of it (Meadow, Desert, Ice, Lava), walled down their sides (stone
 -- pillars at the corners and joints, big ones where one biome opens onto the next; no
 -- walls between them), a gateway (two big pillars and an arch) from the base, a barrier
 -- where areas meet for those in a fight (Server/Eggs), egg nests and the boss's spot.
 --
--- Everything goes in workspace.Map, rebuilt fresh on every start, so the place file
--- never needs the map saved in it. The lineup from tools/lineup.luau (workspace.World)
--- and any Baseplate are moved out of the way while the game runs.
+-- Everything goes in workspace.Map. It's baked into the place in Studio's Edit mode (QM,
+-- Oct 24: see it without playing) by the Map Baker plugin (tools/studio/MapBaker.lua),
+-- from Shared/MapData (maps/world.map, the map editor's file) or a .map picked from disk;
+-- the game then plays on the baked map, and only builds one if the place has none. The
+-- lineup from tools/lineup.luau (workspace.World) and any Baseplate are moved out of the
+-- way while the game runs.
 --
 -- Stone pillars and pines use the meshes in ServerStorage.WorldAssets (made by
 -- tools/lineup.luau); without them the pillars are plain studded blocks and there are no
 -- pines. Every colour is a ColorKey in Config.WorldColors (live-tunable in Play).
 --
---   Map.build() -> workspace.Map   -- once, on the server's start
---   Map.data                        -- Shared/MapData
+--   Map.ensure() -> workspace.Map  -- once, on the server's start: the baked map (or builds it)
+--   Map.build(data?) -> workspace.Map -- builds it fresh (data: a decoded .map; default MapData)
+--   Map.data                        -- Shared/MapData (or the data last built)
 --   Map.area(name)                  -- an area's data ("Base", "Meadow", ...)
 
 local AssetService = game:GetService("AssetService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
-local Shared = ReplicatedStorage:WaitForChild("Shared")
+-- (the Map Baker plugin requires a fresh copy of this beside a fresh copy of Shared)
+local Shared = script.Parent:FindFirstChild("Shared") or ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local MapData = require(Shared.MapData)
 
@@ -29,6 +35,9 @@ local Map = {}
 Map.data = MapData
 
 local COLORS = Config.WorldColors
+-- (the map's own colours, from the editor, over Config's: WorldColors paints from these too)
+local MapFile = require(Shared.MapFile)
+MapFile.applyColours(MapData, COLORS)
 local CHECKER, STUDS = "rbxassetid://84747779882944", "rbxassetid://7447638591"
 local STONE_MESH = "rbxassetid://128149382332662" -- StoneBlock_Block (assets/meshes/ids.json)
 local SIDES = { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
@@ -860,24 +869,65 @@ end
 
 -- ---- all of it ---------------------------------------------------------------------------
 
-function Map.build()
+-- out of the way: in Play the lineup and a fresh place's baseplate (they'd sit under the
+-- base); in Edit mode only the baseplate and its spawn, kept in ServerStorage
+local function clearSite()
+	if RunService:IsRunning() then
+		if Config.Map.HideLineup then
+			local lineup = workspace:FindFirstChild("World")
+			if lineup then
+				lineup.Parent = ServerStorage
+			end
+			for _, name in { "Baseplate", "SpawnLocation" } do
+				local thing = workspace:FindFirstChild(name)
+				if thing then
+					thing:Destroy()
+				end
+			end
+		end
+		return
+	end
+	for _, name in { "Baseplate", "SpawnLocation" } do
+		local thing = workspace:FindFirstChild(name)
+		if thing then
+			local keep = ServerStorage:FindFirstChild("MovedByMapBaker") or Instance.new("Folder")
+			keep.Name = "MovedByMapBaker"
+			keep.Parent = ServerStorage
+			thing.Parent = keep
+		end
+	end
+end
+
+function Map.ensure()
+	local map = workspace:FindFirstChild("Map")
+	if map and map:GetAttribute("Baked") then
+		clearSite()
+		if map:GetAttribute("Saved") ~= MapData.Saved then
+			warn(
+				"[Map] the baked workspace.Map isn't from Shared/MapData's map (baked "
+					.. tostring(map:GetAttribute("Saved"))
+					.. ", MapData "
+					.. tostring(MapData.Saved)
+					.. "): Map Baker > Rebuild to bake it again"
+			)
+		end
+		return map
+	end
+	return Map.build()
+end
+
+function Map.build(data)
+	if data then
+		data.MeshCentres = data.MeshCentres or MapData.MeshCentres
+		MapFile.applyColours(data, COLORS)
+		MapData = data
+		Map.data = data
+	end
 	local old = workspace:FindFirstChild("Map")
 	if old then
 		old:Destroy()
 	end
-	-- (the lineup and a fresh place's baseplate would sit under the base)
-	if Config.Map.HideLineup then
-		local lineup = workspace:FindFirstChild("World")
-		if lineup then
-			lineup.Parent = ServerStorage
-		end
-		for _, name in { "Baseplate", "SpawnLocation" } do
-			local thing = workspace:FindFirstChild(name)
-			if thing then
-				thing:Destroy()
-			end
-		end
-	end
+	clearSite()
 	loadStone()
 	local map = Instance.new("Folder")
 	map.Name = "Map"
@@ -899,6 +949,8 @@ function Map.build()
 	for _, r in MapData.Ruins do
 		ruin(ruins, r)
 	end
+	map:SetAttribute("Baked", not RunService:IsRunning())
+	map:SetAttribute("Saved", MapData.Saved)
 	map.Parent = workspace
 	return map
 end

@@ -1,7 +1,7 @@
--- Builds the map (Server/Map) and starts what runs on it: pens, eggs and the bosses'
--- fights, the training grounds. Gives every player the sword, relays slashes so other
--- players see them (and lets them hit bosses, mobs and dummies: Server/Combat), and
--- spawns a boss on /boss.
+-- Readies the map (Server/Map: the one baked into the place) and starts what runs on
+-- it: pens, eggs and the bosses' fights, the training grounds. Gives every player the
+-- sword, relays slashes so other players see them (and lets them hit bosses, mobs and
+-- dummies: Server/Combat), and spawns a boss on /boss.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,7 +22,7 @@ local Pens = require(script.Pens)
 local Training = require(script.Training)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
-local map = Map.build() -- workspace.Map
+local map = Map.ensure() -- workspace.Map (baked into the place in Studio, or built now)
 WorldColors.create() -- workspace.WorldColors: live world colours (after the map: it paints it)
 Pens.start(map)
 Eggs.start(map)

@@ -1,0 +1,1124 @@
+<title>World Map Editor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a full-screen canvas with the map, a tool rail on the left, a palette tray along the
+   bottom, and an inspector on the right; dark slate panels lit warm on top, cool below (QM's UI). */
+:root {
+  color-scheme: dark;
+  --ink: #0e1218;
+  --panel-top: #3a3640;
+  --panel-bottom: #1b2230;
+  --panel-edge: #0a0d13;
+  --well: #121822;
+  --text: #f4f1ea;
+  --muted: #a3acbd;
+  --accent: #ffcc4d;
+  --accent-deep: #e0912b;
+  --danger: #ff5a4e;
+  --ok: #7fd36b;
+  --display: "Montserrat", "Arial Black", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --outline: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000, 0 2px 0 #000;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--ink); color: var(--text); font: 600 13px/1.35 var(--display); overflow: hidden; user-select: none; -webkit-user-select: none; }
+button, input, select { font: inherit; color: inherit; }
+.panel { background: linear-gradient(180deg, var(--panel-top), var(--panel-bottom)); border: 2px solid var(--panel-edge); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08); }
+.title { font-weight: 800; text-shadow: var(--outline); letter-spacing: .02em; }
+.label { font-weight: 800; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#app { position: fixed; inset: 0; display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto 1fr auto; gap: 8px;
+  padding: max(8px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+#app > * { pointer-events: auto; min-width: 0; }
+#view { position: fixed; inset: 0; display: block; touch-action: none; }
+#top { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 8px; }
+#top h1 { font-size: 17px; margin: 0 8px 0 4px; white-space: nowrap; }
+#top h1 small { font-size: 11px; color: var(--accent); margin-left: 6px; }
+#file { color: var(--muted); font-family: var(--mono); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+.spacer { flex: 1; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; border: 2px solid var(--panel-edge); cursor: pointer;
+  background: linear-gradient(180deg, #5a5560, #2b3242); font-weight: 800; text-shadow: var(--outline); white-space: nowrap; }
+.btn:hover { filter: brightness(1.15); }
+.btn:focus-visible, .tool:focus-visible, .sw:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.gold { background: linear-gradient(180deg, #ffd866, #d9822b 60%, #a8541f); }
+.btn:disabled { opacity: .45; cursor: default; filter: none; }
+#rail { grid-row: 2; display: flex; flex-direction: column; gap: 6px; padding: 6px; align-self: start; }
+.tool { width: 42px; height: 42px; border-radius: 8px; border: 2px solid var(--panel-edge); background: linear-gradient(180deg, #4b4752, #232a38); cursor: pointer; display: grid; place-items: center; position: relative; }
+.tool svg { width: 22px; height: 22px; stroke: var(--text); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 0 #000); }
+.tool.on { background: linear-gradient(180deg, #ffd866, #d9822b 60%, #a8541f); }
+.tool.on svg { stroke: #fff; }
+.tool .k { position: absolute; right: 2px; bottom: 0; font-size: 9px; color: var(--muted); font-family: var(--mono); }
+.tool.on .k { color: #3a1d06; }
+.sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.size { height: 20px; border-radius: 5px; border: 2px solid var(--panel-edge); background: var(--well); cursor: pointer; font-size: 10px; font-family: var(--mono); padding: 0; }
+.size.on { background: var(--accent-deep); color: #fff; }
+#side { grid-row: 2; grid-column: 3; width: 250px; display: flex; flex-direction: column; gap: 8px; align-self: start; max-height: 100%; overflow: auto; }
+#side section { padding: 10px; display: grid; gap: 8px; }
+#side h2 { margin: 0; font-size: 14px; }
+.row { display: grid; grid-template-columns: 74px 1fr; align-items: center; gap: 6px; }
+.row input, .row select { width: 100%; min-width: 0; background: var(--well); border: 1px solid #000; border-radius: 6px; padding: 5px 7px; font-family: var(--mono); font-size: 12px; }
+.checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
+.checks label { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
+.note { color: var(--muted); font-size: 12px; font-weight: 600; }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 800; background: var(--well); }
+.pill.bad { background: var(--danger); color: #fff; text-shadow: var(--outline); }
+.pill.good { background: #2d5a2a; color: var(--ok); }
+#tray { grid-column: 1 / -1; grid-row: 3; padding: 6px 8px 8px; display: grid; gap: 6px; }
+.tabs { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.tab { padding: 4px 10px; border-radius: 6px; border: 2px solid var(--panel-edge); background: var(--well); cursor: pointer; font-weight: 800; }
+.tab.on { background: linear-gradient(180deg, #ffd866, #d9822b); text-shadow: var(--outline); }
+#swatches { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 6px; scrollbar-width: thin; }
+.group { display: flex; flex-direction: column; gap: 4px; }
+.group .label { padding-left: 2px; }
+.group .items { display: flex; gap: 4px; }
+.sw { width: 52px; border-radius: 7px; border: 2px solid var(--panel-edge); background: var(--well); cursor: pointer; padding: 3px 3px 2px; display: grid; justify-items: center; gap: 1px; }
+.sw canvas, .sw img { width: 42px; height: 42px; image-rendering: pixelated; border-radius: 4px; object-fit: contain; }
+.sw span { font-size: 9px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 48px; }
+.sw.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-deep); }
+.crow { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; cursor: pointer; }
+.crow span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crow input[type=color] { width: 30px; height: 22px; padding: 0; border: 2px solid var(--panel-edge); border-radius: 5px; background: none; cursor: pointer; }
+.mini { font-size: 10px; padding: 2px 6px; border-radius: 5px; border: 1px solid #000; background: var(--well); cursor: pointer; }
+.cgroup { display: grid; gap: 3px; min-width: 190px; padding: 4px 6px; background: var(--well); border-radius: 7px; align-content: start; }
+#cfilter { background: var(--well); border: 1px solid #000; border-radius: 6px; padding: 4px 8px; width: 160px; }
+.scale { display: grid; grid-template-columns: 1fr 58px; gap: 6px; align-items: center; }
+.scale input[type=range] { width: 100%; accent-color: var(--accent); }
+#status { position: fixed; left: max(80px, calc(env(safe-area-inset-left, 0px) + 80px)); bottom: 150px; font-family: var(--mono); font-size: 12px; padding: 4px 8px; background: rgba(10,13,19,.8); border-radius: 6px; pointer-events: none; }
+#toast { position: fixed; left: 50%; top: 70px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 8px 12px; z-index: 5; max-width: calc(100% - 32px); }
+#drop { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(10,13,19,.75); font-size: 24px; z-index: 6; pointer-events: none; }
+@media (max-width: 720px) {
+  #app { grid-template-columns: auto 1fr; }
+  #side { grid-column: 1 / -1; grid-row: 4; width: auto; max-height: 30vh; }
+  #status { bottom: auto; top: 110px; }
+  #file { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<canvas id="view"></canvas>
+<div id="app">
+  <header id="top" class="panel">
+    <h1 class="title">World Map Editor<small>.map</small></h1>
+    <span id="file">world.map</span>
+    <span class="spacer"></span>
+    <button class="btn" id="undo" title="Undo (Ctrl+Z)">Undo</button>
+    <button class="btn" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+    <button class="btn" id="open" title="Open a .map file (or drop one on the page)">Open .map</button>
+    <button class="btn gold" id="save" title="Download the map to send over">Download .map</button>
+    <input type="file" id="picker" accept=".map,.json,.txt,application/json,text/plain" hidden>
+  </header>
+
+  <nav id="rail" class="panel" aria-label="Tools">
+    <button class="tool on" data-tool="paint" title="Paint tiles (B)"><svg viewBox="0 0 24 24"><path d="M4 20c3 0 5-2 5-4.5S7.5 12 6 13.5 4 17 4 20z"/><path d="M9 15l10-10 2 2-10 10"/></svg><span class="k">B</span></button>
+    <button class="tool" data-tool="rect" title="Fill a rectangle (U)"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/></svg><span class="k">U</span></button>
+    <button class="tool" data-tool="fill" title="Flood fill a patch (G)"><svg viewBox="0 0 24 24"><path d="M5 11l7-7 7 7-7 7z"/><path d="M19 15c0 2 1 3 1 4a1 1 0 0 1-2 0c0-1 1-2 1-4z"/></svg><span class="k">G</span></button>
+    <button class="tool" data-tool="pick" title="Pick a tile from the map (I, or Alt+click)"><svg viewBox="0 0 24 24"><path d="M14 4l6 6-9 9H5v-6z"/><path d="M12 6l6 6"/></svg><span class="k">I</span></button>
+    <button class="tool" data-tool="select" title="Select and move objects (V)"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-2 6z"/></svg><span class="k">V</span></button>
+    <button class="tool" data-tool="place" title="Place the object chosen in the tray (P)"><svg viewBox="0 0 24 24"><path d="M12 21s-6-6-6-11a6 6 0 0 1 12 0c0 5-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg><span class="k">P</span></button>
+    <button class="tool" data-tool="pan" title="Pan (H, or drag with right or middle mouse, or hold Space)"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg><span class="k">H</span></button>
+    <div class="label" style="text-align:center;margin-top:4px">Brush</div>
+    <div class="sizes" id="sizes"></div>
+  </nav>
+
+  <aside id="side">
+    <section class="panel" id="inspect"></section>
+    <section class="panel">
+      <h2 class="title">View</h2>
+      <div class="checks" id="checks"></div>
+      <div class="note">Layered rule: <span id="rule" class="pill">…</span></div>
+    </section>
+  </aside>
+
+  <footer id="tray" class="panel">
+    <div class="tabs">
+      <button class="tab on" data-tab="tiles">Floor</button>
+      <button class="tab" data-tab="objects">Objects</button>
+      <button class="tab" data-tab="colours">Colours</button>
+      <input id="cfilter" type="search" placeholder="Filter colours" hidden>
+      <span class="spacer"></span>
+      <label class="note" id="stylebox" hidden>Style <select id="style"></select></label>
+      <button class="btn" id="newtile" title="Add a tile: a colour and a height">+ New tile</button>
+    </div>
+    <div id="swatches"></div>
+  </footer>
+</div>
+<div id="status"></div>
+<div id="toast" class="panel" hidden></div>
+<div id="drop" class="title" hidden>Drop the .map to open it</div>
+
+<script>
+const BUNDLE = /*BUNDLE*/null;
+// ---------------------------------------------------------------------------------------------
+// World Map Editor (QM, Oct 24): paints the game's .map (maps/world.map in the repo). Each cell
+// is one 4-stud checker square; colours, studs and the meshes' top-down pictures match the game
+// seen from straight above. Walls, pillars, arches and barriers are fixed (tools/map_gen.py).
+// ---------------------------------------------------------------------------------------------
+const DEFAULTS = BUNDLE.colours; // Config.WorldColors (and the eggs'), as the game has them
+let C = Object.assign({}, DEFAULTS); // with the map's own colours over them (M.colours)
+const STUD_ALPHA = 1 - BUNDLE.studTransparency;
+const LIP = 0.25;
+const $ = (id) => document.getElementById(id);
+const cv = $("view"), ctx = cv.getContext("2d");
+const layer = document.createElement("canvas"), lctx = layer.getContext("2d");
+
+// ---- state ------------------------------------------------------------------------------------
+let M = null;          // the map: {head, tiles, areas, objects, fixed, origin, cell, cols, rows}
+let cells = null;      // Uint8Array: 0 no floor, k = tiles[k - 1]
+let fileName = "world.map";
+let tool = "paint", brush = 2, current = 1, placing = null, selected = null;
+let cam = { x: 0, z: -300, zoom: 1.2 };
+const view = { studs: true, edges: true, fixed: true, arches: true, furniture: true, props: true, barriers: true, labels: true, rule: true, flip: false };
+const undoStack = [], redoStack = [];
+let dirty = true, bad = [];
+
+const rgb = (k) => C[k] || [255, 0, 255];
+const css = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const shade = (c, f) => c.map((v) => Math.max(0, Math.min(255, Math.round(v * f))));
+
+// ---- the .map file ----------------------------------------------------------------------------
+function parseMap(text) {
+  const d = JSON.parse(text);
+  if (d.format !== "StealAndFightPets.map") throw new Error("That isn't a .map file from this game.");
+  const [cols, rows] = d.size;
+  if (!Array.isArray(d.rows) || d.rows.length !== rows) throw new Error("The map's rows don't match its size.");
+  const idx = {};
+  d.tiles.forEach((t, i) => (idx[t.id] = i + 1));
+  const g = new Uint8Array(cols * rows);
+  for (let r = 0; r < rows; r++) {
+    const row = d.rows[r];
+    for (let c = 0; c < cols; c++) g[r * cols + c] = idx[row[c]] || 0;
+  }
+  const head = {};
+  for (const k of Object.keys(d)) if (!["tiles", "areas", "objects", "fixed", "rows", "colours"].includes(k)) head[k] = d[k];
+  return { m: { head, colours: d.colours || {}, tiles: d.tiles, areas: d.areas, objects: d.objects, fixed: d.fixed, origin: d.origin, cell: d.cell, cols, rows }, g };
+}
+
+function dumpMap() {
+  const ids = M.tiles.map((t) => t.id);
+  const rows = [];
+  for (let r = 0; r < M.rows; r++) {
+    let s = "";
+    for (let c = 0; c < M.cols; c++) { const k = cells[r * M.cols + c]; s += k ? ids[k - 1] : "."; }
+    rows.push(s);
+  }
+  const head = Object.assign({}, M.head, { saved: new Date().toISOString().slice(0, 19) + "Z" });
+  const out = [JSON.stringify(head).slice(0, -1) + ","];
+  // the colours QM changed from Config's: { ColorKey: [r, g, b] }, baked over Config.WorldColors
+  const cols = Object.keys(M.colours).sort();
+  out.push('"colours": {');
+  out.push(cols.map((k) => `  "${k}": ${JSON.stringify(M.colours[k])}`).join(",\n"));
+  out.push("},");
+  for (const k of ["areas", "tiles", "objects"]) {
+    out.push(`"${k}": [`);
+    out.push(M[k].map((v) => "  " + JSON.stringify(v)).join(",\n"));
+    out.push("],");
+  }
+  out.push('"fixed": {');
+  const f = Object.entries(M.fixed);
+  f.forEach(([k, v], n) => {
+    const comma = n < f.length - 1 ? "," : "";
+    if (Array.isArray(v)) { out.push(`  "${k}": [`); out.push(v.map((x) => "    " + JSON.stringify(x)).join(",\n")); out.push("  ]" + comma); }
+    else out.push(`  "${k}": ${JSON.stringify(v)}${comma}`);
+  });
+  out.push("},");
+  out.push('"rows": [');
+  out.push(rows.map((r) => `"${r}"`).join(",\n"));
+  out.push("]}");
+  return out.join("\n") + "\n";
+}
+
+function load(text, name, quiet) {
+  const { m, g } = parseMap(text);
+  M = m; cells = g; fileName = name || "world.map";
+  C = Object.assign({}, DEFAULTS, M.colours);
+  $("file").textContent = fileName;
+  undoStack.length = redoStack.length = 0;
+  selected = null; current = Math.min(current, M.tiles.length);
+  buildCellImages(); checkRule(); buildTray(); inspect(); updateUndo();
+  if (!quiet) toast(`Opened ${fileName}`);
+  dirty = true;
+}
+
+// ---- geometry -----------------------------------------------------------------------------------
+const X0 = () => M.origin[0], Z0 = () => M.origin[1];
+function cellAt(x, z) {
+  const c = Math.floor((x - X0()) / M.cell), r = Math.floor((z - Z0()) / M.cell);
+  return c >= 0 && r >= 0 && c < M.cols && r < M.rows ? r * M.cols + c : -1;
+}
+const tileOf = (i) => (i >= 0 && cells[i] ? M.tiles[cells[i] - 1] : null);
+// which checker colour a cell wears: the game's checker texture is lined up with the world grid
+function isChecker(c, r) {
+  const ix = X0() / M.cell + c, iz = Z0() / M.cell + r;
+  return (((ix + iz) % 2) + 2) % 2 === (view.flip ? 1 : 0);
+}
+function biomeAt(z) {
+  for (const a of M.areas) if (a.bounds && z <= a.bounds[1] && z > a.bounds[3]) return a.name;
+  return "Base";
+}
+function areaAt(x, z) { const t = tileOf(cellAt(x, z)); return t ? t.area : biomeAt(z); }
+function groundAt(x, z) { const t = tileOf(cellAt(x, z)); return t ? t.top : M.fixed.wallHeight; }
+
+// ---- cell pictures: one pixel a cell (solid tiles, and liquids, which have no studs) ----------
+let solidCv, liquidCv, solidImg, liquidImg;
+function buildCellImages() {
+  solidCv = document.createElement("canvas"); liquidCv = document.createElement("canvas");
+  solidCv.width = liquidCv.width = M.cols; solidCv.height = liquidCv.height = M.rows;
+  solidImg = solidCv.getContext("2d").createImageData(M.cols, M.rows);
+  liquidImg = liquidCv.getContext("2d").createImageData(M.cols, M.rows);
+  paintCells(0, 0, M.cols - 1, M.rows - 1);
+}
+function paintCells(c0, r0, c1, r1) {
+  c0 = Math.max(0, c0); r0 = Math.max(0, r0); c1 = Math.min(M.cols - 1, c1); r1 = Math.min(M.rows - 1, r1);
+  const cache = M.tiles.map((t) => [rgb(t.key), C[t.key + "Checker"] || rgb(t.key)]);
+  for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+    const i = r * M.cols + c, k = cells[i], p = i * 4;
+    const t = k ? M.tiles[k - 1] : null;
+    const into = t && t.liquid ? liquidImg.data : solidImg.data, other = into === solidImg.data ? liquidImg.data : solidImg.data;
+    other[p + 3] = 0;
+    if (!t) { into[p + 3] = 0; continue; }
+    const col = cache[k - 1][isChecker(c, r) ? 1 : 0];
+    into[p] = col[0]; into[p + 1] = col[1]; into[p + 2] = col[2]; into[p + 3] = 255;
+  }
+  solidCv.getContext("2d").putImageData(solidImg, 0, 0);
+  liquidCv.getContext("2d").putImageData(liquidImg, 0, 0);
+  dirty = true;
+}
+
+// QM's layered rule: no two touching cells (diagonals too) more than a step apart
+function checkRule() {
+  bad = [];
+  const { cols, rows } = M, top = M.tiles.map((t) => t.top);
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const k = cells[r * cols + c];
+    if (!k) continue;
+    const h = top[k - 1];
+    let wrong = false;
+    for (let dr = -1; dr <= 1 && !wrong; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const rr = r + dr, cc = c + dc;
+      if ((dr || dc) && rr >= 0 && cc >= 0 && rr < rows && cc < cols) {
+        const k2 = cells[rr * cols + cc];
+        if (k2 && Math.abs(top[k2 - 1] - h) > 1) { wrong = true; break; }
+      }
+    }
+    if (wrong) bad.push(r * cols + c);
+  }
+  const el = $("rule");
+  el.textContent = bad.length ? `${bad.length} cells break it` : "all good";
+  el.className = "pill " + (bad.length ? "bad" : "good");
+}
+
+// ---- patterns: studs, and the checker for walls ------------------------------------------------
+const studTile = (() => {
+  const s = document.createElement("canvas"); s.width = s.height = 32;
+  const g = s.getContext("2d");
+  g.lineWidth = 3;
+  g.strokeStyle = `rgba(255,255,255,${0.22 * STUD_ALPHA * 2})`;
+  g.beginPath(); g.arc(16, 16, 9, Math.PI * 0.85, Math.PI * 1.85); g.stroke();
+  g.strokeStyle = `rgba(0,0,0,${0.24 * STUD_ALPHA * 2})`;
+  g.beginPath(); g.arc(16, 16, 9, Math.PI * -0.15, Math.PI * 0.85); g.stroke();
+  g.fillStyle = `rgba(255,255,255,${0.05 * STUD_ALPHA * 2})`;
+  g.beginPath(); g.arc(16, 16, 8, 0, Math.PI * 2); g.fill();
+  return s;
+})();
+const checkerCache = {};
+function checkerPattern(g, key) {
+  const id = key + (view.flip ? "!" : "");
+  if (!checkerCache[id]) {
+    const s = document.createElement("canvas"); s.width = s.height = 2;
+    const x = s.getContext("2d"), a = rgb(key), b = C[key + "Checker"] || a;
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) { x.fillStyle = css(((i + j) % 2 === (view.flip ? 1 : 0)) ? b : a); x.fillRect(i, j, 1, 1); }
+    checkerCache[id] = s;
+  }
+  const p = g.createPattern(checkerCache[id], "repeat");
+  p.setTransform(new DOMMatrix().scale(4));
+  return p;
+}
+
+// ---- sprites -----------------------------------------------------------------------------------
+// Each sprite is two pictures: its shading (lit, all white) and which colour key each pixel is,
+// painted here in the current colours, so a colour change shows on every mesh at once.
+const sprites = {};
+let spritesReady = 0;
+const toLin = new Float32Array(256).map((_, i) => { const c = i / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+const toSrgb = (l) => { l = Math.min(1, Math.max(0, l)); return Math.round(255 * (l <= 0.0031308 ? l * 12.92 : 1.055 * l ** (1 / 2.4) - 0.055)); };
+function pixels(src) {
+  return new Promise((done) => {
+    const img = new Image();
+    img.onload = () => { const c = document.createElement("canvas"); c.width = img.width; c.height = img.height; const g = c.getContext("2d"); g.drawImage(img, 0, 0); done(g.getImageData(0, 0, c.width, c.height)); };
+    img.src = src;
+  });
+}
+for (const [name, v] of Object.entries(BUNDLE.sprites)) {
+  const s = { b: v.slice(0, 4), keys: v[4], img: null, sig: "" };
+  sprites[name] = s;
+  Promise.all([pixels(v[5]), pixels(v[6])]).then(([shade, id]) => {
+    // (antialiased edges have no key: they take a neighbour's)
+    const w = id.width, h = id.height, k = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) k[i] = id.data[i * 4 + 3] ? Math.round(id.data[i * 4] / 8) : 0;
+    for (let pass = 0; pass < 2; pass++) for (let i = 0; i < w * h; i++) if (!k[i] && shade.data[i * 4 + 3]) k[i] = k[i - 1] || k[i + 1] || k[i - w] || k[i + w] || 0;
+    s.shade = shade; s.key = k; s.img = document.createElement("canvas"); s.img.width = w; s.img.height = h;
+    tint(s); dirty = true;
+    if (++spritesReady === Object.keys(BUNDLE.sprites).length && tab === "objects") buildTray();
+  });
+}
+function tint(s) {
+  if (!s.shade) return;
+  const cols = s.keys.map((k) => rgb(k));
+  const sig = JSON.stringify(cols);
+  if (sig === s.sig) return;
+  s.sig = sig;
+  const lin = cols.map((c) => c.map((v) => toLin[v]));
+  const out = new ImageData(s.shade.width, s.shade.height), d = out.data, sh = s.shade.data;
+  for (let i = 0; i < s.key.length; i++) {
+    const a = sh[i * 4 + 3]; if (!a) continue;
+    const c = lin[s.key[i] - 1] || [1, 0, 1], l = toLin[sh[i * 4]];
+    d[i * 4] = toSrgb(c[0] * l); d[i * 4 + 1] = toSrgb(c[1] * l); d[i * 4 + 2] = toSrgb(c[2] * l); d[i * 4 + 3] = a;
+  }
+  s.img.getContext("2d").putImageData(out, 0, 0);
+  s.url = null;
+}
+function spriteUrl(s) { if (!s || !s.img) return ""; if (!s.url) s.url = s.img.toDataURL(); return s.url; }
+function propSprite(o) { return sprites[`${o.item}_${o.style || "Base"}`] || sprites[o.item]; }
+function spriteFor(o) {
+  if (o.type === "Prop") return propSprite(o);
+  if (o.type === "Nest") return sprites["Nest_" + o.area];
+  if (o.type === "Boss") return sprites["Boss_" + o.area];
+  return null;
+}
+function drawSprite(g, s, x, z, yaw, scale, alpha = 1) {
+  if (!s || !s.img) return;
+  tint(s);
+  const [x0, z0, x1, z1] = s.b;
+  g.save(); g.globalAlpha = alpha;
+  g.translate(x, z); g.rotate(-(yaw || 0) * Math.PI / 180); g.scale(scale || 1, scale || 1);
+  g.drawImage(s.img, x0, z0, x1 - x0, z1 - z0);
+  g.restore();
+}
+
+// a ruined brick wall from above: a row of bricks along its length, its top course's colours
+function drawRuin(g, o, alpha = 1) {
+  const light = rgb(o.style === "Base" ? "Stone" : o.style + "Pillar"), dark = rgb(o.style === "Base" ? "StoneDark" : o.style + "PillarDark");
+  let seed = (o.seed || 1) % 2147483647;
+  const rnd = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
+  g.save(); g.globalAlpha = alpha;
+  g.translate(o.x, o.z); g.rotate(-(o.yaw || 0) * Math.PI / 180);
+  let u = -o.length / 2;
+  while (u < o.length / 2) {
+    const w = 3 + rnd() * 1.6, u1 = Math.min(u + w, o.length / 2);
+    if (u1 - u > 1) {
+      g.fillStyle = css(rnd() < 0.35 ? dark : light);
+      g.fillRect(u + 0.08, -1.5 + (rnd() - 0.5) * 0.4, u1 - u - 0.16, 3 * (0.9 + rnd() * 0.1));
+    }
+    u += w;
+  }
+  for (let k = 0; k < 4; k++) { // fallen bricks at its foot
+    const side = rnd() < 0.5 ? -1 : 1;
+    g.save(); g.translate((rnd() - 0.5) * o.length, side * (3 + rnd() * 3)); g.rotate(rnd() * Math.PI);
+    g.fillStyle = css(rnd() < 0.5 ? dark : light); g.fillRect(-1.6, -1.3, 3.2, 2.6); g.restore();
+  }
+  g.restore();
+}
+
+// ---- the base's furniture: fences, the dummies, the spawn pad -----------------------------------
+function drawFence(g, cx, cz, size, gate) {
+  const half = size / 2 - 1, GAP = 10;
+  const sides = [[[-half, -half], [half, -half]], [[half, -half], [half, half]], [[half, half], [-half, half]], [[-half, half], [-half, -half]]];
+  for (const [a, b] of sides) {
+    const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const isGate = (gate[0] && Math.sign(mid[0]) === gate[0] && Math.abs(mid[0]) > 1) || (gate[1] && Math.sign(mid[1]) === gate[1] && Math.abs(mid[1]) > 1);
+    const run = (p0, p1) => {
+      g.strokeStyle = css(rgb("Wood")); g.lineWidth = 0.5;
+      g.beginPath(); g.moveTo(cx + p0[0], cz + p0[1]); g.lineTo(cx + p1[0], cz + p1[1]); g.stroke();
+      const len = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), n = Math.max(1, Math.ceil(len / 6));
+      g.fillStyle = css(rgb("WoodDark"));
+      for (let i = 0; i <= n; i++) g.fillRect(cx + p0[0] + (p1[0] - p0[0]) * i / n - 0.6, cz + p0[1] + (p1[1] - p0[1]) * i / n - 0.6, 1.2, 1.2);
+    };
+    if (isGate) {
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]), d = [(b[0] - a[0]) / len, (b[1] - a[1]) / len];
+      run(a, [mid[0] - d[0] * GAP / 2, mid[1] - d[1] * GAP / 2]); run([mid[0] + d[0] * GAP / 2, mid[1] + d[1] * GAP / 2], b);
+    } else run(a, b);
+  }
+}
+function drawFurniture(g) {
+  const base = M.areas.find((a) => a.name === "Base");
+  if (!base) return;
+  for (const [x, z] of base.pens || []) drawFence(g, x, z, base.penSize, [x < 0 ? 1 : -1, 0]);
+  for (const [name, x, z] of base.training || []) {
+    drawFence(g, x, z, base.trainSize, [0, -1]);
+    if (name === "Dummies") for (let k = -1; k <= 1; k++) for (let row = 0; row <= 1; row++) {
+      const px = x + k * 12 + row * 6 - 3, pz = z - 4 + row * 12;
+      g.save(); g.translate(px, pz); g.rotate(k * 10 * Math.PI / 180);
+      g.fillStyle = css(rgb("WoodDark")); g.fillRect(-3.5, -0.4, 7, 0.8);
+      g.fillStyle = css(rgb("Straw")); g.fillRect(-1.5, -1, 3, 2);
+      g.fillStyle = css(rgb("StrawDark")); g.fillRect(-1.1, -1.1, 2.2, 2.2);
+      g.restore();
+    }
+  }
+  if (base.spawn) {
+    g.fillStyle = css(rgb("PlazaInlay")); g.fillRect(base.spawn[0] - 5, base.spawn[1] - 5, 10, 10);
+  }
+}
+
+// ---- drawing -------------------------------------------------------------------------------------
+let W = 0, H = 0, dpr = 1;
+function resize() {
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = cv.clientWidth = window.innerWidth; H = window.innerHeight;
+  cv.width = layer.width = Math.round(W * dpr); cv.height = layer.height = Math.round(H * dpr);
+  cv.style.width = W + "px"; cv.style.height = H + "px";
+  dirty = true;
+}
+function worldTransform(g) { const s = cam.zoom * dpr; g.setTransform(s, 0, 0, s, (W / 2 - cam.x * cam.zoom) * dpr, (H / 2 - cam.z * cam.zoom) * dpr); }
+const toWorld = (sx, sy) => ({ x: (sx - W / 2) / cam.zoom + cam.x, z: (sy - H / 2) / cam.zoom + cam.z });
+function visible() { const a = toWorld(0, 0), b = toWorld(W, H); return { x0: a.x, z0: a.z, x1: b.x, z1: b.z }; }
+
+function drawWalls(g) {
+  const f = M.fixed, keyOf = (st) => (st === "Base" ? "Grass" : st + "Cap");
+  for (const [st, x0, z0, x1, z1] of f.walls) {
+    g.fillStyle = checkerPattern(g, keyOf(st));
+    g.fillRect(Math.min(x0, x1) - LIP, Math.min(z0, z1) - LIP, Math.abs(x1 - x0) + 2 * LIP, Math.abs(z1 - z0) + 2 * LIP);
+  }
+  for (const [st, cx, cz, length, thick, yaw] of f.ring) {
+    g.save(); g.translate(cx, cz); g.rotate(-yaw);
+    g.fillStyle = checkerPattern(g, keyOf(st));
+    g.fillRect(-length / 2 - LIP, -thick / 2 - LIP, length + 2 * LIP, thick + 2 * LIP);
+    g.restore();
+  }
+}
+function wallEdges(g) {
+  // a wall's sides drop away from its cap: a dark rim so its edge reads from above
+  const f = M.fixed;
+  g.strokeStyle = "rgba(0,0,0,0.35)"; g.lineWidth = Math.max(0.3, 1.2 / cam.zoom);
+  for (const [, x0, z0, x1, z1] of f.walls) g.strokeRect(Math.min(x0, x1) - LIP, Math.min(z0, z1) - LIP, Math.abs(x1 - x0) + 2 * LIP, Math.abs(z1 - z0) + 2 * LIP);
+}
+
+function pillarSprite(p) { return sprites[`Pillar_${p[0]}_${p[5]}_${p[3]}`]; }
+
+function draw() {
+  dirty = false;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = "#151a22"; ctx.fillRect(0, 0, cv.width, cv.height);
+  if (!M) return;
+  const v = visible(), cell = M.cell;
+  // tiles and walls, studs over them, then liquids underneath (no studs on a liquid)
+  lctx.setTransform(1, 0, 0, 1, 0, 0); lctx.clearRect(0, 0, layer.width, layer.height);
+  lctx.globalCompositeOperation = "source-over";
+  worldTransform(lctx);
+  lctx.imageSmoothingEnabled = false;
+  lctx.drawImage(solidCv, X0(), Z0(), M.cols * cell, M.rows * cell);
+  if (view.fixed) drawWalls(lctx);
+  if (view.studs && cam.zoom >= 2.2) {
+    lctx.globalCompositeOperation = "source-atop";
+    const p = lctx.createPattern(studTile, "repeat");
+    p.setTransform(new DOMMatrix().scale(1 / 32));
+    lctx.fillStyle = p;
+    lctx.fillRect(Math.floor(v.x0) - 1, Math.floor(v.z0) - 1, v.x1 - v.x0 + 2, v.z1 - v.z0 + 2);
+  }
+  lctx.globalCompositeOperation = "destination-over";
+  lctx.drawImage(liquidCv, X0(), Z0(), M.cols * cell, M.rows * cell);
+  lctx.globalCompositeOperation = "source-over";
+  ctx.drawImage(layer, 0, 0);
+
+  worldTransform(ctx);
+  const c0 = Math.max(0, Math.floor((v.x0 - X0()) / cell) - 1), c1 = Math.min(M.cols - 1, Math.ceil((v.x1 - X0()) / cell));
+  const r0 = Math.max(0, Math.floor((v.z0 - Z0()) / cell) - 1), r1 = Math.min(M.rows - 1, Math.ceil((v.z1 - Z0()) / cell));
+  // height edges: a dark line on the low side of every step
+  if (view.edges && cam.zoom >= 0.8) {
+    const top = M.tiles.map((t) => t.top);
+    ctx.beginPath();
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+      const k = cells[r * M.cols + c]; if (!k) continue;
+      const h = top[k - 1], x = X0() + c * cell, z = Z0() + r * cell;
+      if (c + 1 < M.cols) { const k2 = cells[r * M.cols + c + 1]; if (k2 && top[k2 - 1] !== h) { ctx.moveTo(x + cell, z); ctx.lineTo(x + cell, z + cell); } }
+      if (r + 1 < M.rows) { const k2 = cells[(r + 1) * M.cols + c]; if (k2 && top[k2 - 1] !== h) { ctx.moveTo(x, z + cell); ctx.lineTo(x + cell, z + cell); } }
+    }
+    ctx.strokeStyle = "rgba(30,24,20,0.75)"; ctx.lineWidth = Math.max(0.35, 1.6 / cam.zoom); ctx.stroke();
+  }
+  if (view.fixed) wallEdges(ctx);
+  if (view.rule && bad.length) {
+    ctx.fillStyle = "rgba(255,40,40,0.55)";
+    for (const i of bad) { const r = Math.floor(i / M.cols), c = i % M.cols; if (r >= r0 && r <= r1 && c >= c0 && c <= c1) ctx.fillRect(X0() + c * cell, Z0() + r * cell, cell, cell); }
+  }
+  if (view.furniture) drawFurniture(ctx);
+  // objects: ruins, nests, props, bosses
+  const order = { Ruin: 0, Nest: 1, Prop: 2, Boss: 3 };
+  const objs = M.objects.filter((o) => view.props || o.type === "Boss" || o.type === "Nest").sort((a, b) => order[a.type] - order[b.type]);
+  for (const o of objs) {
+    if (o.x < v.x0 - 80 || o.x > v.x1 + 80 || o.z < v.z0 - 80 || o.z > v.z1 + 80) continue;
+    if (o.type === "Ruin") drawRuin(ctx, o);
+    else drawSprite(ctx, spriteFor(o), o.x, o.z, o.yaw, o.scale);
+  }
+  if (view.fixed) for (const p of M.fixed.pillars) drawSprite(ctx, pillarSprite(p), p[1], p[2], 0, 1);
+  if (view.arches) for (const a of M.fixed.arches) drawSprite(ctx, sprites["Arch_" + a[0]], a[1], a[2], 0, 1, 0.85);
+  if (view.barriers) {
+    ctx.setLineDash([3, 2]); ctx.strokeStyle = "rgba(255,80,60,0.9)"; ctx.lineWidth = Math.max(0.5, 2 / cam.zoom);
+    for (const b of M.fixed.barriers) { const w = b[4] || M.fixed.gateHalf * 2; ctx.beginPath(); ctx.moveTo(b[2] - w / 2, b[3]); ctx.lineTo(b[2] + w / 2, b[3]); ctx.stroke(); }
+    ctx.setLineDash([]);
+  }
+  // the selection, the place ghost, the brush outline
+  if (selected) {
+    const r = hitRadius(selected);
+    ctx.strokeStyle = "#ffcc4d"; ctx.lineWidth = Math.max(0.4, 2.5 / cam.zoom);
+    ctx.beginPath(); ctx.arc(selected.x, selected.z, r + 1, 0, Math.PI * 2); ctx.stroke();
+  }
+  if (hover && (tool === "place") && placing) {
+    const o = newObject(hover.x, hover.z, true);
+    if (o) { if (o.type === "Ruin") drawRuin(ctx, o, 0.6); else drawSprite(ctx, spriteFor(o), o.x, o.z, o.yaw, o.scale, 0.6); }
+  }
+  if (hover && (tool === "paint" || tool === "rect" || tool === "fill" || tool === "pick")) {
+    ctx.strokeStyle = "rgba(255,255,255,0.9)"; ctx.lineWidth = Math.max(0.3, 1.5 / cam.zoom);
+    if (tool === "rect" && drag && drag.rect) {
+      const a = drag.rect, b = cellRC(hover.x, hover.z);
+      const rr0 = Math.min(a.r, b.r), rr1 = Math.max(a.r, b.r), cc0 = Math.min(a.c, b.c), cc1 = Math.max(a.c, b.c);
+      ctx.fillStyle = current ? css(rgb(M.tiles[current - 1].key), 0.45) : "rgba(0,0,0,0.45)";
+      ctx.fillRect(X0() + cc0 * cell, Z0() + rr0 * cell, (cc1 - cc0 + 1) * cell, (rr1 - rr0 + 1) * cell);
+      ctx.strokeRect(X0() + cc0 * cell, Z0() + rr0 * cell, (cc1 - cc0 + 1) * cell, (rr1 - rr0 + 1) * cell);
+    } else {
+      const n = tool === "paint" ? brush : 1, { c, r } = cellRC(hover.x, hover.z), o = Math.floor((n - 1) / 2);
+      ctx.strokeRect(X0() + (c - o) * cell, Z0() + (r - o) * cell, n * cell, n * cell);
+    }
+  }
+  // labels, outlined as the game's UI
+  if (view.labels) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.font = "800 15px Montserrat, sans-serif"; ctx.lineJoin = "round"; ctx.textAlign = "left";
+    const label = (t, x, z) => { const sx = (x - cam.x) * cam.zoom + W / 2, sy = (z - cam.z) * cam.zoom + H / 2; ctx.lineWidth = 4; ctx.strokeStyle = "#000"; ctx.strokeText(t, sx, sy); ctx.fillStyle = "#fff"; ctx.fillText(t, sx, sy); };
+    for (const a of M.areas) if (a.bounds) label(`${a.name}  ${a.bounds[2] - a.bounds[0]}×${a.bounds[1] - a.bounds[3]}`, a.bounds[0] + 6, a.bounds[1] - 8);
+    label("Base", -60, -150);
+  }
+}
+
+// ---- editing ---------------------------------------------------------------------------------------
+function cellRC(x, z) { return { c: Math.floor((x - X0()) / M.cell), r: Math.floor((z - Z0()) / M.cell) }; }
+let stroke = null;
+function setCell(c, r, k) {
+  if (c < 0 || r < 0 || c >= M.cols || r >= M.rows) return;
+  const i = r * M.cols + c;
+  if (cells[i] === k) return;
+  if (!stroke.has(i)) stroke.set(i, cells[i]);
+  cells[i] = k;
+  stroke.box[0] = Math.min(stroke.box[0], c); stroke.box[1] = Math.min(stroke.box[1], r);
+  stroke.box[2] = Math.max(stroke.box[2], c); stroke.box[3] = Math.max(stroke.box[3], r);
+}
+function beginStroke() { stroke = new Map(); stroke.box = [1e9, 1e9, -1, -1]; }
+function flushStroke() { if (stroke && stroke.box[2] >= 0) paintCells(...stroke.box); }
+function endStroke() {
+  if (!stroke) return;
+  flushStroke();
+  if (stroke.size) {
+    const changes = [];
+    for (const [i, old] of stroke) changes.push([i, old, cells[i]]);
+    push({ kind: "cells", changes });
+    checkRule(); changed();
+  }
+  stroke = null;
+}
+function dab(c, r) {
+  const o = Math.floor((brush - 1) / 2);
+  for (let dr = 0; dr < brush; dr++) for (let dc = 0; dc < brush; dc++) setCell(c - o + dc, r - o + dr, current);
+}
+function line(a, b, f) {
+  const n = Math.max(Math.abs(b.c - a.c), Math.abs(b.r - a.r));
+  for (let i = 0; i <= n; i++) f(Math.round(a.c + (b.c - a.c) * i / Math.max(1, n)), Math.round(a.r + (b.r - a.r) * i / Math.max(1, n)));
+}
+function flood(c, r) {
+  const start = r * M.cols + c, from = cells[start];
+  if (from === current) return;
+  const todo = [start], seen = new Uint8Array(cells.length); seen[start] = 1;
+  while (todo.length) {
+    const i = todo.pop(), cc = i % M.cols, rr = (i - cc) / M.cols;
+    setCell(cc, rr, current);
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const c2 = cc + dc, r2 = rr + dr;
+      if (c2 < 0 || r2 < 0 || c2 >= M.cols || r2 >= M.rows) continue;
+      const j = r2 * M.cols + c2;
+      if (!seen[j] && cells[j] === from) { seen[j] = 1; todo.push(j); }
+    }
+  }
+}
+
+// undo: cells (index, before, after), or whole snapshots of the objects or tiles
+function push(e) { undoStack.push(e); if (undoStack.length > 200) undoStack.shift(); redoStack.length = 0; updateUndo(); }
+function apply(e, back) {
+  if (e.kind === "cells") {
+    let box = [1e9, 1e9, -1, -1];
+    for (const [i, a, b] of e.changes) {
+      cells[i] = back ? a : b;
+      const c = i % M.cols, r = (i - c) / M.cols;
+      box = [Math.min(box[0], c), Math.min(box[1], r), Math.max(box[2], c), Math.max(box[3], r)];
+    }
+    paintCells(...box); checkRule();
+  } else if (e.kind === "objects") {
+    M.objects = JSON.parse(back ? e.before : e.after); selected = null; inspect();
+  } else if (e.kind === "colours") {
+    M.colours = JSON.parse(back ? e.before : e.after); recolour(); buildTray(); inspect();
+  } else if (e.kind === "tiles") {
+    M.tiles = JSON.parse(back ? e.before : e.after); current = Math.min(current, M.tiles.length);
+    paintCells(0, 0, M.cols - 1, M.rows - 1); checkRule(); buildTray(); inspect();
+  }
+  changed();
+}
+function undo() { const e = undoStack.pop(); if (!e) return; apply(e, true); redoStack.push(e); updateUndo(); }
+function redo() { const e = redoStack.pop(); if (!e) return; apply(e, false); undoStack.push(e); updateUndo(); }
+function updateUndo() { $("undo").disabled = !undoStack.length; $("redo").disabled = !redoStack.length; }
+function editObjects(f) { const before = JSON.stringify(M.objects); f(); const after = JSON.stringify(M.objects); if (after !== before) { push({ kind: "objects", before, after }); changed(); } }
+function editTiles(f) { const before = JSON.stringify(M.tiles); f(); const after = JSON.stringify(M.tiles); if (after !== before) { push({ kind: "tiles", before, after }); paintCells(0, 0, M.cols - 1, M.rows - 1); checkRule(); buildTray(); inspect(); changed(); } }
+
+// ---- objects ---------------------------------------------------------------------------------------
+const snap = (v, free) => (free ? Math.round(v * 10) / 10 : Math.round(v));
+function hitRadius(o) {
+  if (o.type === "Ruin") return o.length / 2;
+  const s = spriteFor(o);
+  if (!s) return 4;
+  const [x0, z0, x1, z1] = s.b;
+  return Math.max(3, Math.max(x1 - x0, z1 - z0) / 2 * (o.scale || 1) * 0.8);
+}
+function hitObject(x, z) {
+  let best = null, bestD = 1e9;
+  for (const o of M.objects) {
+    let d;
+    if (o.type === "Ruin") {
+      const a = -(o.yaw || 0) * Math.PI / 180, ux = Math.cos(a), uz = Math.sin(a);
+      const t = Math.max(-o.length / 2, Math.min(o.length / 2, (x - o.x) * ux + (z - o.z) * uz));
+      d = Math.hypot(x - (o.x + ux * t), z - (o.z + uz * t)) - 2;
+    } else d = Math.hypot(x - o.x, z - o.z) - hitRadius(o);
+    if (d < bestD) { bestD = d; best = o; }
+  }
+  return bestD <= Math.max(1, 6 / cam.zoom) ? best : null;
+}
+function newObject(x, z, ghost) {
+  if (!placing) return null;
+  x = snap(x); z = snap(z);
+  const area = areaAt(x, z), style = $("style").value || (area === "Base" ? "Base" : area);
+  if (placing.type === "Prop") return { type: "Prop", item: placing.item, x, z, yaw: ghost ? 0 : Math.round(Math.random() * 360), scale: 1, style };
+  if (placing.type === "Ruin") return { type: "Ruin", style, x, z, length: 24, yaw: 0, height: 7.5, seed: Math.floor(Math.random() * 1e6) };
+  const biome = biomeAt(z);
+  if (biome === "Base") return ghost ? null : { error: "Nests and bosses go in a biome, not the base." };
+  return { type: placing.type, area: biome, x, z };
+}
+function place(x, z) {
+  const o = newObject(x, z);
+  if (!o) return;
+  if (o.error) return toast(o.error);
+  editObjects(() => {
+    if (o.type === "Boss") {
+      const old = M.objects.find((p) => p.type === "Boss" && p.area === o.area);
+      if (old) { old.x = o.x; old.z = o.z; selected = old; toast(`Moved the ${o.area} boss: one boss a biome.`); return; }
+    }
+    M.objects.push(o); selected = o;
+  });
+  inspect();
+}
+function deleteSelected() { if (!selected) return; const s = selected; editObjects(() => (M.objects = M.objects.filter((o) => o !== s))); selected = null; inspect(); }
+function duplicateSelected() {
+  if (!selected) return;
+  const copy = JSON.parse(JSON.stringify(selected)); copy.x += 8; copy.z += 8;
+  if (copy.type === "Boss") return toast("One boss a biome: drag it instead.");
+  editObjects(() => M.objects.push(copy)); selected = copy; inspect();
+}
+function nudgeSelected(f) {
+  if (!selected) return;
+  const i = M.objects.indexOf(selected);
+  editObjects(() => f(selected)); selected = M.objects[i] || selected;
+  // (editObjects keeps the same objects, so the selection survives)
+  inspect();
+}
+
+// ---- input -----------------------------------------------------------------------------------------
+let hover = null, drag = null, space = false;
+const pointers = new Map();
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll(".tool").forEach((b) => b.classList.toggle("on", b.dataset.tool === t));
+  if (t !== "place") placing && document.querySelectorAll("#swatches .sw.obj").forEach((b) => b.classList.remove("on"));
+  if (t !== "place") placing = null;
+  cv.style.cursor = t === "pan" ? "grab" : t === "select" ? "default" : "crosshair";
+  dirty = true;
+}
+cv.addEventListener("contextmenu", (e) => e.preventDefault());
+cv.addEventListener("pointerdown", (e) => {
+  cv.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (!M) return;
+  if (pointers.size === 2) { endStroke(); drag = { pinch: pinchState() }; return; }
+  const w = toWorld(e.clientX, e.clientY);
+  if (e.button === 1 || e.button === 2 || space || tool === "pan") { drag = { pan: true, sx: e.clientX, sy: e.clientY, cx: cam.x, cz: cam.z }; cv.style.cursor = "grabbing"; return; }
+  if (e.altKey || tool === "pick") { const t = cells[cellAt(w.x, w.z)]; current = cellAt(w.x, w.z) >= 0 ? t : current; buildTray(); inspect(); return; }
+  if (tool === "paint") { beginStroke(); const rc = cellRC(w.x, w.z); dab(rc.c, rc.r); flushStroke(); drag = { paint: true, last: rc }; }
+  else if (tool === "rect") drag = { rect: cellRC(w.x, w.z) };
+  else if (tool === "fill") { const rc = cellRC(w.x, w.z); if (cellAt(w.x, w.z) >= 0) { beginStroke(); flood(rc.c, rc.r); endStroke(); } }
+  else if (tool === "place") place(w.x, w.z);
+  else if (tool === "select") {
+    const o = hitObject(w.x, w.z);
+    selected = o; inspect();
+    if (o) drag = { move: o, before: JSON.stringify(M.objects), dx: o.x - w.x, dz: o.z - w.z, moved: false };
+  }
+  dirty = true;
+});
+cv.addEventListener("pointermove", (e) => {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (!M) return;
+  const w = toWorld(e.clientX, e.clientY);
+  hover = w; status(w);
+  if (drag && drag.pinch && pointers.size === 2) {
+    const now = pinchState(), was = drag.pinch;
+    const z = Math.max(0.15, Math.min(24, cam.zoom * now.d / was.d));
+    const before = toWorld(was.x, was.y);
+    cam.zoom = z;
+    const after = toWorld(now.x, now.y);
+    cam.x += before.x - after.x; cam.z += before.z - after.z;
+    drag.pinch = now;
+  } else if (drag && drag.pan) { cam.x = drag.cx - (e.clientX - drag.sx) / cam.zoom; cam.z = drag.cz - (e.clientY - drag.sy) / cam.zoom; }
+  else if (drag && drag.paint) { const rc = cellRC(w.x, w.z); line(drag.last, rc, dab); flushStroke(); drag.last = rc; }
+  else if (drag && drag.move) { drag.move.x = snap(w.x + drag.dx, e.altKey); drag.move.z = snap(w.z + drag.dz, e.altKey); drag.moved = true; inspect(); }
+  dirty = true;
+});
+function endDrag(e) {
+  pointers.delete(e.pointerId);
+  if (!drag) return;
+  if (drag.paint) endStroke();
+  else if (drag.rect && hover) {
+    const a = drag.rect, b = cellRC(hover.x, hover.z);
+    beginStroke();
+    for (let r = Math.min(a.r, b.r); r <= Math.max(a.r, b.r); r++) for (let c = Math.min(a.c, b.c); c <= Math.max(a.c, b.c); c++) setCell(c, r, current);
+    endStroke();
+  } else if (drag.move && drag.moved) {
+    const after = JSON.stringify(M.objects);
+    if (after !== drag.before) { push({ kind: "objects", before: drag.before, after }); changed(); }
+  }
+  if (drag.pan) setTool(tool);
+  drag = pointers.size === 2 ? { pinch: pinchState() } : null;
+  dirty = true;
+}
+cv.addEventListener("pointerup", endDrag);
+cv.addEventListener("pointercancel", endDrag);
+cv.addEventListener("pointerleave", () => { hover = null; dirty = true; });
+function pinchState() { const [a, b] = [...pointers.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) }; }
+cv.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const before = toWorld(e.clientX, e.clientY);
+  cam.zoom = Math.max(0.15, Math.min(24, cam.zoom * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015))));
+  const after = toWorld(e.clientX, e.clientY);
+  cam.x += before.x - after.x; cam.z += before.z - after.z;
+  dirty = true;
+}, { passive: false });
+window.addEventListener("keydown", (e) => {
+  if (e.target.closest && e.target.closest("input, select")) return;
+  const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+  if (mod && k === "z") { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+  if (mod && k === "y") { e.preventDefault(); redo(); return; }
+  if (mod && k === "d") { e.preventDefault(); duplicateSelected(); return; }
+  if (mod && k === "s") { e.preventDefault(); download(); return; }
+  if (mod) return;
+  if (k === " ") { space = true; cv.style.cursor = "grab"; e.preventDefault(); return; }
+  const tools = { b: "paint", u: "rect", g: "fill", i: "pick", v: "select", p: "place", h: "pan" };
+  if (tools[k]) return setTool(tools[k]);
+  if ("1234".includes(k) && k.length === 1) { brush = [1, 2, 4, 8][+k - 1]; buildSizes(); return; }
+  if (k === "delete" || k === "backspace") return deleteSelected();
+  if (k === "escape") { selected = null; inspect(); setTool(tool === "place" ? "select" : tool); return; }
+  if (k === "q" || k === "e") return nudgeSelected((o) => (o.yaw = (((o.yaw || 0) + (k === "q" ? 1 : -1) * (e.shiftKey ? 90 : 15)) % 360 + 360) % 360));
+  if (k === "[" || k === "]") return nudgeSelected((o) => { if (o.type === "Prop") o.scale = Math.max(0.2, Math.round(((o.scale || 1) + (k === "]" ? 0.1 : -0.1)) * 100) / 100); });
+  if (k.startsWith("arrow") && selected) { e.preventDefault(); const d = e.shiftKey ? 4 : 1; return nudgeSelected((o) => { if (k === "arrowleft") o.x -= d; if (k === "arrowright") o.x += d; if (k === "arrowup") o.z -= d; if (k === "arrowdown") o.z += d; }); }
+});
+window.addEventListener("keyup", (e) => { if (e.key === " ") { space = false; setTool(tool); } });
+
+function status(w) {
+  const i = cellAt(w.x, w.z), t = tileOf(i);
+  const what = i < 0 ? "off the map" : t ? `${t.key} · top ${t.top}${t.liquid ? " · liquid" : ""}` : "no floor (wall)";
+  $("status").textContent = `x ${Math.round(w.x)}  z ${Math.round(w.z)}  ·  ${areaAt(w.x, w.z)}  ·  ${what}`;
+}
+
+// ---- panels ----------------------------------------------------------------------------------------
+document.querySelectorAll(".tool").forEach((b) => b.addEventListener("click", () => setTool(b.dataset.tool)));
+function buildSizes() {
+  const box = $("sizes"); box.innerHTML = "";
+  [1, 2, 4, 8].forEach((n, i) => {
+    const b = document.createElement("button"); b.className = "size" + (n === brush ? " on" : ""); b.textContent = n * 4 + "";
+    b.title = `${n}×${n} cells (${n * 4} studs) · key ${i + 1}`; b.onclick = () => { brush = n; buildSizes(); setTool("paint"); };
+    box.appendChild(b);
+  });
+}
+let tab = "tiles";
+document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === b)); buildTray(); }));
+function tileSwatch(t) {
+  const s = document.createElement("canvas"); s.width = s.height = 32;
+  const g = s.getContext("2d");
+  if (!t) { g.fillStyle = "#0a0d13"; g.fillRect(0, 0, 32, 32); g.strokeStyle = "#ff5a4e"; g.lineWidth = 3; g.beginPath(); g.moveTo(6, 6); g.lineTo(26, 26); g.stroke(); return s; }
+  const a = rgb(t.key), b = C[t.key + "Checker"] || a;
+  for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) { g.fillStyle = css((i + j) % 2 ? b : a); g.fillRect(i * 16, j * 16, 16, 16); }
+  if (!t.liquid) { g.globalCompositeOperation = "source-atop"; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) g.drawImage(studTile, i * 8, j * 8, 8, 8); }
+  return s;
+}
+function buildTray() {
+  const box = $("swatches"); box.innerHTML = "";
+  $("newtile").hidden = tab !== "tiles"; $("stylebox").hidden = tab !== "objects"; $("cfilter").hidden = tab !== "colours";
+  if (!M) return;
+  if (tab === "colours") {
+    const f = $("cfilter").value.trim().toLowerCase();
+    const keys = Object.keys(DEFAULTS).filter((k) => editable(k) && !k.endsWith("Checker") && (!f || k.toLowerCase().includes(f))).sort();
+    for (const k of keys) {
+      const g = document.createElement("div"); g.className = "cgroup";
+      g.appendChild(colourRow(k));
+      if (editable(k + "Checker")) g.appendChild(colourRow(k + "Checker"));
+      box.appendChild(g);
+    }
+    if (!keys.length) box.innerHTML = '<span class="note">No colour has that in its name.</span>';
+    return;
+  }
+  const groups = [];
+  if (tab === "tiles") {
+    const by = {};
+    M.tiles.forEach((t, i) => (by[t.area] = by[t.area] || []).push([t, i + 1]));
+    groups.push(["Erase", [[null, 0]]]);
+    for (const a of M.areas) if (by[a.name]) groups.push([a.name, by[a.name]]);
+    for (const [name, list] of groups) {
+      const g = document.createElement("div"); g.className = "group";
+      g.innerHTML = `<div class="label">${name}</div><div class="items"></div>`;
+      for (const [t, k] of list) {
+        const b = document.createElement("button"); b.className = "sw" + (k === current ? " on" : "");
+        b.title = t ? `${t.key} · top ${t.top}${t.liquid ? " · liquid" : ""}` : "No floor (as under the walls)";
+        b.appendChild(tileSwatch(t));
+        const s = document.createElement("span"); s.textContent = t ? `${t.key.replace(t.area, "") || t.key} ${t.top >= 0 ? "+" : ""}${t.top}` : "None"; b.appendChild(s);
+        b.onclick = () => { current = k; buildTray(); inspect(); if (!["paint", "rect", "fill"].includes(tool)) setTool("paint"); };
+        g.querySelector(".items").appendChild(b);
+      }
+      box.appendChild(g);
+    }
+  } else {
+    const items = BUNDLE.items.map((it) => ({ type: "Prop", item: it, label: it.replace(/([a-z])([A-Z])/g, "$1 $2") }));
+    const sets = [["Props", items], ["Ruins", [{ type: "Ruin", label: "Brick wall" }]], ["Fight", [{ type: "Nest", label: "Nest" }, { type: "Boss", label: "Boss" }]]];
+    for (const [name, list] of sets) {
+      const g = document.createElement("div"); g.className = "group";
+      g.innerHTML = `<div class="label">${name}</div><div class="items"></div>`;
+      for (const it of list) {
+        const b = document.createElement("button"); b.className = "sw obj" + (placing && placing.type === it.type && placing.item === it.item ? " on" : "");
+        b.title = `Place: ${it.label}`;
+        const img = document.createElement("img");
+        const spr = it.type === "Prop" ? (sprites[it.item] || sprites[it.item + "_Base"]) : it.type === "Nest" ? sprites.Nest_Meadow : it.type === "Boss" ? sprites.Boss_Meadow : null;
+        if (spr) img.src = spriteUrl(spr) || ""; else { const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); x.translate(16, 16); x.scale(1.1, 1.1); drawRuin(x, { x: 0, z: 0, length: 24, yaw: 30, style: "Base", seed: 7 }); img.src = c.toDataURL(); }
+        b.appendChild(img);
+        const s = document.createElement("span"); s.textContent = it.label; b.appendChild(s);
+        b.onclick = () => { placing = it; setTool("place"); placing = it; selected = null; buildTray(); inspect(); };
+        g.querySelector(".items").appendChild(b);
+      }
+      box.appendChild(g);
+    }
+  }
+}
+$("cfilter").oninput = buildTray;
+const styleSel = $("style");
+styleSel.innerHTML = `<option value="">Auto (by area)</option>` + BUNDLE.styles.map((s) => `<option>${s}</option>`).join("");
+
+// ---- colours (QM, Oct 24: tweak any colour globally; the .map keeps the ones changed) ---------
+const WORLD = new Set(BUNDLE.world); // (Config.WorldColors: the colours the map can change)
+const editable = (k) => WORLD.has(k);
+const hex = (c) => "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
+const unhex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+function recolour() {
+  C = Object.assign({}, DEFAULTS, M.colours);
+  for (const k in checkerCache) delete checkerCache[k];
+  paintCells(0, 0, M.cols - 1, M.rows - 1);
+  dirty = true;
+}
+let colourBefore = null;
+function colourRow(key) {
+  const row = document.createElement("label"); row.className = "crow";
+  row.innerHTML = `<input type="color" id="c-${key}" value="${hex(rgb(key))}"><span>${key}</span>`;
+  const input = row.querySelector("input");
+  const reset = document.createElement("button"); reset.className = "mini"; reset.textContent = "Reset"; reset.title = "Back to the game's colour (Config)";
+  reset.hidden = !(key in M.colours);
+  input.oninput = () => { if (colourBefore === null) colourBefore = JSON.stringify(M.colours); M.colours[key] = unhex(input.value); recolour(); };
+  input.onchange = () => {
+    const before = colourBefore ?? JSON.stringify(M.colours); colourBefore = null;
+    M.colours[key] = unhex(input.value);
+    if (JSON.stringify(M.colours[key]) === JSON.stringify(DEFAULTS[key])) delete M.colours[key];
+    const after = JSON.stringify(M.colours);
+    if (after !== before) { push({ kind: "colours", before, after }); recolour(); changed(); }
+    if (tab !== "colours") buildTray();
+    reset.hidden = !(key in M.colours);
+  };
+  reset.onclick = (e) => { e.preventDefault(); const before = JSON.stringify(M.colours); delete M.colours[key]; push({ kind: "colours", before, after: JSON.stringify(M.colours) }); recolour(); changed(); buildTray(); inspect(); };
+  row.appendChild(reset);
+  return row;
+}
+function colourList(box, keys, title) {
+  keys = [...new Set(keys)].filter(editable);
+  if (!keys.length) return;
+  const l = document.createElement("div"); l.className = "label"; l.textContent = title; box.appendChild(l);
+  for (const k of keys) box.appendChild(colourRow(k));
+  const n = document.createElement("div"); n.className = "note"; n.textContent = "Changes that colour everywhere on the map."; box.appendChild(n);
+}
+// a slider for scale: 0.1 to 10, 1 in the middle (log scale)
+function scaleRow(o) {
+  const row = document.createElement("div"); row.className = "row";
+  row.innerHTML = `<span class="label">Scale</span><div class="scale"><input type="range" id="f-scale-slider" min="-1" max="1" step="0.005"><input type="number" id="f-scale" min="0.1" max="10" step="0.05"></div>`;
+  const [slider, num] = row.querySelectorAll("input");
+  const show = (v) => { slider.value = Math.log10(v); num.value = v; };
+  show(o.scale || 1);
+  let before = null;
+  const set = (v, commit) => {
+    v = Math.min(10, Math.max(0.1, Math.round(v * 100) / 100));
+    if (before === null) before = JSON.stringify(M.objects);
+    o.scale = v; show(v); dirty = true;
+    if (commit) { const after = JSON.stringify(M.objects); if (after !== before) { push({ kind: "objects", before, after }); changed(); } before = null; }
+  };
+  slider.oninput = () => set(10 ** +slider.value, false);
+  slider.onchange = () => set(10 ** +slider.value, true);
+  num.onchange = () => set(+num.value || 1, true);
+  return row;
+}
+
+function field(label, value, onchange, opts) {
+  const row = document.createElement("label"); row.className = "row";
+  row.innerHTML = `<span class="label">${label}</span>`;
+  let el;
+  if (opts) { el = document.createElement("select"); el.innerHTML = opts.map((o) => `<option${o == value ? " selected" : ""}>${o}</option>`).join(""); }
+  else { el = document.createElement("input"); el.type = typeof value === "number" || value === "" ? "number" : "text"; el.step = "any"; el.value = value; }
+  el.id = "f-" + label.toLowerCase().replace(/\W+/g, "-");
+  el.onchange = () => onchange(el.type === "number" ? (el.value === "" ? null : +el.value) : el.value);
+  row.appendChild(el);
+  return row;
+}
+function inspect() {
+  const box = $("inspect"); box.innerHTML = "";
+  if (!M) return;
+  const h = document.createElement("h2"); h.className = "title"; box.appendChild(h);
+  if (selected) {
+    const o = selected;
+    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : `${o.area} ${o.type.toLowerCase()}`;
+    const set = (k) => (v) => nudgeSelected((x) => { if (v === null) delete x[k]; else x[k] = v; });
+    box.appendChild(field("X", o.x, set("x")));
+    box.appendChild(field("Z", o.z, set("z")));
+    if (o.type === "Prop") {
+      box.appendChild(field("Item", o.item, set("item"), BUNDLE.items));
+      box.appendChild(field("Style", o.style || "Base", set("style"), BUNDLE.styles));
+      box.appendChild(field("Yaw", o.yaw || 0, set("yaw")));
+      box.appendChild(scaleRow(o));
+      box.appendChild(field("Height", o.y === undefined ? "" : o.y, set("y")));
+      const n = document.createElement("div"); n.className = "note";
+      n.textContent = o.y === undefined ? `Stands on the ground under it (${groundAt(o.x, o.z)}). Set a height to pin it.` : "Pinned at that height: clear it to stand on the ground.";
+      box.appendChild(n);
+    } else if (o.type === "Ruin") {
+      box.appendChild(field("Style", o.style, set("style"), BUNDLE.styles));
+      box.appendChild(field("Yaw", o.yaw || 0, set("yaw")));
+      box.appendChild(field("Length", o.length, set("length")));
+      box.appendChild(field("Height", o.height, set("height")));
+      box.appendChild(field("Seed", o.seed || 1, set("seed")));
+    }
+    const actions = document.createElement("div"); actions.className = "tabs";
+    actions.innerHTML = `<button class="btn" id="dup">Duplicate</button><button class="btn" id="del">Delete</button>`;
+    box.appendChild(actions);
+    $("dup").onclick = duplicateSelected; $("del").onclick = deleteSelected;
+    const keys = document.createElement("div"); keys.className = "note";
+    keys.textContent = "Drag to move (Alt: off the 1-stud grid). Q / E turn 15° (Shift 90°), [ ] scale, arrows nudge.";
+    box.appendChild(keys);
+    const spr = spriteFor(o);
+    colourList(box, o.type === "Ruin" ? (o.style === "Base" ? ["Stone", "StoneDark"] : [o.style + "Pillar", o.style + "PillarDark"]) : spr ? spr.keys : [], "Its colours");
+    return;
+  }
+  if (tool === "place" && placing) {
+    h.textContent = "Placing: " + (placing.label || placing.type);
+    const n = document.createElement("div"); n.className = "note";
+    n.textContent = placing.type === "Boss" ? "Click in a biome to move its boss there." : "Click the map to place one. Style picks the stone's colours (Auto: the area it's in).";
+    box.appendChild(n);
+    const spr = placing.type === "Prop" ? (sprites[placing.item] || sprites[placing.item + "_" + ($("style").value || "Meadow")]) : placing.type === "Nest" ? sprites.Nest_Meadow : null;
+    if (spr) colourList(box, spr.keys, "Its colours");
+    return;
+  }
+  const t = current ? M.tiles[current - 1] : null;
+  if (!t) { h.textContent = "No floor"; const n = document.createElement("div"); n.className = "note"; n.textContent = "Paints cells away, as under the walls. Props on them stand at wall height."; box.appendChild(n); return; }
+  h.textContent = t.key;
+  let count = 0; for (let i = 0; i < cells.length; i++) if (cells[i] === current) count++;
+  const n0 = document.createElement("div"); n0.className = "note"; n0.textContent = `${t.area} tile · ${count} cells (${count * 16} studs²)`; box.appendChild(n0);
+  const editTile = (k) => (v) => editTiles(() => { const tt = M.tiles[current - 1]; if (v === null || v === false) delete tt[k]; else tt[k] = v; });
+  box.appendChild(field("Colour", t.key, editTile("key"), BUNDLE.keys));
+  box.appendChild(field("Top", t.top, editTile("top")));
+  box.appendChild(field("Liquid", t.liquid ? "yes" : "no", (v) => editTile("liquid")(v === "yes"), ["no", "yes"]));
+  box.appendChild(field("Area", t.area, editTile("area"), M.areas.map((a) => a.name)));
+  const n = document.createElement("div"); n.className = "note";
+  n.textContent = "Top is the floor's height in studs. Changing it moves every cell of this tile.";
+  box.appendChild(n);
+  colourList(box, [t.key, t.key + "Checker"], "Its colours");
+}
+$("newtile").onclick = () => {
+  const base = current ? M.tiles[current - 1] : M.tiles[0];
+  const used = new Set(M.tiles.map((t) => t.id));
+  const id = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&()*+-/:;<=>?@^_`{|}~"].find((c) => !used.has(c));
+  if (!id) return toast("That's every tile the format has room for.");
+  editTiles(() => M.tiles.push({ id, area: base.area, key: base.key, top: base.top + 1 }));
+  current = M.tiles.length; buildTray(); inspect();
+  toast("Added a tile a step higher: set its colour and height on the right.");
+};
+
+const checkDefs = [["studs", "Studs"], ["edges", "Height edges"], ["fixed", "Walls, pillars"], ["arches", "Arches"], ["props", "Props, ruins"], ["furniture", "Fences, pads"], ["barriers", "Barriers"], ["labels", "Labels"], ["rule", "Rule check"], ["flip", "Flip checker"]];
+for (const [k, label] of checkDefs) {
+  const l = document.createElement("label");
+  l.innerHTML = `<input type="checkbox" id="v-${k}"${view[k] ? " checked" : ""}> ${label}`;
+  l.querySelector("input").onchange = (e) => { view[k] = e.target.checked; if (k === "flip") paintCells(0, 0, M.cols - 1, M.rows - 1); dirty = true; };
+  $("checks").appendChild(l);
+}
+
+// ---- files -------------------------------------------------------------------------------------------
+let toastTimer;
+function toast(msg, actions) {
+  const t = $("toast"); t.innerHTML = ""; const s = document.createElement("span"); s.textContent = msg; t.appendChild(s);
+  for (const [label, f] of actions || []) { const b = document.createElement("button"); b.className = "btn"; b.textContent = label; b.onclick = () => { t.hidden = true; f(); }; t.appendChild(b); }
+  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), actions ? 9000 : 3200);
+}
+const DRAFT = "world-map-editor-draft";
+let draftTimer;
+function changed() {
+  dirty = true;
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(() => { try { localStorage.setItem(DRAFT, JSON.stringify({ name: fileName, text: dumpMap(), at: Date.now() })); } catch (e) { /* (a draft is a convenience) */ } }, 800);
+}
+async function download() {
+  if (!M) return;
+  const text = dumpMap();
+  let downloads = null;
+  try { downloads = window.claude && window.claude.use ? await window.claude.use("downloads") : null; } catch (e) { downloads = null; }
+  if (downloads) {
+    // (the viewer only saves known types: a .map is JSON, so it goes as .map.json)
+    const name = fileName.replace(/\.json$/, "").replace(/\.map$/, "") + ".map.json";
+    try { await downloads.save({ filename: name, data: new Blob([text], { type: "application/json" }) }); toast(`Saved ${name}. Send it over to go in the game.`); }
+    catch (e) { if (e && e.code !== "declined") toast("The download didn't go through: " + (e.message || e.code)); }
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  a.download = fileName.endsWith(".map") ? fileName : "world.map";
+  document.body.appendChild(a); a.click(); a.remove();
+  toast(`Saved ${a.download}. Send it over to go in the game.`);
+}
+$("save").onclick = download;
+$("undo").onclick = undo; $("redo").onclick = redo;
+$("open").onclick = () => $("picker").click();
+function openFile(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => { try { load(String(r.result), file.name.replace(/\.json$/, "")); } catch (e) { toast(e.message || "Couldn't read that file."); } };
+  r.readAsText(file);
+}
+$("picker").onchange = (e) => { openFile(e.target.files[0]); e.target.value = ""; };
+window.addEventListener("dragover", (e) => { e.preventDefault(); $("drop").hidden = false; });
+window.addEventListener("dragleave", (e) => { if (!e.relatedTarget) $("drop").hidden = true; });
+window.addEventListener("drop", (e) => { e.preventDefault(); $("drop").hidden = true; openFile(e.dataTransfer.files[0]); });
+
+// ---- start -------------------------------------------------------------------------------------------
+window.addEventListener("resize", resize);
+resize(); buildSizes();
+load(BUNDLE.map, "world.map", true);
+try {
+  const d = JSON.parse(localStorage.getItem(DRAFT) || "null");
+  if (d && d.text && d.text !== BUNDLE.map) {
+    const original = BUNDLE.map;
+    load(d.text, d.name, true);
+    toast(`Picked up your unsaved edits from ${new Date(d.at).toLocaleString()}.`, [["Start from the game's map", () => { load(original, "world.map", true); try { localStorage.removeItem(DRAFT); } catch (e) { /* */ } }]]);
+  }
+} catch (e) { /* no draft */ }
+// open on the base and the Meadow
+cam = { x: 0, z: -180, zoom: Math.max(0.5, Math.min(2, H / 760)) };
+(function frame() { if (dirty) draw(); requestAnimationFrame(frame); })();
+</script>

@@ -1,0 +1,1097 @@
+{
+ "sprites": {
+  "Boulders_Base": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "StoneDark"
+   ]
+  ],
+  "Boulders_Meadow": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "MeadowPillarDark"
+   ]
+  ],
+  "Boulders_Desert": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "DesertPillarDark"
+   ]
+  ],
+  "Boulders_Ice": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "IcePillarDark"
+   ]
+  ],
+  "Boulders_Lava": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "LavaPillarDark"
+   ]
+  ],
+  "Cactus": [
+   -4.95,
+   -2.47,
+   5.55,
+   2.47,
+   [
+    "CactusFlower",
+    "CactusGreen"
+   ]
+  ],
+  "CactusBarrel": [
+   -2.34,
+   -2.29,
+   4.27,
+   2.46,
+   [
+    "CactusFlower",
+    "CactusGreen"
+   ]
+  ],
+  "DeadTree": [
+   -5.38,
+   -3.98,
+   3.82,
+   4.39,
+   [
+    "DeadWood"
+   ]
+  ],
+  "Monolith": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "LavaPillar",
+    "Rune"
+   ]
+  ],
+  "PineShort": [
+   -4.79,
+   -3.98,
+   4.66,
+   4.43,
+   [
+    "PineNeedlesA",
+    "PineNeedlesB",
+    "PineNeedlesC",
+    "PineTrunk"
+   ]
+  ],
+  "PineTall": [
+   -5.06,
+   -4.78,
+   4.34,
+   4.85,
+   [
+    "PineNeedlesA",
+    "PineNeedlesB",
+    "PineNeedlesC",
+    "PineNeedlesD",
+    "PineTrunk"
+   ]
+  ],
+  "RuinPillar_Base": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "Stone"
+   ]
+  ],
+  "RuinPillar_Meadow": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "MeadowPillar"
+   ]
+  ],
+  "RuinPillar_Desert": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "DesertPillar"
+   ]
+  ],
+  "RuinPillar_Ice": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "IcePillar"
+   ]
+  ],
+  "RuinPillar_Lava": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "LavaPillar"
+   ]
+  ],
+  "RuinPillarBroken_Base": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "Stone"
+   ]
+  ],
+  "RuinPillarBroken_Meadow": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "MeadowPillar"
+   ]
+  ],
+  "RuinPillarBroken_Desert": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "DesertPillar"
+   ]
+  ],
+  "RuinPillarBroken_Ice": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "IcePillar"
+   ]
+  ],
+  "RuinPillarBroken_Lava": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "LavaPillar"
+   ]
+  ],
+  "SnowPine": [
+   -5.33,
+   -5.31,
+   5.84,
+   5.71,
+   [
+    "PineTrunk",
+    "Snow",
+    "SnowPineNeedles"
+   ]
+  ],
+  "Pillar_Base_joint_14": [
+   -9.06,
+   -9.26,
+   9.27,
+   9.26,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Pillar_Base_gate_24": [
+   -14.13,
+   -14.44,
+   14.46,
+   14.45,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Pillar_Desert_joint_14": [
+   -9.09,
+   -9.29,
+   9.3,
+   9.29,
+   [
+    "DesertPillar",
+    "DesertPillarDark"
+   ]
+  ],
+  "Pillar_Desert_transition_26": [
+   -15.52,
+   -15.53,
+   15.53,
+   15.5,
+   [
+    "DesertPillar",
+    "DesertPillarDark"
+   ]
+  ],
+  "Pillar_Ice_joint_14": [
+   -9.21,
+   -9.21,
+   9.21,
+   9.2,
+   [
+    "IcePillar",
+    "IcePillarDark"
+   ]
+  ],
+  "Pillar_Ice_transition_26": [
+   -15.41,
+   -15.42,
+   15.41,
+   15.39,
+   [
+    "IcePillar",
+    "IcePillarDark"
+   ]
+  ],
+  "Pillar_Lava_joint_14": [
+   -9.15,
+   -9.16,
+   9.16,
+   9.15,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Lava_rubble_20": [
+   -21.06,
+   -8.94,
+   21.08,
+   8.52,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Lava_corner_22": [
+   -13.1,
+   -13.39,
+   13.4,
+   13.39,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Lava_gate_24": [
+   -14.13,
+   -14.44,
+   14.46,
+   14.45,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Lava_transition_26": [
+   -15.44,
+   -15.45,
+   15.45,
+   15.43,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Meadow_joint_14": [
+   -9.09,
+   -9.29,
+   9.3,
+   9.29,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Pillar_Meadow_corner_22": [
+   -13.2,
+   -13.2,
+   13.2,
+   13.19,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Pillar_Meadow_gate_24": [
+   -14.05,
+   -14.37,
+   14.38,
+   14.37,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Arch_Base": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Arch_Lava": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Arch_Meadow": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Nest_Meadow": [
+   -7.28,
+   -7.0,
+   6.89,
+   7.07,
+   [
+    "EggMeadow",
+    "Straw",
+    "StrawDark",
+    "Wood"
+   ]
+  ],
+  "Boss_Meadow": [
+   -6.26,
+   -13.46,
+   6.26,
+   8.42,
+   [
+    "_rgb_230_230_224",
+    "_rgb_232_44_52",
+    "_rgb_250_250_246",
+    "_rgb_255_120_120",
+    "_rgb_255_168_36",
+    "_rgb_255_196_40",
+    "_rgb_30_30_45"
+   ]
+  ],
+  "Nest_Desert": [
+   -7.28,
+   -7.0,
+   6.89,
+   7.07,
+   [
+    "EggDesert",
+    "Straw",
+    "StrawDark",
+    "Wood"
+   ]
+  ],
+  "Boss_Desert": [
+   -7.16,
+   -16.72,
+   7.16,
+   9.44,
+   [
+    "_rgb_160_70_60",
+    "_rgb_184_110_50",
+    "_rgb_230_160_74",
+    "_rgb_255_255_255",
+    "_rgb_30_30_45",
+    "_rgb_70_44_40"
+   ]
+  ],
+  "Nest_Ice": [
+   -7.28,
+   -7.0,
+   6.89,
+   7.07,
+   [
+    "EggIce",
+    "Straw",
+    "StrawDark",
+    "Wood"
+   ]
+  ],
+  "Boss_Ice": [
+   -11.16,
+   -6.79,
+   11.16,
+   8.04,
+   [
+    "_rgb_160_218_250",
+    "_rgb_252_253_255",
+    "_rgb_255_255_255",
+    "_rgb_82_150_226",
+    "_rgb_96_222_255"
+   ]
+  ],
+  "Nest_Lava": [
+   -7.28,
+   -7.0,
+   6.89,
+   7.07,
+   [
+    "EggLava",
+    "Straw",
+    "StrawDark",
+    "Wood"
+   ]
+  ],
+  "Boss_Lava": [
+   -9.34,
+   -19.11,
+   9.34,
+   10.38,
+   [
+    "_rgb_112_96_90",
+    "_rgb_118_78_62",
+    "_rgb_122_66_44",
+    "_rgb_150_122_82",
+    "_rgb_178_150_102",
+    "_rgb_191_101_44",
+    "_rgb_236_214_170",
+    "_rgb_255_116_24",
+    "_rgb_255_186_60",
+    "_rgb_255_255_255",
+    "_rgb_30_30_45",
+    "_rgb_92_50_36",
+    "_rgb_92_78_74"
+   ]
+  ]
+ },
+ "colours": {
+  "Grass": [
+   148,
+   181,
+   26
+  ],
+  "GrassChecker": [
+   163,
+   194,
+   15
+  ],
+  "Dirt": [
+   200,
+   149,
+   71
+  ],
+  "DirtChecker": [
+   189,
+   141,
+   67
+  ],
+  "WallDirt": [
+   133,
+   90,
+   50
+  ],
+  "WallDirtChecker": [
+   143,
+   98,
+   56
+  ],
+  "PineTrunk": [
+   120,
+   84,
+   58
+  ],
+  "PineNeedlesA": [
+   46,
+   125,
+   80
+  ],
+  "PineNeedlesB": [
+   58,
+   140,
+   88
+  ],
+  "PineNeedlesC": [
+   40,
+   112,
+   72
+  ],
+  "PineNeedlesD": [
+   66,
+   150,
+   96
+  ],
+  "Stone": [
+   214,
+   216,
+   206
+  ],
+  "StoneDark": [
+   176,
+   178,
+   168
+  ],
+  "BaseGrassLight": [
+   160,
+   192,
+   36
+  ],
+  "BaseGrassLightChecker": [
+   172,
+   202,
+   28
+  ],
+  "Plaza": [
+   214,
+   216,
+   206
+  ],
+  "PlazaChecker": [
+   202,
+   204,
+   194
+  ],
+  "PlazaInlay": [
+   176,
+   178,
+   168
+  ],
+  "PlazaInlayChecker": [
+   166,
+   168,
+   158
+  ],
+  "PenFloor": [
+   210,
+   176,
+   100
+  ],
+  "PenFloorChecker": [
+   198,
+   164,
+   90
+  ],
+  "TrainFloor": [
+   190,
+   192,
+   182
+  ],
+  "TrainFloorChecker": [
+   178,
+   180,
+   170
+  ],
+  "Wood": [
+   150,
+   98,
+   56
+  ],
+  "WoodDark": [
+   110,
+   72,
+   42
+  ],
+  "Straw": [
+   226,
+   196,
+   110
+  ],
+  "StrawDark": [
+   196,
+   164,
+   84
+  ],
+  "Egg": [
+   250,
+   246,
+   232
+  ],
+  "EggSpot": [
+   150,
+   200,
+   90
+  ],
+  "Sign": [
+   58,
+   46,
+   38
+  ],
+  "MeadowWater": [
+   76,
+   156,
+   222
+  ],
+  "MeadowWaterChecker": [
+   90,
+   170,
+   232
+  ],
+  "MeadowGrass": [
+   148,
+   181,
+   26
+  ],
+  "MeadowGrassChecker": [
+   163,
+   194,
+   15
+  ],
+  "MeadowDirt": [
+   200,
+   149,
+   71
+  ],
+  "MeadowDirtChecker": [
+   189,
+   141,
+   67
+  ],
+  "MeadowWall": [
+   133,
+   90,
+   50
+  ],
+  "MeadowWallChecker": [
+   143,
+   98,
+   56
+  ],
+  "MeadowCap": [
+   148,
+   181,
+   26
+  ],
+  "MeadowCapChecker": [
+   163,
+   194,
+   15
+  ],
+  "MeadowPillar": [
+   168,
+   184,
+   108
+  ],
+  "MeadowPillarDark": [
+   134,
+   152,
+   82
+  ],
+  "DesertDryGrass": [
+   178,
+   170,
+   76
+  ],
+  "DesertDryGrassChecker": [
+   190,
+   180,
+   86
+  ],
+  "DesertSand": [
+   232,
+   188,
+   102
+  ],
+  "DesertSandChecker": [
+   246,
+   208,
+   124
+  ],
+  "DesertSandstone": [
+   206,
+   146,
+   84
+  ],
+  "DesertSandstoneChecker": [
+   222,
+   164,
+   100
+  ],
+  "DesertWall": [
+   206,
+   118,
+   72
+  ],
+  "DesertWallChecker": [
+   226,
+   138,
+   88
+  ],
+  "DesertCap": [
+   222,
+   164,
+   100
+  ],
+  "DesertCapChecker": [
+   232,
+   176,
+   112
+  ],
+  "DesertPillar": [
+   226,
+   178,
+   112
+  ],
+  "DesertPillarDark": [
+   202,
+   148,
+   90
+  ],
+  "IceColdGrass": [
+   80,
+   160,
+   166
+  ],
+  "IceColdGrassChecker": [
+   96,
+   176,
+   180
+  ],
+  "IceSnow": [
+   228,
+   234,
+   242
+  ],
+  "IceSnowChecker": [
+   244,
+   247,
+   251
+  ],
+  "IceGlacier": [
+   160,
+   188,
+   244
+  ],
+  "IceGlacierChecker": [
+   178,
+   202,
+   250
+  ],
+  "IceWall": [
+   126,
+   164,
+   214
+  ],
+  "IceWallChecker": [
+   146,
+   182,
+   228
+  ],
+  "IceCap": [
+   244,
+   247,
+   251
+  ],
+  "IceCapChecker": [
+   232,
+   238,
+   246
+  ],
+  "IcePillar": [
+   204,
+   222,
+   246
+  ],
+  "IcePillarDark": [
+   164,
+   192,
+   232
+  ],
+  "LavaMagma": [
+   255,
+   116,
+   24
+  ],
+  "LavaMagmaChecker": [
+   255,
+   146,
+   40
+  ],
+  "LavaRock": [
+   156,
+   98,
+   66
+  ],
+  "LavaRockChecker": [
+   168,
+   108,
+   74
+  ],
+  "LavaBasalt": [
+   84,
+   66,
+   62
+  ],
+  "LavaBasaltChecker": [
+   94,
+   74,
+   68
+  ],
+  "LavaWall": [
+   170,
+   92,
+   58
+  ],
+  "LavaWallChecker": [
+   186,
+   104,
+   66
+  ],
+  "LavaCap": [
+   96,
+   60,
+   46
+  ],
+  "LavaCapChecker": [
+   106,
+   68,
+   52
+  ],
+  "LavaPillar": [
+   104,
+   80,
+   70
+  ],
+  "LavaPillarDark": [
+   76,
+   60,
+   56
+  ],
+  "CactusGreen": [
+   92,
+   168,
+   70
+  ],
+  "CactusFlower": [
+   255,
+   120,
+   170
+  ],
+  "SnowPineNeedles": [
+   52,
+   112,
+   96
+  ],
+  "Snow": [
+   244,
+   248,
+   252
+  ],
+  "DeadWood": [
+   70,
+   56,
+   50
+  ],
+  "Rune": [
+   255,
+   120,
+   40
+  ],
+  "Meadow": [
+   250,
+   246,
+   232
+  ],
+  "Desert": [
+   240,
+   206,
+   140
+  ],
+  "Ice": [
+   190,
+   226,
+   255
+  ],
+  "Lava": [
+   255,
+   120,
+   40
+  ],
+  "Color": [
+   255,
+   255,
+   255
+  ],
+  "EggMeadow": [
+   250,
+   246,
+   232
+  ],
+  "EggDesert": [
+   240,
+   206,
+   140
+  ],
+  "EggIce": [
+   190,
+   226,
+   255
+  ],
+  "EggLava": [
+   255,
+   120,
+   40
+  ],
+  "_rgb_255_168_36": [
+   255,
+   168,
+   36
+  ],
+  "_rgb_230_230_224": [
+   230,
+   230,
+   224
+  ],
+  "_rgb_250_250_246": [
+   250,
+   250,
+   246
+  ],
+  "_rgb_255_196_40": [
+   255,
+   196,
+   40
+  ],
+  "_rgb_232_44_52": [
+   232,
+   44,
+   52
+  ],
+  "_rgb_255_120_120": [
+   255,
+   120,
+   120
+  ],
+  "_rgb_30_30_45": [
+   30,
+   30,
+   45
+  ],
+  "_rgb_230_160_74": [
+   230,
+   160,
+   74
+  ],
+  "_rgb_255_255_255": [
+   255,
+   255,
+   255
+  ],
+  "_rgb_184_110_50": [
+   184,
+   110,
+   50
+  ],
+  "_rgb_160_70_60": [
+   160,
+   70,
+   60
+  ],
+  "_rgb_70_44_40": [
+   70,
+   44,
+   40
+  ],
+  "_rgb_82_150_226": [
+   82,
+   150,
+   226
+  ],
+  "_rgb_96_222_255": [
+   96,
+   222,
+   255
+  ],
+  "_rgb_252_253_255": [
+   252,
+   253,
+   255
+  ],
+  "_rgb_160_218_250": [
+   160,
+   218,
+   250
+  ],
+  "_rgb_178_150_102": [
+   178,
+   150,
+   102
+  ],
+  "_rgb_236_214_170": [
+   236,
+   214,
+   170
+  ],
+  "_rgb_150_122_82": [
+   150,
+   122,
+   82
+  ],
+  "_rgb_92_50_36": [
+   92,
+   50,
+   36
+  ],
+  "_rgb_122_66_44": [
+   122,
+   66,
+   44
+  ],
+  "_rgb_118_78_62": [
+   118,
+   78,
+   62
+  ],
+  "_rgb_112_96_90": [
+   112,
+   96,
+   90
+  ],
+  "_rgb_92_78_74": [
+   92,
+   78,
+   74
+  ],
+  "_rgb_255_116_24": [
+   255,
+   116,
+   24
+  ],
+  "_rgb_191_101_44": [
+   191,
+   101,
+   44
+  ],
+  "_rgb_255_186_60": [
+   255,
+   186,
+   60
+  ]
+ }
+}
