@@ -1,5 +1,5 @@
 """Writes tools/lineup.luau: run it in Studio (Edit) to build the world-asset lineup near
-spawn (QM, Oct 23). Re-runnable: it deletes what it made before (workspace.World and
+spawn (QM, Oct 23); since Oct 24 it goes to ServerStorage.MovedByMapBaker, out of the map's way. Re-runnable: it deletes what it made before (World and
 ServerStorage.WorldAssets) and builds again.
 
   python3 tools/world_assets.py      # meshes -> assets/meshes/*.obj + pieces.json
@@ -46,8 +46,13 @@ local CHECKER, STUDS = "rbxassetid://84747779882944", "rbxassetid://7447638591"
 local ITEMS = --ITEMS--
 local PROPS = --PROPS--
 
-for _, name in { "World", "Baseplate", "SpawnLocation" } do
-	local old = workspace:FindFirstChild(name)
+-- (the showcase is kept in ServerStorage.MovedByMapBaker, never the workspace: its floor
+-- and old props would sit on the map, QM Oct 24; WorldAssets is what the map uses)
+local kept = ServerStorage:FindFirstChild("MovedByMapBaker") or Instance.new("Folder")
+kept.Name = "MovedByMapBaker"
+kept.Parent = ServerStorage
+for _, where in { workspace, kept } do
+	local old = where:FindFirstChild("World")
 	if old then old:Destroy() end
 end
 local oldAssets = ServerStorage:FindFirstChild("WorldAssets")
@@ -160,7 +165,7 @@ for _, prop in PROPS do
 	copy.Parent = props
 end
 
-world.Parent = workspace
+world.Parent = kept
 return "lineup built"
 '''
 

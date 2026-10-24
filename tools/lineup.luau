@@ -319,8 +319,13 @@ local ITEMS = {
 }
 local PROPS = { { "StoneRubble", -60, -36, 20 }, { "StoneBlockLow", -48, -36, 0 }, { "StoneBlock", -36, -36, 0 }, { "PineTall", 36, -36, 0 }, { "PineShort", 52, -36, 40 } }
 
-for _, name in { "World", "Baseplate", "SpawnLocation" } do
-	local old = workspace:FindFirstChild(name)
+-- (the showcase is kept in ServerStorage.MovedByMapBaker, never the workspace: its floor
+-- and old props would sit on the map, QM Oct 24; WorldAssets is what the map uses)
+local kept = ServerStorage:FindFirstChild("MovedByMapBaker") or Instance.new("Folder")
+kept.Name = "MovedByMapBaker"
+kept.Parent = ServerStorage
+for _, where in { workspace, kept } do
+	local old = where:FindFirstChild("World")
 	if old then old:Destroy() end
 end
 local oldAssets = ServerStorage:FindFirstChild("WorldAssets")
@@ -433,5 +438,5 @@ for _, prop in PROPS do
 	copy.Parent = props
 end
 
-world.Parent = workspace
+world.Parent = kept
 return "lineup built"
