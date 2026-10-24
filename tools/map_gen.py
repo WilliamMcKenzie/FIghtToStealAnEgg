@@ -636,7 +636,41 @@ def export_map(g_base, grids, walls, ring, pillars, arches, barriers, prop_list,
                   "ring": [list(w) for w in ring], "barriers": [list(b) for b in barriers]},
         "rows": ["".join(r) for r in cells],
     }
-    return data
+    return walls_to_cells(data)
+
+
+TILE_IDS = CHARS + "!#$%&()*+-/:;<=>?@^_`{|}~"  # (the editor hands out the same ids)
+
+
+def walls_to_cells(d):
+    """Walls as painted cells (QM, Oct 24: walls malleable like tiles): each style's wall
+    is a tile { wall: true, key: its sides' colour, cap: its top's, top: the wall height },
+    and every `fixed` wall box becomes those cells. A .map without them is unchanged."""
+    walls = d["fixed"].pop("walls", [])
+    if not walls:
+        return d
+    X0, Z0 = d["origin"]
+    cols, _ = d["size"]
+    cell, h = d["cell"], d["fixed"]["wallHeight"]
+    rows = [list(r) for r in d["rows"]]
+    used = {t["id"] for t in d["tiles"]}
+    ids = {}
+    for st, x0, z0, x1, z1 in walls:
+        if st not in ids:
+            key, cap = ("WallDirt", "Grass") if st == "Base" else (st + "Wall", st + "Cap")
+            tid = next(c for c in TILE_IDS if c not in used)
+            used.add(tid)
+            d["tiles"].append({"id": tid, "area": st, "key": key, "cap": cap, "top": h, "wall": True})
+            ids[st] = tid
+        xa, xb = sorted((x0, x1))
+        za, zb = sorted((z0, z1))
+        assert all((v - X0) % cell == 0 for v in (xa, xb)) and all((v - Z0) % cell == 0 for v in (za, zb)), (st, x0, z0, x1, z1)
+        for r in range((za - Z0) // cell, (zb - Z0) // cell):
+            for c in range((xa - X0) // cell, (xb - X0) // cell):
+                if 0 <= r < len(rows) and 0 <= c < cols and rows[r][c] == ".":
+                    rows[r][c] = ids[st]
+    d["rows"] = ["".join(r) for r in rows]
+    return d
 
 
 def dump_map(data):

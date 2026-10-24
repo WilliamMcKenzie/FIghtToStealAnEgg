@@ -134,17 +134,29 @@ end
 
 -- ---- the floors ----------------------------------------------------------------------
 
-local function floors(parent)
+-- (wall tiles go in wallParent, kept out of the Floor: Server/BossAttacks finds the ground there)
+local function floors(parent, wallParent)
 	for _, area in MapData.Areas do
 		local f = folder(area.Name, parent)
 		local lowest = math.huge
 		for _, tile in area.Tiles do
-			lowest = math.min(lowest, tile[2])
+			if not tile[4] then
+				lowest = math.min(lowest, tile[2])
+			end
 		end
 		for _, rect in area.Floor do
 			local tile = area.Tiles[rect[1]]
 			local key, top = tile[1], tile[2]
 			local x0, z0, sx, sz = rect[2], rect[3], rect[4], rect[5]
+			if tile[4] then
+				-- a painted wall: its sides, and a stud-high cap of the cap's colour
+				local model = Instance.new("Model")
+				model.Name = area.Name .. "Wall"
+				box("Wall", model, x0, FLOOR_BOTTOM, z0, x0 + sx, top - 1, z0 - sz, key, SIDES).Locked = true
+				box("Cap", model, x0, top - 1, z0, x0 + sx, top, z0 - sz, tile[4]).Locked = true
+				model.Parent = wallParent
+				continue
+			end
 			-- (only raised tiles show their sides; the lowest one's are always buried)
 			local faces = if top > lowest then ALL else { Enum.NormalId.Top }
 			if tile[3] then
@@ -932,8 +944,9 @@ function Map.build(data)
 	loadStone()
 	local map = Instance.new("Folder")
 	map.Name = "Map"
-	floors(folder("Floor", map))
-	walls(folder("Walls", map))
+	local wallFolder = folder("Walls", map)
+	floors(folder("Floor", map), wallFolder)
+	walls(wallFolder)
 	local rng = Random.new(24)
 	local pillars = folder("Pillars", map)
 	-- (each built at the origin, then turned, scaled and moved to its spot: they're

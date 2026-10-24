@@ -153,8 +153,8 @@ const BUNDLE = /*BUNDLE*/null;
 // ---------------------------------------------------------------------------------------------
 // World Map Editor (QM, Oct 24): paints the game's .map (maps/world.map in the repo). Each cell
 // is one 4-stud checker square; colours, studs and the meshes' top-down pictures match the game
-// seen from straight above. Every mesh (pillars and arches too) is an object; only the walls
-// and barriers are fixed (tools/map_gen.py).
+// seen from straight above. Walls are painted like tiles; every mesh (pillars and arches too)
+// is an object; only the barriers are fixed (tools/map_gen.py).
 // ---------------------------------------------------------------------------------------------
 const DEFAULTS = BUNDLE.colours; // Config.WorldColors (and the eggs'), as the game has them
 let C = Object.assign({}, DEFAULTS); // with the map's own colours over them (M.colours)
@@ -170,7 +170,7 @@ let cells = null;      // Uint8Array: 0 no floor, k = tiles[k - 1]
 let fileName = "world.map";
 let tool = "paint", brush = 2, current = 1, placing = null, selected = null;
 let cam = { x: 0, z: -300, zoom: 1.2 };
-const view = { studs: true, edges: true, fixed: true, arches: true, furniture: true, props: true, barriers: true, labels: true, rule: true, flip: false };
+const view = { studs: true, edges: true, fixed: true, arches: true, furniture: true, props: true, barriers: true, labels: true, rule: true, flip: false, shadeWalls: true };
 const undoStack = [], redoStack = [];
 let dirty = true, bad = [];
 
@@ -179,11 +179,32 @@ const css = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 const shade = (c, f) => c.map((v) => Math.max(0, Math.min(255, Math.round(v * f))));
 
 // ---- the .map file ----------------------------------------------------------------------------
+const TILE_IDS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&()*+-/:;<=>?@^_`{|}~";
 function parseMap(text) {
   const d = JSON.parse(text);
   if (d.format !== "StealAndFightPets.map") throw new Error("That isn't a .map file from this game.");
   const [cols, rows] = d.size;
   if (!Array.isArray(d.rows) || d.rows.length !== rows) throw new Error("The map's rows don't match its size.");
+  // (older files kept pillars and arches in `fixed`: they're objects now, QM Oct 24)
+  for (const [style, x, z, size, height, kind] of d.fixed.pillars || []) d.objects.push({ type: "Pillar", style, kind, x, z, size, height });
+  for (const [style, x, z] of d.fixed.arches || []) d.objects.push({ type: "Arch", style, x, z });
+  delete d.fixed.pillars; delete d.fixed.arches;
+  // (and walls are painted cells now: a wall tile per style, its boxes filled in)
+  if ((d.fixed.walls || []).length) {
+    const used = new Set(d.tiles.map((t) => t.id)), ids = {}, cell = d.cell, [X, Z] = d.origin;
+    const rowsA = d.rows.map((r) => r.split(""));
+    for (const [st, x0, z0, x1, z1] of d.fixed.walls) {
+      if (!ids[st]) {
+        const id = [...TILE_IDS].find((c) => !used.has(c)); used.add(id); ids[st] = id;
+        d.tiles.push({ id, area: st, key: st === "Base" ? "WallDirt" : st + "Wall", cap: st === "Base" ? "Grass" : st + "Cap", top: d.fixed.wallHeight, wall: true });
+      }
+      for (let r = (Math.min(z0, z1) - Z) / cell; r < (Math.max(z0, z1) - Z) / cell; r++)
+        for (let c = (Math.min(x0, x1) - X) / cell; c < (Math.max(x0, x1) - X) / cell; c++)
+          if (rowsA[r] && rowsA[r][c] === ".") rowsA[r][c] = ids[st];
+    }
+    d.rows = rowsA.map((r) => r.join(""));
+  }
+  delete d.fixed.walls;
   const idx = {};
   d.tiles.forEach((t, i) => (idx[t.id] = i + 1));
   const g = new Uint8Array(cols * rows);
@@ -191,10 +212,6 @@ function parseMap(text) {
     const row = d.rows[r];
     for (let c = 0; c < cols; c++) g[r * cols + c] = idx[row[c]] || 0;
   }
-  // (older files kept pillars and arches in `fixed`: they're objects now, QM Oct 24)
-  for (const [style, x, z, size, height, kind] of d.fixed.pillars || []) d.objects.push({ type: "Pillar", style, kind, x, z, size, height });
-  for (const [style, x, z] of d.fixed.arches || []) d.objects.push({ type: "Arch", style, x, z });
-  delete d.fixed.pillars; delete d.fixed.arches;
   const head = {};
   for (const k of Object.keys(d)) if (!["tiles", "areas", "objects", "fixed", "rows", "colours"].includes(k)) head[k] = d[k];
   return { m: { head, colours: d.colours || {}, tiles: d.tiles, areas: d.areas, objects: d.objects, fixed: d.fixed, origin: d.origin, cell: d.cell, cols, rows }, g };
@@ -263,7 +280,7 @@ function biomeAt(z) {
   return "Base";
 }
 function areaAt(x, z) { const t = tileOf(cellAt(x, z)); return t ? t.area : biomeAt(z); }
-function groundAt(x, z) { const t = tileOf(cellAt(x, z)); return t ? t.top : M.fixed.wallHeight; }
+function groundAt(x, z) { const t = tileOf(cellAt(x, z)); return t ? t.top : 0; }
 
 // ---- cell pictures: one pixel a cell (solid tiles, and liquids, which have no studs) ----------
 let solidCv, liquidCv, solidImg, liquidImg;
@@ -276,7 +293,8 @@ function buildCellImages() {
 }
 function paintCells(c0, r0, c1, r1) {
   c0 = Math.max(0, c0); r0 = Math.max(0, r0); c1 = Math.min(M.cols - 1, c1); r1 = Math.min(M.rows - 1, r1);
-  const cache = M.tiles.map((t) => [rgb(t.key), C[t.key + "Checker"] || rgb(t.key)]);
+  const face = (t) => (t.wall ? t.cap || t.key : t.key); // (a wall shows its cap from above)
+  const cache = M.tiles.map((t) => [rgb(face(t)), C[face(t) + "Checker"] || rgb(face(t))]);
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
     const i = r * M.cols + c, k = cells[i], p = i * 4;
     const t = k ? M.tiles[k - 1] : null;
@@ -294,11 +312,13 @@ function paintCells(c0, r0, c1, r1) {
 // QM's layered rule: no two touching cells (diagonals too) more than a step apart
 function checkRule() {
   bad = [];
-  const { cols, rows } = M, top = M.tiles.map((t) => t.top);
+  // (walls stand apart from the rule: it's about the floor's steps)
+  const { cols, rows } = M, top = M.tiles.map((t) => (t.wall ? NaN : t.top));
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
     const k = cells[r * cols + c];
     if (!k) continue;
     const h = top[k - 1];
+    if (Number.isNaN(h)) continue;
     let wrong = false;
     for (let dr = -1; dr <= 1 && !wrong; dr++) for (let dc = -1; dc <= 1; dc++) {
       const rr = r + dr, cc = c + dc;
@@ -484,11 +504,11 @@ function visible() { const a = toWorld(0, 0), b = toWorld(W, H); return { x0: a.
 
 function drawWalls(g) {
   const f = M.fixed, keyOf = (st) => (st === "Base" ? "Grass" : st + "Cap");
-  for (const [st, x0, z0, x1, z1] of f.walls) {
+  for (const [st, x0, z0, x1, z1] of f.walls || []) {
     g.fillStyle = checkerPattern(g, keyOf(st));
     g.fillRect(Math.min(x0, x1) - LIP, Math.min(z0, z1) - LIP, Math.abs(x1 - x0) + 2 * LIP, Math.abs(z1 - z0) + 2 * LIP);
   }
-  for (const [st, cx, cz, length, thick, yaw] of f.ring) {
+  for (const [st, cx, cz, length, thick, yaw] of f.ring || []) {
     g.save(); g.translate(cx, cz); g.rotate(-yaw);
     g.fillStyle = checkerPattern(g, keyOf(st));
     g.fillRect(-length / 2 - LIP, -thick / 2 - LIP, length + 2 * LIP, thick + 2 * LIP);
@@ -499,7 +519,7 @@ function wallEdges(g) {
   // a wall's sides drop away from its cap: a dark rim so its edge reads from above
   const f = M.fixed;
   g.strokeStyle = "rgba(0,0,0,0.35)"; g.lineWidth = Math.max(0.3, 1.2 / cam.zoom);
-  for (const [, x0, z0, x1, z1] of f.walls) g.strokeRect(Math.min(x0, x1) - LIP, Math.min(z0, z1) - LIP, Math.abs(x1 - x0) + 2 * LIP, Math.abs(z1 - z0) + 2 * LIP);
+  for (const [, x0, z0, x1, z1] of f.walls || []) g.strokeRect(Math.min(x0, x1) - LIP, Math.min(z0, z1) - LIP, Math.abs(x1 - x0) + 2 * LIP, Math.abs(z1 - z0) + 2 * LIP);
 }
 
 
@@ -544,6 +564,14 @@ function draw() {
     ctx.strokeStyle = "rgba(30,24,20,0.75)"; ctx.lineWidth = Math.max(0.35, 1.6 / cam.zoom); ctx.stroke();
   }
   if (view.fixed) wallEdges(ctx);
+  // walls a shade darker than the floor (from straight above a cap looks like the ground)
+  if (view.shadeWalls) {
+    ctx.fillStyle = "rgba(10,14,24,0.22)";
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+      const k = cells[r * M.cols + c];
+      if (k && M.tiles[k - 1].wall) ctx.fillRect(X0() + c * cell, Z0() + r * cell, cell, cell);
+    }
+  }
   if (view.rule && bad.length) {
     ctx.fillStyle = "rgba(255,40,40,0.55)";
     for (const i of bad) { const r = Math.floor(i / M.cols), c = i % M.cols; if (r >= r0 && r <= r1 && c >= c0 && c <= c1) ctx.fillRect(X0() + c * cell, Z0() + r * cell, cell, cell); }
@@ -835,7 +863,7 @@ window.addEventListener("keyup", (e) => { if (e.key === " ") { space = false; se
 
 function status(w) {
   const i = cellAt(w.x, w.z), t = tileOf(i);
-  const what = i < 0 ? "off the map" : t ? `${t.key} · top ${t.top}${t.liquid ? " · liquid" : ""}` : "no floor (wall)";
+  const what = i < 0 ? "off the map" : t ? `${t.wall ? "wall · " : ""}${t.key} · top ${t.top}${t.liquid ? " · liquid" : ""}` : "nothing (a hole)";
   $("status").textContent = `x ${Math.round(w.x)}  z ${Math.round(w.z)}  ·  ${areaAt(w.x, w.z)}  ·  ${what}`;
 }
 
@@ -855,9 +883,10 @@ function tileSwatch(t) {
   const s = document.createElement("canvas"); s.width = s.height = 32;
   const g = s.getContext("2d");
   if (!t) { g.fillStyle = "#0a0d13"; g.fillRect(0, 0, 32, 32); g.strokeStyle = "#ff5a4e"; g.lineWidth = 3; g.beginPath(); g.moveTo(6, 6); g.lineTo(26, 26); g.stroke(); return s; }
-  const a = rgb(t.key), b = C[t.key + "Checker"] || a;
+  const k = t.wall ? t.cap || t.key : t.key, a = rgb(k), b = C[k + "Checker"] || a;
   for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) { g.fillStyle = css((i + j) % 2 ? b : a); g.fillRect(i * 16, j * 16, 16, 16); }
   if (!t.liquid) { g.globalCompositeOperation = "source-atop"; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) g.drawImage(studTile, i * 8, j * 8, 8, 8); }
+  if (t.wall) { g.globalCompositeOperation = "source-over"; g.fillStyle = css(rgb(t.key)); g.fillRect(0, 22, 32, 10); g.fillStyle = "rgba(0,0,0,.35)"; g.fillRect(0, 22, 32, 2); }
   return s;
 }
 function buildTray() {
@@ -887,9 +916,9 @@ function buildTray() {
       g.innerHTML = `<div class="label">${name}</div><div class="items"></div>`;
       for (const [t, k] of list) {
         const b = document.createElement("button"); b.className = "sw" + (k === current ? " on" : "");
-        b.title = t ? `${t.key} · top ${t.top}${t.liquid ? " · liquid" : ""}` : "No floor (as under the walls)";
+        b.title = t ? `${t.wall ? "Wall: " : ""}${t.key} · top ${t.top}${t.liquid ? " · liquid" : ""}` : "Nothing: a hole in the map";
         b.appendChild(tileSwatch(t));
-        const s = document.createElement("span"); s.textContent = t ? `${t.key.replace(t.area, "") || t.key} ${t.top >= 0 ? "+" : ""}${t.top}` : "None"; b.appendChild(s);
+        const s = document.createElement("span"); s.textContent = t ? (t.wall ? `Wall ${t.top}` : `${t.key.replace(t.area, "") || t.key} ${t.top >= 0 ? "+" : ""}${t.top}`) : "None"; b.appendChild(s);
         b.onclick = () => { current = k; buildTray(); inspect(); if (!["paint", "rect", "fill"].includes(tool)) setTool("paint"); };
         g.querySelector(".items").appendChild(b);
       }
@@ -1048,31 +1077,33 @@ function inspect() {
     return;
   }
   const t = current ? M.tiles[current - 1] : null;
-  if (!t) { h.textContent = "No floor"; const n = document.createElement("div"); n.className = "note"; n.textContent = "Paints cells away, as under the walls. Props on them stand at wall height."; box.appendChild(n); return; }
-  h.textContent = t.key;
+  if (!t) { h.textContent = "Nothing"; const n = document.createElement("div"); n.className = "note"; n.textContent = "Paints cells away: no floor and no wall, a hole in the map."; box.appendChild(n); return; }
+  h.textContent = t.wall ? `${t.area} wall` : t.key;
   let count = 0; for (let i = 0; i < cells.length; i++) if (cells[i] === current) count++;
   const n0 = document.createElement("div"); n0.className = "note"; n0.textContent = `${t.area} tile · ${count} cells (${count * 16} studs²)`; box.appendChild(n0);
   const editTile = (k) => (v) => editTiles(() => { const tt = M.tiles[current - 1]; if (v === null || v === false) delete tt[k]; else tt[k] = v; });
-  box.appendChild(field("Colour", t.key, editTile("key"), BUNDLE.keys));
+  box.appendChild(field("Wall", t.wall ? "yes" : "no", (v) => editTiles(() => { const tt = M.tiles[current - 1]; if (v === "yes") { tt.wall = true; tt.cap = tt.cap || tt.key; delete tt.liquid; } else { delete tt.wall; delete tt.cap; } }), ["no", "yes"]));
+  box.appendChild(field(t.wall ? "Sides" : "Colour", t.key, editTile("key"), BUNDLE.keys));
+  if (t.wall) box.appendChild(field("Cap", t.cap || t.key, editTile("cap"), BUNDLE.keys));
   box.appendChild(field("Top", t.top, editTile("top")));
-  box.appendChild(field("Liquid", t.liquid ? "yes" : "no", (v) => editTile("liquid")(v === "yes"), ["no", "yes"]));
+  if (!t.wall) box.appendChild(field("Liquid", t.liquid ? "yes" : "no", (v) => editTile("liquid")(v === "yes"), ["no", "yes"]));
   box.appendChild(field("Area", t.area, editTile("area"), M.areas.map((a) => a.name)));
   const n = document.createElement("div"); n.className = "note";
-  n.textContent = "Top is the floor's height in studs. Changing it moves every cell of this tile.";
+  n.textContent = t.wall ? "A wall rises from below the floor to Top, its cap the last stud. Paint it anywhere; None takes it away." : "Top is the floor's height in studs. Changing it moves every cell of this tile.";
   box.appendChild(n);
-  colourList(box, [t.key, t.key + "Checker"], "Its colours");
+  colourList(box, t.wall ? [t.key, t.key + "Checker", t.cap, t.cap + "Checker"] : [t.key, t.key + "Checker"], "Its colours");
 }
 $("newtile").onclick = () => {
   const base = current ? M.tiles[current - 1] : M.tiles[0];
   const used = new Set(M.tiles.map((t) => t.id));
-  const id = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&()*+-/:;<=>?@^_`{|}~"].find((c) => !used.has(c));
+  const id = [...TILE_IDS].find((c) => !used.has(c));
   if (!id) return toast("That's every tile the format has room for.");
   editTiles(() => M.tiles.push({ id, area: base.area, key: base.key, top: base.top + 1 }));
   current = M.tiles.length; buildTray(); inspect();
   toast("Added a tile a step higher: set its colour and height on the right.");
 };
 
-const checkDefs = [["studs", "Studs"], ["edges", "Height edges"], ["fixed", "Walls, pillars"], ["arches", "Arches"], ["props", "Props, ruins"], ["furniture", "Fences, pads"], ["barriers", "Barriers"], ["labels", "Labels"], ["rule", "Rule check"], ["flip", "Flip checker"]];
+const checkDefs = [["studs", "Studs"], ["edges", "Height edges"], ["fixed", "Pillars"], ["shadeWalls", "Shade walls"], ["arches", "Arches"], ["props", "Props, ruins"], ["furniture", "Fences, pads"], ["barriers", "Barriers"], ["labels", "Labels"], ["rule", "Rule check"], ["flip", "Flip checker"]];
 for (const [k, label] of checkDefs) {
   const l = document.createElement("label");
   l.innerHTML = `<input type="checkbox" id="v-${k}"${view[k] ? " checked" : ""}> ${label}`;

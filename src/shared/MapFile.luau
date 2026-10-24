@@ -10,7 +10,7 @@
 -- barriers, shown in the editor but laid out by tools/map_gen.py.
 --
 --   MapFile.decode(text) -> the layout (as Shared/MapData: Areas, Walls, Props, ...)
---   MapFile.groundAt(data, x, z) -> the floor's top there (WallHeight off the floor)
+--   MapFile.groundAt(data, x, z) -> the floor's (or wall's) top there
 --   MapFile.applyColours(data, colours) -- the map's colours over a WorldColors table
 
 local HttpService = game:GetService("HttpService")
@@ -69,7 +69,8 @@ function MapFile.groundAt(data, x, z)
 	local row = g.Rows[r]
 	local ch = if row and c >= 1 and c <= g.Cols then string.sub(row, c, c) else "."
 	local tile = g.Tiles[ch]
-	return if tile then tile.top else data.WallHeight
+	-- (an empty cell: a hole now that walls are painted; under a wall in older files)
+	return if tile then tile.top elseif #data.Walls > 0 then data.WallHeight else 0
 end
 
 function MapFile.applyColours(data, colours)
@@ -90,7 +91,7 @@ function MapFile.decode(text)
 		Colours = file.colours or {},
 		WallHeight = fixed.wallHeight,
 		GateHalf = fixed.gateHalf,
-		Walls = fixed.walls,
+		Walls = fixed.walls or {}, -- (older files: walls are painted wall cells now)
 		Ring = fixed.ring,
 		-- { style, x, z, size, height, kind, yaw, scale, y } and { style, x, z, yaw, scale, y }:
 		-- objects now (QM, Oct 24: every mesh adjustable); older files had them in `fixed`
@@ -121,7 +122,8 @@ function MapFile.decode(text)
 	for _, t in file.tiles do
 		local area = byName[t.area]
 		assert(area, "tile " .. t.id .. ": no area " .. tostring(t.area))
-		table.insert(area.Tiles, { t.key, t.top, t.liquid or nil })
+		-- { key, top, liquid, cap }: a wall tile has its cap's colour (QM, Oct 24: walls painted as tiles)
+		table.insert(area.Tiles, { t.key, t.top, t.liquid or false, if t.wall then t.cap or t.key else nil })
 		tileOf[t.id] = { area, #area.Tiles }
 		data.Grid.Tiles[t.id] = t
 	end

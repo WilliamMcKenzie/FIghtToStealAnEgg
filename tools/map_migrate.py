@@ -1,5 +1,6 @@
 """Brings an older .map up to date, keeping its edits (QM, Oct 24): pillars and arches move
-from `fixed` into `objects`, where the editor can move, turn, scale, recolour and delete them.
+from `fixed` into `objects`, where the editor can move, turn, scale, recolour and delete them,
+and the walls become painted wall cells (map_gen.walls_to_cells).
 
 Run: python3 tools/map_migrate.py [file.map]    (default maps/world.map; rewrites it in place)
 """
@@ -10,7 +11,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from map_gen import dump_map  # noqa: E402
+from map_gen import dump_map, walls_to_cells  # noqa: E402
 
 
 def migrate(d):
@@ -19,7 +20,7 @@ def migrate(d):
         d["objects"].append({"type": "Pillar", "style": st, "kind": kind, "x": x, "z": z, "size": size, "height": h})
     for st, x, z in f.pop("arches", []):
         d["objects"].append({"type": "Arch", "style": st, "x": x, "z": z})
-    return d
+    return walls_to_cells(d)
 
 
 if __name__ == "__main__":
