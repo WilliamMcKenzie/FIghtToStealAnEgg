@@ -281,6 +281,15 @@ local function loadStone()
 	end
 end
 
+-- a stone block's shade, from where it stands now (run again once a pillar built at the
+-- origin is moved, so identical pillars don't share a pattern)
+local function shadeStone(p)
+	local at = p.Position
+	local shade = Random.new(math.floor(at.X * 7.3 + at.Y * 13.1 + at.Z * 17.9)):NextNumber(0.86, 1.1)
+	p:SetAttribute("Shade", math.round(shade * 100) / 100)
+	p.Color = WorldColors.shaded(color(p:GetAttribute("ColorKey")), p)
+end
+
 -- one stone block, its centre at `centre` (a CFrame: position and tilt), `size` studs.
 -- Each block takes its own shade of its colour (a Shade attribute, kept by Shared/
 -- WorldColors when it repaints), so a pillar reads as many stones (QM, Oct 24); picked
@@ -295,10 +304,7 @@ local function stone(parent, centre, size, key, collide)
 	else
 		p = block("Stone", parent, centre, size, key, ALL, false)
 	end
-	local at = centre.Position
-	local shade = Random.new(math.floor(at.X * 7.3 + at.Y * 13.1 + at.Z * 17.9)):NextNumber(0.86, 1.1)
-	p:SetAttribute("Shade", math.round(shade * 100) / 100)
-	p.Color = WorldColors.shaded(color(key), p)
+	shadeStone(p)
 	p.Name = "Stone"
 	p.Anchored = true
 	p.CanCollide = collide ~= false
@@ -968,6 +974,11 @@ function Map.build(data)
 			model:ScaleTo(scale)
 		end
 		model:PivotTo(CFrame.new(x, y or 0, z) * CFrame.Angles(0, math.rad(yaw or 0), 0))
+		for _, part in model:GetDescendants() do
+			if part:IsA("BasePart") and part:GetAttribute("Shade") then
+				shadeStone(part)
+			end
+		end
 	end
 	for _, p in MapData.Pillars do
 		local height = if p[6] == "gate" then ARCH_SPRING + 6 else p[5]
