@@ -79,8 +79,8 @@ TRAIN_PATH = (72, 88)  # the dirt path along the training grounds' gates (z from
 BIOMES = [
     dict(name="Meadow", W=224, D=176, tiles=[("Water", 0, True), ("Grass", 1, False), ("Dirt", 1, False)],
          ground=1, centre=2, angles=5, scale=7, cuts=(0.07,), bowl=0.0, dais=32, nests=4),
-    dict(name="Desert", W=248, D=200, tiles=[("DryGrass", 0, False), ("Sand", 1, False), ("Sandstone", 2, False)],
-         ground=1, centre=1, angles=7, scale=8, cuts=(0.18, 0.76), bowl=0.2, dais=36, nests=6),
+    dict(name="Desert", W=248, D=200, tiles=[("Sand", 0, False), ("Sandstone", 1, False), ("DryGrass", 2, False)],
+         ground=0, centre=0, angles=7, scale=8, cuts=(0.18, 0.76), bowl=0.2, dais=36, nests=6),
     dict(name="Ice", W=280, D=224, tiles=[("ColdGrass", 0, False), ("Snow", 1, False), ("Glacier", 2, False)],
          ground=1, centre=1, angles=8, scale=9, cuts=(0.2, 0.8), bowl=0.18, dais=40, nests=6),
     dict(name="Lava", W=320, D=240, tiles=[("Magma", 0, True), ("Rock", 1, False), ("Basalt", 2, False)],
