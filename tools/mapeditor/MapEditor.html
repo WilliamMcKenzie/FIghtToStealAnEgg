@@ -1113,7 +1113,9 @@ resize(); buildSizes();
 load(BUNDLE.map, "world.map", true);
 try {
   const d = JSON.parse(localStorage.getItem(DRAFT) || "null");
-  if (d && d.text && d.text !== BUNDLE.map) {
+  // (only a draft of this same layout: a draft from an older map would undo its changes)
+  const shape = (t) => { try { const j = JSON.parse(t); return JSON.stringify([j.origin, j.size, j.fixed]); } catch (e) { return ""; } };
+  if (d && d.text && d.text !== BUNDLE.map && shape(d.text) === shape(BUNDLE.map)) {
     const original = BUNDLE.map;
     load(d.text, d.name, true);
     toast(`Picked up your unsaved edits from ${new Date(d.at).toLocaleString()}.`, [["Start from the game's map", () => { load(original, "world.map", true); try { localStorage.removeItem(DRAFT); } catch (e) { /* */ } }]]);
