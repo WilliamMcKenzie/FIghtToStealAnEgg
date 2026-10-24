@@ -1,5 +1,5 @@
 -- Builds the map in game from Shared/MapData (laid out by tools/map_gen.py; QM, Oct 24):
--- the base (spawn plaza, pens, training grounds, its ring wall and gateway), and the
+-- the base (a grass square, its dirt yard round the spawn, pens, training grounds), and the
 -- biome arenas north of it (Meadow, Desert, Ice, Lava), walled down their sides (stone
 -- pillars at the corners and joints, big ones where one biome opens onto the next; no
 -- walls between them), a gateway (two big pillars and an arch) from the base, a barrier
@@ -378,7 +378,7 @@ end
 
 -- An arch over a gateway, springing from its two pillars' capitals: chunky voussoirs
 -- round a flattened half ring, a keystone at the crown poking out at the front.
-local ARCH_SPRING = 22 -- (the gate pillars' shafts end here, under their capitals)
+local ARCH_SPRING = 36 -- (the gate pillars' shafts end here, under their capitals)
 local ARCH_SQUASH = 0.7 -- the arch's height over its half width
 local function arch(parent, style, x, z, rng)
 	local light, dark = pillarKeys(style)
@@ -538,13 +538,13 @@ local function baseFurniture(parent)
 		pen.Name = "Pen" .. i
 		pen:SetAttribute("Index", i)
 		local gateSide = if x < 0 then 1 else -1 -- (the side facing the middle)
-		fence(pen, x, z, base.PenSize, 1, Vector3.new(gateSide, 0, 0))
+		fence(pen, x, z, base.PenSize, 0, Vector3.new(gateSide, 0, 0))
 		local marker = Instance.new("Part")
 		marker.Name = "Area"
 		marker.Anchored, marker.CanCollide, marker.CanQuery, marker.CanTouch = true, false, false, false
 		marker.Transparency = 1
 		marker.Size = Vector3.new(base.PenSize, 12, base.PenSize)
-		marker.CFrame = CFrame.new(x, 7, z)
+		marker.CFrame = CFrame.new(x, 6, z)
 		marker.Parent = pen
 		local signAt = CFrame.new(x + gateSide * (base.PenSize / 2 + 3), 0, z + 9)
 			* CFrame.Angles(0, if gateSide > 0 then math.pi / 2 else -math.pi / 2, 0)
@@ -562,14 +562,14 @@ local function baseFurniture(parent)
 		zone.Name = name
 		zone:SetAttribute("X", x)
 		zone:SetAttribute("Z", z)
-		fence(zone, x, z, size, 1, Vector3.new(0, 0, -1))
+		fence(zone, x, z, size, 0, Vector3.new(0, 0, -1))
 		if name == "Dummies" then
 			local dummies = folder("Dummies", zone)
 			for k = -1, 1 do
 				for row = 0, 1 do
 					dummy(
 						dummies,
-						CFrame.new(x + k * 12 + row * 6 - 3, 1, z - 4 + row * 12)
+						CFrame.new(x + k * 12 + row * 6 - 3, 0, z - 4 + row * 12)
 							* CFrame.Angles(0, math.rad(k * -10), 0)
 					)
 				end
@@ -580,23 +580,23 @@ local function baseFurniture(parent)
 		gate.Anchored, gate.CanCollide, gate.CanQuery, gate.CanTouch = true, false, false, false
 		gate.Transparency = 1
 		gate.Size = Vector3.new(10, 8, 1.2)
-		gate.CFrame = CFrame.new(x, 5, z - size / 2 + 1)
+		gate.CFrame = CFrame.new(x, 4, z - size / 2 + 1)
 		gate.Parent = zone
 		local title = if name == "Dummies" then "TRAINING DUMMIES" else string.upper(name) .. " TRAINING"
 		Map.sign(zone, CFrame.new(x + 14, 0, z - size / 2 - 3), title, 13)
 		zone.Parent = training
 	end
-	-- the spawn, on the plaza
+	-- the spawn, in the dirt yard (a stud below the grass)
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "SpawnLocation"
 	spawn.Anchored = true
 	spawn.Neutral = true
 	spawn.Duration = 0
 	spawn.Size = Vector3.new(10, 1, 10)
-	spawn.CFrame = CFrame.new(base.Spawn[1], 1.5, base.Spawn[2])
+	spawn.CFrame = CFrame.new(base.Spawn[1], -0.5, base.Spawn[2])
 	spawn.Material = Enum.Material.SmoothPlastic
-	spawn:SetAttribute("ColorKey", "PlazaInlay")
-	spawn.Color = color("PlazaInlay")
+	spawn:SetAttribute("ColorKey", "Dirt")
+	spawn.Color = color("Dirt")
 	spawn.TopSurface = Enum.SurfaceType.Smooth
 	local decal = spawn:FindFirstChildOfClass("Decal")
 	if decal then

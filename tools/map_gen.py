@@ -5,9 +5,10 @@ Run: python3 tools/map_gen.py [preview_dir]
      writes src/shared/MapData.luau and previews/map_*.png (and copies to preview_dir).
 
 Layout (studs, y up, north is -z):
-- The base: a circle (BASE_R) round the spawn plaza. Three pens down each side, the two
-  training grounds at the south end, and the gateway out at the north end, where a short
-  corridor runs to the first biome.
+- The base (QM, Oct 24: compact and square, like LassoAPet's spawn): grass with a ragged
+  dirt yard (a stud lower) round the spawn. Three pens down each side, the training
+  grounds along the south wall, and the gateway out in the north wall, straight into the
+  Meadow (its south wall is the base's north wall).
 - The biomes, in a line north: Meadow, Desert, Ice, Lava. Each is a roughly square arena,
   wider than deep, bigger the further you go, the boss's circle (plain ground) in the
   middle and egg nests in the corners and along the sides. Walls (raised plateaus) run
@@ -44,28 +45,25 @@ CELL = 8
 
 # ---- the layout ------------------------------------------------------------------------
 
-BASE_R = 264  # the base's inner radius
-RING_SEGMENTS = 40  # its wall, as straight pieces (two left out at the north: the gateway)
-RING_T = 40  # the base wall's thickness (a plateau round the circle)
+BASE_HALF = 176  # the base's inside: x -176..176 (LassoAPet's base width)
+BASE_N, BASE_S = -152, 152  # its north edge (the Meadow's south wall) and south edge
 GATE_HALF = 24  # every gateway's opening: 48 wide
-CORRIDOR_END = -BASE_R - 48  # the corridor from the base runs to the Meadow's south wall
-DIV_T = 24  # the Meadow's south wall (where the base's corridor meets it) is this thick
+DIV_T = 24  # the Meadow's south wall (the base's north wall, the gateway in it) is this thick
 OUT_T = 48  # outer walls: a wide plateau
-WALL_H = 10  # walls stand this high above the floor (their cap the last stud)
+WALL_H = 30  # walls stand this high above the floor (their cap the last stud; QM: 3x, like LassoAPet)
 
 # QM, Oct 24: 6 players a server, so two rows of 3 pens either side of the spawn, LassoAPet's
 # pen size (14 tiles of 4 studs); the training grounds lined up at the south "head of the
 # table" (one per biome, each about a pen's size, plus the free dummies), the way out to
 # the biomes at the north head.
-PENS = [(sx * 160, z) for sx in (-1, 1) for z in (-80, 0, 80)]  # pen centres
+PENS = [(sx * 132, z) for sx in (-1, 1) for z in (-100, -28, 44)]  # pen centres
 PEN_SIZE = 56
 TRAINING = [("Dummies", -112), ("Meadow", -56), ("Desert", 0), ("Ice", 56), ("Lava", 112)]  # (name, centre x)
-TRAIN_Z = 184  # their centres' z
+TRAIN_Z = 112  # their centres' z
 TRAIN_SIZE = 48
-TRAIN_FLOOR = {"Dummies": "TrainFloor", "Meadow": "MeadowGrass", "Desert": "DesertSand", "Ice": "IceSnow", "Lava": "LavaRock"}
-PLAZA_R = 40
-PATH_RING = (112, 128)  # the base's ring path (inner, outer radius)
-TRAIN_PATH = (148, 160)  # the path along the training grounds' gates (z from, to)
+SPAWN = (0, -28)  # in the dirt yard, level with the middle pens
+YARD = (80, 92)  # the dirt yard's half width and half depth round the spawn (before its ragged edge)
+TRAIN_PATH = (72, 88)  # the dirt path along the training grounds' gates (z from, to)
 
 # Each biome (QM, Oct 24: simple floors, at most three tiles and maybe a liquid): its
 # interior width (x) and depth (z), its tiles (suffix, ladder step, liquid?) from low to
@@ -74,28 +72,28 @@ TRAIN_PATH = (148, 160)  # the path along the training grounds' gates (z from, t
 # (plain ground: its `centre` tile), its egg nests. `ground` is the everyday tile: the
 # circle, the nests and the seams between biomes are flat ground.
 # A liquid sinks you a little and slows you (client/Liquid.luau).
+# (QM, Oct 24: each 1.6x smaller than first laid out: 352 x 288 .. 512 x 384)
 BIOMES = [
-    dict(name="Meadow", W=352, D=288, tiles=[("Water", 0, True), ("Grass", 1, False), ("Dirt", 1, False)],
-         ground=1, centre=2, angles=5, scale=11, cuts=(0.07,), bowl=0.0, dais=48, nests=4),
-    dict(name="Desert", W=400, D=320, tiles=[("DryGrass", 0, False), ("Sand", 1, False), ("Sandstone", 2, False)],
-         ground=1, centre=1, angles=7, scale=13, cuts=(0.18, 0.76), bowl=0.2, dais=56, nests=6),
-    dict(name="Ice", W=448, D=352, tiles=[("ColdGrass", 0, False), ("Snow", 1, False), ("Glacier", 2, False)],
-         ground=1, centre=1, angles=8, scale=14, cuts=(0.2, 0.8), bowl=0.18, dais=64, nests=6),
-    dict(name="Lava", W=512, D=384, tiles=[("Magma", 0, True), ("Rock", 1, False), ("Basalt", 2, False)],
-         ground=1, centre=1, angles=9, scale=15, cuts=(0.12, 0.74), bowl=-0.16, dais=72, nests=8),
+    dict(name="Meadow", W=224, D=176, tiles=[("Water", 0, True), ("Grass", 1, False), ("Dirt", 1, False)],
+         ground=1, centre=2, angles=5, scale=7, cuts=(0.07,), bowl=0.0, dais=32, nests=4),
+    dict(name="Desert", W=248, D=200, tiles=[("DryGrass", 0, False), ("Sand", 1, False), ("Sandstone", 2, False)],
+         ground=1, centre=1, angles=7, scale=8, cuts=(0.18, 0.76), bowl=0.2, dais=36, nests=6),
+    dict(name="Ice", W=280, D=224, tiles=[("ColdGrass", 0, False), ("Snow", 1, False), ("Glacier", 2, False)],
+         ground=1, centre=1, angles=8, scale=9, cuts=(0.2, 0.8), bowl=0.18, dais=40, nests=6),
+    dict(name="Lava", W=320, D=240, tiles=[("Magma", 0, True), ("Rock", 1, False), ("Basalt", 2, False)],
+         ground=1, centre=1, angles=9, scale=9, cuts=(0.12, 0.74), bowl=-0.16, dais=44, nests=8),
 ]
-NEST_CLEAR = 24  # flat ground round a nest
-GATE_CLEAR = 40  # flat ground inside the Meadow's gateway
+NEST_CLEAR = 16  # flat ground round a nest
+GATE_CLEAR = 24  # flat ground inside the Meadow's gateway
 SEAM = 16  # flat ground either side of the line where two biomes meet
 
-# the base's tiles: (key, top)
-BASE_TILES = [("Grass", 0), ("BaseGrassLight", 0), ("Dirt", 0), ("Plaza", 1), ("PlazaInlay", 1), ("PenFloor", 1)] + [
-    (TRAIN_FLOOR[name], 1) for name, _ in TRAINING]
+# the base's tiles: (key, top): the lineup's grass, its dirt a stud lower (QM, Oct 24)
+BASE_TILES = [("Grass", 0), ("Dirt", -1)]
 
 # where each biome sits: its south (near) interior edge, north (far) edge. Only the Meadow
-# has a south wall (the base's corridor ends at it); the rest open straight onto the
-# biome before (QM, Oct 24: no walls between biomes), each a little wider.
-z = CORRIDOR_END - DIV_T
+# has a south wall (shared with the base, the gateway in it); the rest open straight onto
+# the biome before (QM, Oct 24: no walls between biomes), each a little wider.
+z = BASE_N - DIV_T
 for b in BIOMES:
     b["zs"] = z
     b["zn"] = z - b["D"]
@@ -274,37 +272,43 @@ class Grid:
 # ---- the base --------------------------------------------------------------------------
 
 def base():
-    g = Grid(-BASE_R - 8, BASE_R + 8, BASE_R + 8, CORRIDOR_END)
-    r = np.hypot(g.x, g.z)
-    corridor = (np.abs(g.x) < GATE_HALF) & (g.z < -BASE_R + 48)
-    g.inside = (r < BASE_R + 10) | corridor
-    # grass in two shades: a rosette round the spawn (8 angles)
-    q = value(g.x, g.z, 8, 15)
-    g.tile[:] = np.where(q > np.quantile(q[g.inside], 0.7), 1, 0)
-    g.tile = blocky(tidy(g.tile, g.inside), g.inside)
-    # paths (flush): north to the gateway, south between the training grounds, the ring
-    # path past the pens and a spoke to each pen's gate
-    path = (np.abs(g.x) < 12) & (g.z < TRAIN_PATH[1])
-    path |= (g.z >= TRAIN_PATH[0]) & (g.z < TRAIN_PATH[1]) & (np.abs(g.x) < TRAINING[-1][1] + TRAIN_SIZE / 2)
-    path |= (r >= PATH_RING[0]) & (r < PATH_RING[1])
+    """Grass (0) and dirt (1, a stud lower), LassoAPet's base: a ragged dirt yard round the
+    spawn, lanes from it to the gateway, each pen's gate and the training grounds, a few
+    dirt patches in the grass. Pens and training grounds stand on grass; no dirt within a
+    tile of a wall except the gateway's lane."""
+    g = Grid(-BASE_HALF, BASE_HALF, BASE_S, BASE_N)
+    g.inside[:] = True
+    sx, sz = SPAWN
+    # the yard: an oval with a ragged edge
+    q = value(g.x, g.z, 7, 9)
+    oval = ((g.x - sx) / YARD[0]) ** 2 + ((g.z - sz) / YARD[1]) ** 2
+    dirt = oval + 1.1 * (q - 0.5) < 1
+    # lanes: north to the gateway, south to the training path, along the training gates,
+    # and out to each pen's gate
+    dirt |= (np.abs(g.x) < GATE_HALF) & (g.z < sz)
+    dirt |= (np.abs(g.x) < 16) & (g.z > sz) & (g.z < TRAIN_PATH[1])
+    dirt |= (g.z >= TRAIN_PATH[0]) & (g.z < TRAIN_PATH[1]) & (np.abs(g.x) < TRAINING[-1][1] + TRAIN_SIZE / 2)
     for px, pz in PENS:
-        ring_x = math.sqrt(max(0, PATH_RING[0] ** 2 - pz ** 2))
         inner = abs(px) - PEN_SIZE / 2
-        path |= (np.abs(g.z - pz) < 8) & (np.abs(g.x) >= ring_x) & (np.abs(g.x) < inner) & (np.sign(g.x) == np.sign(px))
-    path |= corridor
-    g.tile[path] = 2
-    # the raised plaza round the spawn, a quasicrystal inlay in it
-    plaza = r < PLAZA_R
-    inlay = value(g.x, g.z, 5, 4) > 0.62
-    g.tile[plaza] = np.where(inlay[plaza], 4, 3)
+        dirt |= (np.abs(g.z - pz) < 12) & (np.abs(g.x) < inner) & (np.sign(g.x) == np.sign(px))
+    # patches in the grass, a tile clear of the yard
+    q2 = value(g.x + 37, g.z - 11, 5, 4)
+    near_yard = oval < 1.45
+    dirt |= (q2 > np.quantile(q2, 0.86)) & ~near_yard
+    t = dirt.astype(int)
+    t = blocky(tidy(t, g.inside), g.inside)
+    # grass: under the pens and training grounds, and a tile out from the walls
+    keep = (np.abs(g.x) > BASE_HALF - 8) | (g.z > BASE_S - 8) | ((g.z < BASE_N + 8) & (np.abs(g.x) >= GATE_HALF))
     for px, pz in PENS:
-        g.tile[(np.abs(g.x - px) < PEN_SIZE / 2) & (np.abs(g.z - pz) < PEN_SIZE / 2)] = 5
-    for k, (_, tx) in enumerate(TRAINING):
-        g.tile[(np.abs(g.x - tx) < TRAIN_SIZE / 2) & (np.abs(g.z - TRAIN_Z) < TRAIN_SIZE / 2)] = 6 + k
-    # everything inside, clear of the wall's pillars
+        keep |= (np.abs(g.x - px) < PEN_SIZE / 2) & (np.abs(g.z - pz) < PEN_SIZE / 2)
+    for _, tx in TRAINING:
+        keep |= (np.abs(g.x - tx) < TRAIN_SIZE / 2) & (np.abs(g.z - TRAIN_Z) < TRAIN_SIZE / 2)
+    t[keep] = 0
+    g.tile = blocky(t, g.inside)
+    g.tile[keep] = 0
     for cx, cz, h in [(x, z, PEN_SIZE / 2) for x, z in PENS] + [(x, TRAIN_Z, TRAIN_SIZE / 2) for _, x in TRAINING]:
-        assert math.hypot(abs(cx) + h, abs(cz) + h) < BASE_R - 10, (cx, cz)
-    check("Base", np.array([t[1] for t in BASE_TILES])[g.tile], g.inside)
+        assert abs(cx) + h <= BASE_HALF - 8 and BASE_N + 8 <= cz - h and cz + h <= BASE_S - 8, (cx, cz)
+    check("Base", np.array([t_[1] for t_ in BASE_TILES])[g.tile], g.inside)
     return g
 
 
@@ -312,12 +316,12 @@ def base():
 
 def nests(b):
     W, zs, zn, cz = b["W"], b["zs"], b["zn"], b["cz"]
-    inset = 40
+    inset = 24
     out = [(sx * (W / 2 - inset), z) for z in (zs - inset, zn + inset) for sx in (-1, 1)]
     if b["nests"] >= 6:
-        out += [(sx * (W / 2 - 32), cz) for sx in (-1, 1)]
+        out += [(sx * (W / 2 - 20), cz) for sx in (-1, 1)]
     if b["nests"] >= 8:
-        out += [(sx * W / 4, zn + 32) for sx in (-1, 1)]
+        out += [(sx * W / 4, zn + 20) for sx in (-1, 1)]
     return out
 
 
@@ -367,39 +371,35 @@ def biome(b, index):
 # ---- walls and pillars -------------------------------------------------------------------
 
 def walls_and_pillars():
-    """Walls: (key, x0, z0, x1, z1) axis-aligned boxes (z0 > z1), plus the base ring's
-    rotated pieces (key, cx, cz, length, thick, yaw). Pillars: (style, x, z, size, height, kind)."""
+    """Walls: (key, x0, z0, x1, z1) axis-aligned boxes (z0 > z1); `ring` (rotated pieces:
+    key, cx, cz, length, thick, yaw) is empty now the base is square. Pillars: (style, x, z,
+    size, height, kind)."""
     walls, ring, pillars, arches, barriers = [], [], [], [], []
-    # the base ring
-    step = 2 * math.pi / RING_SEGMENTS
-    for k in range(RING_SEGMENTS):
-        if k in (0, RING_SEGMENTS - 1):
-            continue  # (the two either side of north: the gateway)
-        a = (k + 0.5) * step  # from north, clockwise seen from above
-        rc = BASE_R + RING_T / 2
-        length = 2 * (BASE_R + RING_T) * math.tan(step / 2) + 1
-        ring.append(("Base", round(math.sin(a) * rc, 3), round(-math.cos(a) * rc, 3), round(length, 3), RING_T, round(-a, 6)))
-    for k in range(2, RING_SEGMENTS - 1, 2):
-        a = k * step
-        rp = BASE_R + 4
-        pillars.append(("Base", round(math.sin(a) * rp, 2), round(-math.cos(a) * rp, 2), 14, 15, "joint"))
-    # the corridor to the Meadow, and the base's gateway pillars at its mouth
-    top = -BASE_R + 48
+    # the base: walls west, east and south (its north wall is the Meadow's), a pillar at
+    # each joint
+    outer = BASE_HALF + OUT_T
     for sx in (-1, 1):
-        x0, x1 = sorted((sx * GATE_HALF, sx * (GATE_HALF + 48)))
-        walls.append(("Base", x0, top, x1, CORRIDOR_END))
-        pillars.append(("Base", sx * (GATE_HALF + 12), -BASE_R - 2, 24, 34, "gate"))
-    arches.append(("Base", 0, -BASE_R - 2))
+        x0, x1 = sorted((sx * BASE_HALF, sx * outer))
+        walls.append(("Base", x0, BASE_S + OUT_T, x1, BASE_N))
+        for k in (1, 2):
+            pillars.append(("Base", sx * (BASE_HALF + 3), BASE_S - k * (BASE_S - BASE_N) / 3, 14, 36, "joint"))
+    walls.append(("Base", -BASE_HALF, BASE_S + OUT_T, BASE_HALF, BASE_S))
+    for k in (-1, 1):
+        pillars.append(("Base", k * BASE_HALF / 2, BASE_S + 3, 14, 36, "joint"))
+    for sx in (-1, 1):
+        pillars.append(("Base", sx * BASE_HALF, BASE_S, 22, 40, "corner"))
     # the biomes
     for i, b in enumerate(BIOMES):
         name, half, zs, zn = b["name"], b["W"] / 2, b["zs"], b["zn"]
         if i == 0:
             # the Meadow's south wall, at the corridor's end: a gateway in it
             for sx in (-1, 1):
-                x0, x1 = sorted((sx * GATE_HALF, sx * (half + OUT_T)))
+                # (right across the base too: it's the base's north wall)
+                x0, x1 = sorted((sx * GATE_HALF, sx * max(half + OUT_T, BASE_HALF + OUT_T)))
                 walls.append((name, x0, zs + DIV_T, x1, zs))
                 pillars.append((name, sx * (GATE_HALF + 12), zs + DIV_T / 2, 24, 36, "gate"))
-                pillars.append((name, sx * half, zs, 22, 26, "corner"))
+                pillars.append((name, sx * half, zs, 22, 40, "corner"))
+                pillars.append(("Base", sx * BASE_HALF, zs + DIV_T, 22, 40, "corner"))
             arches.append((name, 0, zs + DIV_T / 2))
             barriers.append(("Base", name, 0, zs + DIV_T / 2, 2 * GATE_HALF))
         else:
@@ -412,22 +412,22 @@ def walls_and_pillars():
                     # (behind the step: the wider wall's corner, filled in)
                     x0, x1 = sorted((sx * (narrow + OUT_T), sx * (half + OUT_T)))
                     walls.append((prev["name"], x0, zs + OUT_T, x1, zs))
-                pillars.append((name, sx * (narrow + 4), zs, 26, 32, "transition"))
+                pillars.append((name, sx * (narrow + 4), zs, 26, 44, "transition"))
             barriers.append((prev["name"], name, 0, zs, 2 * narrow))
         # its side walls, in pieces with a pillar at each joint
-        n = max(1, round(b["D"] / 112))
+        n = max(1, round(b["D"] / 80))
         for sx in (-1, 1):
             x0, x1 = sorted((sx * half, sx * (half + OUT_T)))
             walls.append((name, x0, zs, x1, zn))
             for k in range(1, n):
-                pillars.append((name, sx * (half + 3), zs - k * b["D"] / n, 14, 18, "joint"))
+                pillars.append((name, sx * (half + 3), zs - k * b["D"] / n, 14, 36, "joint"))
         if i == len(BIOMES) - 1:
             # the far wall: a gateway for the next world, sealed with rubble for now
             for sx in (-1, 1):
                 x0, x1 = sorted((sx * GATE_HALF, sx * (half + OUT_T)))
                 walls.append((name, x0, zn, x1, zn - OUT_T))
                 pillars.append((name, sx * (GATE_HALF + 12), zn - DIV_T / 2, 24, 36, "gate"))
-                pillars.append((name, sx * half, zn, 22, 26, "corner"))
+                pillars.append((name, sx * half, zn, 22, 40, "corner"))
             walls.append((name, -GATE_HALF, zn - 4, GATE_HALF, zn - OUT_T))
             arches.append((name, 0, zn - DIV_T / 2))
             pillars.append((name, 0, zn - 6, 20, 12, "rubble"))
@@ -441,13 +441,13 @@ def walls_and_pillars():
 # in the Lava): (item, weight) for the plateau tops round it and for the arena floor.
 DRESSING = {
     "Meadow": dict(top=[("PineTall", 5), ("PineShort", 3), ("Boulders", 1), ("RuinPillarBroken", 1)],
-                   floor=[("Boulders", 2), ("RuinPillarBroken", 2), ("PineShort", 1)], n=7, ring="RuinPillar"),
+                   floor=[("Boulders", 2), ("RuinPillarBroken", 2), ("PineShort", 1)], n=4, ring="RuinPillar"),
     "Desert": dict(top=[("Cactus", 4), ("CactusBarrel", 3), ("Boulders", 2), ("RuinPillarBroken", 1)],
-                   floor=[("Cactus", 3), ("CactusBarrel", 2), ("Boulders", 1), ("RuinPillarBroken", 1)], n=9, ring="RuinPillar"),
+                   floor=[("Cactus", 3), ("CactusBarrel", 2), ("Boulders", 1), ("RuinPillarBroken", 1)], n=5, ring="RuinPillar"),
     "Ice": dict(top=[("SnowPine", 6), ("Boulders", 2), ("RuinPillarBroken", 1)],
-                floor=[("SnowPine", 3), ("Boulders", 2), ("RuinPillarBroken", 1)], n=9, ring="RuinPillar"),
+                floor=[("SnowPine", 3), ("Boulders", 2), ("RuinPillarBroken", 1)], n=5, ring="RuinPillar"),
     "Lava": dict(top=[("DeadTree", 4), ("Monolith", 2), ("Boulders", 2), ("RuinPillarBroken", 1)],
-                 floor=[("DeadTree", 3), ("Monolith", 2), ("Boulders", 2)], n=11, ring="Monolith"),
+                 floor=[("DeadTree", 3), ("Monolith", 2), ("Boulders", 2)], n=6, ring="Monolith"),
 }
 SCALE = {"PineTall": (1.1, 1.7), "PineShort": (1.1, 1.6), "SnowPine": (1.0, 1.5), "Cactus": (0.9, 1.3),
          "CactusBarrel": (1.0, 1.6), "DeadTree": (0.9, 1.3), "Monolith": (0.9, 1.25), "Boulders": (0.8, 1.6),
@@ -465,12 +465,15 @@ def props(grids):
     ruined walls in its corners: (item, x, z, ground y, yaw, scale, style)."""
     rng = np.random.default_rng(24)
     out, ruins = [], []
-    for k in range(48):
-        a = (k + 0.5) / 48 * 2 * math.pi
-        if abs(math.sin(a)) * (BASE_R + 20) < GATE_HALF + 60 and math.cos(a) > 0:
-            continue  # (clear of the gateway)
-        rr = BASE_R + 14 + rng.uniform(0, 20)
-        out.append(("PineTall" if k % 3 else "PineShort", math.sin(a) * rr, -math.cos(a) * rr, WALL_H, rng.uniform(0, 360), rng.uniform(1.1, 1.7), "Base"))
+    # pines along the base's walls (west, east, south) and its north wall either side of
+    # the Meadow
+    spots = []
+    for sx in (-1, 1):
+        spots += [(sx * (BASE_HALF + 12 + rng.uniform(0, OUT_T - 22)), z) for z in np.arange(BASE_N + 4, BASE_S + OUT_T - 8, 24)]
+        spots += [(sx * x, BASE_N - rng.uniform(6, DIV_T - 6)) for x in np.arange(BIOMES[0]["W"] / 2 + OUT_T + 14, BASE_HALF + 8, 24)]
+    spots += [(x, BASE_S + 12 + rng.uniform(0, OUT_T - 22)) for x in np.arange(-BASE_HALF + 12, BASE_HALF - 8, 24)]
+    for k, (x, z) in enumerate(spots):
+        out.append(("PineTall" if k % 3 else "PineShort", x, z, WALL_H, rng.uniform(0, 360), rng.uniform(1.1, 1.7), "Base"))
     for b, g in zip(BIOMES, grids):
         name, half = b["name"], b["W"] / 2
         dress = DRESSING[name]
@@ -504,19 +507,19 @@ def props(grids):
         spots = [(i, j) for i in range(g.nx) for j in range(g.nz)
                  if g.inside[i, j] and steps[i, j] == high and dry[i, j] and g.tile[i, j] != b["centre"]]
         rng.shuffle(spots)
-        taken = [(x, z, 26) for x, z in nests(b)] + [(0, b["zs"], 56), (0, b["zn"], 56)]
+        taken = [(x, z, 18) for x, z in nests(b)] + [(0, b["zs"], 36), (0, b["zn"], 36)]
         placed = 0
         for i, j in spots:
             x, z = float(g.x[i, j]), float(g.z[i, j])
-            if math.hypot(x, z - b["cz"]) < b["dais"] + 32:
+            if math.hypot(x, z - b["cz"]) < b["dais"] + 20:
                 continue
-            if abs(x) > half - 20 or z > b["zs"] - 20 or z < b["zn"] + 20:
+            if abs(x) > half - 14 or z > b["zs"] - 14 or z < b["zn"] + 14:
                 continue
             if any(math.hypot(x - tx, z - tz) < tr for tx, tz, tr in taken):
                 continue
             it = pick(rng, dress["floor"])
             out.append((it, x, z, high - 1, rng.uniform(0, 360), rng.uniform(*SCALE[it]), name))
-            taken.append((x, z, 40))
+            taken.append((x, z, 28))
             placed += 1
             if placed >= dress["n"]:
                 break
@@ -526,7 +529,7 @@ def props(grids):
                 cx = sx * half * 0.52
                 cz = b["cz"] + sz * b["D"] / 2 * 0.5
                 yaw = math.degrees(math.atan2(sx, sz))  # (facing the dais)
-                ruins.append((name, round(cx, 1), round(cz, 1), round(rng.uniform(20, 28), 1), round(yaw + 90, 1), round(rng.uniform(6, 9), 1), int(rng.integers(1, 10 ** 6))))
+                ruins.append((name, round(cx, 1), round(cz, 1), round(rng.uniform(14, 20), 1), round(yaw + 90, 1), round(rng.uniform(6, 9), 1), int(rng.integers(1, 10 ** 6))))
     return [(i, round(x, 2), round(z, 2), t, round(y, 1), round(s, 2), st) for i, x, z, t, y, s, st in out], ruins
 
 
@@ -584,7 +587,7 @@ def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruin
         w("\t\t},")
 
     area("Base", BASE_TILES, g_base, [
-        "Spawn = { 0, 0 },",
+        "Spawn = { %s, %s }," % SPAWN,
         "Pens = { %s }," % ", ".join("{ %s, %s }" % (lua_num(x), lua_num(z)) for x, z in PENS),
         "PenSize = %d," % PEN_SIZE,
         "Training = { %s }," % ", ".join('{ "%s", %s, %s }' % (n, x, TRAIN_Z) for n, x in TRAINING),
@@ -641,9 +644,9 @@ def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruin
 # ---- previews ----------------------------------------------------------------------------
 
 def preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colours, s=1.0, crop=None):
-    xs = [-(b["W"] / 2 + OUT_T) for b in BIOMES] + [-BASE_R - RING_T]
+    xs = [-(b["W"] / 2 + OUT_T) for b in BIOMES] + [-BASE_HALF - OUT_T]
     X0, X1 = min(xs) - 8, -min(xs) + 8
-    Z0, Z1 = BASE_R + RING_T + 8, BIOMES[-1]["zn"] - OUT_T - 8
+    Z0, Z1 = BASE_S + OUT_T + 8, BIOMES[-1]["zn"] - OUT_T - 8
     if crop:
         Z0, Z1 = crop
     W, H = int((X1 - X0) * s), int((Z0 - Z1) * s)
@@ -737,7 +740,7 @@ def preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colou
         a, b_ = P(tx - TRAIN_SIZE / 2, TRAIN_Z + TRAIN_SIZE / 2), P(tx + TRAIN_SIZE / 2, TRAIN_Z - TRAIN_SIZE / 2)
         d.rectangle([a[0], a[1], b_[0], b_[1]], outline=colours["WoodDark"], width=max(1, int(2 * s)))
         d.text(P(tx - 20, TRAIN_Z), name, fill=(0, 0, 0))
-    cx, cy = P(0, 0)
+    cx, cy = P(*SPAWN)
     d.ellipse([cx - 5 * s, cy - 5 * s, cx + 5 * s, cy + 5 * s], fill=(40, 120, 255))
     return im
 
@@ -757,7 +760,7 @@ def main():
     colours = config_colours()
     whole = preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colours, s=0.5)
     near = preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colours, s=2.0,
-                   crop=(BASE_R + RING_T + 8, BIOMES[0]["zn"] - 8))
+                   crop=(BASE_S + OUT_T + 8, BIOMES[0]["zn"] - 8))
     for od in out_dirs:
         os.makedirs(od, exist_ok=True)
         whole.save(os.path.join(od, "map_overview.png"))

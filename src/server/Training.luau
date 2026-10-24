@@ -43,7 +43,7 @@ local function spawnMob(name, x, z, half)
 	body.Anchored, body.CanCollide, body.CanTouch = true, false, false
 	body.Transparency = 1
 	body.Size = Vector3.new(radius * 2, 4, radius * 2)
-	local at = Vector3.new(x + rng:NextNumber(-half, half), 1 + 2, z + rng:NextNumber(-half, half))
+	local at = Vector3.new(x + rng:NextNumber(-half, half), 0 + 2, z + rng:NextNumber(-half, half))
 	local yaw = rng:NextNumber(-math.pi, math.pi)
 	body.CFrame = CFrame.new(at) * CFrame.Angles(0, yaw, 0)
 	body:SetAttribute("Model", g.Mob)
