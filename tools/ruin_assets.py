@@ -1,5 +1,5 @@
 """Ruins and biome props (QM, Oct 24): broken stone pillars, boulders, runic monoliths,
-big cacti, snowy pines and dead trees, in LassoAPet's portal-gate style (chamfered,
+big cacti, snowy pines, dead trees and bones (femur, ribcage, skull), in LassoAPet's portal-gate style (chamfered,
 slightly-off stone chunks, flat shaded, studded UVs) for the map's biomes.
 
 Like tools/world_assets.py (same OBJ writer and stud UVs), but each piece may be several
@@ -276,6 +276,79 @@ def dead_tree(seed, h=15.0):
     return [("Wood", "DeadWood", wood + roots)]
 
 
+def ball(rng, c, r, squash=(1, 1, 1), n=18):
+    """A lumpy ball (a knuckle of bone, a cranium): points round a sphere, jittered."""
+    pts = []
+    for i in range(n):
+        y = 1 - 2 * (i + 0.5) / n
+        a = i * math.pi * (3 - math.sqrt(5))
+        rr = math.sqrt(1 - y * y) * r * (1 + rng.uniform(-0.06, 0.06))
+        pts.append((math.cos(a) * rr * squash[0], y * r * squash[1], math.sin(a) * rr * squash[2]))
+    return place(pts, None, c)
+
+
+def chain(rng, points, r0, r1, sides=6):
+    """A bent bone along `points`, one tapered limb a span (they overlap at the joints)."""
+    out = []
+    n = len(points) - 1
+    for k in range(n):
+        a, b = np.asarray(points[k], float), np.asarray(points[k + 1], float)
+        ra, rb = r0 + (r1 - r0) * k / n, r0 + (r1 - r0) * (k + 1) / n
+        out.append(limb(rng, a, b - a, np.linalg.norm(b - a) + rb * 0.5, ra, rb, sides))
+    return out
+
+
+def femur(seed, length=10.0):
+    """A giant thigh bone lying on the ground: a shaft with a double knuckle each end
+    (QM, Oct 24: bones to decorate the Lava zone)."""
+    rng = np.random.default_rng(seed)
+    half = length / 2 - 1.0
+    tilt = rot_y(math.radians(8))
+    bone = [place(limb(rng, (-half, 0.75, 0), (1, 0.04, 0), 2 * half, 0.62, 0.55, 7), tilt)]
+    for x in (-half - 0.3, half + 0.3):
+        for z in (-0.6, 0.65):
+            bone.append(place(ball(rng, (x, 0.9 if z < 0 else 0.8, z), 0.95), tilt))
+    return [("Bone", "Bone", bone)]
+
+
+def ribcage(seed, n=5):
+    """A huge ribcage on its back: a spine of vertebrae down the middle, rib pairs arching
+    up and in over it, longest in the middle, a gap left along the top."""
+    rng = np.random.default_rng(seed)
+    spine, ribs = [], []
+    xs = np.linspace(-6, 6, n)
+    for x in np.linspace(-7.5, 7.5, 9):
+        spine.append(ball(rng, (x, 0.5, 0), 0.85, (1.0, 0.75, 1.1), 14))
+    for k, x in enumerate(xs):
+        R = 4.6 * (1 - 0.35 * abs(k - (n - 1) / 2) / ((n - 1) / 2))
+        for side in (-1, 1):
+            pts = []
+            for f in np.linspace(-90, 55, 7):
+                a = math.radians(f)
+                sweep = 0.9 * (f + 90) / 145  # (the ribs lean back, toward the tail)
+                pts.append((x + sweep, R * 0.95 + R * math.sin(a) + 0.3, side * R * math.cos(a)))
+            ribs += chain(rng, pts, 0.42, 0.26, 5)
+    return [("Ribs", "Bone", ribs), ("Spine", "BoneDark", spine)]
+
+
+def skull(seed):
+    """A big horned skull resting on the ground, muzzle to the front (-z): dark eye
+    sockets and nose, a row of teeth, two curled horns."""
+    rng = np.random.default_rng(seed)
+    bone = [ball(rng, (0, 3.0, 0.8), 3.0, (1.0, 0.95, 1.05), 26),
+            block(rng, -2.0, 0.2, -4.4, 2.0, 3.0, 0.0, 0.6, 0.08),
+            block(rng, -1.4, 0.0, -1.2, 1.4, 1.6, 2.2, 0.4, 0.05)]
+    for x in np.linspace(-1.5, 1.5, 5):
+        bone.append(prism(rng, 0, 0.9, 0.32, 0.12, 5) + (x, -0.05, -4.05))
+    dark = [ball(rng, (sx * 1.25, 3.5, -2.05), 0.85, (1.0, 0.8, 0.5), 14) for sx in (-1, 1)]
+    dark.append(ball(rng, (0, 2.5, -4.35), 0.5, (1.1, 0.8, 0.4), 12))
+    horns = []
+    for sx in (-1, 1):
+        pts = [(sx * 2.2, 4.6, 0.6), (sx * 3.6, 5.6, 0.9), (sx * 4.3, 7.0, 1.5), (sx * 4.1, 8.3, 2.4), (sx * 3.4, 9.0, 3.2)]
+        horns += chain(rng, pts, 0.75, 0.15, 6)
+    return [("Bone", "Bone", bone), ("Dark", "BoneDark", dark + horns)]
+
+
 ITEMS = {
     "RuinPillarBroken": broken_pillar(41),
     "RuinPillar": standing_pillar(42),
@@ -285,6 +358,9 @@ ITEMS = {
     "CactusBarrel": barrel_cactus(46),
     "SnowPine": snow_pine(47),
     "DeadTree": dead_tree(48),
+    "Femur": femur(49),
+    "Ribcage": ribcage(50),
+    "Skull": skull(51),
 }
 
 
@@ -324,6 +400,7 @@ COLOURS = {  # preview colours (in game: Config.WorldColors by key)
     "Stone": (214, 216, 206), "StoneDark": (150, 150, 144), "LavaPillar": (92, 78, 74), "Rune": (255, 120, 40),
     "CactusGreen": (92, 168, 70), "CactusFlower": (255, 120, 170), "PineTrunk": (120, 84, 58),
     "SnowPineNeedles": (52, 112, 96), "Snow": (244, 248, 252), "DeadWood": (70, 56, 50),
+    "Bone": (232, 222, 196), "BoneDark": (150, 136, 112),
 }
 
 

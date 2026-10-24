@@ -154,5 +154,36 @@
       "colour": "DeadWood",
       "obj": "DeadTree_Wood"
     }
+  ],
+  "Femur": [
+    {
+      "piece": "Bone",
+      "colour": "Bone",
+      "obj": "Femur_Bone"
+    }
+  ],
+  "Ribcage": [
+    {
+      "piece": "Ribs",
+      "colour": "Bone",
+      "obj": "Ribcage_Ribs"
+    },
+    {
+      "piece": "Spine",
+      "colour": "BoneDark",
+      "obj": "Ribcage_Spine"
+    }
+  ],
+  "Skull": [
+    {
+      "piece": "Bone",
+      "colour": "Bone",
+      "obj": "Skull_Bone"
+    },
+    {
+      "piece": "Dark",
+      "colour": "BoneDark",
+      "obj": "Skull_Dark"
+    }
   ]
 }

@@ -74,6 +74,15 @@
     "DeadWood"
    ]
   ],
+  "Femur": [
+   -5.69,
+   -2.58,
+   5.82,
+   2.64,
+   [
+    "Bone"
+   ]
+  ],
   "Monolith_Base": [
    -4.76,
    -3.42,
@@ -147,6 +156,16 @@
     "PineNeedlesC",
     "PineNeedlesD",
     "PineTrunk"
+   ]
+  ],
+  "Ribcage": [
+   -8.76,
+   -5.38,
+   8.83,
+   5.38,
+   [
+    "Bone",
+    "BoneDark"
    ]
   ],
   "RuinPillar_Base": [
@@ -237,6 +256,16 @@
    5.36,
    [
     "LavaPillar"
+   ]
+  ],
+  "Skull": [
+   -5.29,
+   -5.02,
+   5.3,
+   4.39,
+   [
+    "Bone",
+    "BoneDark"
    ]
   ],
   "SnowPine": [
@@ -1027,6 +1056,16 @@
    70,
    56,
    50
+  ],
+  "Bone": [
+   232,
+   222,
+   196
+  ],
+  "BoneDark": [
+   150,
+   136,
+   112
   ],
   "Boulder": [
    150,

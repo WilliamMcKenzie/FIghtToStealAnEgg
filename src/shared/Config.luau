@@ -98,6 +98,8 @@ return {
 		SnowPineNeedles = Color3.fromRGB(52, 112, 96),
 		Snow = Color3.fromRGB(244, 248, 252),
 		DeadWood = Color3.fromRGB(70, 56, 50),
+		Bone = Color3.fromRGB(232, 222, 196), -- (femur, ribcage, skull: QM, Oct 24, for the Lava zone)
+		BoneDark = Color3.fromRGB(150, 136, 112), -- (eye sockets, horns, the ribcage's spine)
 		-- boulders and monoliths, each biome's own (QM, Oct 24); runes are Neon and glow.
 		-- Base's go unprefixed (Boulder, Monolith, Rune), the biomes' as MeadowBoulder etc.
 		Boulder = Color3.fromRGB(150, 152, 146),

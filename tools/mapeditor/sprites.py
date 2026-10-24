@@ -33,7 +33,7 @@ STYLES = ["Base"] + [b["name"] for b in M.BIOMES]
 def sprites():
     """(name, scene) for everything the editor draws from a picture."""
     out = []
-    items = sorted({it for d in M.DRESSING.values() for it, _ in d["top"] + d["floor"]} | {d["ring"] for d in M.DRESSING.values()} | {"PineTall", "PineShort"})
+    items = sorted({it for d in M.DRESSING.values() for it, _ in d["top"] + d["floor"]} | {d["ring"] for d in M.DRESSING.values()} | {"PineTall", "PineShort", "Femur", "Ribcage", "Skull"})
     for it in items:
         stony = any(R.prop_key(it, p["colour"], "Meadow") != p["colour"] for p in R.PIECES[it])
         for st in STYLES if stony else ["Base"]:
