@@ -2,7 +2,10 @@
 -- world-asset lineup near spawn. Re-runnable.
 local AssetService = game:GetService("AssetService")
 local ServerStorage = game:GetService("ServerStorage")
-local Config = require(game.ReplicatedStorage.Shared.Config)
+-- (a fresh copy of Config: Studio's command bar keeps a required module cached, so
+-- colours added since the first run would be missing)
+local configCopy = game.ReplicatedStorage.Shared.Config:Clone()
+local Config = require(configCopy)
 local COLORS = Config.WorldColors
 local CHECKER, STUDS = "rbxassetid://84747779882944", "rbxassetid://7447638591"
 
@@ -123,6 +126,29 @@ local ITEMS = {
 			piece = "Wood",
 			colour = "DeadWood",
 			id = "rbxassetid://139771638447721",
+		} },
+	Femur = { {
+			piece = "Bone",
+			colour = "Bone",
+			id = "rbxassetid://118444554613780",
+		} },
+	Ribcage = { {
+			piece = "Ribs",
+			colour = "Bone",
+			id = "rbxassetid://98686404354753",
+		}, {
+			piece = "Spine",
+			colour = "BoneDark",
+			id = "rbxassetid://82784954944879",
+		} },
+	Skull = { {
+			piece = "Bone",
+			colour = "Bone",
+			id = "rbxassetid://137711366132284",
+		}, {
+			piece = "Dark",
+			colour = "BoneDark",
+			id = "rbxassetid://92502971536719",
 		} },
 }
 local PROPS = { { "StoneRubble", -60, -36, 20 }, { "StoneBlockLow", -48, -36, 0 }, { "StoneBlock", -36, -36, 0 }, { "PineTall", 36, -36, 0 }, { "PineShort", 52, -36, 40 } }
