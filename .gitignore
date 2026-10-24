@@ -9,3 +9,4 @@
 .DS_Store
 __pycache__/
 tools/studio/_*.luau
+tools/node_modules/
