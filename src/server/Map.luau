@@ -44,6 +44,7 @@ local STONE_MESH = "rbxassetid://128149382332662" -- StoneBlock_Block (assets/me
 local SIDES = { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
 local ALL = { Enum.NormalId.Top, Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
 local FLOOR_BOTTOM = -2
+local SEAM = 0.03 -- how far each floor part reaches past its edges
 local LIP = 0.25 -- how far a wall's cap overhangs it (as the lineup's showcase)
 
 local function folder(name, parent)
@@ -194,6 +195,16 @@ local function floors(parent, wallParent)
 			end
 			local p = box(key, f, x0, FLOOR_BOTTOM, z0, x0 + sx, top, z0 - sz, key, faces)
 			p.Locked = true
+			-- a hair bigger all round, so neighbours overlap and no crack shows between them
+			-- (QM, Oct 24: creases between plates). The top's textures shift back by the same
+			-- hair, so the overlap shows the same squares from both parts.
+			p.Size += Vector3.new(2 * SEAM, 0, 2 * SEAM)
+			for _, t in p:GetChildren() do
+				if t:IsA("Texture") and t.Face == Enum.NormalId.Top then
+					t.OffsetStudsU = (t.OffsetStudsU - SEAM) % t.StudsPerTileU
+					t.OffsetStudsV = (t.OffsetStudsV - SEAM) % t.StudsPerTileV
+				end
+			end
 		end
 	end
 end
