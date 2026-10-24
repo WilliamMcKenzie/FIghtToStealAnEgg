@@ -6,7 +6,7 @@
    6.39,
    4.88,
    [
-    "StoneDark"
+    "BoulderDark"
    ]
   ],
   "Boulders_Meadow": [
@@ -15,7 +15,7 @@
    6.39,
    4.88,
    [
-    "MeadowPillarDark"
+    "MeadowBoulderDark"
    ]
   ],
   "Boulders_Desert": [
@@ -24,7 +24,7 @@
    6.39,
    4.88,
    [
-    "DesertPillarDark"
+    "DesertBoulderDark"
    ]
   ],
   "Boulders_Ice": [
@@ -33,7 +33,7 @@
    6.39,
    4.88,
    [
-    "IcePillarDark"
+    "IceBoulderDark"
    ]
   ],
   "Boulders_Lava": [
@@ -42,7 +42,7 @@
    6.39,
    4.88,
    [
-    "LavaPillarDark"
+    "LavaBoulderDark"
    ]
   ],
   "Cactus": [
@@ -74,14 +74,54 @@
     "DeadWood"
    ]
   ],
-  "Monolith": [
+  "Monolith_Base": [
    -4.76,
    -3.42,
    5.22,
    3.8,
    [
-    "LavaPillar",
+    "Monolith",
     "Rune"
+   ]
+  ],
+  "Monolith_Meadow": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "MeadowMonolith",
+    "MeadowRune"
+   ]
+  ],
+  "Monolith_Desert": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "DesertMonolith",
+    "DesertRune"
+   ]
+  ],
+  "Monolith_Ice": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "IceMonolith",
+    "IceRune"
+   ]
+  ],
+  "Monolith_Lava": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "LavaMonolith",
+    "LavaRune"
    ]
   ],
   "PineShort": [
@@ -988,7 +1028,127 @@
    56,
    50
   ],
+  "Boulder": [
+   150,
+   152,
+   146
+  ],
+  "BoulderDark": [
+   118,
+   120,
+   116
+  ],
+  "Monolith": [
+   96,
+   98,
+   106
+  ],
+  "MonolithDark": [
+   68,
+   70,
+   78
+  ],
   "Rune": [
+   110,
+   200,
+   255
+  ],
+  "MeadowBoulder": [
+   140,
+   146,
+   124
+  ],
+  "MeadowBoulderDark": [
+   106,
+   116,
+   92
+  ],
+  "MeadowMonolith": [
+   118,
+   128,
+   104
+  ],
+  "MeadowMonolithDark": [
+   86,
+   98,
+   74
+  ],
+  "MeadowRune": [
+   120,
+   255,
+   140
+  ],
+  "DesertBoulder": [
+   198,
+   140,
+   92
+  ],
+  "DesertBoulderDark": [
+   164,
+   108,
+   70
+  ],
+  "DesertMonolith": [
+   212,
+   166,
+   106
+  ],
+  "DesertMonolithDark": [
+   176,
+   130,
+   80
+  ],
+  "DesertRune": [
+   255,
+   214,
+   90
+  ],
+  "IceBoulder": [
+   152,
+   178,
+   206
+  ],
+  "IceBoulderDark": [
+   112,
+   142,
+   178
+  ],
+  "IceMonolith": [
+   122,
+   160,
+   210
+  ],
+  "IceMonolithDark": [
+   86,
+   124,
+   178
+  ],
+  "IceRune": [
+   130,
+   236,
+   255
+  ],
+  "LavaBoulder": [
+   64,
+   54,
+   52
+  ],
+  "LavaBoulderDark": [
+   44,
+   38,
+   38
+  ],
+  "LavaMonolith": [
+   104,
+   80,
+   70
+  ],
+  "LavaMonolithDark": [
+   76,
+   60,
+   56
+  ],
+  "LavaRune": [
    255,
    120,
    40

@@ -331,6 +331,27 @@ local function pillarKeys(style)
 	return style .. "Pillar", style .. "PillarDark"
 end
 
+-- A prop piece's ColorKey in its style: boulders and monoliths have each biome's own
+-- colours (Config.WorldColors MeadowBoulder, LavaMonolith, IceRune...), other grey stone
+-- wears the biome's pillar colours. (tools/render3d.py prop() does the same for the editor.)
+local function propKey(item, key, style)
+	local prefix = if style == "Base" then "" else style
+	if item == "Boulders" and (key == "Stone" or key == "StoneDark") then
+		return prefix .. (if key == "Stone" then "Boulder" else "BoulderDark")
+	elseif item == "Monolith" then
+		if key == "Rune" then
+			return prefix .. "Rune"
+		elseif key == "LavaPillar" or key == "Stone" then
+			return prefix .. "Monolith"
+		elseif key == "LavaPillarDark" or key == "StoneDark" then
+			return prefix .. "MonolithDark"
+		end
+	elseif style ~= "Base" and (key == "Stone" or key == "StoneDark") then
+		return if key == "Stone" then style .. "Pillar" else style .. "PillarDark"
+	end
+	return key
+end
+
 -- A pillar of rough stone blocks (LassoAPet's portal gate style): a wide plinth, a shaft
 -- of courses (each one or two blocks, a little off true), a stepped capital. `size` is
 -- its footprint, `height` its top.
@@ -746,6 +767,7 @@ local function standIn(parent, item, at, scale, style, rng)
 	local model = Instance.new("Model")
 	model.Name = item
 	local function piece(offset, size, key, tilt)
+		key = propKey(item, key, style)
 		stone(model, at * CFrame.new(offset * scale) * (tilt or CFrame.identity), size * scale, key)
 	end
 	if item == "RuinPillar" or item == "RuinPillarBroken" then
@@ -784,7 +806,7 @@ local function standIn(parent, item, at, scale, style, rng)
 				model,
 				at * CFrame.new(Vector3.new(0, 3.4 + k * 3, -1.55) * scale),
 				Vector3.new(1.4, 1.8, 0.2) * scale,
-				"Rune",
+				propKey(item, "Rune", style),
 				{}
 			)
 			rune.Material = Enum.Material.Neon
@@ -812,7 +834,7 @@ local function standIn(parent, item, at, scale, style, rng)
 end
 
 -- The props (pines, ruins, cacti, monoliths...) from ServerStorage.WorldAssets: grey stone
--- pieces wear their biome's pillar colours, runes glow.
+-- pieces wear their biome's colours (propKey), runes glow.
 local function props(parent)
 	local assets = ServerStorage:FindFirstChild("WorldAssets")
 	local rng = Random.new(77)
@@ -831,12 +853,13 @@ local function props(parent)
 					part.Anchored = true
 					part.Locked = true
 					local key = part:GetAttribute("ColorKey")
-					if style ~= "Base" and (key == "Stone" or key == "StoneDark") then
-						key = if key == "Stone" then style .. "Pillar" else style .. "PillarDark"
+					local mine = key and propKey(item, key, style)
+					if mine ~= key then
+						key = mine
 						part:SetAttribute("ColorKey", key)
 						part.Color = color(key)
 					end
-					if key == "Rune" then
+					if key and string.sub(key, -4) == "Rune" then
 						part.Material = Enum.Material.Neon
 						part.CanCollide = false
 					end

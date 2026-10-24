@@ -35,7 +35,7 @@ def sprites():
     out = []
     items = sorted({it for d in M.DRESSING.values() for it, _ in d["top"] + d["floor"]} | {d["ring"] for d in M.DRESSING.values()} | {"PineTall", "PineShort"})
     for it in items:
-        stony = any(p["colour"] in ("Stone", "StoneDark") for p in R.PIECES[it])
+        stony = any(R.prop_key(it, p["colour"], "Meadow") != p["colour"] for p in R.PIECES[it])
         for st in STYLES if stony else ["Base"]:
             sc = R.Scene()
             R.prop(sc, it, 0, 0, 0, 0, 1, st)

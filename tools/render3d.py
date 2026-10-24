@@ -299,15 +299,31 @@ def nest(scene, rng, x, z, egg=None):
         scene.ellipsoid(egg, (x, 1 + 3.3 / 2, z), (1.3, 1.65, 1.3))
 
 
+def prop_key(item, key, st):
+    """A prop piece's colour in its style (as Server/Map propKey): boulders and monoliths
+    have each biome's own colours, other grey stone the biome's pillar colours."""
+    pre = "" if st == "Base" else st
+    if item == "Boulders" and key in ("Stone", "StoneDark"):
+        return pre + ("Boulder" if key == "Stone" else "BoulderDark")
+    if item == "Monolith":
+        if key == "Rune":
+            return pre + "Rune"
+        if key in ("LavaPillar", "Stone"):
+            return pre + "Monolith"
+        if key in ("LavaPillarDark", "StoneDark"):
+            return pre + "MonolithDark"
+    elif st != "Base" and key in ("Stone", "StoneDark"):
+        return st + ("Pillar" if key == "Stone" else "PillarDark")
+    return key
+
+
 def prop(scene, item, x, z, gy, yaw, scale, st):
-    """A prop from assets/meshes (pieces.json), stone pieces in its style's pillar colours."""
+    """A prop from assets/meshes (pieces.json), its stone in its style's colours."""
     R = rot_y(yaw)
     for p in PIECES[item]:
-        key = p["colour"]
-        if st != "Base" and key in ("Stone", "StoneDark"):
-            key = st + ("Pillar" if key == "Stone" else "PillarDark")
+        key = prop_key(item, p["colour"], st)
         V, F = obj(p["obj"])
-        scene.mesh(key, V, F, scale, R, np.array([x, gy, z]), mode="glow" if key == "Rune" else "plain")
+        scene.mesh(key, V, F, scale, R, np.array([x, gy, z]), mode="glow" if key.endswith("Rune") else "plain")
 
 
 # ---- the build (as Server/Map.luau) ------------------------------------------------------
