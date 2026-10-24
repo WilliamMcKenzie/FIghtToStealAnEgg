@@ -1,0 +1,85 @@
+{
+  "name": "StealAndFightPets",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/server"
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "ShadowMap",
+        "Brightness": 1,
+        "GlobalShadows": false,
+        "ShadowSoftness": 0.2,
+        "Ambient": [
+          0,
+          0,
+          0
+        ],
+        "OutdoorAmbient": [
+          0.7450980392156863,
+          0.7490196078431373,
+          0.7490196078431373
+        ],
+        "EnvironmentDiffuseScale": 0.2,
+        "EnvironmentSpecularScale": 0,
+        "ExposureCompensation": 0.5,
+        "ClockTime": 12,
+        "FogStart": 100000,
+        "FogEnd": 100000,
+        "GeographicLatitude": 0,
+        "ColorShift_Bottom": [
+          0,
+          0,
+          0
+        ],
+        "ColorShift_Top": [
+          0,
+          0,
+          0
+        ],
+        "LightingStyle": "Soft",
+        "PrioritizeLightingQuality": false
+      },
+      "ColorCorrection": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Contrast": 0.05,
+          "Saturation": 0.25
+        }
+      },
+      "Sky": {
+        "$className": "Sky",
+        "$properties": {
+          "CelestialBodiesShown": false,
+          "StarCount": 0,
+          "SkyboxBk": "rbxassetid://81588505365795",
+          "SkyboxDn": "rbxassetid://81588505365795",
+          "SkyboxFt": "rbxassetid://81588505365795",
+          "SkyboxLf": "rbxassetid://81588505365795",
+          "SkyboxRt": "rbxassetid://81588505365795",
+          "SkyboxUp": "rbxassetid://81588505365795"
+        }
+      }
+    },
+    "TextChatService": {
+      "$properties": {
+        "ChatVersion": "TextChatService"
+      }
+    }
+  }
+}

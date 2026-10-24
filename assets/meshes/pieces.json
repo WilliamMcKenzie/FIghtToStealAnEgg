@@ -1,0 +1,77 @@
+{
+  "PineTall": [
+    {
+      "piece": "Trunk",
+      "colour": "PineTrunk",
+      "obj": "PineTall_Trunk"
+    },
+    {
+      "piece": "Tier1",
+      "colour": "PineNeedlesA",
+      "obj": "PineTall_Tier1"
+    },
+    {
+      "piece": "Tier2",
+      "colour": "PineNeedlesB",
+      "obj": "PineTall_Tier2"
+    },
+    {
+      "piece": "Tier3",
+      "colour": "PineNeedlesC",
+      "obj": "PineTall_Tier3"
+    },
+    {
+      "piece": "Tier4",
+      "colour": "PineNeedlesD",
+      "obj": "PineTall_Tier4"
+    }
+  ],
+  "PineShort": [
+    {
+      "piece": "Trunk",
+      "colour": "PineTrunk",
+      "obj": "PineShort_Trunk"
+    },
+    {
+      "piece": "Tier1",
+      "colour": "PineNeedlesA",
+      "obj": "PineShort_Tier1"
+    },
+    {
+      "piece": "Tier2",
+      "colour": "PineNeedlesB",
+      "obj": "PineShort_Tier2"
+    },
+    {
+      "piece": "Tier3",
+      "colour": "PineNeedlesC",
+      "obj": "PineShort_Tier3"
+    }
+  ],
+  "StoneBlock": [
+    {
+      "piece": "Block",
+      "colour": "Stone",
+      "obj": "StoneBlock_Block"
+    }
+  ],
+  "StoneBlockLow": [
+    {
+      "piece": "Block",
+      "colour": "Stone",
+      "obj": "StoneBlockLow_Block"
+    }
+  ],
+  "StoneRubble": [
+    {
+      "piece": "Big",
+      "colour": "StoneDark",
+      "obj": "StoneRubble_Big"
+    },
+    {
+      "piece": "Small",
+      "colour": "Stone",
+      "obj": "StoneRubble_Small"
+    }
+  ]
+}
