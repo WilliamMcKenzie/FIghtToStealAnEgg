@@ -869,8 +869,9 @@ end
 
 -- ---- all of it ---------------------------------------------------------------------------
 
--- out of the way: in Play the lineup and a fresh place's baseplate (they'd sit under the
--- base); in Edit mode only the baseplate and its spawn, kept in ServerStorage
+-- out of the way: the lineup (tools/lineup.luau's workspace.World: its 1024-stud grass
+-- floor at y 0 z-fights the map's grass and covers the dirt a stud below it) and a fresh
+-- place's baseplate. In Play they go; in Edit mode they're kept in ServerStorage.
 local function clearSite()
 	if RunService:IsRunning() then
 		if Config.Map.HideLineup then
@@ -887,9 +888,9 @@ local function clearSite()
 		end
 		return
 	end
-	for _, name in { "Baseplate", "SpawnLocation" } do
+	for _, name in { "World", "Baseplate", "SpawnLocation" } do
 		local thing = workspace:FindFirstChild(name)
-		if thing then
+		if thing and (name ~= "World" or Config.Map.HideLineup) then
 			local keep = ServerStorage:FindFirstChild("MovedByMapBaker") or Instance.new("Folder")
 			keep.Name = "MovedByMapBaker"
 			keep.Parent = ServerStorage
