@@ -27,13 +27,15 @@ import render3d as R  # noqa: E402
 OUT = os.path.join(HERE, "sprites")
 PX = 8  # pixels a stud
 MAX_PX = 640
-STYLES = ["Base"] + [b["name"] for b in M.BIOMES]
+STYLES = ["Base"] + [b["name"] for b in M.BIOMES] + ["Dungeon", "Castle", "Forest", "Ocean"]  # (past the Lava: tools/map_fork.py)
+NEW_DECOR = ["Torch", "WallTorch", "Shackles", "HumanSkull", "Candelabra", "Candles", "CandlePodium", "ForestCandle",
+             "PalmTree", "PalmTreeSmall", "Kelp", "Starfish", "Sponges", "Coral"]
 
 
 def sprites():
     """(name, scene) for everything the editor draws from a picture."""
     out = []
-    items = sorted({it for d in M.DRESSING.values() for it, _ in d["top"] + d["floor"]} | {d["ring"] for d in M.DRESSING.values()} | {"PineTall", "PineShort", "Femur", "Ribcage", "Skull"})
+    items = sorted({it for d in M.DRESSING.values() for it, _ in d["top"] + d["floor"]} | {d["ring"] for d in M.DRESSING.values()} | {"PineTall", "PineShort", "Femur", "Ribcage", "Skull"} | set(NEW_DECOR))
     for it in items:
         stony = any(R.prop_key(it, p["colour"], "Meadow") != p["colour"] for p in R.PIECES[it])
         for st in STYLES if stony else ["Base"]:

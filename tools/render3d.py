@@ -323,7 +323,7 @@ def prop(scene, item, x, z, gy, yaw, scale, st):
     for p in PIECES[item]:
         key = prop_key(item, p["colour"], st)
         V, F = obj(p["obj"])
-        scene.mesh(key, V, F, scale, R, np.array([x, gy, z]), mode="glow" if key.endswith("Rune") else "plain")
+        scene.mesh(key, V, F, scale, R, np.array([x, gy, z]), mode="glow" if key.endswith(("Rune", "Flame")) else "plain")
 
 
 # ---- the build (as Server/Map.luau) ------------------------------------------------------

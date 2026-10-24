@@ -150,6 +150,48 @@ local ITEMS = {
 			colour = "BoneDark",
 			id = "rbxassetid://92502971536719",
 		} },
+	PalmTree = { {
+			piece = "Trunk",
+			colour = "ForestTrunk",
+			id = "rbxassetid://99808729024646",
+		}, {
+			piece = "TrunkRings",
+			colour = "ForestTrunkDark",
+			id = "rbxassetid://90764732062237",
+		}, {
+			piece = "Fronds",
+			colour = "ForestFrondDark",
+			id = "rbxassetid://109196007060782",
+		}, {
+			piece = "FrondsLight",
+			colour = "ForestFrond",
+			id = "rbxassetid://101932241612867",
+		}, {
+			piece = "Fruit",
+			colour = "ForestFruit",
+			id = "rbxassetid://93187689323776",
+		} },
+	PalmTreeSmall = { {
+			piece = "Trunk",
+			colour = "ForestTrunk",
+			id = "rbxassetid://122426000934087",
+		}, {
+			piece = "TrunkRings",
+			colour = "ForestTrunkDark",
+			id = "rbxassetid://90511748416329",
+		}, {
+			piece = "Fronds",
+			colour = "ForestFrondDark",
+			id = "rbxassetid://99500360728648",
+		}, {
+			piece = "FrondsLight",
+			colour = "ForestFrond",
+			id = "rbxassetid://71129173459040",
+		}, {
+			piece = "Fruit",
+			colour = "ForestFruit",
+			id = "rbxassetid://72799685534058",
+		} },
 }
 local PROPS = { { "StoneRubble", -60, -36, 20 }, { "StoneBlockLow", -48, -36, 0 }, { "StoneBlock", -36, -36, 0 }, { "PineTall", 36, -36, 0 }, { "PineShort", 52, -36, 40 } }
 
@@ -245,10 +287,13 @@ for item, pieces in ITEMS do
 		})
 		part.Name = piece.piece
 		part.Anchored = true
-		part.Material = if piece.colour == "Rune" then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		-- (runes and flames glow)
+		local glow = piece.colour:match("Rune$") or piece.colour:match("Flame$")
+		part.Material = if glow then Enum.Material.Neon else Enum.Material.SmoothPlastic
 		part:SetAttribute("ColorKey", piece.colour) part.Color = COLORS[piece.colour]
 		-- (pine needles, snow and cactus flowers don't block; trunks, cacti and stones do)
-		part.CanCollide = not (piece.piece:match("^Tier") or piece.piece == "Needles" or piece.piece == "Snow" or piece.piece == "Flowers" or piece.piece == "Runes")
+		part.CanCollide = not (piece.piece:match("^Tier") or piece.piece == "Needles" or piece.piece == "Snow" or piece.piece == "Flowers" or piece.piece == "Runes"
+			or piece.piece == "Flame" or piece.piece:match("^Fronds") or piece.piece:match("^Blades") or item == "Starfish")
 		part.Parent = model
 	end
 	model.Parent = assets

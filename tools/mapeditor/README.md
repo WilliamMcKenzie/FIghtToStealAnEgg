@@ -3,7 +3,9 @@
 `MapEditor.html` edits the game's map, `maps/world.map` (QM, Oct 24). Open it in a browser
 (it's one self-contained file), paint the floor and the walls a 4-stud checker square at a time, place
 and move every mesh (props, pillars, arches, ruins, nests, bosses), tweak any colour, then **Download .map** and send it
-over. Only the barriers are fixed (tools/map_gen.py lays them out).
+over. Only the barriers are fixed (tools/map_gen.py lays them out). **Grow map** adds 64 studs of
+empty room along a side (tools/map_grow.py does the same from the command line; serve.py's merge
+copes with a map that grew in the tab or in the file).
 
 On this Mac: `python3 tools/mapeditor/serve.py` serves it at http://localhost:3000, opening the
 game's current `maps/world.map`. Its **Save to game** button writes `maps/world.map`, bakes

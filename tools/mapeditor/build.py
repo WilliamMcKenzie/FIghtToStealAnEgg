@@ -41,7 +41,7 @@ def main():
         "world": world_keys,
         "sprites": sprites,
         "items": items,
-        "styles": ["Base", "Meadow", "Desert", "Ice", "Lava"],
+        "styles": ["Base", "Meadow", "Desert", "Ice", "Lava", "Dungeon", "Castle", "Forest", "Ocean"],
         "studTransparency": stud,
         "map": open(os.path.join(ROOT, "maps", "world.map")).read(),
     }

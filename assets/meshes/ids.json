@@ -29,5 +29,15 @@
   "Ribcage_Ribs": "rbxassetid://98686404354753",
   "Ribcage_Spine": "rbxassetid://82784954944879",
   "Skull_Bone": "rbxassetid://137711366132284",
-  "Skull_Dark": "rbxassetid://92502971536719"
+  "Skull_Dark": "rbxassetid://92502971536719",
+  "PalmTree_Trunk": "rbxassetid://99808729024646",
+  "PalmTree_TrunkRings": "rbxassetid://90764732062237",
+  "PalmTree_Fronds": "rbxassetid://109196007060782",
+  "PalmTree_Fruit": "rbxassetid://93187689323776",
+  "PalmTreeSmall_Trunk": "rbxassetid://122426000934087",
+  "PalmTreeSmall_TrunkRings": "rbxassetid://90511748416329",
+  "PalmTreeSmall_Fronds": "rbxassetid://99500360728648",
+  "PalmTreeSmall_Fruit": "rbxassetid://72799685534058",
+  "PalmTree_FrondsLight": "rbxassetid://101932241612867",
+  "PalmTreeSmall_FrondsLight": "rbxassetid://71129173459040"
 }

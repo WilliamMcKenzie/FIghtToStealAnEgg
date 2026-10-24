@@ -19,6 +19,9 @@ import sys
 import tempfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from map_grow import reframe  # noqa: E402
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 STUDIO = os.path.join(ROOT, "tools", "studio")
@@ -57,7 +60,19 @@ def merge(base, mine, theirs):
     (QM's other tabs, Claude's edits to the file) stays. Rows merge cell by cell."""
     b, m, t = json.loads(base), json.loads(mine), json.loads(theirs)
     if b.get("size") != t.get("size") or b.get("size") != m.get("size"):
-        return mine  # (a different layout: the tab's map as it is)
+        # (the map grew, in the tab or in the file: all three laid into a grid holding both)
+        cell = m["cell"]
+        x0 = min(m["origin"][0], t["origin"][0])
+        z0 = min(m["origin"][1], t["origin"][1])
+        x1 = max(d["origin"][0] + d["size"][0] * cell for d in (m, t))
+        z1 = max(d["origin"][1] + d["size"][1] * cell for d in (m, t))
+        frame = ([x0, z0], [(x1 - x0) // cell, (z1 - z0) // cell])
+        grown = [reframe(d, *frame) for d in (b, m, t)]
+        if None in grown or cell != t["cell"]:
+            return mine  # (a different layout: the tab's map as it is)
+        b, m, t = grown
+        for d in (b, m):
+            d["origin"], d["size"] = t["origin"], t["size"]
     out = dict(t)
     for k in m:
         if k == "rows":

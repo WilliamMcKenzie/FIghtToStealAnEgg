@@ -45,6 +45,42 @@
     "LavaBoulderDark"
    ]
   ],
+  "Boulders_Dungeon": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "DungeonBoulderDark"
+   ]
+  ],
+  "Boulders_Castle": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "CastleBoulderDark"
+   ]
+  ],
+  "Boulders_Forest": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "ForestBoulderDark"
+   ]
+  ],
+  "Boulders_Ocean": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "OceanBoulderDark"
+   ]
+  ],
   "Cactus": [
    -4.95,
    -2.47,
@@ -65,6 +101,48 @@
     "CactusGreen"
    ]
   ],
+  "Candelabra": [
+   -2.97,
+   -1.76,
+   2.97,
+   1.79,
+   [
+    "CandleFlame",
+    "CandleWax",
+    "Gold"
+   ]
+  ],
+  "CandlePodium": [
+   -1.91,
+   -1.92,
+   1.93,
+   1.91,
+   [
+    "ForestCandleWax",
+    "ForestFlame",
+    "ForestPodium",
+    "ForestPodiumDark"
+   ]
+  ],
+  "Candles": [
+   -2.17,
+   -2.15,
+   2.21,
+   2.19,
+   [
+    "CandleFlame",
+    "CandleWax"
+   ]
+  ],
+  "Coral": [
+   -4.77,
+   -4.93,
+   3.94,
+   5.54,
+   [
+    "Coral"
+   ]
+  ],
   "DeadTree": [
    -5.38,
    -3.98,
@@ -81,6 +159,37 @@
    2.64,
    [
     "Bone"
+   ]
+  ],
+  "ForestCandle": [
+   -1.73,
+   -1.67,
+   1.72,
+   1.76,
+   [
+    "ForestCandleWax",
+    "ForestFlame",
+    "ForestPodiumDark"
+   ]
+  ],
+  "HumanSkull": [
+   -1.44,
+   -1.66,
+   1.46,
+   1.85,
+   [
+    "Bone",
+    "BoneDark"
+   ]
+  ],
+  "Kelp": [
+   -3.09,
+   -2.78,
+   2.11,
+   2.98,
+   [
+    "Kelp",
+    "KelpDark"
    ]
   ],
   "Monolith_Base": [
@@ -131,6 +240,72 @@
    [
     "LavaMonolith",
     "LavaRune"
+   ]
+  ],
+  "Monolith_Dungeon": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "DungeonMonolith",
+    "DungeonRune"
+   ]
+  ],
+  "Monolith_Castle": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "CastleMonolith",
+    "CastleRune"
+   ]
+  ],
+  "Monolith_Forest": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "ForestMonolith",
+    "ForestRune"
+   ]
+  ],
+  "Monolith_Ocean": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "OceanMonolith",
+    "OceanRune"
+   ]
+  ],
+  "PalmTree": [
+   -3.97,
+   -8.0,
+   11.94,
+   7.98,
+   [
+    "ForestFrond",
+    "ForestFrondDark",
+    "ForestFruit",
+    "ForestTrunk",
+    "ForestTrunkDark"
+   ]
+  ],
+  "PalmTreeSmall": [
+   -3.34,
+   -5.65,
+   7.47,
+   5.46,
+   [
+    "ForestFrond",
+    "ForestFrondDark",
+    "ForestFruit",
+    "ForestTrunk",
+    "ForestTrunkDark"
    ]
   ],
   "PineShort": [
@@ -213,6 +388,42 @@
     "LavaPillar"
    ]
   ],
+  "RuinPillar_Dungeon": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "DungeonPillar"
+   ]
+  ],
+  "RuinPillar_Castle": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "CastlePillar"
+   ]
+  ],
+  "RuinPillar_Forest": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "ForestPillar"
+   ]
+  ],
+  "RuinPillar_Ocean": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "OceanPillar"
+   ]
+  ],
   "RuinPillarBroken_Base": [
    -5.31,
    -3.97,
@@ -258,6 +469,52 @@
     "LavaPillar"
    ]
   ],
+  "RuinPillarBroken_Dungeon": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "DungeonPillar"
+   ]
+  ],
+  "RuinPillarBroken_Castle": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "CastlePillar"
+   ]
+  ],
+  "RuinPillarBroken_Forest": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "ForestPillar"
+   ]
+  ],
+  "RuinPillarBroken_Ocean": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "OceanPillar"
+   ]
+  ],
+  "Shackles": [
+   -2.52,
+   -1.15,
+   2.51,
+   0.51,
+   [
+    "Iron",
+    "IronDark"
+   ]
+  ],
   "Skull": [
    -5.29,
    -5.02,
@@ -277,6 +534,47 @@
     "PineTrunk",
     "Snow",
     "SnowPineNeedles"
+   ]
+  ],
+  "Sponges": [
+   -3.64,
+   -2.77,
+   3.11,
+   2.8,
+   [
+    "Sponge",
+    "SpongeRock"
+   ]
+  ],
+  "Starfish": [
+   -2.34,
+   -2.45,
+   2.59,
+   2.51,
+   [
+    "Starfish"
+   ]
+  ],
+  "Torch": [
+   -1.51,
+   -1.89,
+   2.05,
+   1.88,
+   [
+    "DungeonFlame",
+    "Iron",
+    "IronDark"
+   ]
+  ],
+  "WallTorch": [
+   -1.21,
+   -2.79,
+   1.19,
+   0.51,
+   [
+    "DungeonFlame",
+    "Iron",
+    "IronDark"
    ]
   ],
   "Pillar_Base_joint_14": [
@@ -329,6 +627,46 @@
     "LavaPillarDark"
    ]
   ],
+  "Pillar_Dungeon_joint_14": [
+   -9.11,
+   -9.11,
+   9.11,
+   9.1,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_joint_14": [
+   -9.15,
+   -9.15,
+   9.15,
+   9.14,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_joint_14": [
+   -9.15,
+   -9.15,
+   9.15,
+   9.14,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_joint_14": [
+   -9.12,
+   -9.12,
+   9.12,
+   9.11,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
   "Pillar_Base_rubble_20": [
    -21.06,
    -8.94,
@@ -377,6 +715,46 @@
    [
     "LavaPillar",
     "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Dungeon_rubble_20": [
+   -23.91,
+   -9.73,
+   25.09,
+   9.8,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_rubble_20": [
+   -22.03,
+   -8.68,
+   16.2,
+   10.27,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_rubble_20": [
+   -22.03,
+   -8.68,
+   16.2,
+   10.27,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_rubble_20": [
+   -20.78,
+   -11.47,
+   20.16,
+   10.12,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
    ]
   ],
   "Pillar_Base_corner_22": [
@@ -429,6 +807,46 @@
     "LavaPillarDark"
    ]
   ],
+  "Pillar_Dungeon_corner_22": [
+   -13.23,
+   -13.23,
+   13.23,
+   13.22,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_corner_22": [
+   -13.0,
+   -13.09,
+   13.09,
+   13.09,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_corner_22": [
+   -13.0,
+   -13.09,
+   13.09,
+   13.09,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_corner_22": [
+   -13.05,
+   -13.35,
+   13.36,
+   13.35,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
   "Pillar_Base_gate_24": [
    -14.0,
    -14.3,
@@ -477,6 +895,46 @@
    [
     "LavaPillar",
     "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Dungeon_gate_24": [
+   -14.15,
+   -14.16,
+   14.15,
+   14.14,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_gate_24": [
+   -14.46,
+   -14.47,
+   14.47,
+   14.44,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_gate_24": [
+   -14.46,
+   -14.47,
+   14.47,
+   14.44,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_gate_24": [
+   -14.0,
+   -14.28,
+   14.29,
+   14.28,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
    ]
   ],
   "Pillar_Base_transition_26": [
@@ -529,6 +987,46 @@
     "LavaPillarDark"
    ]
   ],
+  "Pillar_Dungeon_transition_26": [
+   -15.0,
+   -15.32,
+   15.33,
+   15.32,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_transition_26": [
+   -15.1,
+   -15.44,
+   15.45,
+   15.44,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_transition_26": [
+   -15.1,
+   -15.44,
+   15.45,
+   15.44,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_transition_26": [
+   -15.11,
+   -15.11,
+   15.11,
+   15.09,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
   "Arch_Base": [
    -33.99,
    -8.5,
@@ -577,6 +1075,46 @@
    [
     "LavaPillar",
     "LavaPillarDark"
+   ]
+  ],
+  "Arch_Dungeon": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Arch_Castle": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Arch_Forest": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Arch_Ocean": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
    ]
   ],
   "Nest_Meadow": [
@@ -1032,6 +1570,206 @@
    60,
    56
   ],
+  "DungeonStone": [
+   74,
+   96,
+   86
+  ],
+  "DungeonStoneChecker": [
+   82,
+   106,
+   94
+  ],
+  "DungeonSlate": [
+   66,
+   82,
+   102
+  ],
+  "DungeonSlateChecker": [
+   74,
+   91,
+   112
+  ],
+  "DungeonWall": [
+   38,
+   40,
+   44
+  ],
+  "DungeonWallChecker": [
+   45,
+   47,
+   52
+  ],
+  "DungeonCap": [
+   54,
+   58,
+   60
+  ],
+  "DungeonCapChecker": [
+   61,
+   65,
+   67
+  ],
+  "DungeonPillar": [
+   84,
+   92,
+   92
+  ],
+  "DungeonPillarDark": [
+   58,
+   64,
+   66
+  ],
+  "CastleCarpet": [
+   156,
+   22,
+   42
+  ],
+  "CastleCarpetChecker": [
+   170,
+   30,
+   52
+  ],
+  "CastleFloor": [
+   78,
+   70,
+   86
+  ],
+  "CastleFloorChecker": [
+   87,
+   78,
+   95
+  ],
+  "CastleWall": [
+   112,
+   34,
+   42
+  ],
+  "CastleWallChecker": [
+   124,
+   40,
+   48
+  ],
+  "CastleCap": [
+   70,
+   62,
+   78
+  ],
+  "CastleCapChecker": [
+   78,
+   70,
+   86
+  ],
+  "CastlePillar": [
+   132,
+   116,
+   132
+  ],
+  "CastlePillarDark": [
+   100,
+   86,
+   102
+  ],
+  "ForestGrass": [
+   56,
+   196,
+   168
+  ],
+  "ForestGrassChecker": [
+   66,
+   208,
+   178
+  ],
+  "ForestStone": [
+   96,
+   124,
+   214
+  ],
+  "ForestStoneChecker": [
+   106,
+   134,
+   224
+  ],
+  "ForestWall": [
+   112,
+   140,
+   222
+  ],
+  "ForestWallChecker": [
+   124,
+   152,
+   230
+  ],
+  "ForestCap": [
+   56,
+   196,
+   168
+  ],
+  "ForestCapChecker": [
+   66,
+   208,
+   178
+  ],
+  "ForestPillar": [
+   150,
+   176,
+   240
+  ],
+  "ForestPillarDark": [
+   112,
+   140,
+   222
+  ],
+  "OceanSand": [
+   140,
+   200,
+   236
+  ],
+  "OceanSandChecker": [
+   152,
+   210,
+   242
+  ],
+  "OceanStone": [
+   60,
+   92,
+   188
+  ],
+  "OceanStoneChecker": [
+   68,
+   102,
+   198
+  ],
+  "OceanWall": [
+   48,
+   76,
+   170
+  ],
+  "OceanWallChecker": [
+   56,
+   86,
+   182
+  ],
+  "OceanCap": [
+   60,
+   92,
+   188
+  ],
+  "OceanCapChecker": [
+   68,
+   102,
+   198
+  ],
+  "OceanPillar": [
+   76,
+   110,
+   204
+  ],
+  "OceanPillarDark": [
+   52,
+   82,
+   176
+  ],
   "CactusGreen": [
    92,
    168,
@@ -1191,6 +1929,211 @@
    255,
    120,
    40
+  ],
+  "DungeonBoulder": [
+   70,
+   78,
+   78
+  ],
+  "DungeonBoulderDark": [
+   50,
+   56,
+   58
+  ],
+  "DungeonMonolith": [
+   56,
+   62,
+   66
+  ],
+  "DungeonMonolithDark": [
+   40,
+   44,
+   48
+  ],
+  "DungeonRune": [
+   90,
+   255,
+   140
+  ],
+  "CastleBoulder": [
+   96,
+   86,
+   102
+  ],
+  "CastleBoulderDark": [
+   72,
+   64,
+   78
+  ],
+  "CastleMonolith": [
+   88,
+   78,
+   96
+  ],
+  "CastleMonolithDark": [
+   64,
+   56,
+   72
+  ],
+  "CastleRune": [
+   255,
+   70,
+   90
+  ],
+  "ForestBoulder": [
+   120,
+   146,
+   224
+  ],
+  "ForestBoulderDark": [
+   90,
+   114,
+   196
+  ],
+  "ForestMonolith": [
+   128,
+   156,
+   232
+  ],
+  "ForestMonolithDark": [
+   96,
+   122,
+   204
+  ],
+  "ForestRune": [
+   110,
+   220,
+   255
+  ],
+  "OceanBoulder": [
+   64,
+   96,
+   190
+  ],
+  "OceanBoulderDark": [
+   46,
+   72,
+   160
+  ],
+  "OceanMonolith": [
+   70,
+   104,
+   198
+  ],
+  "OceanMonolithDark": [
+   50,
+   78,
+   168
+  ],
+  "OceanRune": [
+   120,
+   255,
+   230
+  ],
+  "Iron": [
+   84,
+   88,
+   96
+  ],
+  "IronDark": [
+   52,
+   54,
+   60
+  ],
+  "DungeonFlame": [
+   90,
+   255,
+   130
+  ],
+  "Gold": [
+   214,
+   168,
+   72
+  ],
+  "CandleWax": [
+   242,
+   232,
+   206
+  ],
+  "CandleFlame": [
+   255,
+   196,
+   92
+  ],
+  "ForestTrunk": [
+   92,
+   64,
+   82
+  ],
+  "ForestTrunkDark": [
+   74,
+   50,
+   68
+  ],
+  "ForestFrond": [
+   36,
+   150,
+   132
+  ],
+  "ForestFrondDark": [
+   28,
+   124,
+   112
+  ],
+  "ForestFruit": [
+   150,
+   96,
+   200
+  ],
+  "ForestPodium": [
+   150,
+   176,
+   240
+  ],
+  "ForestPodiumDark": [
+   104,
+   130,
+   214
+  ],
+  "ForestCandleWax": [
+   226,
+   220,
+   246
+  ],
+  "ForestFlame": [
+   96,
+   196,
+   255
+  ],
+  "Kelp": [
+   60,
+   168,
+   128
+  ],
+  "KelpDark": [
+   44,
+   136,
+   108
+  ],
+  "Starfish": [
+   255,
+   112,
+   64
+  ],
+  "Sponge": [
+   92,
+   92,
+   230
+  ],
+  "SpongeRock": [
+   52,
+   60,
+   108
+  ],
+  "Coral": [
+   226,
+   72,
+   170
   ],
   "Meadow": [
    250,

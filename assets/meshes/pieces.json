@@ -185,5 +185,223 @@
       "colour": "BoneDark",
       "obj": "Skull_Dark"
     }
+  ],
+  "Torch": [
+    {
+      "piece": "Iron",
+      "colour": "Iron",
+      "obj": "Torch_Iron"
+    },
+    {
+      "piece": "Bowl",
+      "colour": "IronDark",
+      "obj": "Torch_Bowl"
+    },
+    {
+      "piece": "Flame",
+      "colour": "DungeonFlame",
+      "obj": "Torch_Flame"
+    }
+  ],
+  "WallTorch": [
+    {
+      "piece": "Iron",
+      "colour": "Iron",
+      "obj": "WallTorch_Iron"
+    },
+    {
+      "piece": "Cup",
+      "colour": "IronDark",
+      "obj": "WallTorch_Cup"
+    },
+    {
+      "piece": "Flame",
+      "colour": "DungeonFlame",
+      "obj": "WallTorch_Flame"
+    }
+  ],
+  "Shackles": [
+    {
+      "piece": "Iron",
+      "colour": "Iron",
+      "obj": "Shackles_Iron"
+    },
+    {
+      "piece": "Chains",
+      "colour": "IronDark",
+      "obj": "Shackles_Chains"
+    }
+  ],
+  "HumanSkull": [
+    {
+      "piece": "Bone",
+      "colour": "Bone",
+      "obj": "HumanSkull_Bone"
+    },
+    {
+      "piece": "Dark",
+      "colour": "BoneDark",
+      "obj": "HumanSkull_Dark"
+    }
+  ],
+  "Candelabra": [
+    {
+      "piece": "Gold",
+      "colour": "Gold",
+      "obj": "Candelabra_Gold"
+    },
+    {
+      "piece": "Wax",
+      "colour": "CandleWax",
+      "obj": "Candelabra_Wax"
+    },
+    {
+      "piece": "Flame",
+      "colour": "CandleFlame",
+      "obj": "Candelabra_Flame"
+    }
+  ],
+  "Candles": [
+    {
+      "piece": "Wax",
+      "colour": "CandleWax",
+      "obj": "Candles_Wax"
+    },
+    {
+      "piece": "Flame",
+      "colour": "CandleFlame",
+      "obj": "Candles_Flame"
+    }
+  ],
+  "CandlePodium": [
+    {
+      "piece": "Stone",
+      "colour": "ForestPodium",
+      "obj": "CandlePodium_Stone"
+    },
+    {
+      "piece": "Trim",
+      "colour": "ForestPodiumDark",
+      "obj": "CandlePodium_Trim"
+    },
+    {
+      "piece": "Wax",
+      "colour": "ForestCandleWax",
+      "obj": "CandlePodium_Wax"
+    },
+    {
+      "piece": "Flame",
+      "colour": "ForestFlame",
+      "obj": "CandlePodium_Flame"
+    }
+  ],
+  "ForestCandle": [
+    {
+      "piece": "Dish",
+      "colour": "ForestPodiumDark",
+      "obj": "ForestCandle_Dish"
+    },
+    {
+      "piece": "Wax",
+      "colour": "ForestCandleWax",
+      "obj": "ForestCandle_Wax"
+    },
+    {
+      "piece": "Flame",
+      "colour": "ForestFlame",
+      "obj": "ForestCandle_Flame"
+    }
+  ],
+  "PalmTree": [
+    {
+      "piece": "Trunk",
+      "colour": "ForestTrunk",
+      "obj": "PalmTree_Trunk"
+    },
+    {
+      "piece": "TrunkRings",
+      "colour": "ForestTrunkDark",
+      "obj": "PalmTree_TrunkRings"
+    },
+    {
+      "piece": "Fronds",
+      "colour": "ForestFrondDark",
+      "obj": "PalmTree_Fronds"
+    },
+    {
+      "piece": "FrondsLight",
+      "colour": "ForestFrond",
+      "obj": "PalmTree_FrondsLight"
+    },
+    {
+      "piece": "Fruit",
+      "colour": "ForestFruit",
+      "obj": "PalmTree_Fruit"
+    }
+  ],
+  "PalmTreeSmall": [
+    {
+      "piece": "Trunk",
+      "colour": "ForestTrunk",
+      "obj": "PalmTreeSmall_Trunk"
+    },
+    {
+      "piece": "TrunkRings",
+      "colour": "ForestTrunkDark",
+      "obj": "PalmTreeSmall_TrunkRings"
+    },
+    {
+      "piece": "Fronds",
+      "colour": "ForestFrondDark",
+      "obj": "PalmTreeSmall_Fronds"
+    },
+    {
+      "piece": "FrondsLight",
+      "colour": "ForestFrond",
+      "obj": "PalmTreeSmall_FrondsLight"
+    },
+    {
+      "piece": "Fruit",
+      "colour": "ForestFruit",
+      "obj": "PalmTreeSmall_Fruit"
+    }
+  ],
+  "Kelp": [
+    {
+      "piece": "Blades",
+      "colour": "Kelp",
+      "obj": "Kelp_Blades"
+    },
+    {
+      "piece": "BladesDark",
+      "colour": "KelpDark",
+      "obj": "Kelp_BladesDark"
+    }
+  ],
+  "Starfish": [
+    {
+      "piece": "Body",
+      "colour": "Starfish",
+      "obj": "Starfish_Body"
+    }
+  ],
+  "Sponges": [
+    {
+      "piece": "Rock",
+      "colour": "SpongeRock",
+      "obj": "Sponges_Rock"
+    },
+    {
+      "piece": "Tubes",
+      "colour": "Sponge",
+      "obj": "Sponges_Tubes"
+    }
+  ],
+  "Coral": [
+    {
+      "piece": "Coral",
+      "colour": "Coral",
+      "obj": "Coral_Coral"
+    }
   ]
 }

@@ -860,9 +860,18 @@ local function props(parent)
 						part:SetAttribute("ColorKey", key)
 						part.Color = color(key)
 					end
-					if key and string.sub(key, -4) == "Rune" then
+					if key and (string.sub(key, -4) == "Rune" or string.sub(key, -5) == "Flame") then
 						part.Material = Enum.Material.Neon
 						part.CanCollide = false
+					end
+					-- (flames light up round them: QM, Oct 24, the new biomes' torches and candles)
+					if key and string.sub(key, -5) == "Flame" and not part:FindFirstChildOfClass("PointLight") then
+						local light = Instance.new("PointLight")
+						light.Color = part.Color
+						light.Range = 14 * math.clamp(scale, 0.5, 3)
+						light.Brightness = 1.6
+						light.Shadows = false
+						light.Parent = part
 					end
 				end
 			end

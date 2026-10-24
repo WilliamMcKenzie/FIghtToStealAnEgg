@@ -1,5 +1,6 @@
 """Ruins and biome props (QM, Oct 24): broken stone pillars, boulders, runic monoliths,
-big cacti, snowy pines, dead trees and bones (femur, ribcage, skull), in LassoAPet's portal-gate style (chamfered,
+big cacti, snowy pines, dead trees, bones (femur, ribcage, skull), and the decor of the
+biomes past the Lava (torches, shackles, candles, palms, kelp, coral...), in LassoAPet's portal-gate style (chamfered,
 slightly-off stone chunks, flat shaded, studded UVs) for the map's biomes.
 
 Like tools/world_assets.py (same OBJ writer and stud UVs), but each piece may be several
@@ -349,6 +350,218 @@ def skull(seed):
     return [("Bone", "Bone", bone), ("Dark", "BoneDark", dark + horns)]
 
 
+# ---- the new biomes' decor (QM, Oct 24: past the Lava, the Dungeon, Castle, Forest, Ocean) -
+
+def flame(rng, c, r, h):
+    """A teardrop flame on `c`: a narrow ring, a wide one, a point."""
+    pts = []
+    a0 = rng.uniform(0, 2 * math.pi)
+    for i in range(7):
+        a = a0 + 2 * math.pi * i / 7
+        pts.append((math.cos(a) * r * 0.6, 0, math.sin(a) * r * 0.6))
+        pts.append((math.cos(a) * r, h * 0.35, math.sin(a) * r))
+    pts.append((rng.uniform(-0.1, 0.1) * r, h, rng.uniform(-0.1, 0.1) * r))
+    return place(pts, None, c)
+
+
+def cyl(rng, c, r0, r1, h, sides=8):
+    """A short column standing on `c`."""
+    return place(prism(rng, 0, h, r0, r1, sides, jitter=0.02), None, c)
+
+
+def torch(seed):
+    """A standing dungeon torch: a tripod, an iron pole, a bowl, a green flame."""
+    rng = np.random.default_rng(seed)
+    iron = [cyl(rng, (0, 0.8, 0), 0.28, 0.24, 5.0, 6)]
+    for k in range(3):
+        a = k * 2 * math.pi / 3
+        iron += chain(rng, [(math.cos(a) * 1.4, 0, math.sin(a) * 1.4), (math.cos(a) * 0.5, 1.2, math.sin(a) * 0.5), (0, 2.4, 0)], 0.2, 0.16, 5)
+    bowl = [cyl(rng, (0, 5.6, 0), 0.5, 1.05, 0.9, 8), cyl(rng, (0, 5.3, 0), 0.32, 0.5, 0.35, 8)]
+    fire = [flame(rng, (0, 6.35, 0), 0.85, 2.4)]
+    return [("Iron", "Iron", iron), ("Bowl", "IronDark", bowl), ("Flame", "DungeonFlame", fire)]
+
+
+def wall_torch(seed):
+    """A torch in a bracket on a wall: the back plate is the item's +z edge (z = 0), so it
+    goes against a wall facing out (-z), seven studs up."""
+    rng = np.random.default_rng(seed)
+    plate = [block(rng, -0.6, 6.2, -0.3, 0.6, 8.6, 0, 0.1, 0.02)]
+    arm = chain(rng, [(0, 7.0, -0.2), (0, 7.2, -1.0), (0, 7.9, -1.5)], 0.18, 0.15, 5)
+    cup = [cyl(rng, (0, 7.8, -1.6), 0.3, 0.7, 0.7, 8)]
+    fire = [flame(rng, (0, 8.4, -1.6), 0.6, 1.8)]
+    return [("Iron", "Iron", plate + arm), ("Cup", "IronDark", cup), ("Flame", "DungeonFlame", fire)]
+
+
+def shackles(seed):
+    """Shackles on a wall (back at z = 0, as the wall torch): an iron plate, two chains
+    hanging down to open cuffs."""
+    rng = np.random.default_rng(seed)
+    iron = [block(rng, -2.0, 6.0, -0.3, 2.0, 7.0, 0, 0.12, 0.02)]
+    links = []
+    for sx in (-1, 1):
+        x = sx * 1.3
+        for k in range(6):
+            y = 5.8 - k * 0.55
+            sq = (0.45, 1.0, 1.0) if k % 2 else (1.0, 1.0, 0.45)
+            links.append(ball(rng, (x, y, -0.35), 0.3, sq, 10))
+        cuff = place(prism(rng, -0.3, 0.3, 0.55, 0.55, 8, jitter=0.0), rot_x(math.pi / 2), (x, 2.3, -0.35))
+        iron.append(cuff)
+    return [("Iron", "Iron", iron), ("Chains", "IronDark", links)]
+
+
+def human_skull(seed, s=1.4):
+    """A human skull (s times life size, as a pet sees it), face to -z."""
+    rng = np.random.default_rng(seed)
+    bone = [ball(rng, (0, 0.95 * s, 0.15 * s), 0.8 * s, (0.92, 0.95, 1.05), 22),
+            block(rng, -0.48 * s, 0.05 * s, -0.78 * s, 0.48 * s, 0.75 * s, 0.0, 0.15 * s, 0.01)]
+    for x in np.linspace(-0.3, 0.3, 4):
+        bone.append(cyl(rng, (x * s, 0.0, -0.72 * s), 0.07 * s, 0.05 * s, 0.25 * s, 5))
+    dark = [ball(rng, (sx * 0.28 * s, 0.98 * s, -0.55 * s), 0.21 * s, (1.0, 0.9, 0.6), 10) for sx in (-1, 1)]
+    dark.append(ball(rng, (0, 0.62 * s, -0.78 * s), 0.11 * s, (0.8, 1.2, 0.5), 8))
+    return [("Bone", "Bone", bone), ("Dark", "BoneDark", dark)]
+
+
+def candles_on(rng, tops, wax, fire, r=0.3, h=1.4):
+    for x, y, z in tops:
+        hh = h * rng.uniform(0.8, 1.15)
+        wax.append(cyl(rng, (x, y, z), r, r * 0.95, hh, 7))
+        fire.append(flame(rng, (x, y + hh, z), r * 0.9, r * 3))
+
+
+def candelabra(seed):
+    """A three-armed candelabra: a round foot, a knobbed stem, two arms curling up either
+    side of the middle, a candle in each cup."""
+    rng = np.random.default_rng(seed)
+    gold = [cyl(rng, (0, 0, 0), 1.3, 0.9, 0.4, 10), cyl(rng, (0, 0.4, 0), 0.6, 0.22, 0.6, 8),
+            cyl(rng, (0, 0.9, 0), 0.2, 0.18, 4.4, 6), ball(rng, (0, 2.2, 0), 0.42, (1, 0.8, 1), 12),
+            ball(rng, (0, 3.6, 0), 0.32, (1, 0.8, 1), 12)]
+    cups = [(0, 5.4, 0)]
+    for sx in (-1, 1):
+        gold += chain(rng, [(0, 3.6, 0), (sx * 0.9, 3.4, 0), (sx * 1.7, 3.7, 0), (sx * 2.0, 4.3, 0), (sx * 2.0, 4.7, 0)], 0.17, 0.15, 5)
+        cups.append((sx * 2.0, 4.7, 0))
+    for x, y, z in cups:
+        gold.append(cyl(rng, (x, y - 0.1, z), 0.25, 0.5, 0.35, 8))
+    wax, fire = [], []
+    candles_on(rng, [(x, y + 0.2, z) for x, y, z in cups], wax, fire, 0.28, 1.6)
+    return [("Gold", "Gold", gold), ("Wax", "CandleWax", wax), ("Flame", "CandleFlame", fire)]
+
+
+def candles(seed):
+    """A cluster of four candles of different heights in a puddle of wax."""
+    rng = np.random.default_rng(seed)
+    wax = [cyl(rng, (0, 0, 0), 1.7, 1.6, 0.12, 10)]
+    fire = []
+    for (x, z), h, r in (((0, 0), 3.0, 0.5), ((0.95, 0.45), 2.0, 0.4), ((-0.7, 0.75), 1.4, 0.38), ((0.2, -0.95), 1.0, 0.34)):
+        wax.append(cyl(rng, (x, 0, z), r * 1.05, r, h, 8))
+        fire.append(flame(rng, (x, h, z), r * 0.85, r * 2.8))
+    return [("Wax", "CandleWax", wax), ("Flame", "CandleFlame", fire)]
+
+
+def candle_podium(seed):
+    """A small stone podium (the Forest's, after QM's reference braziers) with candles."""
+    rng = np.random.default_rng(seed)
+    dark = [block(rng, -1.4, 0, -1.4, 1.4, 0.6, 1.4, 0.2, 0.03), block(rng, -1.2, 3.4, -1.2, 1.2, 3.9, 1.2, 0.18, 0.03)]
+    stone = [cyl(rng, (0, 0.5, 0), 0.85, 0.75, 3.0, 8)]
+    wax, fire = [], []
+    candles_on(rng, [(0, 3.9, 0), (0.6, 3.9, 0.45), (-0.55, 3.9, 0.5)], wax, fire, 0.26, 1.1)
+    return [("Stone", "ForestPodium", stone), ("Trim", "ForestPodiumDark", dark),
+            ("Wax", "ForestCandleWax", wax), ("Flame", "ForestFlame", fire)]
+
+
+def forest_candle(seed):
+    """The Forest's candle: a fat candle with wax drips in a stone dish, a blue flame."""
+    rng = np.random.default_rng(seed)
+    dish = [cyl(rng, (0, 0, 0), 0.9, 1.25, 0.5, 9)]
+    wax = [cyl(rng, (0, 0.45, 0), 0.62, 0.58, 1.9, 9)]
+    for k in range(4):
+        a = k * math.pi / 2 + rng.uniform(-0.3, 0.3)
+        wax.append(ball(rng, (math.cos(a) * 0.6, 1.4 + rng.uniform(0, 0.8), math.sin(a) * 0.6), 0.2, (1, 2.2, 1), 8))
+    fire = [flame(rng, (0, 2.35, 0), 0.5, 1.5)]
+    return [("Dish", "ForestPodiumDark", dish), ("Wax", "ForestCandleWax", wax), ("Flame", "ForestFlame", fire)]
+
+
+def palms(small):
+    """LassoAPet's palm (tools/pirate_meshes.py), reused (QM, Oct 24): its own meshes are
+    already uploaded (ids.json), so these pieces are only for the editor's pictures."""
+    lap = os.environ.get("LASSOAPET", os.path.join(HERE, "..", "..", "williammckenzie", "lassoapet"))
+    sys.path.insert(0, os.path.join(lap, "tools"))
+    import pirate_meshes as PM
+    raw = (PM.palm_small if small else PM.palm_tall)(np.random.default_rng(5 if small else 3))
+    keys = ["ForestTrunk", "ForestTrunkDark", "ForestFrondDark", "ForestFrond", "ForestFruit"]
+    names = ["Trunk", "TrunkRings", "Fronds", "FrondsLight", "Fruit"]
+    return [(n, k, pts) for n, k, (_, _, pts) in zip(names, keys, raw)]
+
+
+def kelp(seed):
+    """A clump of kelp: tall wavy blades, two greens."""
+    rng = np.random.default_rng(seed)
+    blades = [[], []]
+    for k in range(5):
+        a = k * 2 * math.pi / 5 + rng.uniform(-0.3, 0.3)
+        r = rng.uniform(0.3, 1.2)
+        h = rng.uniform(5, 9)
+        x0, z0 = math.cos(a) * r, math.sin(a) * r
+        pts = []
+        for j in range(5):
+            t = j / 4
+            pts.append((x0 + math.cos(a) * t * 1.2 + 0.5 * math.sin(t * 5 + k), h * t, z0 + math.sin(a) * t * 1.2))
+        side = np.array((-math.sin(a), 0, math.cos(a)))
+        for j in range(4):
+            p, q = np.array(pts[j]), np.array(pts[j + 1])
+            w0 = 0.7 * math.sin(math.pi * (j / 4 * 0.8 + 0.2))
+            w1 = 0.7 * math.sin(math.pi * ((j + 1) / 4 * 0.8 + 0.2)) if j < 3 else 0.08
+            seg = [p + side * w0, p - side * w0, q + side * w1, q - side * w1]
+            seg += [v + np.array((math.cos(a), 0, math.sin(a))) * 0.2 for v in seg]
+            blades[k % 2].append(np.array(seg))
+    return [("Blades", "Kelp", blades[0]), ("BladesDark", "KelpDark", blades[1])]
+
+
+def starfish(seed):
+    """An orange starfish lying flat: a domed middle, five tapered arms."""
+    rng = np.random.default_rng(seed)
+    body = [ball(rng, (0, 0.2, 0), 0.75, (1, 0.45, 1), 12)]
+    for k in range(5):
+        a = k * 2 * math.pi / 5 + rng.uniform(-0.1, 0.1)
+        body += chain(rng, [(0, 0.2, 0), (math.cos(a) * 1.1, 0.22, math.sin(a) * 1.1), (math.cos(a) * 2.0, 0.12, math.sin(a) * 2.0)], 0.42, 0.14, 5)
+    return [("Body", "Starfish", body)]
+
+
+def sponges(seed):
+    """Tube sponges, the purple-blue fingers of QM's reference, on a dark flat rock."""
+    rng = np.random.default_rng(seed)
+    rock = [boulder(rng, 3.0, 1.2, 7, (1.0, 0.75))]
+    tubes = []
+    for (x, z), h, r in (((0, 0), 4.4, 0.6), ((1.1, 0.4), 3.4, 0.5), ((-1.0, 0.5), 3.8, 0.55),
+                         ((0.5, -0.9), 2.8, 0.45), ((-0.6, -0.8), 2.4, 0.42), ((1.7, -0.5), 2.0, 0.4)):
+        tubes.append(cyl(rng, (x, 0.6, z), r, r * 0.9, h - 0.4, 8))
+        tubes.append(ball(rng, (x, 0.6 + h - 0.4, z), r * 0.9, (1, 0.7, 1), 12))
+    return [("Rock", "SpongeRock", rock), ("Tubes", "Sponge", tubes)]
+
+
+def coral(seed):
+    """A pink branching coral: a few trunks forking into upturned fingers."""
+    rng = np.random.default_rng(seed)
+    out = []
+
+    def branch(p, d, length, r, depth):
+        d = np.asarray(d, float) / np.linalg.norm(d)
+        q = np.asarray(p, float) + d * length
+        out.append(limb(rng, p, d, length + r * 0.5, r, r * 0.8, 6))
+        if depth == 0:
+            out.append(ball(rng, q, r * 0.85, (1, 1, 1), 10))
+            return
+        a = rng.uniform(0, 2 * math.pi)
+        for turn in (-1.0, 1.0):
+            # (a fork in a plane: one finger each way, both turning back up)
+            nd = np.array((math.cos(a) * turn * 0.9, 1.0, math.sin(a) * turn * 0.9)) + d * 0.3
+            branch(q, nd, length * rng.uniform(0.75, 0.9), r * 0.8, depth - 1)
+
+    for k in range(3):
+        a = k * 2 * math.pi / 3 + rng.uniform(-0.3, 0.3)
+        branch((math.cos(a) * 0.5, 0, math.sin(a) * 0.5), (math.cos(a) * 0.35, 1, math.sin(a) * 0.35), 3.2, 0.6, 3)
+    return [("Coral", "Coral", out)]
+
+
 ITEMS = {
     "RuinPillarBroken": broken_pillar(41),
     "RuinPillar": standing_pillar(42),
@@ -361,6 +574,27 @@ ITEMS = {
     "Femur": femur(49),
     "Ribcage": ribcage(50),
     "Skull": skull(51),
+    "Torch": torch(52),
+    "WallTorch": wall_torch(53),
+    "Shackles": shackles(54),
+    "HumanSkull": human_skull(55),
+    "Candelabra": candelabra(56),
+    "Candles": candles(57),
+    "CandlePodium": candle_podium(58),
+    "ForestCandle": forest_candle(59),
+    "PalmTree": palms(False),
+    "PalmTreeSmall": palms(True),
+    "Kelp": kelp(60),
+    "Starfish": starfish(61),
+    "Sponges": sponges(62),
+    "Coral": coral(63),
+}
+# (LassoAPet's palm meshes, already uploaded there: tools/pirate_meshes.py's pieces 1-5)
+REUSED = {
+    "PalmTree_Trunk": 99808729024646, "PalmTree_TrunkRings": 90764732062237, "PalmTree_Fronds": 109196007060782,
+    "PalmTree_FrondsLight": 101932241612867, "PalmTree_Fruit": 93187689323776,
+    "PalmTreeSmall_Trunk": 122426000934087, "PalmTreeSmall_TrunkRings": 90511748416329,
+    "PalmTreeSmall_Fronds": 99500360728648, "PalmTreeSmall_FrondsLight": 71129173459040, "PalmTreeSmall_Fruit": 72799685534058,
 }
 
 
@@ -401,6 +635,13 @@ COLOURS = {  # preview colours (in game: Config.WorldColors by key)
     "CactusGreen": (92, 168, 70), "CactusFlower": (255, 120, 170), "PineTrunk": (120, 84, 58),
     "SnowPineNeedles": (52, 112, 96), "Snow": (244, 248, 252), "DeadWood": (70, 56, 50),
     "Bone": (232, 222, 196), "BoneDark": (150, 136, 112),
+    "Iron": (84, 88, 96), "IronDark": (52, 54, 60), "DungeonFlame": (90, 255, 130), "Gold": (214, 168, 72),
+    "CandleWax": (242, 232, 206), "CandleFlame": (255, 196, 92), "ForestTrunk": (92, 64, 82),
+    "ForestTrunkDark": (74, 50, 68), "ForestFrond": (36, 150, 132), "ForestFrondDark": (28, 124, 112),
+    "ForestFruit": (150, 96, 200), "ForestPodium": (150, 176, 240), "ForestPodiumDark": (104, 130, 214),
+    "ForestCandleWax": (226, 220, 246), "ForestFlame": (96, 196, 255), "Kelp": (60, 168, 128),
+    "KelpDark": (44, 136, 108), "Starfish": (255, 112, 64), "Sponge": (92, 92, 230), "SpongeRock": (52, 60, 108),
+    "Coral": (226, 72, 170),
 }
 
 
@@ -458,6 +699,12 @@ def main():
             print("%-26s %4d triangles  (%s)" % (name, len(tris), key))
     with open(index_path, "w") as fh:
         json.dump(index, fh, indent=2)
+    ids_path = os.path.join(OUT, "ids.json")
+    ids = json.load(open(ids_path)) if os.path.exists(ids_path) else {}
+    for name, asset in REUSED.items():
+        ids.setdefault(name, "rbxassetid://%d" % asset)
+    with open(ids_path, "w") as fh:
+        json.dump(ids, fh, indent=2)
     os.makedirs(os.path.join(HERE, "..", "previews"), exist_ok=True)
     render(built, os.path.join(HERE, "..", "previews", "ruin_assets.png"))
 

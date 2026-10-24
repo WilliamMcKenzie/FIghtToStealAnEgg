@@ -105,6 +105,7 @@ button, input, select { font: inherit; color: inherit; }
     <span class="spacer"></span>
     <button class="btn" id="undo" title="Undo (Ctrl+Z)">Undo</button>
     <button class="btn" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+    <button class="btn" id="grow" title="Add room round the edge of the map, 64 studs at a time">Grow map</button>
     <button class="btn" id="open" title="Open a .map file (or drop one on the page)">Open .map</button>
     <button class="btn gold" id="save" title="Download the map to send over">Download .map</button>
     <input type="file" id="picker" accept=".map,.json,.txt,application/json,text/plain" hidden>
@@ -1171,6 +1172,20 @@ async function download() {
 $("save").onclick = download;
 $("undo").onclick = undo; $("redo").onclick = redo;
 $("open").onclick = () => $("picker").click();
+// More room (QM, Oct 24: the fork past the Lava ran off the top): 16 empty cells along one
+// side. The origin moves north or west, so everything keeps its place in the world.
+function growMap(side) {
+  const n = 16, d = JSON.parse(dumpMap()), [cols] = d.size, blank = ".".repeat(cols);
+  if (side === "North") { d.rows = Array(n).fill(blank).concat(d.rows); d.origin[1] -= n * d.cell; }
+  if (side === "South") d.rows = d.rows.concat(Array(n).fill(blank));
+  if (side === "West") { d.rows = d.rows.map((r) => ".".repeat(n) + r); d.origin[0] -= n * d.cell; }
+  if (side === "East") d.rows = d.rows.map((r) => r + ".".repeat(n));
+  d.size = [d.rows[0].length, d.rows.length];
+  load(JSON.stringify(d), fileName, true);
+  changed();
+  toast(`Grew the map ${n * d.cell} studs ${side.toLowerCase()} (${d.size[0]}×${d.size[1]} cells). Undo starts afresh from here.`);
+}
+$("grow").onclick = () => toast("Grow the map 64 studs to the…", ["North", "South", "West", "East"].map((s) => [s, () => growMap(s)]));
 function openFile(file) {
   if (!file) return;
   const r = new FileReader();

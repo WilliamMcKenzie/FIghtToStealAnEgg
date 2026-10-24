@@ -138,10 +138,13 @@ for item, pieces in ITEMS do
 		})
 		part.Name = piece.piece
 		part.Anchored = true
-		part.Material = if piece.colour == "Rune" then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		-- (runes and flames glow)
+		local glow = piece.colour:match("Rune$") or piece.colour:match("Flame$")
+		part.Material = if glow then Enum.Material.Neon else Enum.Material.SmoothPlastic
 		part:SetAttribute("ColorKey", piece.colour) part.Color = COLORS[piece.colour]
 		-- (pine needles, snow and cactus flowers don't block; trunks, cacti and stones do)
-		part.CanCollide = not (piece.piece:match("^Tier") or piece.piece == "Needles" or piece.piece == "Snow" or piece.piece == "Flowers" or piece.piece == "Runes")
+		part.CanCollide = not (piece.piece:match("^Tier") or piece.piece == "Needles" or piece.piece == "Snow" or piece.piece == "Flowers" or piece.piece == "Runes"
+			or piece.piece == "Flame" or piece.piece:match("^Fronds") or piece.piece:match("^Blades") or item == "Starfish")
 		part.Parent = model
 	end
 	model.Parent = assets
