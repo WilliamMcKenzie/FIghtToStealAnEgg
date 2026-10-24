@@ -5,7 +5,12 @@
 and move props, ruins, nests and bosses, tweak any colour, then **Download .map** and send it
 over. Walls, pillars, arches and barriers are shown but fixed (tools/map_gen.py lays them out).
 
-Getting a .map into the game:
+On this Mac: `python3 tools/mapeditor/serve.py` serves it at http://localhost:3000, opening the
+game's current `maps/world.map`. Its **Save to game** button writes `maps/world.map`, bakes
+`src/shared/MapData.luau` and syncs and rebuilds the map in the open Studio place (Edit mode),
+so nothing needs sending.
+
+Getting a .map into the game by hand:
 
 1. `python3 tools/map_bake.py ~/Downloads/world.map` copies it to `maps/world.map` and bakes
    it into `src/shared/MapData.luau` (a `.map.json` from the Artifact page works the same).

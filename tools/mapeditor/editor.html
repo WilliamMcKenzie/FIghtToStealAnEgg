@@ -1075,9 +1075,21 @@ function changed() {
   clearTimeout(draftTimer);
   draftTimer = setTimeout(() => { try { localStorage.setItem(DRAFT, JSON.stringify({ name: fileName, text: dumpMap(), at: Date.now() })); } catch (e) { /* (a draft is a convenience) */ } }, 800);
 }
+// served by tools/mapeditor/serve.py on this Mac: Save goes straight into the game
+const LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 async function download() {
   if (!M) return;
   const text = dumpMap();
+  if (LOCAL) {
+    toast("Saving into the game...");
+    try {
+      const r = await fetch("/save", { method: "POST", body: text });
+      const msg = await r.text();
+      if (r.ok) { BUNDLE.map = text; try { localStorage.removeItem(DRAFT); } catch (e) { /* */ } }
+      toast(msg);
+      return;
+    } catch (e) { toast("Couldn't reach the local server, downloading instead."); }
+  }
   let downloads = null;
   try { downloads = window.claude && window.claude.use ? await window.claude.use("downloads") : null; } catch (e) { downloads = null; }
   if (downloads) {
@@ -1111,6 +1123,15 @@ window.addEventListener("drop", (e) => { e.preventDefault(); $("drop").hidden = 
 window.addEventListener("resize", resize);
 resize(); buildSizes();
 load(BUNDLE.map, "world.map", true);
+if (LOCAL) {
+  $("save").textContent = "Save to game";
+  $("save").title = "Save into maps/world.map and rebuild it in Studio";
+}
+async function start() {
+  // (on this Mac: the game's map as it is now, not the copy baked into this page)
+  if (LOCAL) {
+    try { const r = await fetch("/world.map", { cache: "no-store" }); if (r.ok) { BUNDLE.map = await r.text(); load(BUNDLE.map, "world.map", true); } } catch (e) { /* the baked-in copy */ }
+  }
 try {
   const d = JSON.parse(localStorage.getItem(DRAFT) || "null");
   // (only a draft of this same layout: a draft from an older map would undo its changes)
@@ -1121,7 +1142,10 @@ try {
     toast(`Picked up your unsaved edits from ${new Date(d.at).toLocaleString()}.`, [["Start from the game's map", () => { load(original, "world.map", true); try { localStorage.removeItem(DRAFT); } catch (e) { /* */ } }]]);
   }
 } catch (e) { /* no draft */ }
+}
+start();
 // open on the base and the Meadow
 cam = { x: 0, z: -110, zoom: Math.max(0.6, Math.min(2.4, H / 620)) };
-(function frame() { if (dirty) draw(); requestAnimationFrame(frame); })();
+// (a draw that throws, as in a window still 0 wide, is tried again next frame, not the end of the loop)
+(function frame() { if (dirty) { try { draw(); } catch (e) { /* again next frame */ } } requestAnimationFrame(frame); })();
 </script>
