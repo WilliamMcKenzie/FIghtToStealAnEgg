@@ -646,20 +646,6 @@ local function biomeFurniture(parent)
 			spot.CFrame = CFrame.new(area.Boss[1], 0.5, area.Boss[2])
 			spot:SetAttribute("Biome", area.Name)
 			spot.Parent = f
-			-- short stone posts round the dais's ring: cover to kite the boss round
-			local light = area.Name .. "Pillar"
-			local r = area.DaisRadius + area.RingWidth / 2
-			for k = 0, 5 do
-				local a = (k + 0.5) / 6 * 2 * math.pi
-				local s = rng:NextNumber(5.5, 7)
-				stone(
-					f,
-					CFrame.new(area.Boss[1] + math.cos(a) * r, 1 + s * 0.6, area.Boss[2] + math.sin(a) * r)
-						* CFrame.Angles(0, rng:NextNumber(0, math.pi), 0),
-					Vector3.new(s, s * 1.2, s),
-					light
-				)
-			end
 		end
 	end
 	local barriers = folder("Barriers", parent)
@@ -685,30 +671,172 @@ end
 
 -- ---- pines on the plateaus -------------------------------------------------------------
 
+-- Stone stand-ins for the ruin and biome meshes until they're uploaded (tools/ruin_assets.py
+-- writes them; tools/lineup.luau puts them in ServerStorage.WorldAssets). Trees have none.
+local function standIn(parent, item, at, scale, style, rng)
+	local light, dark = pillarKeys(style)
+	local model = Instance.new("Model")
+	model.Name = item
+	local function piece(offset, size, key, tilt)
+		stone(model, at * CFrame.new(offset * scale) * (tilt or CFrame.identity), size * scale, key)
+	end
+	if item == "RuinPillar" or item == "RuinPillarBroken" then
+		local broken = item == "RuinPillarBroken"
+		piece(Vector3.new(0, 0.7, 0), Vector3.new(6.8, 1.4, 6.8), dark)
+		local y, n = 1.4, if broken then 2 else 4
+		for k = 1, n do
+			piece(
+				Vector3.new(0, y + 1.5, 0),
+				Vector3.new(4.6, 3, 4.6),
+				light,
+				CFrame.Angles(0, rng:NextNumber(0, 1), 0)
+			)
+			y += 3.05
+		end
+		if broken then
+			piece(Vector3.new(5.6, 2.3, 2.4), Vector3.new(2.4, 4.6, 4.6), light, CFrame.Angles(0, 0.6, 0))
+		else
+			piece(Vector3.new(0, y + 1, 0), Vector3.new(7, 2, 7), dark)
+		end
+	elseif item == "Boulders" then
+		piece(Vector3.new(0, 1.8, 0), Vector3.new(6.4, 4.2, 5.6), dark, CFrame.Angles(0.15, rng:NextNumber(0, 3), 0.1))
+		piece(
+			Vector3.new(3.6, 1, 1.4),
+			Vector3.new(3.6, 2.6, 3.4),
+			dark,
+			CFrame.Angles(-0.1, rng:NextNumber(0, 3), 0.2)
+		)
+		piece(Vector3.new(-2.4, 0.6, 3), Vector3.new(2.4, 1.5, 2.2), light, CFrame.Angles(0, rng:NextNumber(0, 3), 0))
+	elseif item == "Monolith" then
+		piece(Vector3.new(0, 0.3, 0), Vector3.new(8.4, 1.4, 5.6), dark)
+		piece(Vector3.new(0, 7.5, 0), Vector3.new(5.6, 15, 3), "LavaPillar", CFrame.Angles(0.07, 0, -0.05))
+		for k = 0, 3 do
+			local rune = block(
+				"Rune",
+				model,
+				at * CFrame.new(Vector3.new(0, 3.4 + k * 3, -1.55) * scale),
+				Vector3.new(1.4, 1.8, 0.2) * scale,
+				"Rune",
+				{}
+			)
+			rune.Material = Enum.Material.Neon
+			rune.CanCollide = false
+		end
+	elseif item == "Cactus" or item == "CactusBarrel" then
+		local function green(offset, size)
+			block("Cactus", model, at * CFrame.new(offset * scale), size * scale, "CactusGreen", ALL)
+		end
+		if item == "Cactus" then
+			green(Vector3.new(0, 8, 0), Vector3.new(3.6, 16, 3.6))
+			green(Vector3.new(2.6, 6.4, 0), Vector3.new(3, 2.2, 2.2))
+			green(Vector3.new(3.8, 9.4, 0), Vector3.new(2.2, 6, 2.2))
+			green(Vector3.new(-2.4, 9.4, 0), Vector3.new(2.6, 2, 2))
+			green(Vector3.new(-3.4, 11.6, 0), Vector3.new(2, 4.6, 2))
+		else
+			green(Vector3.new(0, 1.2, 0), Vector3.new(3.6, 2.4, 3.6))
+		end
+	else
+		model:Destroy()
+		return nil
+	end
+	model.Parent = parent
+	return model
+end
+
+-- The props (pines, ruins, cacti, monoliths...) from ServerStorage.WorldAssets: grey stone
+-- pieces wear their biome's pillar colours, runes glow.
 local function props(parent)
 	local assets = ServerStorage:FindFirstChild("WorldAssets")
-	if not assets then
-		return
-	end
+	local rng = Random.new(77)
 	for _, p in MapData.Props do
-		local template = assets:FindFirstChild(p[1])
+		local item, scale, style = p[1], p[6], p[7]
+		local template = assets and assets:FindFirstChild(item)
+		local at = CFrame.new(p[2], p[4], p[3]) * CFrame.Angles(0, math.rad(p[5]), 0)
 		if template then
 			local copy = template:Clone()
-			local scale = p[6]
-			local at = CFrame.new(p[2], p[4], p[3]) * CFrame.Angles(0, math.rad(p[5]), 0)
 			for _, part in copy:GetChildren() do
 				if part:IsA("BasePart") then
 					part.Size *= scale
 					-- (centred on its box, or at its own origin: see lift)
-					local centre = MapData.MeshCentres[p[1] .. "_" .. part.Name] or Vector3.zero
+					local centre = MapData.MeshCentres[item .. "_" .. part.Name] or Vector3.zero
 					part.CFrame = if lift < 0.25 then at * CFrame.new(centre * scale) else at
 					part.Anchored = true
 					part.Locked = true
+					local key = part:GetAttribute("ColorKey")
+					if style ~= "Base" and (key == "Stone" or key == "StoneDark") then
+						key = if key == "Stone" then style .. "Pillar" else style .. "PillarDark"
+						part:SetAttribute("ColorKey", key)
+						part.Color = color(key)
+					end
+					if key == "Rune" then
+						part.Material = Enum.Material.Neon
+						part.CanCollide = false
+					end
 				end
 			end
 			copy.Parent = parent
+		else
+			standIn(parent, item, at, scale, style, rng)
 		end
 	end
+end
+
+-- A ruined brick wall (QM, Oct 24: old broken stone-brick walls): courses of rough
+-- bricks along its length, its top crumbling away unevenly, a few fallen bricks at its
+-- foot. Bricks are the stone block mesh, so they're bevelled and a little off true.
+local BRICK_H = 1.8
+local function ruin(parent, r)
+	local style, x, z, length, yaw, height, seed = r[1], r[2], r[3], r[4], r[5], r[6], r[7]
+	local light, dark = pillarKeys(style)
+	local rng = Random.new(seed)
+	local model = Instance.new("Model")
+	model.Name = style .. "Ruin"
+	local at = CFrame.new(x, -1, z) * CFrame.Angles(0, math.rad(yaw), 0)
+	local depth = 3
+	-- the top's profile: high in one place, crumbling toward the ends
+	local peak = rng:NextNumber(-0.3, 0.3)
+	local function top(u) -- u in -0.5..0.5 along the wall
+		local h = height * (1 - math.abs(u - peak) * 1.4) + rng:NextNumber(-1.2, 1.2)
+		return math.max(BRICK_H, h)
+	end
+	local courses = math.ceil(height / BRICK_H) + 1
+	for c = 0, courses - 1 do
+		local y = c * BRICK_H
+		local u = -length / 2 + (if c % 2 == 0 then 0 else -rng:NextNumber(1, 2))
+		while u < length / 2 do
+			local w = rng:NextNumber(3, 4.6)
+			local u0, u1 = math.max(u, -length / 2), math.min(u + w, length / 2)
+			local mid = (u0 + u1) / 2
+			if u1 - u0 > 1 and y + BRICK_H <= top(mid / length) then
+				stone(
+					model,
+					at
+						* CFrame.new(mid, y + BRICK_H / 2, rng:NextNumber(-0.2, 0.2))
+						* CFrame.Angles(0, math.rad(rng:NextNumber(-3, 3)), math.rad(rng:NextNumber(-2, 2))),
+					Vector3.new(u1 - u0 - 0.15, BRICK_H - 0.08, depth * rng:NextNumber(0.9, 1)),
+					if rng:NextNumber() < 0.35 then dark else light
+				)
+			end
+			u += w
+		end
+	end
+	for _ = 1, rng:NextInteger(3, 6) do
+		local side = if rng:NextNumber() < 0.5 then -1 else 1
+		stone(
+			model,
+			at
+				* CFrame.new(rng:NextNumber(-length / 2, length / 2), 1.6, side * rng:NextNumber(3, 6))
+				* CFrame.Angles(
+					math.rad(rng:NextNumber(-20, 20)),
+					rng:NextNumber(0, math.pi),
+					math.rad(rng:NextNumber(-20, 20))
+				),
+			Vector3.new(rng:NextNumber(2.6, 4), BRICK_H, depth * 0.9),
+			if rng:NextNumber() < 0.5 then dark else light
+		)
+	end
+	model.Parent = parent
+	return model
 end
 
 -- ---- all of it ---------------------------------------------------------------------------
@@ -748,6 +876,10 @@ function Map.build()
 	baseFurniture(base)
 	biomeFurniture(folder("Biomes", map))
 	props(folder("Props", map))
+	local ruins = folder("Ruins", map)
+	for _, r in MapData.Ruins do
+		ruin(ruins, r)
+	end
 	map.Parent = workspace
 	return map
 end

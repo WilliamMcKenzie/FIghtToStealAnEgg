@@ -73,5 +73,86 @@
       "colour": "Stone",
       "obj": "StoneRubble_Small"
     }
+  ],
+  "RuinPillarBroken": [
+    {
+      "piece": "Stone",
+      "colour": "Stone",
+      "obj": "RuinPillarBroken_Stone"
+    }
+  ],
+  "RuinPillar": [
+    {
+      "piece": "Stone",
+      "colour": "Stone",
+      "obj": "RuinPillar_Stone"
+    }
+  ],
+  "Boulders": [
+    {
+      "piece": "Rock",
+      "colour": "StoneDark",
+      "obj": "Boulders_Rock"
+    }
+  ],
+  "Monolith": [
+    {
+      "piece": "Stone",
+      "colour": "LavaPillar",
+      "obj": "Monolith_Stone"
+    },
+    {
+      "piece": "Runes",
+      "colour": "Rune",
+      "obj": "Monolith_Runes"
+    }
+  ],
+  "Cactus": [
+    {
+      "piece": "Body",
+      "colour": "CactusGreen",
+      "obj": "Cactus_Body"
+    },
+    {
+      "piece": "Flowers",
+      "colour": "CactusFlower",
+      "obj": "Cactus_Flowers"
+    }
+  ],
+  "CactusBarrel": [
+    {
+      "piece": "Body",
+      "colour": "CactusGreen",
+      "obj": "CactusBarrel_Body"
+    },
+    {
+      "piece": "Flowers",
+      "colour": "CactusFlower",
+      "obj": "CactusBarrel_Flowers"
+    }
+  ],
+  "SnowPine": [
+    {
+      "piece": "Trunk",
+      "colour": "PineTrunk",
+      "obj": "SnowPine_Trunk"
+    },
+    {
+      "piece": "Needles",
+      "colour": "SnowPineNeedles",
+      "obj": "SnowPine_Needles"
+    },
+    {
+      "piece": "Snow",
+      "colour": "Snow",
+      "obj": "SnowPine_Snow"
+    }
+  ],
+  "DeadTree": [
+    {
+      "piece": "Wood",
+      "colour": "DeadWood",
+      "obj": "DeadTree_Wood"
+    }
   ]
 }

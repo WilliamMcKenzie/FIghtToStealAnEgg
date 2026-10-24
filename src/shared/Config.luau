@@ -134,6 +134,13 @@ return {
 		LavaCapChecker = Color3.fromRGB(106, 68, 52),
 		LavaPillar = Color3.fromRGB(92, 78, 74),
 		LavaPillarDark = Color3.fromRGB(66, 56, 54),
+		-- props (tools/ruin_assets.py): ruins take their biome's Pillar colours
+		CactusGreen = Color3.fromRGB(92, 168, 70),
+		CactusFlower = Color3.fromRGB(255, 120, 170),
+		SnowPineNeedles = Color3.fromRGB(52, 112, 96),
+		Snow = Color3.fromRGB(244, 248, 252),
+		DeadWood = Color3.fromRGB(70, 56, 50),
+		Rune = Color3.fromRGB(255, 120, 40), -- (Neon: the runes glow)
 	},
 
 	-- the map (Server/Map.luau builds it from Shared/MapData, made by tools/map_gen.py)

@@ -159,9 +159,10 @@ for item, pieces in ITEMS do
 		})
 		part.Name = piece.piece
 		part.Anchored = true
-		part.Material = Enum.Material.SmoothPlastic
+		part.Material = if piece.colour == "Rune" then Enum.Material.Neon else Enum.Material.SmoothPlastic
 		part:SetAttribute("ColorKey", piece.colour) part.Color = COLORS[piece.colour]
-		part.CanCollide = not piece.piece:match("^Tier") -- (pine needles don't block; trunks and stones do)
+		-- (pine needles, snow and cactus flowers don't block; trunks, cacti and stones do)
+		part.CanCollide = not (piece.piece:match("^Tier") or piece.piece == "Needles" or piece.piece == "Snow" or piece.piece == "Flowers" or piece.piece == "Runes")
 		part.Parent = model
 	end
 	model.Parent = assets

@@ -29,7 +29,6 @@ function Eggs.make(biome)
 	local egg = Instance.new("Part")
 	egg.Name = biome .. "Egg"
 	egg.Size = Config.Eggs.Size
-	egg.Shape = Enum.PartType.Ball
 	egg.Material = Enum.Material.SmoothPlastic
 	egg.Color = Config.Eggs.Colors[biome] or Config.WorldColors.Egg
 	egg.CanCollide = false

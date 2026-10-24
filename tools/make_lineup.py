@@ -135,9 +135,10 @@ for item, pieces in ITEMS do
 		})
 		part.Name = piece.piece
 		part.Anchored = true
-		part.Material = Enum.Material.SmoothPlastic
+		part.Material = if piece.colour == "Rune" then Enum.Material.Neon else Enum.Material.SmoothPlastic
 		part:SetAttribute("ColorKey", piece.colour) part.Color = COLORS[piece.colour]
-		part.CanCollide = not piece.piece:match("^Tier") -- (pine needles don't block; trunks and stones do)
+		-- (pine needles, snow and cactus flowers don't block; trunks, cacti and stones do)
+		part.CanCollide = not (piece.piece:match("^Tier") or piece.piece == "Needles" or piece.piece == "Snow" or piece.piece == "Flowers" or piece.piece == "Runes")
 		part.Parent = model
 	end
 	model.Parent = assets
@@ -172,10 +173,15 @@ def lua(value, indent=1):
 def main():
     pieces = json.load(open(os.path.join(MESHES, "pieces.json")))
     ids = json.load(open(os.path.join(MESHES, "ids.json")))
+    # (only items whose pieces are all uploaded: tools/studio/meshup.py fills ids.json)
     items = {
         item: [{"piece": p["piece"], "colour": p["colour"], "id": ids[p["obj"]]} for p in plist]
         for item, plist in pieces.items()
+        if all(p["obj"] in ids for p in plist)
     }
+    missing = [item for item in pieces if item not in items]
+    if missing:
+        print("not uploaded yet (left out):", ", ".join(missing))
     code = TEMPLATE.replace("--ITEMS--", lua(items)).replace("--PROPS--", lua(PROPS))
     with open(os.path.join(HERE, "lineup.luau"), "w") as fh:
         fh.write(code)

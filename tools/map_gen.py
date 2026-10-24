@@ -426,26 +426,86 @@ def walls_and_pillars():
 
 # ---- props -------------------------------------------------------------------------------
 
-def props():
-    """Pines on the base's wall and the Meadow's and Ice's plateaus: (item, x, z, top, yaw, scale)."""
+# Each biome's dressing (QM, Oct 24: ruined stone castle and runic vibes; pines in the
+# Meadow, big cacti in the Desert, snowy pines on the Ice, dead trees and runic monoliths
+# in the Lava): (item, weight) for the plateau tops round it and for the arena floor.
+DRESSING = {
+    "Meadow": dict(top=[("PineTall", 5), ("PineShort", 3), ("Boulders", 1), ("RuinPillarBroken", 1)],
+                   floor=[("Boulders", 2), ("RuinPillarBroken", 2), ("PineShort", 1)], n=7, ring="RuinPillar"),
+    "Desert": dict(top=[("Cactus", 4), ("CactusBarrel", 3), ("Boulders", 2), ("RuinPillarBroken", 1)],
+                   floor=[("Cactus", 3), ("CactusBarrel", 2), ("Boulders", 1), ("RuinPillarBroken", 1)], n=9, ring="RuinPillar"),
+    "Ice": dict(top=[("SnowPine", 6), ("Boulders", 2), ("RuinPillarBroken", 1)],
+                floor=[("SnowPine", 3), ("Boulders", 2), ("RuinPillarBroken", 1)], n=9, ring="RuinPillar"),
+    "Lava": dict(top=[("DeadTree", 4), ("Monolith", 2), ("Boulders", 2), ("RuinPillarBroken", 1)],
+                 floor=[("DeadTree", 3), ("Monolith", 2), ("Boulders", 2)], n=11, ring="Monolith"),
+}
+SCALE = {"PineTall": (1.1, 1.7), "PineShort": (1.1, 1.6), "SnowPine": (1.0, 1.5), "Cactus": (0.9, 1.3),
+         "CactusBarrel": (1.0, 1.6), "DeadTree": (0.9, 1.3), "Monolith": (0.9, 1.25), "Boulders": (0.8, 1.6),
+         "RuinPillarBroken": (1.0, 1.3), "RuinPillar": (1.0, 1.0)}
+
+
+def pick(rng, table):
+    items, w = zip(*table)
+    w = np.array(w, float)
+    return items[rng.choice(len(items), p=w / w.sum())]
+
+
+def props(grids):
+    """Props on the base's wall, round each biome's plateaus and on its floor, and the
+    ruined walls in its corners: (item, x, z, ground y, yaw, scale, style)."""
     rng = np.random.default_rng(24)
-    out = []
+    out, ruins = [], []
     for k in range(48):
         a = (k + 0.5) / 48 * 2 * math.pi
         if abs(math.sin(a)) * (BASE_R + 20) < GATE_HALF + 60 and math.cos(a) > 0:
             continue  # (clear of the gateway)
         rr = BASE_R + 14 + rng.uniform(0, 20)
-        out.append(("PineTall" if k % 3 else "PineShort", math.sin(a) * rr, -math.cos(a) * rr, WALL_H, rng.uniform(0, 360), rng.uniform(1.1, 1.7)))
-    for b in BIOMES:
-        if b["name"] not in ("Meadow", "Ice"):
-            continue
+        out.append(("PineTall" if k % 3 else "PineShort", math.sin(a) * rr, -math.cos(a) * rr, WALL_H, rng.uniform(0, 360), rng.uniform(1.1, 1.7), "Base"))
+    for b, g in zip(BIOMES, grids):
+        name, half = b["name"], b["W"] / 2
+        dress = DRESSING[name]
+        # the plateau tops beside it
         for sx in (-1, 1):
-            z = b["zs"] - 16
-            while z > b["zn"] + 16:
-                x = sx * (b["W"] / 2 + 16 + rng.uniform(0, 24))
-                out.append(("PineTall" if rng.random() < 0.6 else "PineShort", x, z, WALL_H, rng.uniform(0, 360), rng.uniform(1.1, 1.8)))
-                z -= rng.uniform(22, 38)
-    return [(i, round(x, 2), round(z, 2), t, round(y, 1), round(s, 2)) for i, x, z, t, y, s in out]
+            z = b["zs"] - 12
+            while z > b["zn"] + 12:
+                x = sx * (half + 12 + rng.uniform(0, OUT_T - 22))
+                it = pick(rng, dress["top"])
+                out.append((it, x, z, WALL_H, rng.uniform(0, 360), rng.uniform(*SCALE[it]), name))
+                z -= rng.uniform(18, 32)
+        # round the dais's ring: standing ruins (or monoliths), cover to kite the boss round
+        r = b["dais"] + RING_W / 2
+        for k in range(6):
+            a = (k + 0.5) / 6 * 2 * math.pi
+            it = dress["ring"] if k % 2 == 0 or name == "Lava" else "RuinPillarBroken"
+            yaw = math.degrees(-a) + 90 if it == "Monolith" else rng.uniform(0, 360)
+            out.append((it, math.cos(a) * r, b["cz"] + math.sin(a) * r, 1, yaw, 1.0, name))
+        # the floor: on raised ground, clear of the dais, nests, gateways and walls
+        spots = [(i, j) for i in range(g.nx) for j in range(g.nz) if g.inside[i, j] and g.tile[i, j] == 2]
+        rng.shuffle(spots)
+        taken = [(x, z, 26) for x, z in nests(b)] + [(0, b["zs"], 56), (0, b["zn"], 56)]
+        placed = 0
+        for i, j in spots:
+            x, z = float(g.x[i, j]), float(g.z[i, j])
+            if math.hypot(x, z - b["cz"]) < b["dais"] + RING_W + 24:
+                continue
+            if abs(x) > half - 20 or z > b["zs"] - 20 or z < b["zn"] + 20:
+                continue
+            if any(math.hypot(x - tx, z - tz) < tr for tx, tz, tr in taken):
+                continue
+            it = pick(rng, dress["floor"])
+            out.append((it, x, z, 1, rng.uniform(0, 360), rng.uniform(*SCALE[it]), name))
+            taken.append((x, z, 40))
+            placed += 1
+            if placed >= dress["n"]:
+                break
+        # ruined brick walls: an L in each corner's diagonal, between the nests and the dais
+        for sx in (-1, 1):
+            for sz in (-1, 1):
+                cx = sx * half * 0.52
+                cz = b["cz"] + sz * b["D"] / 2 * 0.5
+                yaw = math.degrees(math.atan2(sx, sz))  # (facing the dais)
+                ruins.append((name, round(cx, 1), round(cz, 1), round(rng.uniform(20, 28), 1), round(yaw + 90, 1), round(rng.uniform(6, 9), 1), int(rng.integers(1, 10 ** 6))))
+    return [(i, round(x, 2), round(z, 2), t, round(y, 1), round(s, 2), st) for i, x, z, t, y, s, st in out], ruins
 
 
 def mesh_centres():
@@ -476,7 +536,7 @@ def lua_num(v):
     return str(int(v)) if v == int(v) else ("%.3f" % v).rstrip("0").rstrip(".")
 
 
-def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list):
+def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruins):
     L = []
     w = L.append
     w("-- GENERATED by tools/map_gen.py (QM, Oct 24): edit that and re-run it, not this.")
@@ -535,10 +595,15 @@ def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list):
     w("\tArches = { %s }," % ", ".join('{ "%s", %s, %s }' % (a[0], lua_num(a[1]), lua_num(a[2])) for a in arches))
     w("\t-- each gateway's barrier (for egg holders): { south area, north area, x, z }")
     w("\tBarriers = { %s }," % ", ".join('{ "%s", "%s", %s, %s }' % (a[0], a[1], lua_num(a[2]), lua_num(a[3])) for a in barriers))
-    w("\t-- { item, x, z, ground y, yaw (degrees), scale }: ServerStorage.WorldAssets meshes")
+    w("\t-- { item, x, z, ground y, yaw (degrees), scale, style }: ServerStorage.WorldAssets meshes")
     w("\tProps = {")
     for p in prop_list:
-        w('\t\t{ "%s", %s },' % (p[0], ", ".join(lua_num(v) for v in p[1:])))
+        w('\t\t{ "%s", %s, "%s" },' % (p[0], ", ".join(lua_num(v) for v in p[1:6]), p[6]))
+    w("\t},")
+    w("\t-- ruined brick walls: { style, centre x, z, length, yaw (degrees), height, seed }")
+    w("\tRuins = {")
+    for r in ruins:
+        w('\t\t{ "%s", %s },' % (r[0], ", ".join(lua_num(v) for v in r[1:])))
     w("\t},")
     w("\t-- each mesh piece's bounding-box centre from its origin (assets/meshes/*.obj)")
     w("\tMeshCentres = {")
@@ -553,7 +618,7 @@ def write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list):
 
 # ---- previews ----------------------------------------------------------------------------
 
-def preview(g_base, grids, walls, ring, pillars, arches, prop_list, colours, s=1.0, crop=None):
+def preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colours, s=1.0, crop=None):
     xs = [-(b["W"] / 2 + OUT_T) for b in BIOMES] + [-BASE_R - RING_T]
     X0, X1 = min(xs) - 8, -min(xs) + 8
     Z0, Z1 = BASE_R + RING_T + 8, BIOMES[-1]["zn"] - OUT_T - 8
@@ -613,10 +678,19 @@ def preview(g_base, grids, walls, ring, pillars, arches, prop_list, colours, s=1
     for st, x0, z0, x1, z1 in walls:
         a, b_ = P(x0, z0), P(x1, z1)
         d.rectangle([min(a[0], b_[0]), min(a[1], b_[1]), max(a[0], b_[0]), max(a[1], b_[1])], fill=colours[cap_key[st]], outline=shade(colours[cap_key[st]], 0.75))
-    for it, x, z, top, yaw, sc in prop_list:
-        r = (5 if it == "PineTall" else 4) * sc
+    look = {"PineTall": ("PineNeedlesB", 5), "PineShort": ("PineNeedlesB", 4), "SnowPine": ("SnowPineNeedles", 5),
+            "Cactus": ("CactusGreen", 2.5), "CactusBarrel": ("CactusGreen", 2.5), "DeadTree": ("DeadWood", 3),
+            "Monolith": ("LavaPillarDark", 3.5), "Boulders": ("StoneDark", 4), "RuinPillar": ("Stone", 3.4),
+            "RuinPillarBroken": ("Stone", 3.4)}
+    for it, x, z, top, yaw, sc, st in prop_list:
+        key, r = look[it]
+        r *= sc
         cx, cy = P(x, z)
-        d.ellipse([cx - r * s, cy - r * s, cx + r * s, cy + r * s], fill=colours["PineNeedlesB"], outline=colours["PineNeedlesA"])
+        d.ellipse([cx - r * s, cy - r * s, cx + r * s, cy + r * s], fill=colours[key], outline=shade(colours[key], 0.6))
+    for st, x, z, length, yaw, h, seed in ruins:
+        a = math.radians(yaw)
+        dx, dz = math.sin(a) * length / 2, math.cos(a) * length / 2
+        d.line([P(x - dx, z - dz), P(x + dx, z + dz)], fill=colours[st + "PillarDark"], width=max(2, int(4 * s)))
     for st, x, z, size, h, kind in pillars:
         key = "Stone" if st == "Base" else st + "Pillar"
         a, b_ = P(x - size / 2, z + size / 2), P(x + size / 2, z - size / 2)
@@ -651,23 +725,23 @@ def main():
     g_base = base()
     grids = [biome(b, i) for i, b in enumerate(BIOMES)]
     walls, ring, pillars, arches, barriers = walls_and_pillars()
-    prop_list = props()
-    path = write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list)
+    prop_list, ruins = props(grids)
+    path = write(g_base, grids, walls, ring, pillars, arches, barriers, prop_list, ruins)
     n = len(g_base.floor()) + sum(len(g.floor()) for g in grids)
     print("wrote", os.path.relpath(path, ROOT), "-", n, "floor parts,", len(walls) + len(ring), "walls,", len(pillars), "pillars,", len(prop_list), "props")
     for b, g in zip(BIOMES, grids):
         counts = {TILES[k][0]: int(((g.tile == k) & g.inside).sum()) for k in range(len(TILES))}
         print(" ", b["name"], "z", b["zs"], "to", b["zn"], "parts", len(g.floor()), counts)
     colours = config_colours()
-    whole = preview(g_base, grids, walls, ring, pillars, arches, prop_list, colours, s=0.5)
-    near = preview(g_base, grids, walls, ring, pillars, arches, prop_list, colours, s=2.0,
+    whole = preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colours, s=0.5)
+    near = preview(g_base, grids, walls, ring, pillars, arches, prop_list, ruins, colours, s=2.0,
                    crop=(BASE_R + RING_T + 8, BIOMES[0]["zn"] - DIV_T - 8))
     for od in out_dirs:
         os.makedirs(od, exist_ok=True)
         whole.save(os.path.join(od, "map_overview.png"))
         near.save(os.path.join(od, "map_base_meadow.png"))
     for i, b in enumerate(BIOMES):
-        im = preview(g_base, grids[:], walls, ring, pillars, arches, prop_list, colours, s=1.5,
+        im = preview(g_base, grids[:], walls, ring, pillars, arches, prop_list, ruins, colours, s=1.5,
                      crop=(b["zs"] + DIV_T + 16, b["zn"] - DIV_T - 16))
         for od in out_dirs:
             im.save(os.path.join(od, "map_%d_%s.png" % (i + 1, b["name"].lower())))
