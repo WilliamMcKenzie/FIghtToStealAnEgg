@@ -1,5 +1,5 @@
 -- The sword: it's always out, and it attacks by itself (QM, Oct 24, Archero-style).
--- While a boss is within AimRange the torso turns toward it, eased (not snapped), and
+-- While a boss (or a training mob or dummy) is within AimRange the torso turns toward it, eased (not snapped), and
 -- whenever one is within AttackRange and the cooldown allows, it slashes along that aim:
 -- the upper body swings the held sword (SwingPose) along the arc (SlashFx). It plays
 -- here at once and is relayed through the server, which also deals the damage.
@@ -22,6 +22,7 @@ local SlashCam = require(script.SlashCam)
 local SwingPose = require(script.SwingPose)
 require(script.BossView)
 require(script.Hud)
+require(script.Barriers)
 local remote = ReplicatedStorage:WaitForChild("Slash")
 
 local player = Players.LocalPlayer
@@ -106,19 +107,25 @@ local function wrap(a)
 	return (a + math.pi) % (2 * math.pi) - math.pi
 end
 
--- the nearest boss body within `range` of the character (flat distance to its edge)
+-- the nearest thing to hit within `range` of the character (flat distance to its edge):
+-- a boss (workspace.Bosses), or a training mob or dummy (workspace.Mobs) in a ground
+-- you've unlocked
 local function nearestBoss(root, range)
-	local folder = workspace:FindFirstChild("Bosses")
-	if not folder then
-		return nil
-	end
 	local best, bestDist = nil, range
-	for _, body in folder:GetChildren() do
-		if body:IsA("BasePart") and (body:GetAttribute("Health") or 0) > 0 then
-			local d = ((body.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude
-				- (body:GetAttribute("Radius") or 0)
-			if d < bestDist then
-				best, bestDist = body, d
+	for _, name in { "Bosses", "Mobs" } do
+		local folder = workspace:FindFirstChild(name)
+		for _, body in if folder then folder:GetChildren() else {} do
+			local ground = body:GetAttribute("Ground")
+			if
+				body:IsA("BasePart")
+				and (body:GetAttribute("Health") or 0) > 0
+				and (ground == nil or player:GetAttribute("Train" .. ground) ~= false)
+			then
+				local d = ((body.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude
+					- (body:GetAttribute("Radius") or 0)
+				if d < bestDist then
+					best, bestDist = body, d
+				end
 			end
 		end
 	end

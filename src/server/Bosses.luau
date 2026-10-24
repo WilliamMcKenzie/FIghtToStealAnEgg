@@ -1,56 +1,83 @@
 -- Bosses, on the server: each is an invisible anchored body in workspace.Bosses (its
--- hitbox and position, replicated), with attributes Kind, Health, MaxHealth and Radius
--- (the HUD's boss bar shows its health: client/Hud.luau). Every client draws and animates the actual model on it
--- (client/BossView.luau), like the horses.
+-- hitbox and position, replicated), with attributes Kind (its Config.Bosses entry),
+-- Model and Size (what clients draw: client/BossView.luau), Name, Health, MaxHealth,
+-- Radius, and for an arena's boss Biome and Asleep. The HUD's boss bar shows the
+-- nearest awake one.
 --
--- A boss chases the nearest living player at Speed, turning toward them (Turn), and
--- stops StopAt studs short. Slashes hurt it through Bosses.slash (the server checks the
--- reach and the arc); at 0 health it's removed.
+-- Each biome's boss sleeps on its dais (Map's BossSpot) until it's woken: someone steals
+-- one of its eggs, or hits it (Server/Eggs locks them into its fight). Awake, it chases
+-- the nearest player locked into its fight, never leaving its arena. With nobody left in
+-- the fight for Config.BossCalmDown seconds it walks home, heals and sleeps. At 0 health
+-- it dies (Bosses.defeated fires: the fight's players go free) and comes back asleep
+-- Respawn seconds later.
 --
---   Bosses.spawn(kind, player)          -- in front of the player (the /boss command)
---   Bosses.slash(player, yaw, c)        -- a player's slash along world yaw `yaw`
+--   Bosses.spawn(kind, player)       -- a boss in front of the player (the /boss command)
+--   Bosses.arena(biome, spot, bounds) -- a biome's sleeping boss on its spot
+--   Bosses.wake(biome)
+--   Bosses.defeated                  -- BindableEvent: Event(biome)
+--   Bosses.engaged                   -- BindableEvent: Event(player, biome), on a hit
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
-local ChickenModel = require(ReplicatedStorage.Shared.Animals.ChickenModel)
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Combat = require(script.Parent.Combat)
 
 local Bosses = {}
-
-local MODELS = { Chicken = ChickenModel }
+Bosses.defeated = Instance.new("BindableEvent")
+Bosses.engaged = Instance.new("BindableEvent")
 
 local folder = Instance.new("Folder")
 folder.Name = "Bosses"
 folder.Parent = workspace
 
-local live = {} -- [body] = { kind, settings, yaw, bar }
+local live = {} -- [body] = { kind, c, yaw, home, bounds, biome, calm }
+local arenas = {} -- [biome] = { spot, bounds }
+local extents = {}
 
 -- the drawing's box (studs, at 1x), for the body's size
-local function extent(data)
+local function extent(model)
+	if extents[model] then
+		return extents[model]
+	end
+	local data = require(Shared.Animals:FindFirstChild(model .. "Model"))
 	local hi = Vector3.zero
 	for _, part in data.parts do
 		local p, h = part.cframe.Position, part.size / 2
 		hi = hi:Max(Vector3.new(math.abs(p.X) + h.X, p.Y + h.Y, math.abs(p.Z) + h.Z))
 	end
+	extents[model] = hi
 	return hi
 end
 
-function Bosses.spawn(kind, player)
-	local c = Config.Bosses[kind]
-	local data = MODELS[kind]
-	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not (c and data and root) then
-		return nil
+local function hurt(body, amount)
+	local health = math.max(0, body:GetAttribute("Health") - amount)
+	body:SetAttribute("Health", health)
+	if health <= 0 then
+		local b = live[body]
+		live[body] = nil
+		Combat.remove(body)
+		task.delay(0.6, function() -- (time for clients to play its death)
+			body:Destroy()
+		end)
+		if b and b.biome then
+			Bosses.defeated:Fire(b.biome)
+			local arena = arenas[b.biome]
+			task.delay(b.c.Respawn or 20, function()
+				if arenas[b.biome] == arena then
+					Bosses.arena(b.biome, arena.spot, arena.bounds)
+				end
+			end)
+		end
 	end
-	local box = extent(data) * c.Size
-	local size = Vector3.new(c.Radius * 2, box.Y, c.Radius * 2)
-	local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
-	look = if look.Magnitude > 1e-3 then look.Unit else Vector3.new(0, 0, -1)
-	local at = root.Position * Vector3.new(1, 0, 1) + look * 30
-	local yaw = math.atan2(look.X, look.Z) -- (facing back toward the player)
+end
 
+local function make(kind, at, yaw)
+	local c = Config.Bosses[kind]
+	local box = extent(c.Model) * c.Size
+	local size = Vector3.new(c.Radius * 2, box.Y, c.Radius * 2)
 	local body = Instance.new("Part")
 	body.Name = kind .. "Boss"
 	body.Anchored = true
@@ -60,79 +87,126 @@ function Bosses.spawn(kind, player)
 	body.Size = size
 	body.CFrame = CFrame.new(at + Vector3.new(0, size.Y / 2, 0)) * CFrame.Angles(0, yaw, 0)
 	body:SetAttribute("Kind", kind)
+	body:SetAttribute("Model", c.Model)
+	body:SetAttribute("Size", c.Size)
+	body:SetAttribute("Name", c.Name or c.Model)
 	body:SetAttribute("Health", c.Health)
 	body:SetAttribute("MaxHealth", c.Health)
 	body:SetAttribute("Radius", c.Radius)
+	local b = { kind = kind, c = c, yaw = yaw, home = at, calm = 0 }
+	live[body] = b
+	Combat.add(body, function(player, damage)
+		if not live[body] then
+			return
+		end
+		if b.biome then
+			Bosses.engaged:Fire(player, b.biome)
+			Bosses.wake(b.biome)
+		end
+		Combat.train(player, c.Strength or 1)
+		hurt(body, damage)
+	end)
+	return body, b
+end
+
+function Bosses.spawn(kind, player)
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not (Config.Bosses[kind] and root) then
+		return nil
+	end
+	local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
+	look = if look.Magnitude > 1e-3 then look.Unit else Vector3.new(0, 0, -1)
+	local at = root.Position * Vector3.new(1, 0, 1) + look * 30
+	local body = make(kind, at, math.atan2(look.X, look.Z)) -- (facing back toward the player)
 	body.Parent = folder
-	live[body] = { kind = kind, c = c, yaw = yaw }
 	return body
 end
 
-local function hurt(body, amount)
-	local health = math.max(0, body:GetAttribute("Health") - amount)
-	body:SetAttribute("Health", health)
-	if health <= 0 then
-		live[body] = nil
-		task.delay(0.6, function() -- (time for clients to play its death)
-			body:Destroy()
-		end)
+-- bounds = { x0, z0 (south), x1, z1 (north) }: the arena it never leaves
+function Bosses.arena(biome, spot, bounds)
+	if not Config.Bosses[biome] then
+		return nil
 	end
+	arenas[biome] = { spot = spot, bounds = bounds }
+	local body, b = make(biome, spot * Vector3.new(1, 0, 1), 0)
+	b.biome, b.bounds = biome, bounds
+	body:SetAttribute("Biome", biome)
+	body:SetAttribute("Asleep", true)
+	body.Parent = folder
+	return body
 end
 
--- A player's slash along world yaw `yaw`: it catches every boss whose body is within
--- the arc's reach (Forward + Radius, plus the boss's own radius and a little slack) and
--- inside its sweep (half the Arc either side, plus slack for the boss's width).
-function Bosses.slash(player, yaw, c)
-	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root then
-		return
-	end
-	local look = CFrame.Angles(0, yaw, 0).LookVector
-	local reach = c.Forward + c.Radius * 1.15 + 2
+function Bosses.wake(biome)
 	for body, b in live do
-		local offset = (body.Position - root.Position) * Vector3.new(1, 0, 1)
-		local distance = offset.Magnitude
-		if distance - b.c.Radius <= reach then
-			local angle = if distance > 1e-3 then math.deg(math.acos(math.clamp(offset.Unit:Dot(look), -1, 1))) else 0
-			local slack = math.deg(math.atan2(b.c.Radius, math.max(distance, 1)))
-			if angle <= c.Arc / 2 + slack + 10 then
-				hurt(body, c.Damage)
-			end
+		if b.biome == biome and body:GetAttribute("Asleep") then
+			body:SetAttribute("Asleep", false)
+			b.calm = 0
 		end
 	end
 end
 
-local function nearestPlayer(position)
+-- the nearest living player in this biome's fight (or, for /boss bosses, anyone)
+local function nearestPlayer(position, biome)
 	local best, bestDist = nil, math.huge
 	for _, player in Players:GetPlayers() do
-		local character = player.Character
-		local root = character and character:FindFirstChild("HumanoidRootPart")
-		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if root and humanoid and humanoid.Health > 0 then
-			local d = ((root.Position - position) * Vector3.new(1, 0, 1)).Magnitude
-			if d < bestDist then
-				best, bestDist = root, d
+		if biome == nil or player:GetAttribute("LockedIn") == biome then
+			local character = player.Character
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if root and humanoid and humanoid.Health > 0 then
+				local d = ((root.Position - position) * Vector3.new(1, 0, 1)).Magnitude
+				if d < bestDist then
+					best, bestDist = root, d
+				end
 			end
 		end
 	end
 	return best, bestDist
 end
 
+local function turnToward(b, offset, dt)
+	local want = math.atan2(-offset.X, -offset.Z)
+	local turn = (want - b.yaw + math.pi) % (2 * math.pi) - math.pi
+	b.yaw += turn * (1 - math.exp(-dt * b.c.Turn))
+end
+
 RunService.Heartbeat:Connect(function(dt)
 	for body, b in live do
 		local c = b.c
 		local pos = body.Position
-		local target, distance = nearestPlayer(pos)
+		if body:GetAttribute("Asleep") then
+			continue
+		end
+		local target, distance = nearestPlayer(pos, b.biome)
 		if target then
+			b.calm = 0
 			local offset = (target.Position - pos) * Vector3.new(1, 0, 1)
-			local want = math.atan2(-offset.X, -offset.Z)
-			local turn = (want - b.yaw + math.pi) % (2 * math.pi) - math.pi
-			b.yaw += turn * (1 - math.exp(-dt * c.Turn))
+			turnToward(b, offset, dt)
 			if distance - c.Radius > c.StopAt then
 				local step = math.min(c.Speed * dt, distance - c.Radius - c.StopAt)
 				-- (it walks where it faces, so it curves round rather than sliding sideways)
 				pos += CFrame.Angles(0, b.yaw, 0).LookVector * step
 			end
+		elseif b.biome then
+			-- nobody left in the fight: wait, then walk home, heal and sleep
+			b.calm += dt
+			if b.calm > Config.BossCalmDown then
+				local offset = (b.home - pos) * Vector3.new(1, 0, 1)
+				if offset.Magnitude < 1 then
+					body:SetAttribute("Health", c.Health)
+					body:SetAttribute("Asleep", true)
+					b.yaw = 0
+				else
+					turnToward(b, offset, dt)
+					pos += offset.Unit * math.min(c.Speed * dt, offset.Magnitude)
+				end
+			end
+		end
+		if b.bounds then
+			local r = c.Radius + 2
+			local x0, x1 = math.min(b.bounds[1], b.bounds[3]) + r, math.max(b.bounds[1], b.bounds[3]) - r
+			local z0, z1 = math.min(b.bounds[2], b.bounds[4]) + r, math.max(b.bounds[2], b.bounds[4]) - r
+			pos = Vector3.new(math.clamp(pos.X, x0, x1), pos.Y, math.clamp(pos.Z, z0, z1))
 		end
 		body.CFrame = CFrame.new(pos) * CFrame.Angles(0, b.yaw, 0)
 	end

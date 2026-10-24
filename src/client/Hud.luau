@@ -5,7 +5,7 @@
 -- ExtraBold 45, white with a dark outline.
 --
 -- Counters show the player's Power and Cash attributes (abbreviated: 288T). The boss bar
--- follows the nearest living boss in workspace.Bosses and hides when there's none (or a popup is open).
+-- follows the nearest awake boss in workspace.Bosses and hides when there's none (or a popup is open).
 -- Under the red sits QM's trail bar, cut to wherever the red was TRAIL_LAG seconds ago,
 -- so a hit drops the red and exposes the trail, which follows it down half a second on. The buttons don't open anything yet.
 --
@@ -206,7 +206,8 @@ count("Cash")
 Popups.init(root, hudFrames)
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- the boss bar follows the nearest living boss
+-- the boss bar follows the nearest living, awake boss within BAR_RANGE
+local BAR_RANGE = 260
 local shown = 1 -- the red's width
 local history = {} -- { { os.clock(), red width }, ... } over the last TRAIL_LAG seconds
 local following = nil
@@ -217,9 +218,10 @@ RunService.RenderStepped:Connect(function(dt)
 	local best, bestDist = nil, math.huge
 	if folder and me then
 		for _, body in folder:GetChildren() do
-			if body:IsA("BasePart") and (body:GetAttribute("Health") or 0) > 0 then
+			-- (awake ones close enough to matter: the arenas' sleeping bosses don't count)
+			if body:IsA("BasePart") and (body:GetAttribute("Health") or 0) > 0 and not body:GetAttribute("Asleep") then
 				local d = (body.Position - me.Position).Magnitude
-				if d < bestDist then
+				if d < bestDist and d < BAR_RANGE then
 					best, bestDist = body, d
 				end
 			end
@@ -236,7 +238,7 @@ RunService.RenderStepped:Connect(function(dt)
 		following = best
 		shown = fraction
 		table.clear(history)
-		bossName.Text = string.upper(best:GetAttribute("Kind") or "Boss")
+		bossName.Text = string.upper(best:GetAttribute("Name") or best:GetAttribute("Kind") or "Boss")
 	end
 	shown += (fraction - shown) * (1 - math.exp(-dt * BAR_EASE))
 	clip.Size = UDim2.fromScale(shown, 1)

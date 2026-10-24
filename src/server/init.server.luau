@@ -1,5 +1,7 @@
--- Gives every player the sword, relays slashes so other players see them (and lets
--- them hurt bosses), and spawns a boss on /boss.
+-- Builds the map (Server/Map) and starts what runs on it: pens, eggs and the bosses'
+-- fights, the training grounds. Gives every player the sword, relays slashes so other
+-- players see them (and lets them hit bosses, mobs and dummies: Server/Combat), and
+-- spawns a boss on /boss.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,9 +14,18 @@ local SlashTuning = require(Shared.SlashTuning)
 local Sword = require(Shared.Weapons.Sword)
 local WorldColors = require(Shared.WorldColors)
 local Bosses = require(script.Bosses)
+local Combat = require(script.Combat)
+local Eggs = require(script.Eggs)
+local Map = require(script.Map)
+local Pens = require(script.Pens)
+local Training = require(script.Training)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
-WorldColors.create() -- workspace.WorldColors: live world colours
+local map = Map.build() -- workspace.Map
+WorldColors.create() -- workspace.WorldColors: live world colours (after the map: it paints it)
+Pens.start(map)
+Eggs.start(map)
+Training.start(map)
 
 local remote = Instance.new("RemoteEvent")
 remote.Name = "Slash"
@@ -40,10 +51,9 @@ local function ride(character)
 end
 local requestBoss -- (below)
 local function joined(player)
-	-- the HUD's counters (client/Hud.luau): no stats system yet, so Power is the sword's
-	-- damage and Cash starts at 0
-	player:SetAttribute("Power", Config.Slash.Damage)
-	player:SetAttribute("Cash", 0)
+	-- the HUD's counters (client/Hud.luau): Power is your slash's damage (Server/Combat
+	-- keeps it), Cash starts at 0 (no saving yet)
+	player:SetAttribute("Cash", player:GetAttribute("Cash") or 0)
 	player.CharacterAdded:Connect(ride)
 	-- (/boss typed in chat also works when the place uses the legacy chat)
 	player.Chatted:Connect(function(message)
@@ -80,7 +90,7 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 	end
 	-- the hit lands as the arc sweeps through (wind-up, then half the sweep)
 	local c = Config.Slash
-	task.delay(c.Windup + c.Sweep * 0.5, Bosses.slash, player, yaw, c)
+	task.delay(c.Windup + c.Sweep * 0.5, Combat.slash, player, yaw, c)
 end)
 
 -- /boss: a chicken boss in front of you. The command is a TextChatCommand; its client
