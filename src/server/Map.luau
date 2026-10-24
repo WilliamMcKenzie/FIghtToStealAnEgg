@@ -853,9 +853,10 @@ local function props(parent)
 					part.Anchored = true
 					part.Locked = true
 					local key = part:GetAttribute("ColorKey")
-					local mine = key and propKey(item, key, style)
-					if mine ~= key then
-						key = mine
+					-- (always recoloured: the template keeps the colour it was made with, and the
+					-- map's colours or the style's keys may differ; a Neon rune glows its colour)
+					if key then
+						key = propKey(item, key, style)
 						part:SetAttribute("ColorKey", key)
 						part.Color = color(key)
 					end
