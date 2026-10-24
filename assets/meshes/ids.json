@@ -11,5 +11,18 @@
   "StoneBlockLow_Block": "rbxassetid://80759426625318",
   "StoneBlock_Block": "rbxassetid://128149382332662",
   "StoneRubble_Big": "rbxassetid://102774178768206",
-  "StoneRubble_Small": "rbxassetid://105263626724475"
+  "StoneRubble_Small": "rbxassetid://105263626724475",
+  "Boulders_Rock": "rbxassetid://112785217700205",
+  "CactusBarrel_Body": "rbxassetid://99514847520822",
+  "CactusBarrel_Flowers": "rbxassetid://84291563273442",
+  "Cactus_Body": "rbxassetid://108070594105370",
+  "Cactus_Flowers": "rbxassetid://140520028203187",
+  "DeadTree_Wood": "rbxassetid://139771638447721",
+  "Monolith_Runes": "rbxassetid://119294021401659",
+  "Monolith_Stone": "rbxassetid://92495539582984",
+  "RuinPillarBroken_Stone": "rbxassetid://71809041788816",
+  "RuinPillar_Stone": "rbxassetid://136637132455471",
+  "SnowPine_Needles": "rbxassetid://77665111637907",
+  "SnowPine_Snow": "rbxassetid://118289739143518",
+  "SnowPine_Trunk": "rbxassetid://105243423855795"
 }

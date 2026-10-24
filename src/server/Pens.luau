@@ -63,7 +63,7 @@ function Pens.addEgg(player, biome, makeEgg)
 	local half = area.Size.X / 2 - 8
 	local egg = makeEgg(biome)
 	egg.Anchored = true
-	local floor = 1
+	local floor = area.Position.Y - area.Size.Y / 2 -- (the pen's floor: its Area marker's bottom)
 	egg.CFrame = CFrame.new(
 		area.Position.X - half + col * (2 * half / 5),
 		floor + egg.Size.Y / 2,

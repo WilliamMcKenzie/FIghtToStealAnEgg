@@ -30,7 +30,7 @@ import map_gen as M  # noqa: E402
 
 FLOOR_BOTTOM = -2
 LIP = 0.25
-ARCH_SPRING = 22
+ARCH_SPRING = 36
 ARCH_SQUASH = 0.7
 LIQUID_SINK = 1
 
@@ -418,9 +418,9 @@ def build():
                 run(a, b)
 
     for x, z in M.PENS:
-        fence(x, z, M.PEN_SIZE, 1, (1 if x < 0 else -1, 0))
+        fence(x, z, M.PEN_SIZE, 0, (1 if x < 0 else -1, 0))
     for name, x in M.TRAINING:
-        fence(x, M.TRAIN_Z, M.TRAIN_SIZE, 1, (0, -1))
+        fence(x, M.TRAIN_Z, M.TRAIN_SIZE, 0, (0, -1))
         if name == "Dummies":
             for k in (-1, 0, 1):
                 for row in (0, 1):
@@ -428,8 +428,9 @@ def build():
                     R = rot_y(k * -10)
                     for off, size, key in [((0, 2.5, 0), (1, 5, 1), "WoodDark"), ((0, 5.5, 0), (3, 4, 2), "Straw"),
                                            ((0, 6.6, 0), (7, 0.8, 0.8), "WoodDark"), ((0, 8.6, 0), (2.2, 2.2, 2.2), "StrawDark")]:
-                        scene.box(key, np.array([px, 1, pz]) + R @ np.array(off), size, R)
-    scene.aabb("PlazaInlay", -5, 1, -5, 5, 2, 5)
+                        scene.box(key, np.array([px, 0, pz]) + R @ np.array(off), size, R)
+    sx, sz = M.SPAWN
+    scene.aabb("Dirt", sx - 5, -1, sz - 5, sx + 5, 0, sz + 5)
 
     # the bosses, asleep on their spots; a few mobs in the training grounds
     bosses = boss_settings()
@@ -440,18 +441,18 @@ def build():
     for name, x in M.TRAINING:
         if name in mobs:
             for k in range(3):
-                animal(scene, mobs[name][0], np.array([x + U(-14, 14), 1, M.TRAIN_Z + U(-14, 14)]), mobs[name][1], U(0, 360), extra)
+                animal(scene, mobs[name][0], np.array([x + U(-14, 14), 0, M.TRAIN_Z + U(-14, 14)]), mobs[name][1], U(0, 360), extra)
     return scene, extra
 
 
 # ---- views -------------------------------------------------------------------------------
 
 def views():
-    out = [("3d_spawn", (0, 300, 460), (0, 0, -20), 42)]
+    out = [("3d_spawn", (0, 260, 380), (0, 0, -28), 42)]
     for i, b in enumerate(M.BIOMES):
         W, D = b["W"], b["D"]
         out.append(("3d_%d_%s" % (i + 1, b["name"].lower()), (W * 0.42, D * 0.9, b["zs"] + D * 0.55), (0, 0, b["cz"] - D * 0.05), 45))
-    zmid = (M.BASE_R + M.BIOMES[-1]["zn"]) / 2
+    zmid = (M.BASE_S + M.BIOMES[-1]["zn"]) / 2
     out.append(("3d_overview", (900, 1100, zmid + 900), (0, 0, zmid - 60), 50))
     return out
 

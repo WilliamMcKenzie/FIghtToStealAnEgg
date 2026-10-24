@@ -457,7 +457,7 @@ function drawFurniture(g) {
     }
   }
   if (base.spawn) {
-    g.fillStyle = css(rgb("PlazaInlay")); g.fillRect(base.spawn[0] - 5, base.spawn[1] - 5, 10, 10);
+    g.fillStyle = css(rgb("Dirt")); g.fillRect(base.spawn[0] - 5, base.spawn[1] - 5, 10, 10);
   }
 }
 
@@ -586,7 +586,8 @@ function draw() {
     ctx.font = "800 15px Montserrat, sans-serif"; ctx.lineJoin = "round"; ctx.textAlign = "left";
     const label = (t, x, z) => { const sx = (x - cam.x) * cam.zoom + W / 2, sy = (z - cam.z) * cam.zoom + H / 2; ctx.lineWidth = 4; ctx.strokeStyle = "#000"; ctx.strokeText(t, sx, sy); ctx.fillStyle = "#fff"; ctx.fillText(t, sx, sy); };
     for (const a of M.areas) if (a.bounds) label(`${a.name}  ${a.bounds[2] - a.bounds[0]}×${a.bounds[1] - a.bounds[3]}`, a.bounds[0] + 6, a.bounds[1] - 8);
-    label("Base", -60, -150);
+    const base = M.areas.find((a) => a.name === "Base");
+    if (base && base.spawn) label("Base", base.spawn[0] - 20, base.spawn[1] - 14);
   }
 }
 
@@ -1119,6 +1120,6 @@ try {
   }
 } catch (e) { /* no draft */ }
 // open on the base and the Meadow
-cam = { x: 0, z: -180, zoom: Math.max(0.5, Math.min(2, H / 760)) };
+cam = { x: 0, z: -110, zoom: Math.max(0.6, Math.min(2.4, H / 620)) };
 (function frame() { if (dirty) draw(); requestAnimationFrame(frame); })();
 </script>

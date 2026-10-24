@@ -32,17 +32,7 @@ return {
 
 		-- the map (tools/map_gen.py lays it out, Server/Map.luau builds it). Each floor
 		-- tile's Checker is its checker's colour.
-		-- the base: Grass and Dirt (above) are its lawn and paths, WallDirt its wall
-		BaseGrassLight = Color3.fromRGB(160, 192, 36),
-		BaseGrassLightChecker = Color3.fromRGB(172, 202, 28),
-		Plaza = Color3.fromRGB(214, 216, 206),
-		PlazaChecker = Color3.fromRGB(202, 204, 194),
-		PlazaInlay = Color3.fromRGB(176, 178, 168),
-		PlazaInlayChecker = Color3.fromRGB(166, 168, 158),
-		PenFloor = Color3.fromRGB(210, 176, 100),
-		PenFloorChecker = Color3.fromRGB(198, 164, 90),
-		TrainFloor = Color3.fromRGB(190, 192, 182),
-		TrainFloorChecker = Color3.fromRGB(178, 180, 170),
+		-- the base: Grass and Dirt (above, the dirt a stud lower) are its floor, WallDirt its wall
 		Wood = Color3.fromRGB(150, 98, 56),
 		WoodDark = Color3.fromRGB(110, 72, 42),
 		Straw = Color3.fromRGB(226, 196, 110),
