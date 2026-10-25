@@ -629,8 +629,8 @@ return {
 	},
 
 	-- the rider's upper body with a weapon out (client/SwingPose; QM, Oct 25). Every weapon
-	-- rides like cavalry: the weapon hand low by the hip, the blade (or bow, or staff) rising
-	-- up and back with its tip high behind the rider, the torso twisted a little and leaning into the
+	-- rides like cavalry: the weapon arm hanging at the side, the weapon's head (or blade,
+	-- bow, staff) pointing down and forward by the mount's front leg, the torso twisted a little and leaning into the
 	-- ride, the other hand forward on the reins. Swords and staffs swing from it and settle
 	-- back into it; bows snap up into the Archer pose below while shooting.
 	-- Angles are degrees about the joint's parent-part axes: X pitch (arms: 90 = straight
@@ -648,10 +648,11 @@ return {
 		Joints = {
 			Waist = { Order = "YXZ", X = -12, Y = -18, Z = -4, Breathe = 2, Bob = 3, Lag = 0 },
 			Neck = { Order = "YXZ", X = 8, Y = 14, Z = 0, Breathe = -1, Bob = -2, Lag = 0.05 },
-			-- (QM's drawing: the hand low by the hip, the weapon rising up and back past the head)
-			RightShoulder = { Order = "YXY", X = -10, Y = -60, Z = 60, Breathe = 1.5, Bob = 3, Lag = 0.15 },
-			RightElbow = { Order = "YXZ", X = 80, Y = 0, Z = 0, Breathe = 1, Bob = 3, Lag = 0.2 },
-			RightWrist = { Order = "YXZ", X = 60, Y = 0, Z = 0, Breathe = 0, Bob = 2, Lag = 0.25 },
+			-- (QM's drawing: the arm hanging a little out, the weapon's head low and forward by
+			-- the mount's front leg, its handle rising up and back through the fist)
+			RightShoulder = { Order = "YXY", X = 20, Y = -40, Z = 60, Breathe = 1.5, Bob = 3, Lag = 0.15 },
+			RightElbow = { Order = "YXZ", X = 0, Y = 0, Z = 0, Breathe = 1, Bob = 3, Lag = 0.2 },
+			RightWrist = { Order = "YXZ", X = -60, Y = 0, Z = 0, Breathe = 0, Bob = 2, Lag = 0.25 },
 			LeftShoulder = { Order = "YXZ", X = 55, Y = 5, Z = 0, Breathe = 1.5, Bob = 3, Lag = 0.1 },
 			LeftElbow = { Order = "YXZ", X = 45, Y = 0, Z = 0, Breathe = 1, Bob = 4, Lag = 0.15 },
 		},
