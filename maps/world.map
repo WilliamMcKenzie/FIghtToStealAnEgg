@@ -386,7 +386,14 @@
   {"type":"Prop","item":"PineTall","x":-170,"z":-24,"yaw":138,"scale":2.09,"style":"Base"},
   {"type":"Prop","item":"PineTall","x":-172,"z":-12,"yaw":41,"scale":1,"style":"Base"},
   {"type":"Prop","item":"Boulders","x":-165,"z":-15,"yaw":69,"scale":1,"style":"Base"},
-  {"type":"Prop","item":"Boulders","x":165,"z":-8,"yaw":335,"scale":1,"style":"Base"}
+  {"type":"Prop","item":"Boulders","x":165,"z":-8,"yaw":335,"scale":1,"style":"Base"},
+  {"type":"Barrier","region":"Desert","x":0,"z":-373,"yaw":0,"width":145,"height":40},
+  {"type":"Barrier","region":"Ice","x":0,"z":-578,"yaw":0,"width":147,"height":40},
+  {"type":"Barrier","region":"Lava","x":-2,"z":-800,"yaw":0,"width":178,"height":40},
+  {"type":"Barrier","region":"Dungeon","x":-88,"z":-1041,"yaw":0,"width":79,"height":40},
+  {"type":"Barrier","region":"Castle","x":-181,"z":-1344,"yaw":0,"width":74,"height":40},
+  {"type":"Barrier","region":"Forest","x":94,"z":-1041,"yaw":0,"width":85,"height":40},
+  {"type":"Barrier","region":"Ocean","x":178,"z":-1282,"yaw":0,"width":79,"height":40}
 ],
 "fixed": {
   "wallHeight": 30,

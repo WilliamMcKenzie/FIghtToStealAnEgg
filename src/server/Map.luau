@@ -980,56 +980,42 @@ end
 
 -- ---- region gates ----------------------------------------------------------------------
 
--- Each region's gate (QM, Oct 25: regions are bought with cash): the opening between its
--- two gate (or transition) pillars, as an invisible marker filling it, its Region
--- attribute the area's name and its local X along the opening, and the region's blocker
--- in it (Shared/RegionBlocker; client/Regions hides it for a player who's bought it).
+-- Each region's gate (QM, Oct 25: regions are bought with cash): a Barrier object in the
+-- map editor (MapData.RegionGates: region, x, z, yaw, width, height), so QM can move, turn
+-- and size it there. Here an invisible marker fills it, its Region attribute the area's
+-- name and its local X along the opening, facing away from the region, and the region's
+-- blocker stands in it (Shared/RegionBlocker; client/Regions hides it for a player who's
+-- bought it).
 gates = function(parent, blockers)
-	local by = {}
-	for _, p in MapData.Pillars do
-		if p[6] == "gate" or p[6] == "transition" then
-			by[p[1]] = by[p[1]] or {}
-			table.insert(by[p[1]], p)
-		end
-	end
-	for region, pair in by do
-		if #pair ~= 2 or not Map.area(region) then
+	for _, g in MapData.RegionGates or {} do
+		local region, x, z, yaw, width, height = g[1], g[2], g[3], g[4], g[5], g[6]
+		local area = Map.area(region)
+		if not area then
 			continue
 		end
-		local a, b = pair[1], pair[2]
-		local pa, pb = Vector3.new(a[2], 0, a[3]), Vector3.new(b[2], 0, b[3])
-		local along = (pb - pa).Unit
-		local halfA, halfB = a[4] * (a[8] or 1) / 2, b[4] * (b[8] or 1) / 2
-		local from, to = pa + along * halfA, pb - along * halfB
-		local width = (to - from).Magnitude
-		if width < 4 then
-			continue
+		-- (the editor's yaw: the opening runs along x turned -yaw degrees, seen from above)
+		local a = -math.rad(yaw)
+		local along = Vector3.new(math.cos(a), 0, math.sin(a))
+		local mid = Vector3.new(x, 0, z)
+		local normal = Vector3.new(-along.Z, 0, along.X)
+		if area.Bounds then
+			local centre = Vector3.new((area.Bounds[1] + area.Bounds[3]) / 2, 0, (area.Bounds[2] + area.Bounds[4]) / 2)
+			if normal:Dot(centre - mid) > 0 then
+				normal = -normal
+			end
 		end
-		local mid = (from + to) / 2
-		local height = 40
+		local floor = MapFile.groundAt(MapData, x, z)
+		local centre = mid + Vector3.new(0, floor + height / 2 - 0.5, 0)
 		local marker = Instance.new("Part")
 		marker.Name = region .. "Gate"
 		marker.Anchored, marker.CanCollide, marker.CanQuery, marker.CanTouch = true, false, false, false
 		marker.Transparency = 1
 		marker.Size = Vector3.new(width, height, 1.5)
-		-- (facing out of the region: its front toward whoever walks up to it)
-		local into = Vector3.new(0, 0, 0)
-		local area = Map.area(region)
-		if area.Bounds then
-			local centre = Vector3.new((area.Bounds[1] + area.Bounds[3]) / 2, 0, (area.Bounds[2] + area.Bounds[4]) / 2)
-			into = centre - mid
-		end
-		local normal = Vector3.new(-along.Z, 0, along.X)
-		if normal:Dot(into) > 0 then
-			normal = -normal
-		end
-		marker.CFrame = CFrame.lookAt(mid + Vector3.new(0, height / 2 - 2, 0), mid + Vector3.new(0, height / 2 - 2, 0) + normal)
+		marker.CFrame = CFrame.lookAt(centre, centre + normal)
 		marker:SetAttribute("Region", region)
-		marker:SetAttribute("PillarWidthA", a[4] * (a[8] or 1))
-		marker:SetAttribute("PillarWidthB", b[4] * (b[8] or 1))
 		marker.Parent = parent
-		local blocker = RegionBlocker.build(marker, function(x, z)
-			return MapFile.groundAt(MapData, x, z)
+		local blocker = RegionBlocker.build(marker, function(px, pz)
+			return MapFile.groundAt(MapData, px, pz)
 		end)
 		if blocker then
 			blocker.Parent = blockers

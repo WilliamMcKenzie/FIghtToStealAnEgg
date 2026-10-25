@@ -358,7 +358,7 @@ return {
 			Castle = 25000000,
 			Ocean = 25000000,
 		},
-		Names = { Dungeon = "The Dungeon", Castle = "Red Castle", Forest = "Magic Forest", Ocean = "Ocean Trench" },
+		Names = { Ice = "Tundra", Lava = "Lava Valley", Castle = "Red Castle", Forest = "Magic Circle", Ocean = "Ocean Trench" }, -- (what players see, where it isn't the key)
 		Shadow = 20, -- studs its shadow spreads across the floor before it's gone
 	},
 

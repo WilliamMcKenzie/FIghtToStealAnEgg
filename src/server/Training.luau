@@ -133,7 +133,7 @@ function Training.start(map)
 				local prompt = Instance.new("ProximityPrompt")
 				prompt.Name = "Unlock"
 				prompt.ActionText = "Unlock ($" .. tostring(g.Cost) .. ")"
-				prompt.ObjectText = name .. " Training"
+				prompt.ObjectText = (Config.Regions.Names[name] or name) .. " Training"
 				prompt.HoldDuration = 0.4
 				prompt.MaxActivationDistance = 14
 				prompt.RequiresLineOfSight = false
