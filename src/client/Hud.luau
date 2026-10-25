@@ -147,7 +147,7 @@ trailClip.BackgroundTransparency = 1
 trailClip.ClipsDescendants = true
 trailClip.Size = UDim2.fromScale(1, 1)
 trailClip.Parent = bar
-image(trailClip, "BossBarTrail", { Size = UDim2.fromOffset(646, 91) })
+local trailImage = image(trailClip, "BossBarTrail", { Size = UDim2.fromOffset(646, 91) })
 local clip = Instance.new("Frame")
 clip.Name = "Clip"
 clip.BackgroundTransparency = 1
@@ -281,7 +281,12 @@ RunService.RenderStepped:Connect(function(dt)
 		table.remove(history, 1)
 		lagged = history[1][2]
 	end
-	trailClip.Size = UDim2.fromScale(math.max(lagged, shown), 1)
+	-- (only the stretch the red has left behind: cropped from the left at the red's edge, so
+	-- it never sits under the red, and it's gone when they meet; QM, Oct 25)
+	local from, to = shown, math.max(lagged, shown)
+	trailClip.Position = UDim2.fromScale(from, 0)
+	trailClip.Size = UDim2.fromScale(to - from, 1)
+	trailImage.Position = UDim2.fromOffset(-from * 646, 0)
 end)
 
 return Hud
