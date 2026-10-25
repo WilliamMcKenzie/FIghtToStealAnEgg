@@ -271,6 +271,36 @@ return {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
 			},
 		},
+		MajesticUnicorn = {
+			Name = "Majestic Unicorn",
+			Model = "MajesticUnicorn", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
+			Size = 2.4, -- (about 32 studs tall)
+			Health = 800,
+			Speed = 10,
+			StopAt = 1,
+			Radius = 8,
+			Turn = 4,
+			Strength = 2,
+			Respawn = 20,
+			Attacks = {
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+			},
+		},
+		VenusFlytrap = {
+			Name = "Venus Flytrap",
+			Model = "VenusFlytrap", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
+			Size = 1.8, -- (about 31 studs tall)
+			Health = 800,
+			Speed = 10,
+			StopAt = 1,
+			Radius = 9,
+			Turn = 4,
+			Strength = 2,
+			Respawn = 20,
+			Attacks = {
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+			},
+		},
 		CactusBoss = {
 			Name = "Cactus Boss",
 			Model = "CactusBoss", -- (LassoAPet's, QM Oct 24)
@@ -326,7 +356,7 @@ return {
 	-- each biome's boss: one of these at random every time it (re)spawns (QM, Oct 25; /reboss
 	-- re-rolls them all)
 	BossPools = {
-		Meadow = { "MotherHen", "GiantRafflesia" },
+		Meadow = { "MotherHen", "GiantRafflesia", "MajesticUnicorn", "VenusFlytrap" },
 		Desert = { "CactusBoss" },
 		Ice = { "ElderBoar" },
 		Lava = { "LavaWyrm" },
