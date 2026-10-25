@@ -631,8 +631,34 @@ local function baseFurniture(parent)
 		marker.Size = Vector3.new(base.PenSize, 12, base.PenSize)
 		marker.CFrame = CFrame.new(x, 6, z)
 		marker.Parent = pen
-		local sign = Map.sign(pen, side * CFrame.new(9, 0, -3), "Empty Pen", 10)
-		sign.Name = "OwnerSign"
+		-- (no sign board, QM Oct 25: the owner's name floats over the gate instead; Server/
+		-- Pens writes it into OwnerSign.Board's label)
+		local owner = Instance.new("Model")
+		owner.Name = "OwnerSign"
+		local board = Instance.new("Part")
+		board.Name = "Board"
+		board.Anchored, board.CanCollide, board.CanQuery, board.CanTouch = true, false, false, false
+		board.Transparency = 1
+		board.Size = Vector3.new(1, 1, 1)
+		board.CFrame = side * CFrame.new(0, 9, 0)
+		board.Parent = owner
+		local gui = Instance.new("BillboardGui")
+		gui.Size = UDim2.fromScale(16, 2.4)
+		gui.MaxDistance = 120
+		gui.Parent = board
+		local label = Instance.new("TextLabel")
+		label.Name = "Text"
+		label.Size = UDim2.fromScale(1, 1)
+		label.BackgroundTransparency = 1
+		label.FontFace = SIGN_FONT
+		label.TextScaled = true
+		label.TextColor3 = Color3.new(1, 1, 1)
+		label.Text = ""
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 2
+		stroke.Parent = label
+		label.Parent = gui
+		owner.Parent = pen
 		pen.Parent = pens
 	end
 	-- the training grounds: fenced yards, their gates facing the spawn (Server/Training
@@ -666,8 +692,6 @@ local function baseFurniture(parent)
 		gate.Size = Vector3.new(10, 8, 1.2)
 		gate.CFrame = side * CFrame.new(0, 4, 1)
 		gate.Parent = zone
-		local title = if name == "Dummies" then "TRAINING DUMMIES" else string.upper(name) .. " TRAINING"
-		Map.sign(zone, side * CFrame.new(14, 0, -3), title, 13)
 		zone.Parent = training
 	end
 	-- the spawn: an invisible point in the dirt yard (QM, Oct 24: no spawn plate), you

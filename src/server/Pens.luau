@@ -94,7 +94,7 @@ function Pens.start(map)
 		for i, owner in owners do
 			if owner == player then
 				owners[i] = nil
-				setSign(pens[i], "Empty Pen")
+				setSign(pens[i], "")
 				clearEggs(pens[i])
 			end
 		end
