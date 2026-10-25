@@ -41,7 +41,6 @@ local function attach(character)
 	name.TextColor3 = rarity.Fill
 	local stroke = Instance.new("UIStroke")
 	stroke.Color = rarity.Stroke
-	stroke.Thickness = 2
 	stroke.LineJoinMode = Enum.LineJoinMode.Round
 	stroke.Parent = name
 	name.Parent = gui
@@ -79,6 +78,13 @@ local function attach(character)
 	humanoid.HealthChanged:Connect(health)
 	humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(health)
 	health()
+	-- (the name's outline as thick as the bar's black border, 4 of its 18 pixels, at
+	-- whatever size the billboard is drawn: QM)
+	local function outline()
+		stroke.Thickness = math.max(1, bar.AbsoluteSize.Y * 4 / 18)
+	end
+	bar:GetPropertyChangedSignal("AbsoluteSize"):Connect(outline)
+	outline()
 	gui.Parent = head
 end
 
