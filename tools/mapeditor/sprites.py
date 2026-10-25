@@ -57,7 +57,7 @@ def sprites():
     extra = {}
     for b in M.BIOMES:
         sc = R.Scene()
-        R.nest(sc, np.random.default_rng(5), 0, 0, "Egg" + b["name"])
+        R.nest(sc, np.random.default_rng(5), 0, 0, "Egg" + b["name"] if "Egg" + b["name"] in R.colours() else "Egg")
         out.append(("Nest_%s" % b["name"], sc))
         sc = R.Scene()
         model, size = bosses[b["name"]]

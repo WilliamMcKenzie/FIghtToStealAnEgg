@@ -186,18 +186,22 @@ def colours():
     src = open(os.path.join(ROOT, "src", "shared", "Config.luau")).read()
     out = {k: (int(r), int(g), int(b)) for k, r, g, b in re.findall(r"(\w+) = Color3\.fromRGB\((\d+), (\d+), (\d+)\)", src[src.index("WorldColors = {"):])}
     eggs = src[src.index("Eggs = {"):]
-    eggs = eggs[eggs.index("Colors = {"):eggs.index("},")]
-    for k, r, g, b in re.findall(r"(\w+) = Color3\.fromRGB\((\d+), (\d+), (\d+)\)", eggs):
-        out["Egg" + k] = (int(r), int(g), int(b))
+    if "Colors = {" in eggs[:eggs.index("\n\t},")]:  # (older Configs: an egg colour per biome)
+        eggs = eggs[eggs.index("Colors = {"):eggs.index("},")]
+        for k, r, g, b in re.findall(r"(\w+) = Color3\.fromRGB\((\d+), (\d+), (\d+)\)", eggs):
+            out["Egg" + k] = (int(r), int(g), int(b))
     return out
 
 
 def boss_settings():
     src = open(os.path.join(ROOT, "src", "shared", "Config.luau")).read()
+    pools = src[src.index("BossPools = {"):]
     src = src[src.index("Bosses = {"):]
     out = {}
     for b in M.BIOMES:
-        block = src[src.index("\t\t%s = {" % b["name"]):]
+        # (each biome's first boss in Config.BossPools: QM, Oct 25, a pool per biome)
+        name = re.search(r"\b%s = \{ \"(\w+)\"" % b["name"], pools).group(1)
+        block = src[src.index("\t\t%s = {" % name):]
         out[b["name"]] = (re.search(r'Model = "(\w+)"', block).group(1), float(re.search(r"Size = ([\d.]+)", block).group(1)))
     return out
 
@@ -287,16 +291,57 @@ def arch(scene, rng, st, x, z):
 
 
 def nest(scene, rng, x, z, egg=None):
-    """A straw nest (and its egg), as Map.luau's nest()."""
-    J = lambda a: (rng.random() * 2 - 1) * a  # noqa: E731
-    scene.cylinder_y("Straw", (x, 0.5, z), 5.5, 1)
+    """LassoAPet's woven stick nest (and its egg), as Map.luau's nest(): a criss-cross mat,
+    five rings of sticks leaning out, fourteen strays, at NEST_SCALE."""
+    S = 1.3
+
+    def Rx(a):
+        c, s_ = math.cos(a), math.sin(a)
+        return np.array([[1, 0, 0], [0, c, -s_], [0, s_, c]])
+
+    def Ry(a):
+        c, s_ = math.cos(a), math.sin(a)
+        return np.array([[c, 0, s_], [0, 1, 0], [-s_, 0, c]])
+
+    def Rz(a):
+        c, s_ = math.cos(a), math.sin(a)
+        return np.array([[c, -s_, 0], [s_, c, 0], [0, 0, 1]])
+
+    d = math.radians
+
+    def stick(length, w, h, pos, R):
+        key = "NestStick" if rng.random() < 0.5 else "NestStickDark"
+        scene.box(key, (x + pos[0] * S, pos[1] * S, z + pos[2] * S), (length * S, h * S, w * S), R, mode="plain")
+
+    def ring(a, r, h):
+        # (Roblox's CFrame.fromMatrix: X along the ring, Y up, Z = X x Y pointing inward)
+        X = np.array((-math.sin(a), 0, math.cos(a)))
+        Y = np.array((0, 1, 0))
+        return (r * math.cos(a), h, r * math.sin(a)), np.stack([X, Y, np.cross(X, Y)], 1)
+
+    for _ in range(30):
+        a, dd = rng.uniform(0, 2 * math.pi), math.sqrt(rng.random()) * 2
+        R = Ry(d(rng.uniform(0, 180))) @ Rz(d(rng.uniform(-5, 5))) @ Rx(d(rng.uniform(-8, 8)))
+        stick(rng.uniform(3.2, 4.6), rng.uniform(0.3, 0.42), 0.24, (dd * math.cos(a), rng.uniform(0.12, 0.3), dd * math.sin(a)), R)
+    for layer in range(5):
+        r, h = 2.2 + 0.34 * layer, 0.22 + 0.24 * layer
+        n, lean = 13 + 2 * layer, 18 + 7 * layer
+        for j in range(n):
+            a = 2 * math.pi * (j + rng.uniform(-0.25, 0.25)) / n
+            length = 2 * math.pi * r / n * rng.uniform(1.35, 1.8)
+            w, hh = rng.uniform(0.38, 0.5), rng.uniform(0.26, 0.34)
+            pos, B = ring(a, r + rng.uniform(-0.12, 0.12), h + rng.uniform(-0.06, 0.06))
+            R = B @ Ry(d(rng.uniform(-12, 12))) @ Rz(d(rng.uniform(-9, 9))) @ Rx(d(-lean + rng.uniform(-6, 6)))
+            stick(length, w, hh, pos, R)
     for i in range(14):
-        a = (i + rng.uniform(-0.3, 0.3)) / 14 * 2 * math.pi
-        r = 5.6 + rng.uniform(-0.3, 0.3)
-        R = rot_y(math.degrees(-a)) @ rot_xyz(math.radians(J(20)), 0, math.radians(J(12)))
-        scene.box("Wood" if i % 3 == 0 else "StrawDark", (x + math.cos(a) * r, 1.1 + rng.uniform(0, 0.5), z + math.sin(a) * r), (0.8, 0.8, rng.uniform(4, 5.5)), R, mode="plain")
+        a = 2 * math.pi * (i + rng.uniform(-0.4, 0.4)) / 14
+        side = -1 if rng.random() < 0.5 else 1
+        length, w, hh = rng.uniform(2.2, 3.4), rng.uniform(0.24, 0.32), rng.uniform(0.2, 0.26)
+        pos, B = ring(a, rng.uniform(3.1, 3.7), rng.uniform(0.7, 1.3))
+        R = B @ Ry(d(side * rng.uniform(25, 50))) @ Rz(d(rng.uniform(-18, 18))) @ Rx(d(-rng.uniform(20, 45)))
+        stick(length, w, hh, pos, R)
     if egg:
-        scene.ellipsoid(egg, (x, 1 + 3.3 / 2, z), (1.3, 1.65, 1.3))
+        scene.ellipsoid(egg, (x, 0.52 + 1.65 * S, z), (1.3 * S, 1.65 * S, 1.3 * S))
 
 
 def prop_key(item, key, st):
