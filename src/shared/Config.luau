@@ -694,14 +694,9 @@ return {
 			Shot = {
 				Speed = 60,
 				Homing = 220,
-				Color = Color3.fromRGB(200, 255, 240),
-				Color2 = Color3.fromRGB(255, 255, 255),
-				ShellSize = 2,
-				ShellTransparency = 0.3,
-				Sparkles = 6,
-				Orbit = 3,
-				OrbitRadius = 0.9,
-				Spin = 720,
+				Size = 0.9,
+				Color = Color3.fromRGB(90, 230, 200),
+				Color2 = Color3.fromRGB(210, 255, 245),
 			},
 		},
 		-- tier 2
@@ -738,12 +733,11 @@ return {
 			Shot = {
 				Speed = 85,
 				Homing = 260,
-				Color = Color3.fromRGB(255, 244, 120),
-				Color2 = Color3.fromRGB(130, 200, 255),
-				Size = 0.8,
-				Flicker = 0.6,
-				TrailLength = 0.12,
-				Sparkles = 30,
+				Size = 0.85,
+				Color = Color3.fromRGB(255, 210, 40),
+				Color2 = Color3.fromRGB(255, 250, 170),
+				Sparks = 5,
+				SparkTransparency = 0.35,
 			},
 		},
 		-- tier 3
@@ -757,14 +751,9 @@ return {
 				Speed = 50,
 				Homing = 180,
 				Splash = 6,
-				Size = 1.3,
-				Color = Color3.fromRGB(70, 160, 255),
-				Color2 = Color3.fromRGB(200, 240, 255),
-				ShellSize = 1.4,
-				ShellTransparency = 0,
-				Orbit = 2,
-				OrbitRadius = 0.8,
-				Spin = 360,
+				Size = 1.2,
+				Color = Color3.fromRGB(40, 120, 255),
+				Color2 = Color3.fromRGB(150, 220, 255),
 			},
 		},
 		Bomb = {
@@ -853,11 +842,9 @@ return {
 				Speed = 55,
 				Homing = 170,
 				Splash = 8,
-				Size = 1.6,
-				Color = Color3.fromRGB(255, 110, 30),
-				Color2 = Color3.fromRGB(255, 220, 90),
-				Sparkles = 30,
-				TrailLength = 0.3,
+				Size = 1.4,
+				Color = Color3.fromRGB(255, 90, 20),
+				Color2 = Color3.fromRGB(255, 200, 80),
 			},
 		},
 		-- boss-only (super rare): one for each boss in BossPools
@@ -950,17 +937,14 @@ return {
 			Damage = 4,
 			Weight = 2,
 			Shot = {
-				Look = "Fireball",
 				Cooldown = 1,
 				Range = 60,
 				Speed = 45,
 				Homing = 120,
 				Splash = 12,
-				Size = 2.4,
-				Color = Color3.fromRGB(255, 90, 30),
-				Color2 = Color3.fromRGB(255, 220, 90),
-				Sparkles = 30,
-				TrailLength = 0.3,
+				Size = 2.2,
+				Color = Color3.fromRGB(230, 40, 10),
+				Color2 = Color3.fromRGB(255, 170, 60),
 			},
 		},
 	},
@@ -990,15 +974,16 @@ return {
 			TrailColor = Color3.fromRGB(255, 255, 255),
 			TrailLength = 0.12, -- seconds the trail lasts
 		},
-		-- every Magic weapon's Shot starts from these. Its look is built from the numbers: a
-		-- glowing core (Color), a ForceField shell (ShellSize x the core, 0 for none), a trail
-		-- from Color2 to Color, sparkles, bits orbiting it, and a flicker
+		-- every Magic weapon's Shot starts from these. Every staff fires the same orb (QM, Oct
+		-- 25, after QM's purple orb reference), only recoloured and resized: a white-hot core
+		-- inside a ring of Color, a soft halo of Color2 round it, wispy flares curling over
+		-- it, a faint crackle of electricity, a trail and a few sparkles (client/Shots)
 		Magic = {
-			Look = "Orb", -- Orb (or Fireball, the same), Bomb, Petal
+			Look = "Orb", -- Orb (every staff), Bomb, Petal (boss weapons)
 			Cooldown = 0.7,
 			Range = 50,
 			Speed = 55,
-			Size = 1,
+			Size = 1, -- the whole orb (and how wide it hits)
 			Count = 1,
 			Spread = 0,
 			Pierce = 0,
@@ -1006,18 +991,32 @@ return {
 			Homing = 200, -- degrees a second it can turn toward a target: it guides, it can't loop round
 			HomingCone = 135, -- it only bends toward targets this many degrees either side of its path
 			Launch = 90, -- sets off up to this many degrees either side of the aim, at random (QM)
-			Color = Color3.fromRGB(110, 230, 255),
-			Color2 = Color3.fromRGB(255, 255, 255),
-			ShellSize = 1.6,
-			ShellTransparency = 0.1,
-			TrailLength = 0.2,
-			TrailWidth = 1.1, -- times the core
-			Sparkles = 14, -- a second
-			SparkleSize = 0.35,
-			Flicker = 0, -- 0..1: the core jitters in size every frame (lightning)
-			Spin = 0, -- degrees a second it turns (its orbiting bits, a bomb's tumble)
-			Orbit = 0, -- little bits circling it
-			OrbitRadius = 1, -- times the core
+			-- the orb's look
+			Color = Color3.fromRGB(150, 60, 255), -- the ring round the core
+			Color2 = Color3.fromRGB(235, 140, 255), -- the halo, flares and trail
+			CoreColor = Color3.fromRGB(255, 255, 255),
+			CoreSize = 0.55, -- studs (x Size)
+			RingSize = 1, -- studs (x Size)
+			RingTransparency = 0.3,
+			HaloSize = 1.9, -- studs (x Size)
+			HaloTransparency = 0.8,
+			HazeSize = 2.8, -- a fainter, wider glow past the halo (0: none)
+			HazeTransparency = 0.93,
+			Flares = 3, -- wispy flames curling over the orb
+			FlareLength = 1.6, -- (x Size)
+			FlareWidth = 0.45, -- (x Size)
+			FlareSpin = 220, -- degrees a second they turn round it
+			FlareTransparency = 0.25,
+			Sparks = 3, -- little bolts of electricity crackling round it (0: none)
+			SparkReach = 1.3, -- how far out they reach (x Size)
+			SparkTransparency = 0.6, -- faint (QM: a subtle, low opacity crackle)
+			SparkRate = 18, -- times a second they jump to new shapes
+			TrailLength = 0.25, -- seconds
+			TrailWidth = 0.9, -- studs (x Size)
+			Sparkles = 10, -- a second
+			SparkleSize = 0.3,
+			Flicker = 0, -- 0..1: the core jitters in size every frame
+			Spin = 0, -- degrees a second (a bomb's tumble)
 		},
 	},
 }

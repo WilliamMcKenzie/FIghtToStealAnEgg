@@ -8,7 +8,7 @@
 --   Melee: every Config.Slash value (Arc, Radius, Width, OuterSegments, Cooldown,
 --          AttackRange, Color...), each Variety range as Variety_<name> (X min, Y max)
 --   Ranged and Magic: every Config.Shots.Ranged / .Magic value (Speed, Size, Homing,
---          HomingCone, Launch, Color, Sparkles, Flicker, Orbit...)
+--          HomingCone, Launch, and the orb: Color, Color2, sizes, Flares, Sparks...)
 --
 -- Tuned values last until Play stops. Tick PrintConfig to print the weapon's block, ready
 -- to paste into Config.Weapons (or send to Claude); tick Reset to go back to Config.

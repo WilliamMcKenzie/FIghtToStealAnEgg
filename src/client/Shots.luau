@@ -6,9 +6,10 @@
 -- Cheap on purpose: a shot is one to three anchored blocks moved once a frame and a Trail
 -- (FaceCamera, so it reads from any angle). Every Ranged weapon shoots the same arrow
 -- (QM, Oct 25: its Size and TrailColor differ). Magic is built from its numbers
--- (Config.Shots.Magic, tunable live): a neon core, a ForceField shell for shimmer, a
--- trail, a few default sparkles, little bits orbiting it, and a flicker for lightning; a
--- Bomb is a dark ball with a lit fuse. Hits flash a neon ball that swells and fades;
+-- (Config.Shots.Magic, tunable live): every staff fires the same orb, recoloured and
+-- resized (QM): a white core in a ring of colour inside a soft halo, flares curling over
+-- it, a faint crackle of electricity, a trail and sparkles. A Bomb is a dark ball with a
+-- lit fuse. Hits flash a neon ball that swells and fades;
 -- splashes add a flat ring.
 --
 --   Shots.fire(character, id, yaw, seed)   -- a weapon's volley from that rider (seed: its
@@ -32,6 +33,7 @@ folder.Name = "Shots"
 folder.Parent = workspace
 
 local WHITE = Color3.new(1, 1, 1)
+local rng = Random.new() -- (the sparks' zigzags: only looks, so not seeded)
 local active = {} -- { { shot, model, spin, look, color } }
 
 local function block(model, size, cf, color, props)
@@ -92,8 +94,8 @@ local RAINBOW = ColorSequence.new({
 })
 
 -- a shot's look, as a model whose PrimaryPart is moved each frame (facing -Z = its way).
--- Returns the drawing: { model, spin = { speed, axis }, core, shell, orbit = { parts },
--- orbitRadius, flicker, color }
+-- Returns the drawing: { model, color, spin = { speed, axis } } and, for the orb, its
+-- core, flares and sparks to animate
 local function build(s)
 	local look = s.Look or "Arrow"
 	local size = s.Size or 1
@@ -149,33 +151,80 @@ local function build(s)
 		d.spin = if look == "Horn" then { speed = 25, axis = "Z" } else { speed = 12, axis = "X" }
 		d.color = if look == "Horn" then WHITE else Color3.fromRGB(255, 220, 90)
 	else
-		-- magic (Orb, Fireball): built from its numbers (Config.Shots.Magic)
-		local core = 0.8 * size
-		root = block(model, Vector3.one * core, CFrame.new(), color, { Shape = Enum.PartType.Ball, Material = Enum.Material.Neon })
-		d.core, d.coreSize = root, core
-		local shell = s.ShellSize or 1.6
-		if shell > 0 then
-			d.shell = block(model, Vector3.one * core * shell, CFrame.new(), color, {
-				Shape = Enum.PartType.Ball,
-				Material = Enum.Material.ForceField,
-				Transparency = s.ShellTransparency or 0.1,
-			})
-			d.shellSize = core * shell
-		end
-		trail(root, core * (s.TrailWidth or 1.1), ColorSequence.new(color2, color), s.TrailLength or 0.2, 1)
-		if (s.Sparkles or 0) > 0 then
-			sparkles(root, color2, (s.SparkleSize or 0.35) * size, s.Sparkles)
-		end
-		d.flicker = s.Flicker or 0
-		d.orbit = {}
-		for _ = 1, math.floor(s.Orbit or 0) do
-			table.insert(d.orbit, block(folder, Vector3.one * core * 0.35, CFrame.new(), color2, {
+		-- every staff's orb (QM's purple orb reference, Oct 25), from Config.Shots.Magic:
+		-- glowing balls stacked inside each other (Neon, more see-through the further out),
+		-- so the white core shows through a ring of Color, inside a soft halo and a haze of
+		-- Color2; Beams curling over it for flares; a faint crackle of short zigzag Beams;
+		-- a trail and sparkles. No textures: it's all built-in parts, beams and particles.
+		local function ball(diameter, c, transparency)
+			return block(model, Vector3.one * diameter, CFrame.new(), c, {
 				Shape = Enum.PartType.Ball,
 				Material = Enum.Material.Neon,
-			}))
+				Transparency = transparency,
+			})
 		end
-		d.orbitRadius = core * (s.OrbitRadius or 1)
-		d.spinRate = math.rad(s.Spin or 0)
+		local coreSize = (s.CoreSize or 0.55) * size
+		root = ball(coreSize, s.CoreColor or WHITE, 0)
+		d.core, d.coreSize = root, coreSize
+		ball((s.RingSize or 1) * size, color, s.RingTransparency or 0.3)
+		ball((s.HaloSize or 1.9) * size, color2, s.HaloTransparency or 0.8)
+		if (s.HazeSize or 0) > 0 then
+			ball(s.HazeSize * size, color2, s.HazeTransparency or 0.93)
+		end
+		-- flares: each a Beam from low on one side of the ring, bowing out and up over the
+		-- top to a point further round, wide at its root and tapering to nothing
+		local ring = (s.RingSize or 1) * size / 2
+		d.flares = {}
+		for k = 1, math.floor(s.Flares or 0) do
+			local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
+			a0.Parent, a1.Parent = root, root
+			local beam = Instance.new("Beam")
+			beam.Attachment0, beam.Attachment1 = a0, a1
+			beam.FaceCamera = true
+			beam.Segments = 12
+			beam.LightEmission = 1
+			beam.Color = ColorSequence.new(color2, color)
+			beam.Transparency = NumberSequence.new(s.FlareTransparency or 0.25, 1)
+			beam.Width0 = (s.FlareWidth or 0.45) * size
+			beam.Width1 = 0
+			beam.CurveSize0 = (s.FlareLength or 1.6) * size * 0.6
+			beam.Parent = root
+			table.insert(d.flares, { a0 = a0, a1 = a1, base = (k - 1) * 2 * math.pi / s.Flares })
+		end
+		d.ring, d.flareLength = ring, (s.FlareLength or 1.6) * size
+		d.flareSpin = math.rad(s.FlareSpin or 220)
+		-- sparks: little bolts of three segments, jumping to a new shape SparkRate times a second
+		d.sparks = {}
+		for _ = 1, math.floor(s.Sparks or 0) do
+			local atts, beams = {}, {}
+			for n = 1, 4 do
+				local a = Instance.new("Attachment")
+				a.Parent = root
+				atts[n] = a
+				if n > 1 then
+					local beam = Instance.new("Beam")
+					beam.Attachment0, beam.Attachment1 = atts[n - 1], a
+					beam.FaceCamera = true
+					beam.Segments = 1
+					beam.LightEmission = 1
+					beam.Color = ColorSequence.new(WHITE, color2)
+					beam.Transparency = NumberSequence.new(s.SparkTransparency or 0.6)
+					beam.Width0 = 0.07 * size
+					beam.Width1 = 0.04 * size
+					beam.Parent = root
+					beams[n - 1] = beam
+				end
+			end
+			table.insert(d.sparks, { atts = atts, beams = beams })
+		end
+		d.sparkReach = (s.SparkReach or 1.3) * size
+		d.sparkEvery = 1 / math.max(s.SparkRate or 18, 1)
+		d.sparkClock = 0
+		trail(root, (s.TrailWidth or 0.9) * size, ColorSequence.new(color2, color), s.TrailLength or 0.25, 1)
+		if (s.Sparkles or 0) > 0 then
+			sparkles(root, color2, (s.SparkleSize or 0.3) * size, s.Sparkles)
+		end
+		d.flicker = s.Flicker or 0
 	end
 	model.PrimaryPart = root
 	model.Parent = folder
@@ -262,20 +311,41 @@ RunService.RenderStepped:Connect(function(dt)
 				else CFrame.Angles(0, 0, t)
 		end
 		a.model:PivotTo(cf)
-		-- (lightning: the core and shell jitter in size)
+		-- (the core jitters in size)
 		if a.flicker and a.flicker > 0 then
-			local k = 1 + (math.random() * 2 - 1) * a.flicker
-			a.core.Size = Vector3.one * a.coreSize * k
-			if a.shell then
-				a.shell.Size = Vector3.one * a.shellSize * (2 - k)
-			end
+			a.core.Size = Vector3.one * a.coreSize * (1 + (math.random() * 2 - 1) * a.flicker)
 		end
-		-- (bits circling it, in the flat plane, round its path)
-		if a.orbit then
-			local n = #a.orbit
-			for k, part in a.orbit do
-				local angle = shot.age * a.spinRate + (k - 1) * 2 * math.pi / n
-				part.CFrame = cf * CFrame.new(math.cos(angle) * a.orbitRadius, math.sin(angle) * a.orbitRadius, 0)
+		-- (the flares turn round the orb, curling up over its top)
+		for _, f in a.flares or {} do
+			local t = f.base + shot.age * a.flareSpin
+			local out0 = Vector3.new(math.cos(t), 0, math.sin(t))
+			local t1 = t + math.rad(110)
+			local p0 = out0 * a.ring + Vector3.new(0, -a.ring * 0.3, 0)
+			local p1 = Vector3.new(math.cos(t1), 0, math.sin(t1)) * a.ring * 0.5 + Vector3.new(0, a.flareLength, 0)
+			-- (Attachment0's X axis is where the beam bows: out and up)
+			f.a0.CFrame = CFrame.fromMatrix(p0, (out0 + Vector3.yAxis * 0.6).Unit, Vector3.yAxis:Cross(out0).Unit)
+			f.a1.Position = p1
+		end
+		-- (the sparks jump to new zigzags now and then, and some blink out)
+		if a.sparks and #a.sparks > 0 then
+			a.sparkClock -= dt
+			if a.sparkClock <= 0 then
+				a.sparkClock = a.sparkEvery
+				for _, sp in a.sparks do
+					local on = math.random() < 0.75
+					local from = rng:NextUnitVector()
+					local to = (from + rng:NextUnitVector() * 0.8).Unit
+					for n, att in sp.atts do
+						local u = (n - 1) / 3
+						local dir = from:Lerp(to, u).Unit
+						local r = a.ring + (a.sparkReach - a.ring) * u
+						local jitter = if n > 1 and n < 4 then rng:NextUnitVector() * a.ring * 0.35 else Vector3.zero
+						att.Position = dir * r + jitter
+					end
+					for _, beam in sp.beams do
+						beam.Enabled = on
+					end
+				end
 			end
 		end
 		if shot.dead then
@@ -288,10 +358,12 @@ RunService.RenderStepped:Connect(function(dt)
 					part.Enabled = false
 				end
 			end
-			Debris:AddItem(a.model, 0.5)
-			for _, part in a.orbit or {} do
-				part:Destroy()
+			for _, beam in a.model:GetDescendants() do
+				if beam:IsA("Beam") then
+					beam.Enabled = false
+				end
 			end
+			Debris:AddItem(a.model, 0.5)
 		end
 	end
 end)
