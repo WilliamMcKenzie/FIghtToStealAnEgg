@@ -116,7 +116,7 @@ end
 -- local player's sword: aim and auto-attack
 local nextDir = 1
 local ready = 0 -- os.clock() when the next slash may start
-local aimYaw = nil -- world yaw the torso and the slashes point along, eased toward the target
+local aimYaw = nil -- world yaw the slashes point along (SwingPose eases the torso onto it)
 
 local function yawOf(v)
 	return math.atan2(-v.X, -v.Z)
@@ -180,9 +180,7 @@ RunService.Heartbeat:Connect(function(dt)
 	local facing = yawOf(root.CFrame.LookVector)
 	local target = nearestBoss(root, math.max(c.AimRange, range + 8))
 	local want = if target then yawOf((target.Position - root.Position) * Vector3.new(1, 0, 1)) else facing
-	aimYaw = aimYaw or facing
-	-- (eased: the further off, the faster it turns, never a snap)
-	aimYaw = wrap(aimYaw + wrap(want - aimYaw) * (1 - math.exp(-dt * c.AimTurn)))
+	aimYaw = want
 	SwingPose.aim(character, math.clamp(wrap(aimYaw - facing), -math.rad(c.AimTwist), math.rad(c.AimTwist)))
 
 	if not id or os.clock() < ready then

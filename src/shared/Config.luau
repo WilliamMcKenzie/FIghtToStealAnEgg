@@ -789,7 +789,7 @@ return {
 		Cooldown = 0.3, -- between slashes
 		AttackRange = 12, -- slashes while a boss's edge is this close (studs)
 		AimRange = 26, -- the torso starts turning toward a boss this close
-		AimTurn = 8, -- how fast the aim eases round (higher = quicker; never a snap)
+		AimTime = 0.2, -- seconds the upper body takes to turn onto a new target (never a snap)
 		AimTwist = 110, -- the most the upper body turns from the hips (degrees)
 		Damage = 10, -- per slash that catches a boss (server checks it)
 		Alternate = true, -- swing left-to-right, then right-to-left

@@ -294,7 +294,18 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 
 		-- (other players' aim isn't known here: their bow arm points along their last shot)
-		local aim = s.aim or (if s.shot then s.shot.aim * drawing else 0)
+		local want = s.aim or (if s.shot then s.shot.aim * drawing else 0)
+		-- the turn onto a new target (or past the twist limit) is never a snap: a critically
+		-- damped spring that settles in Config.Slash.AimTime, starting and stopping smoothly
+		local w = 5.8 / math.max(Config.Slash.AimTime, 0.02)
+		local x, v = s.aimNow or want, s.aimSpeed or 0
+		local step = math.min(dt, 1 / 30) -- (a long frame mustn't overshoot)
+		for _ = 1, math.ceil(dt / step) do
+			v += (w * w * (want - x) - 2 * w * v) * step
+			x += v * step
+		end
+		s.aimNow, s.aimSpeed = x, v
+		local aim = x
 		if not swing and target == 0 and s.stance < 0.01 and s.archer < 0.01 and math.abs(aim) < 1e-3 then
 			release(s.joints)
 			states[character] = nil

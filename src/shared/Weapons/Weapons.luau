@@ -137,7 +137,7 @@ local NOT_TUNED = {
 	ZoomPower = true,
 	SoundCut = true,
 	Volume = true,
-	AimTurn = true,
+	AimTime = true,
 	AimTwist = true,
 	AimRange = true,
 }
