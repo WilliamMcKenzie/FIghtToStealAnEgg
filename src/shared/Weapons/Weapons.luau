@@ -305,11 +305,11 @@ function Weapons.makeModel(id, scale)
 end
 
 -- where the hand holds weapon `id` (Tool.Grip): the middle of the grip, turned and slid
--- by its Config.WeaponPoses GripAngle (degrees) and GripOffset (studs)
+-- by its Config.WeaponPoses GripAngle (degrees) and GripOffset (studs), else Config.WeaponGrip's
 function Weapons.grip(id)
 	local pose = Config.WeaponPoses[id] or {}
-	local angle = pose.GripAngle or Vector3.zero
-	local offset = pose.GripOffset or Vector3.zero
+	local angle = pose.GripAngle or Config.WeaponGrip.GripAngle
+	local offset = pose.GripOffset or Config.WeaponGrip.GripOffset
 	return CFrame.new(0, GRIP_Y, 0)
 		* CFrame.new(offset)
 		* CFrame.Angles(math.rad(angle.X), math.rad(angle.Y), math.rad(angle.Z))
