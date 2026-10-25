@@ -136,10 +136,11 @@ local shoot = Instance.new("RemoteEvent")
 shoot.Name = "Shoot"
 shoot.Parent = ReplicatedStorage
 local lastShot = {}
-shoot.OnServerEvent:Connect(function(player, yaw)
+shoot.OnServerEvent:Connect(function(player, yaw, seed)
 	if typeof(yaw) ~= "number" or yaw ~= yaw or math.abs(yaw) > 10 then
 		return
 	end
+	seed = if typeof(seed) == "number" and seed == seed then math.floor(seed) % 2 ^ 30 else 0
 	local id = player:GetAttribute("Weapon")
 	local w = Weapons.get(id)
 	if not w.Shot then
@@ -152,10 +153,10 @@ shoot.OnServerEvent:Connect(function(player, yaw)
 	lastShot[player] = now
 	for _, other in Players:GetPlayers() do
 		if other ~= player then
-			shoot:FireClient(other, player, id, yaw)
+			shoot:FireClient(other, player, id, yaw, seed)
 		end
 	end
-	Combat.shoot(player, id, yaw)
+	Combat.shoot(player, id, yaw, seed)
 end)
 
 -- /boss: a chicken boss in front of you. The command is a TextChatCommand; its client

@@ -8,7 +8,7 @@
 -- second: enough to curve onto a target that's moving, not enough to turn round. Targets
 -- are flat circles: { body, pos, radius } (a boss's or mob's body and its Radius).
 --
---   Projectiles.spawn(id, origin, yaw) -> { shot, ... }   -- a weapon's volley
+--   Projectiles.spawn(id, origin, yaw, seed) -> { shot, ... }   -- a weapon's volley
 --   Projectiles.step(shot, dt, targets) -> { target, ... } -- what it hit this step;
 --                                                         -- shot.dead once it's spent
 
@@ -24,7 +24,7 @@ local function dirOf(yaw)
 	return Vector3.new(-math.sin(yaw), 0, -math.cos(yaw))
 end
 
-function Projectiles.spawn(id, origin, yaw)
+function Projectiles.spawn(id, origin, yaw, seed)
 	local w = Config.Weapons[id]
 	local s = w and w.Shot
 	if not s then
@@ -33,8 +33,16 @@ function Projectiles.spawn(id, origin, yaw)
 	local count = s.Count or 1
 	local spread = math.rad(s.Spread or 0)
 	local shots = {}
+	-- (a Magic shot sets off up to Config.Shots.MagicLaunch degrees off the aim, at random
+	-- from the shot's seed, so its homing curves it in: QM; the server and every client use
+	-- the same seed, so they all fly it the same way)
+	local wobble = if w.Type == "Magic" then math.rad(Config.Shots.MagicLaunch or 0) else 0
+	local rng = Random.new(math.floor(seed or 0))
 	for i = 1, count do
 		local offset = if count > 1 then spread * ((i - 1) / (count - 1) - 0.5) else 0
+		if wobble > 0 then
+			offset += rng:NextNumber(-wobble, wobble)
+		end
 		table.insert(shots, {
 			id = id,
 			pos = origin,

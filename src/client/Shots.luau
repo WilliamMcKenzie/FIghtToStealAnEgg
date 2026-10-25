@@ -8,7 +8,8 @@
 -- and a few default sparkles. Hits flash a neon ball that swells and fades; splashes add
 -- a flat ring.
 --
---   Shots.fire(character, id, yaw)   -- a weapon's volley from that rider
+--   Shots.fire(character, id, yaw, seed)   -- a weapon's volley from that rider (seed: its
+--                                          magic shots' random launch angles)
 
 local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -169,7 +170,7 @@ local function ring(at, color, radius)
 	Debris:AddItem(p, 0.32)
 end
 
-function Shots.fire(character, id, yaw)
+function Shots.fire(character, id, yaw, seed)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local w = Config.Weapons[id]
 	if not (root and w and w.Shot) then
@@ -178,7 +179,7 @@ function Shots.fire(character, id, yaw)
 	local hips = Riding.hips(character)
 	local y = (if hips then hips.Y else root.Position.Y) + Config.Shots.Height
 	local origin = Vector3.new(root.Position.X, y, root.Position.Z)
-	for _, shot in Projectiles.spawn(id, origin, yaw) do
+	for _, shot in Projectiles.spawn(id, origin, yaw, seed) do
 		local model, spin, color = build(id, w.Shot)
 		table.insert(active, { shot = shot, model = model, spin = spin, color = color, s = w.Shot })
 	end

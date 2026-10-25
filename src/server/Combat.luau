@@ -110,13 +110,13 @@ end
 local flying = {}
 local MAX_FLYING = 300
 
-function Combat.shoot(player, id, yaw)
+function Combat.shoot(player, id, yaw, seed)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if not root or #flying > MAX_FLYING then
 		return
 	end
 	local damage = Combat.damage(player) * Weapons.get(id).Damage
-	for _, shot in Projectiles.spawn(id, root.Position, yaw) do
+	for _, shot in Projectiles.spawn(id, root.Position, yaw, seed) do
 		table.insert(flying, { shot = shot, player = player, damage = damage })
 	end
 end
