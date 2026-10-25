@@ -4,7 +4,7 @@
 -- The spin: weapons flick past one at a time in the middle of the screen, big and
 -- glowing, slowing down until one lands (the server picked it: Server/Arsenal). Behind
 -- the weapon a burst of light rays turns, in its rarity's colour; under it its name in
--- white outlined text and its rarity; tilted above-left, its odds as a green "1 / N";
+-- its rarity's colour, outlined black; tilted above-left, its odds as a white "1/N";
 -- white streaks either side kick out on every flick. A boss's own super rare weapon
 -- brings up the BONUS badge (orange text on a dark oval) whenever it's on show.
 -- It lands with a pop, stays up Config.WeaponDrops.Show seconds and shrinks away. Spins
@@ -35,7 +35,6 @@ local player = Players.LocalPlayer
 local DESIGN_HEIGHT = 1080
 local WHITE = Color3.new(1, 1, 1)
 local INK = Color3.fromRGB(14, 12, 16)
-local GREEN = Color3.fromRGB(160, 238, 104) -- the odds counter (QM's screenshot)
 local RAYS = 14
 local TICK_SOUND = "rbxasset://sounds/clickfast.wav"
 local LAND_SOUND = "rbxasset://sounds/electronicpingshort.wav"
@@ -210,20 +209,6 @@ local stage = frame(root, {
 local stageScale = Instance.new("UIScale")
 stageScale.Parent = stage
 
--- the glow: soft circles stacked (a radial glow without an image)
-local glows = {}
-for i, size in { 420, 330, 250 } do
-	local g = frame(stage, {
-		Name = "Glow" .. i,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromOffset(size, size),
-		BackgroundTransparency = 0.86,
-	})
-	round(g)
-	table.insert(glows, g)
-end
-
 -- the burst: rays out from the middle, each a rotated holder with the ray in its top half,
 -- bright at the middle and fading to its tip
 local burst = frame(stage, {
@@ -276,31 +261,23 @@ itemScale.Parent = item.frame
 local nameLabel = Popups.text(stage, {
 	Name = "WeaponName",
 	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.new(0.5, 0, 0.5, 175),
+	Position = UDim2.new(0.5, 0, 0.5, 150),
 	Size = UDim2.fromOffset(700, 70),
 	TextSize = 64,
 	Text = "",
 })
-local rarityLabel = Popups.text(stage, {
-	Name = "Rarity",
-	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.new(0.5, 0, 0.5, 225),
-	Size = UDim2.fromOffset(700, 40),
-	TextSize = 34,
-	Text = "",
-})
-local rarityStroke = rarityLabel:FindFirstChildOfClass("UIStroke")
-
+nameLabel:FindFirstChildOfClass("UIStroke").Color = Color3.new(0, 0, 0)
 local oddsLabel = Popups.text(stage, {
 	Name = "Odds",
 	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.new(0.5, -120, 0.5, -130),
+	Position = UDim2.new(0.5, -100, 0.5, -110), -- (tucked in at the weapon's top left: QM's ref)
 	Size = UDim2.fromOffset(220, 60),
 	TextSize = 54,
 	Rotation = -14,
 	Text = "",
 })
-oddsLabel.TextColor3 = GREEN -- (solid, no gradient: QM)
+oddsLabel.TextColor3 = WHITE -- (white on a black outline: QM)
+oddsLabel:FindFirstChildOfClass("UIStroke").Color = Color3.new(0, 0, 0)
 
 -- the streaks: white, bright at the end nearest the middle
 local streaks = {}
@@ -377,18 +354,14 @@ local function raysFade(t, transparency)
 end
 
 local function showItem(id, odds, landed)
-	local r, name = rarityOf(id)
+	local r = rarityOf(id)
 	local w = Weapons.get(id)
 	item.show(id)
 	nameLabel.Text = w.Name
-	rarityLabel.Text = string.upper(name) .. "  ·  " .. string.upper(w.Type)
-	rarityLabel.TextColor3 = r.Fill
-	rarityStroke.Color = r.Stroke
-	oddsLabel.Text = "1 / " .. tostring(odds[id] or 1)
+	-- (its rarity's colour, a little softer: QM)
+	nameLabel.TextColor3 = r.Fill:Lerp(WHITE, 0.3)
+	oddsLabel.Text = "1/" .. tostring(odds[id] or 1)
 	raysColour(r.Fill)
-	for _, g in glows do
-		g.BackgroundColor3 = r.Fill
-	end
 	local isBonus = w.Boss ~= nil
 	if isBonus and not bonus.Visible then
 		bonusScale.Scale = 0.6
