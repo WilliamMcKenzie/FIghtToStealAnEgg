@@ -229,7 +229,12 @@ return {
 	-- bosses (server/Bosses.luau, client/BossView.luau). Each biome's sleeps in its arena's
 	-- middle until someone steals one of its eggs or hits it (Server/Eggs); /boss spawns a
 	-- Chicken in front of you. Model is a module in Shared/Animals (<Model>Model.luau),
-	-- Size times its Blockbench drawing. Strength is what each hit on it trains.
+	-- Size times its Blockbench drawing. Strength is what each hit on it trains (its biome's
+	-- training ground's band applies: Config.Training). Health (QM, Oct 25, with the training
+	-- pacing): about 45 s solo with the Sword once you've outgrown the ground before its
+	-- biome's, i.e. 150 x (Slash.Damage + that ground's Outgrow): Meadow's bosses after the
+	-- dummies (200), Cactus Boss after Meadow (2,000), Elder Boar after the Desert (18,000),
+	-- Lava Wyrm after the Tundra (140,000). Faster with friends or a better weapon.
 	Bosses = {
 		Chicken = {
 			Model = "Chicken",
@@ -245,12 +250,12 @@ return {
 			Name = "Mother Hen",
 			Model = "Chicken",
 			Size = 3.84, -- (about 40 studs tall: QM, Oct 25, 1.6x)
-			Health = 800,
+			Health = 30000,
 			Speed = 10,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 11,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1,
 			Respawn = 20, -- seconds after it dies before it's back asleep on its dais
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -262,12 +267,12 @@ return {
 			Name = "Giant Rafflesia",
 			Model = "GiantRafflesia", -- (LassoAPet's, QM Oct 25: its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
 			Size = 0.6, -- (about 30 studs tall)
-			Health = 800,
+			Health = 30000,
 			Speed = 9,
 			StopAt = 1,
 			Radius = 9,
 			Turn = 3.5,
-			Strength = 2,
+			Strength = 1,
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
@@ -277,12 +282,12 @@ return {
 			Name = "Majestic Unicorn",
 			Model = "MajesticUnicorn", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 2.4, -- (about 32 studs tall)
-			Health = 800,
+			Health = 30000,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 8,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1,
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
@@ -292,12 +297,12 @@ return {
 			Name = "Venus Flytrap",
 			Model = "VenusFlytrap", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 1.8, -- (about 31 studs tall)
-			Health = 800,
+			Health = 30000,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 9,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1,
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
@@ -307,12 +312,12 @@ return {
 			Name = "Cactus Boss",
 			Model = "CactusBoss", -- (LassoAPet's, QM Oct 24)
 			Size = 2.4, -- (about 29 studs tall)
-			Health = 4000,
+			Health = 300000,
 			Speed = 11,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 13,
 			Turn = 3.5,
-			Strength = 6,
+			Strength = 4,
 			Respawn = 25,
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -324,12 +329,12 @@ return {
 			Name = "Elder Boar",
 			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
 			Size = 2, -- (about 27 studs tall, 40 long)
-			Health = 20000,
+			Health = 2700000,
 			Speed = 9,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 12,
 			Turn = 3,
-			Strength = 20,
+			Strength = 15,
 			Respawn = 30,
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -341,12 +346,12 @@ return {
 			Name = "Lava Wyrm",
 			Model = "LavaWyrm", -- (LassoAPet's, QM Oct 24)
 			Size = 1.4, -- (about 16 studs tall, 60 long)
-			Health = 100000,
+			Health = 21000000,
 			Speed = 8,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 10,
 			Turn = 2.5,
-			Strength = 60,
+			Strength = 50,
 			Respawn = 35,
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -498,29 +503,50 @@ return {
 	},
 
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
-	-- trains the enemy's Strength (a boss's in Bosses above), and each point of Strength
-	-- adds DamagePerStrength to your slash. The training grounds at the south of the base,
-	-- one per biome, are fenced off until bought with cash (a rebirth will lock them again);
-	-- their mobs wander and come back Respawn seconds after they fall, for AFK training
-	-- (RuneScape's sand crabs).
+	-- trains the enemy's Strength (a boss trains its biome's ground's, below), and each
+	-- point of Strength adds DamagePerStrength to your slash. The training grounds at the
+	-- south of the base, one per biome, are fenced off until bought with cash (a rebirth
+	-- will lock them again); their mobs wander and come back Respawn seconds after they
+	-- fall, for AFK training (RuneScape's sand crabs).
+	--
+	-- Pacing (QM, Oct 25: you outgrew everything in seconds). Each ground has a band of
+	-- Strength it's for, Need up to Outgrow (Outgrow is its mob's Health: about where your
+	-- slash one-shots it). Inside the band every hit trains its full Strength; below Need
+	-- you're flailing, (yours / Need) ^ Under of it; past Outgrow it's too easy,
+	-- (Outgrow / yours) ^ Over of it. Each Need is the ground before's Outgrow, so the next
+	-- ground only pays once you've done the last. Training counts once every Every seconds
+	-- however many things a swing or volley hits (so 200 hits a minute, the sword's pace;
+	-- a Dagger or a splash doesn't train faster).
+	-- Target AFK times, non-stop swinging, before any rebirth (each rebirth trains
+	-- StrengthBonus more, so these shrink: 2/3 of them after one):
+	--   Dummies    0 ->       200 at  1/hit    1 min
+	--   Meadow   200 ->     2,000 at  1/hit    9 min
+	--   Desert 2,000 ->    18,000 at  4/hit   20 min
+	--   Tundra 18,000 ->  140,000 at 15/hit   41 min
+	--   Lava  140,000 -> 1,000,000 at 50/hit  86 min   (about 2.5 hours in all)
+	-- To retune a ground: minutes = (Health - Need) / Strength / 200.
 	Training = {
 		DamagePerStrength = 1,
+		Every = 0.3, -- seconds: at most one training hit this often
+		Under = 3, -- below a ground's Need: (Strength / Need) ^ Under of its training
+		Over = 2, -- past its Outgrow: (Outgrow / Strength) ^ Over of it
 		Grounds = {
-			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
-			Meadow = { Cost = 300, Mob = "Pig", Size = 0.55, Health = 60, Count = 4, Strength = 2, Speed = 4 },
+			Dummies = { Cost = 0, Strength = 1, Need = 0, Outgrow = 200 }, -- free: straw dummies that never fall
+			Meadow = { Cost = 300, Mob = "Pig", Size = 0.55, Health = 2000, Count = 4, Strength = 1, Need = 200, Speed = 4 },
 			Desert = {
 				Cost = 4000,
 				Mob = "KingCrab",
 				Name = "Sand Crab",
 				Tint = "Sand",
 				Size = 1,
-				Health = 300,
+				Health = 18000,
 				Count = 5,
-				Strength = 5,
+				Strength = 4,
+				Need = 2000,
 				Speed = 2.5,
 			},
-			Ice = { Cost = 40000, Mob = "Penguin", Size = 0.6, Health = 1500, Count = 4, Strength = 15, Speed = 3 },
-			Lava = { Cost = 400000, Mob = "RockHog", Size = 0.5, Health = 8000, Count = 4, Strength = 45, Speed = 3.5 },
+			Ice = { Cost = 40000, Mob = "Penguin", Size = 0.6, Health = 140000, Count = 4, Strength = 15, Need = 18000, Speed = 3 },
+			Lava = { Cost = 400000, Mob = "RockHog", Size = 0.5, Health = 1000000, Count = 4, Strength = 50, Need = 140000, Speed = 3.5 },
 		},
 		Respawn = 4,
 		MobRadius = 2.5, -- a mob's body half-width (hits and reach)

@@ -10,7 +10,8 @@
 --   Combat.remove(body)
 --   Combat.slash(player, yaw, c)     -- a player's slash along world yaw `yaw`
 --   Combat.shoot(player, id, yaw)    -- a Ranged or Magic weapon's volley (Shared/Projectiles)
---   Combat.train(player, amount)     -- adds Strength (and updates Power)
+--   Combat.train(player, amount, ground) -- adds Strength (and updates Power); ground is a
+--                                      Config.Training.Grounds entry whose band applies
 --   Combat.refresh(player)           -- updates Power after Strength is set directly
 --   Combat.damage(player) -> number
 --
@@ -47,11 +48,43 @@ local function showPower(player)
 	player:SetAttribute("Power", Combat.damage(player))
 end
 
+-- how much of `amount` a hit trains at this Strength, by the ground's band (Config.Training:
+-- full inside Need..Outgrow, less below or past it)
+function Combat.gain(strength, amount, ground)
+	if not ground then
+		return amount
+	end
+	local t = Config.Training
+	local need, outgrow = ground.Need or 0, ground.Outgrow or ground.Health
+	if strength < need then
+		return amount * (math.max(strength, 1) / need) ^ t.Under
+	elseif outgrow and strength > outgrow then
+		return amount * (outgrow / strength) ^ t.Over
+	end
+	return amount
+end
+
+-- at most one training hit every Training.Every seconds: within that window only the best
+-- hit counts (a swing through a dummy and a crab trains the crab's)
+local window = {} -- [player] = { at, given }
+
 -- (each rebirth makes every hit train Config.Rebirth.StrengthBonus more)
-function Combat.train(player, amount)
-	if amount and amount > 0 then
+function Combat.train(player, amount, ground)
+	local strength = player:GetAttribute("Strength") or 0
+	amount = Combat.gain(strength, amount or 0, ground)
+	if amount <= 0 then
+		return
+	end
+	local now = os.clock()
+	local w = window[player]
+	if not w or now - w.at >= Config.Training.Every then
+		w = { at = now, given = 0 }
+		window[player] = w
+	end
+	if amount > w.given then
 		local bonus = 1 + (player:GetAttribute("Rebirths") or 0) * Config.Rebirth.StrengthBonus
-		player:SetAttribute("Strength", (player:GetAttribute("Strength") or 0) + amount * bonus)
+		player:SetAttribute("Strength", strength + (amount - w.given) * bonus)
+		w.given = amount
 		showPower(player)
 	end
 end
@@ -146,6 +179,9 @@ RunService.Heartbeat:Connect(function(dt)
 end)
 
 Players.PlayerAdded:Connect(Combat.join)
+Players.PlayerRemoving:Connect(function(player)
+	window[player] = nil
+end)
 for _, player in Players:GetPlayers() do
 	Combat.join(player)
 end
