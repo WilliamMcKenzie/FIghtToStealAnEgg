@@ -991,7 +991,7 @@ return {
 			HaloTransparency = 0.8, -- (the same Color, fainter)
 			HazeSize = 2.8, -- a fainter, wider glow past the halo (0: none)
 			HazeTransparency = 0.93,
-			Flares = 3, -- wispy flames curling over the orb
+			Flares = 0, -- wispy flames curling over the orb (QM: off)
 			FlareLength = 1.6, -- (x Size)
 			FlareWidth = 0.45, -- (x Size)
 			FlareSpin = 220, -- degrees a second they turn round it
