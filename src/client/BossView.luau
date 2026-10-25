@@ -194,6 +194,11 @@ local function add(body)
 		view.pose = pose
 		view.phase = math.random() -- (so a server's bosses don't all breathe together)
 		view.shut, view.hidden = {}, {}
+		-- (sizes as built, at this scale: Model:ScaleTo scales from whatever a part's size is
+		-- now, so a shut or opened eye is sized for the animal's scale at the time, or the
+		-- intro's grow from tiny blows it up 20x)
+		view.shutScale = animal.scale
+		view.eyesShut = false
 		for _, part in animal.model:GetChildren() do
 			if table.find(pose.Shut, part.Name) then
 				-- (a shut eye squashes along whichever of its two broad sides stands most upright)
@@ -350,7 +355,7 @@ RunService.RenderStepped:Connect(function(dt)
 			if shut ~= view.eyesShut then
 				view.eyesShut = shut
 				for part, eye in view.shut do
-					part.Size = if shut then eye.squashed else eye.size
+					part.Size = (if shut then eye.squashed else eye.size) * (animal.scale / view.shutScale)
 					part.Color = if shut then SHUT_COLOUR else view.colours[part]
 				end
 				for part, transparency in view.hidden do
