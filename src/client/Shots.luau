@@ -84,13 +84,6 @@ local function sparkles(part, color, size, rate)
 	e.Parent = part
 end
 
-local RAINBOW = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 120, 200)),
-	ColorSequenceKeypoint.new(0.33, Color3.fromRGB(255, 230, 120)),
-	ColorSequenceKeypoint.new(0.66, Color3.fromRGB(120, 230, 255)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 140, 255)),
-})
-
 -- a shot's look, as a model whose PrimaryPart is moved each frame (facing -Z = its way).
 -- Returns the drawing: { model, color, spin = { speed, axis } } and, for the orb, its
 -- core and flares to animate
@@ -102,39 +95,21 @@ local function build(s)
 	local model = Instance.new("Model")
 	local d = { model = model, color = color }
 	local root
-	if look == "Arrow" or look == "Bolt" or look == "Needle" then
+	if look == "Arrow" or look == "Bolt" then
 		-- (every Ranged weapon's arrow: QM, Oct 25; Size scales it, TrailColor tints its trail)
-		local len = (if look == "Needle" then 1.3 else 2.2) * size
-		local thick = (if look == "Needle" then 0.09 else 0.12) * size
-		local shaft = if look == "Needle" then Color3.fromRGB(246, 236, 210) else Color3.fromRGB(117, 71, 34)
+		local len = 2.2 * size
+		local thick = 0.12 * size
+		local shaft = Color3.fromRGB(117, 71, 34)
 		root = block(model, Vector3.new(thick, thick, len), CFrame.new(), shaft)
-		if look ~= "Needle" then
-			block(model, Vector3.one * 0.3 * size, CFrame.new(0, 0, -len / 2) * CFrame.Angles(0, math.rad(45), 0), Color3.fromRGB(200, 206, 216))
-			block(model, Vector3.new(0.04, 0.42, 0.5) * size, CFrame.new(0, 0, len / 2 - 0.2 * size), WHITE)
-		end
-		local tint = s.TrailColor or (if look == "Needle" then Color3.fromRGB(150, 255, 120) else WHITE)
+		block(model, Vector3.one * 0.3 * size, CFrame.new(0, 0, -len / 2) * CFrame.Angles(0, math.rad(45), 0), Color3.fromRGB(200, 206, 216))
+		block(model, Vector3.new(0.04, 0.42, 0.5) * size, CFrame.new(0, 0, len / 2 - 0.2 * size), WHITE)
+		local tint = s.TrailColor or WHITE
 		trail(root, 0.35 * size, tint, s.TrailLength or 0.12)
 		d.color = tint
 	elseif look == "Petal" then
 		root = block(model, Vector3.new(0.75, 0.12, 0.5) * size, CFrame.new(), color, { Material = Enum.Material.Neon })
 		trail(root, 0.4 * size, ColorSequence.new(color2, color), s.TrailLength or 0.18, 1)
 		d.spin = { speed = 14, axis = "Y" }
-	elseif look == "Horn" or look == "Egg" then
-		root = block(model, Vector3.one * 0.2, CFrame.new(), WHITE, { Transparency = 1 })
-		local held = Weapons.makeModel(if look == "Horn" then "UnicornHorn" else "GoldenEgg", if look == "Horn" then 0.9 else 1.3 * size)
-		-- (its blade end, +Y, out front along -Z; the Egg just tumbles)
-		held:PivotTo(CFrame.Angles(-math.pi / 2, 0, 0))
-		for _, part in held:GetDescendants() do
-			if part:IsA("BasePart") then
-				part.Anchored = true
-				part.CastShadow = false
-				part.CanQuery = false
-			end
-		end
-		held.Parent = model
-		trail(root, 0.6, if look == "Horn" then RAINBOW else ColorSequence.new(Color3.fromRGB(255, 220, 90)), 0.22, 0.8)
-		d.spin = if look == "Horn" then { speed = 25, axis = "Z" } else { speed = 12, axis = "X" }
-		d.color = if look == "Horn" then WHITE else Color3.fromRGB(255, 220, 90)
 	else
 		-- every staff's orb (QM's purple orb reference, Oct 25), from Config.Shots.Magic, in
 		-- one Color: glowing balls stacked inside each other (Neon, more see-through the

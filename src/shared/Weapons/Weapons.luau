@@ -16,7 +16,7 @@
 --   Weapons.untune(id)         -- back to Config
 --   Weapons.source(id)         -- its Config entry as Luau, with the tuned values, to paste
 --
--- Models point up +Y with the grip at y -0.5..0 (see WeaponModels), so every tool's
+-- Models point up +Y with the grip at y -0.5..0, so every tool's
 -- Grip is the sword's.
 
 local Config = require(script.Parent.Parent.Config)
@@ -38,7 +38,7 @@ local LightningStaffModel = require(script.Parent.LightningStaffModel)
 local WaterStaffModel = require(script.Parent.WaterStaffModel)
 local FireStaffModel = require(script.Parent.FireStaffModel)
 local FlowerStaffModel = require(script.Parent.FlowerStaffModel)
-local WeaponModels = require(script.Parent.WeaponModels)
+local UnholyLanceModel = require(script.Parent.UnholyLanceModel)
 
 local Weapons = {}
 
@@ -72,6 +72,7 @@ local DRAWN = {
 	WaterStaff = WaterStaffModel,
 	FireStaff = FireStaffModel,
 	RafflesiaBloom = FlowerStaffModel, -- (the Flower Staff)
+	UnholyLance = UnholyLanceModel,
 }
 
 local STUDS = { image = Studs.IMAGE, tile = 0.5 }
@@ -301,8 +302,8 @@ function Weapons.exists(id)
 end
 
 function Weapons.makeModel(id, scale)
-	-- (QM's Blockbench ones, via tools/bbmodel_to_luau.py, then the hand-made blocks)
-	local data = DRAWN[id] or WeaponModels[id] or KendoStickModel
+	-- (QM's Blockbench ones, via tools/bbmodel_to_luau.py: every weapon has one)
+	local data = DRAWN[id] or KendoStickModel
 	return Rig.fromData(data, id, STUDS, SCALE * (scale or 1))
 end
 
