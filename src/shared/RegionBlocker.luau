@@ -1,8 +1,9 @@
 -- A region's blocker (QM, Oct 25), built into the map at its gate (Server/Map), so it's
--- there in Studio: a solid navy wall (Config.Regions.Color) filling the opening, on both
+-- there in Studio: a solid navy wall (WorldColors RegionBarrier: the map editor's Colours
+-- list) filling the opening, on both
 -- its faces the region's name, a coin and its price (400K) and a green Buy button, and a
--- shadow in the same navy spilling off it, fading out over Config.Regions.Shadow studs:
--- across the floor either side and along the faces of the pillars beside it.
+-- shadow in the same navy across the floor either side, fading out over
+-- Config.Regions.Shadow studs.
 -- client/Regions hides it for a player who owns the region and wires up the Buy buttons.
 --
 --   RegionBlocker.build(marker, groundAt) -> Model   (marker: the gate's Part; groundAt(x, z) -> floor top)
@@ -12,8 +13,7 @@ local Config = require(script.Parent.Config)
 local RegionBlocker = {}
 
 local REGIONS = Config.Regions
-local NAVY = REGIONS.Color
-local COIN = "rbxassetid://116346549604801" -- assets/ui/Coin.png: a gold hexagonal coin
+local COIN = "rbxassetid://128139739160102" -- assets/ui/CashIcon.png: the HUD's cash, cropped
 local PIXELS = 10 -- the faces: pixels per stud (text stops at 100 pixels: 10 studs)
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local INK = Color3.fromRGB(14, 12, 16)
@@ -130,7 +130,8 @@ local function shade(holder, p0, p1, width, across)
 	beam.Width0, beam.Width1 = width, width
 	beam.FaceCamera = false
 	beam.Segments = 1
-	beam.Color = ColorSequence.new(NAVY)
+	beam:SetAttribute("ColorKey", "RegionBarrier")
+	beam.Color = ColorSequence.new(Config.WorldColors.RegionBarrier)
 	beam.Transparency = NumberSequence.new(0, 1)
 	beam.LightInfluence = 0
 	beam.Parent = a0
@@ -152,14 +153,15 @@ function RegionBlocker.build(marker, groundAt)
 	wall.CastShadow = false
 	wall.Size = marker.Size
 	wall.CFrame = marker.CFrame
-	wall.Color = NAVY
+	wall:SetAttribute("ColorKey", "RegionBarrier")
+	wall.Color = Config.WorldColors.RegionBarrier
 	wall.Material = Enum.Material.SmoothPlastic
 	wall.TopSurface, wall.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
 	wall.Locked = true
 	wall.Parent = model
 	face(wall, Enum.NormalId.Front, region, cost)
 	face(wall, Enum.NormalId.Back, region, cost)
-	-- the shadow: over the floor either side, and along the pillars' faces beside it
+	-- the shadow: over the floor either side (QM: the floor only)
 	local cf, size = wall.CFrame, wall.Size
 	local right, out = cf.RightVector, cf.LookVector
 	local len = REGIONS.Shadow
@@ -170,16 +172,6 @@ function RegionBlocker.build(marker, groundAt)
 		local y = groundAt(at.X + n.X * 2, at.Z + n.Z * 2)
 		local p0 = Vector3.new(at.X, y + 0.06, at.Z)
 		shade(wall, p0, p0 + n * len, size.X, right)
-		for _, end_ in { -1, 1 } do
-			local pillar = marker:GetAttribute(if end_ < 0 then "PillarWidthA" else "PillarWidthB") or 24
-			local edge = centre + right * end_ * (size.X / 2 - 0.2)
-			local mid = Vector3.new(edge.X, y + size.Y / 2, edge.Z)
-			-- the pillar's face toward the opening: dark at the wall, fading along it
-			shade(wall, mid + n * (size.Z / 2), mid + n * (size.Z / 2 + len), size.Y, Vector3.yAxis)
-			-- its face toward whoever walks up: dark at the opening's edge, fading outward
-			local front = mid + right * end_ * 0.2 + n * (pillar / 2 + 0.2)
-			shade(wall, front, front + right * end_ * len, size.Y, Vector3.yAxis)
-		end
 	end
 	return model
 end

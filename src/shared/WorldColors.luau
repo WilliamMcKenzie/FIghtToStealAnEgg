@@ -51,6 +51,8 @@ local function paint(key, color)
 				thing.Color = WorldColors.shaded(color, thing)
 			elseif thing:IsA("Texture") then
 				thing.Color3 = color
+			elseif thing:IsA("Beam") then
+				thing.Color = ColorSequence.new(color)
 			end
 		end
 	end
@@ -68,6 +70,8 @@ function WorldColors.paintAll(folder)
 				thing.Color = WorldColors.shaded(color, thing)
 			elseif thing:IsA("Texture") then
 				thing.Color3 = color
+			elseif thing:IsA("Beam") then
+				thing.Color = ColorSequence.new(color)
 			end
 		elseif stud and thing:IsA("Texture") and thing.Texture == STUD_IMAGE then
 			thing.Transparency = stud

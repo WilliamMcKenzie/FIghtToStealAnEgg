@@ -28,6 +28,7 @@ return {
 		PineNeedlesC = Color3.fromRGB(40, 112, 72),
 		PineNeedlesD = Color3.fromRGB(66, 150, 96),
 		Stone = Color3.fromRGB(214, 216, 206),
+		RegionBarrier = Color3.fromRGB(0, 28, 78), -- #001C4E: a locked region's blocker and its shadow (Shared/RegionBlocker)
 		StoneDark = Color3.fromRGB(176, 178, 168),
 
 		-- the map (tools/map_gen.py lays it out, Server/Map.luau builds it). Each floor
@@ -343,7 +344,7 @@ return {
 
 	-- regions (QM, Oct 25): each biome past the Meadow is bought with cash. Until you own
 	-- it, its gate shows a blocker only you see (client/Regions: a navy wall with its name,
-	-- price and a Buy button, and a shadow spilling off it); Server/Regions sells it and
+	-- price and a Buy button, and its shadow on the floor); Server/Regions sells it and
 	-- Server/Data saves it (Region<Name>). A rebirth locks them again, like the training
 	-- grounds. Prices are placeholders.
 	Regions = {
@@ -358,8 +359,7 @@ return {
 			Ocean = 25000000,
 		},
 		Names = { Dungeon = "The Dungeon", Castle = "Red Castle", Forest = "Magic Forest", Ocean = "Ocean Trench" },
-		Color = Color3.fromRGB(0, 28, 78), -- #001C4E: the blocker and its shadow
-		Shadow = 10, -- studs the shadow spreads off it before it's gone
+		Shadow = 20, -- studs its shadow spreads across the floor before it's gone
 	},
 
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
