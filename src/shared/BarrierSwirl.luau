@@ -28,8 +28,20 @@
 --
 --   local swirl = BarrierSwirl.new(wall, guiParent)   -- guiParent: where its SurfaceGuis live
 --   swirl:draw(offset, style)                        -- offset: time drift (BarrierSwirl.step)
+--   swirl:show(on)                                   -- hide it without throwing it away
 --   swirl:destroy()
 --   BarrierSwirl.knob(style, name)
+--
+-- Kept cheap (QM, Oct 25: the barriers lagged hard when they came up):
+-- - every wave drifts by the same offset, so the sum of cos waves at a pixel is
+--   A cos(offset) - B sin(offset), with A and B worked out once per pixel (again only when
+--   Angles, Scale, Modifier, Seed or the size change): two multiplies a pixel a frame
+--   instead of Angles cosines
+-- - the colour for each pattern strength is a 256-step lookup, made when the colour knobs
+--   change, so a pixel is one packed write
+-- - barriers the same size show the same picture, so they share one EditableImage drawn
+--   once a frame however many there are
+-- - the floor shadows are only touched when they or their knobs change
 
 local AssetService = game:GetService("AssetService")
 
@@ -74,8 +86,43 @@ function BarrierSwirl.step(style, dt)
 	return knob(style, "Speed") / 16 * dt * 60
 end
 
+-- one shared picture per pixel size: [W .. "x" .. H] = canvas
+local canvases = {}
+
+local function canvasFor(W, H)
+	local key = W .. "x" .. H
+	local canvas = canvases[key]
+	if canvas then
+		canvas.users += 1
+		return canvas
+	end
+	local ok, made = pcall(AssetService.CreateEditableImage, AssetService, { Size = Vector2.new(W, H) })
+	if not ok or not made then
+		return nil -- (no EditableImage here: no swirl)
+	end
+	canvas = {
+		key = key,
+		image = made,
+		content = Content.fromObject(made),
+		W = W,
+		H = H,
+		pixels = buffer.create(W * H * 4),
+		users = 1,
+	}
+	canvases[key] = canvas
+	return canvas
+end
+
+local function release(canvas)
+	canvas.users -= 1
+	if canvas.users <= 0 then
+		canvases[canvas.key] = nil
+		canvas.image:Destroy()
+	end
+end
+
 function BarrierSwirl.new(wall, guiParent)
-	local self = setmetatable({ wall = wall, surfaces = {}, labels = {} }, BarrierSwirl)
+	local self = setmetatable({ wall = wall, surfaces = {}, labels = {}, shown = true }, BarrierSwirl)
 	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
 		local surface = Instance.new("SurfaceGui")
 		surface.Name = "BarrierSwirl"
@@ -95,35 +142,42 @@ function BarrierSwirl.new(wall, guiParent)
 	return self
 end
 
+function BarrierSwirl:show(on)
+	if self.shown ~= on then
+		self.shown = on
+		for _, surface in self.surfaces do
+			surface.Enabled = on
+		end
+	end
+end
+
 function BarrierSwirl:destroy()
 	for _, surface in self.surfaces do
 		surface:Destroy()
 	end
-	if self.image then
-		self.image:Destroy()
+	if self.canvas then
+		release(self.canvas)
 	end
-	self.image = nil
+	self.canvas = nil
 end
 
 function BarrierSwirl:build(perStud)
 	perStud = math.clamp(math.floor(perStud + 0.5), 1, 6)
 	local size = self.wall.Size
-	if self.builtFor == perStud and self.builtSize == size and self.image then
+	if self.builtFor == perStud and self.builtSize == size and self.canvas then
 		return true
 	end
-	self.builtFor, self.builtSize = perStud, size
 	local W, H = math.max(1, math.floor(size.X * perStud)), math.max(1, math.floor(size.Y * perStud))
-	local ok, made = pcall(AssetService.CreateEditableImage, AssetService, { Size = Vector2.new(W, H) })
-	if not ok or not made then
-		return false -- (no EditableImage here: no swirl)
+	local made = canvasFor(W, H)
+	if not made then
+		return false
 	end
-	if self.image then
-		self.image:Destroy()
+	if self.canvas then
+		release(self.canvas)
 	end
-	self.image, self.W, self.H = made, W, H
-	self.pixels = buffer.create(W * H * 4)
+	self.builtFor, self.builtSize, self.canvas = perStud, size, made
 	for i, label in self.labels do
-		label.ImageContent = Content.fromObject(made)
+		label.ImageContent = made.content
 		self.surfaces[i].CanvasSize = Vector2.new(size.X * 8, size.Y * 8)
 	end
 	return true
@@ -148,75 +202,164 @@ local function waves(style)
 	return list, angles
 end
 
-function BarrierSwirl:draw(offset, style)
-	if not self:build(knob(style, "PixelsPerStud")) then
+-- A and B a pixel: the waves' sum at drift 0 and a quarter turn on (see the top)
+local function shape(canvas, style)
+	local sig = table.concat({
+		knob(style, "Angles"),
+		knob(style, "Modifier"),
+		knob(style, "Seed"),
+		knob(style, "Scale"),
+	}, ",")
+	if canvas.shapeSig == sig then
 		return
 	end
-	for _, surface in self.surfaces do
-		surface.Brightness = knob(style, "Glow")
-	end
-	local dirs, angles = waves(style)
+	canvas.shapeSig = sig
+	local dirs = waves(style)
 	local scale = knob(style, "Scale")
-	local contrast = knob(style, "Contrast")
+	local W, H = canvas.W, canvas.H
+	local A, B = table.create(W * H, 0), table.create(W * H, 0)
+	local i = 1
+	for py = 0, H - 1 do
+		local y = (py - H / 2) * scale
+		for px = 0, W - 1 do
+			local x = (px - W / 2) * scale
+			local a, b = 0, 0
+			for _, d in dirs do
+				local u = d[1] * x + d[2] * y + d[3]
+				a += math.cos(u)
+				b += math.sin(u)
+			end
+			A[i], B[i] = a, b
+			i += 1
+		end
+	end
+	canvas.A, canvas.B = A, B
+end
+
+-- the colour for each of 256 pattern strengths: rgb packed, alpha (0..255) apart
+local LEVELS = 255
+local function palette(canvas, style)
 	local fill, back = knob(style, "FillColor"), knob(style, "BackColor")
 	local fa, ba = math.clamp(knob(style, "FillAlpha"), 0, 1), math.clamp(knob(style, "BackAlpha"), 0, 1)
-	local fr, fg, fb = fill.R, fill.G, fill.B
-	local br, bg, bb = back.R, back.G, back.B
-	local n = #dirs
-	local W, H, pixels = self.W, self.H, self.pixels
+	local sig = table.concat({ tostring(fill), tostring(back), fa, ba }, ",")
+	if canvas.paletteSig == sig then
+		return
+	end
+	canvas.paletteSig = sig
+	local rgb, alpha, full = {}, {}, {}
+	for idx = 0, LEVELS do
+		local a = idx / LEVELS * fa
+		local outA = a + ba * (1 - a)
+		local r, g, b = 0, 0, 0
+		if outA > 0 then
+			r = (fill.R * a + back.R * ba * (1 - a)) / outA
+			g = (fill.G * a + back.G * ba * (1 - a)) / outA
+			b = (fill.B * a + back.B * ba * (1 - a)) / outA
+		end
+		rgb[idx] = math.floor(r * 255) + math.floor(g * 255) * 256 + math.floor(b * 255) * 65536
+		alpha[idx] = outA * 255
+		full[idx] = rgb[idx] + math.floor(outA * 255) * 16777216
+	end
+	canvas.rgb, canvas.alpha, canvas.full = rgb, alpha, full
+end
+
+local function paint(canvas, offset, style)
 	local f0 = knob(style, "FadeStart")
 	if knob(style, "FadePulse") then
 		local lo, hi = knob(style, "FadePulseMin"), knob(style, "FadePulseMax")
 		f0 = lo + (hi - lo) * (0.5 + 0.5 * math.sin(os.clock() * knob(style, "FadePulseSpeed") * 2 * math.pi))
 	end
 	local f1 = math.max(knob(style, "FadeEnd"), f0 + 0.001)
+	shape(canvas, style)
+	palette(canvas, style)
+	local k = knob(style, "Contrast") / math.max(knob(style, "Angles"), 1) * LEVELS
+	local sig = table.concat({ offset, f0, f1, k, canvas.shapeSig, canvas.paletteSig }, ",")
+	if canvas.paintSig == sig then
+		return -- (drawn already this frame, for another barrier this size)
+	end
+	canvas.paintSig = sig
+	local W, H, pixels = canvas.W, canvas.H, canvas.pixels
+	local A, B = canvas.A, canvas.B
+	local rgb, alpha, full = canvas.rgb, canvas.alpha, canvas.full
+	local c, s = math.cos(offset) * k, math.sin(offset) * k
+	local floor = math.floor
+	local writeu32 = buffer.writeu32
+	local i = 1
 	for py = 0, H - 1 do
-		local y = (py - H / 2) * scale
 		-- (the fade toward the top: smooth, from f0 of the way up to f1)
 		local t = math.clamp(((1 - (py + 0.5) / H) - f0) / (f1 - f0), 0, 1)
 		local keep = 1 - t * t * (3 - 2 * t)
-		for px = 0, W - 1 do
-			local x = (px - W / 2) * scale
-			local sum = 0
-			for k = 1, n do
-				local d = dirs[k]
-				sum += math.cos(d[1] * x + d[2] * y + offset + d[3])
+		local o = py * W * 4
+		if keep <= 0 then
+			buffer.fill(pixels, o, 0, W * 4)
+			i += W
+		elseif keep >= 1 then
+			for _ = 1, W do
+				local idx = floor(A[i] * c - B[i] * s)
+				idx = if idx < 0 then 0 elseif idx > LEVELS then LEVELS else idx
+				writeu32(pixels, o, full[idx])
+				o += 4
+				i += 1
 			end
-			local a = math.clamp(sum * contrast / angles, 0, 1) * fa
-			local outA = a + ba * (1 - a)
-			local r, g, b = 0, 0, 0
-			if outA > 0 then
-				r = (fr * a + br * ba * (1 - a)) / outA
-				g = (fg * a + bg * ba * (1 - a)) / outA
-				b = (fb * a + bb * ba * (1 - a)) / outA
+		else
+			for _ = 1, W do
+				local idx = floor(A[i] * c - B[i] * s)
+				idx = if idx < 0 then 0 elseif idx > LEVELS then LEVELS else idx
+				writeu32(pixels, o, rgb[idx] + floor(alpha[idx] * keep) * 16777216)
+				o += 4
+				i += 1
 			end
-			local o = (py * W + px) * 4
-			buffer.writeu8(pixels, o, math.floor(r * 255))
-			buffer.writeu8(pixels, o + 1, math.floor(g * 255))
-			buffer.writeu8(pixels, o + 2, math.floor(b * 255))
-			buffer.writeu8(pixels, o + 3, math.floor(outA * keep * 255))
 		end
 	end
-	self.image:WritePixelsBuffer(Vector2.zero, Vector2.new(W, H), pixels)
+	canvas.image:WritePixelsBuffer(Vector2.zero, Vector2.new(W, H), pixels)
 end
 
--- a barrier's floor shadows (beams Server/Map put on it) tuned from the style, shown or not
+function BarrierSwirl:draw(offset, style)
+	if not self:build(knob(style, "PixelsPerStud")) then
+		return
+	end
+	local glow = knob(style, "Glow")
+	if self.glow ~= glow then
+		self.glow = glow
+		for _, surface in self.surfaces do
+			surface.Brightness = glow
+		end
+	end
+	paint(self.canvas, offset, style)
+end
+
+-- a barrier's floor shadows (beams Server/Map put on it) tuned from the style, shown or not;
+-- only touched when that changes
+local shadowState = setmetatable({}, { __mode = "k" }) -- [wall] = { sig, beams }
 function BarrierSwirl.shadows(wall, style, shown)
 	local colour = knob(style, "ShadowColor")
 	local alpha = math.clamp(knob(style, "ShadowAlpha"), 0, 1)
 	local length = math.max(knob(style, "ShadowLength"), 0.1)
-	for _, beam in wall:GetDescendants() do
-		if beam:IsA("Beam") and beam.Name == "Shadow" then
-			beam.Enabled = shown
-			if shown then
-				beam.Color = ColorSequence.new(colour)
-				beam.Transparency = NumberSequence.new(1 - alpha, 1)
-				local a0, a1 = beam.Attachment0, beam.Attachment1
-				if a0 and a1 then
-					local dir = (a1.Position - a0.Position)
-					if dir.Magnitude > 1e-3 then
-						a1.Position = a0.Position + dir.Unit * length
-					end
+	local state = shadowState[wall]
+	local sig = if shown then table.concat({ tostring(colour), alpha, length }, ",") else "off"
+	if state and state.sig == sig then
+		return
+	end
+	if not state then
+		state = { beams = {} }
+		for _, beam in wall:GetDescendants() do
+			if beam:IsA("Beam") and beam.Name == "Shadow" then
+				table.insert(state.beams, beam)
+			end
+		end
+		shadowState[wall] = state
+	end
+	state.sig = sig
+	for _, beam in state.beams do
+		beam.Enabled = shown
+		if shown then
+			beam.Color = ColorSequence.new(colour)
+			beam.Transparency = NumberSequence.new(1 - alpha, 1)
+			local a0, a1 = beam.Attachment0, beam.Attachment1
+			if a0 and a1 then
+				local dir = (a1.Position - a0.Position)
+				if dir.Magnitude > 1e-3 then
+					a1.Position = a0.Position + dir.Unit * length
 				end
 			end
 		end

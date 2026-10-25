@@ -52,10 +52,12 @@ RunService.RenderStepped:Connect(function(dt)
 	for _, wall in if markers then markers:GetChildren() else {} do
 		local want = shownFor(wall)
 		BarrierSwirl.shadows(wall, style, want)
+		-- (made the first time it's wanted, then only hidden: making one is the costly bit)
 		if want and not swirls[wall] then
 			swirls[wall] = BarrierSwirl.new(wall)
-		elseif not want and swirls[wall] then
-			drop(wall)
+		end
+		if swirls[wall] then
+			swirls[wall]:show(want)
 		end
 	end
 	local now = os.clock()
@@ -66,6 +68,9 @@ RunService.RenderStepped:Connect(function(dt)
 	for wall, swirl in swirls do
 		if not wall.Parent then
 			drop(wall)
+			continue
+		end
+		if not swirl.shown then
 			continue
 		end
 		if (camera.CFrame.Position - wall.Position).Magnitude > NEAR then
