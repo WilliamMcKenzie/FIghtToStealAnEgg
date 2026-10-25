@@ -845,7 +845,7 @@ local function biomeFurniture(parent)
 		p.Material = Enum.Material.ForceField
 		p.Color = Color3.fromRGB(255, 80, 60)
 		-- (as tall as a region's blocker, from the floor: QM)
-		p.Size = Vector3.new(b[5] or MapData.GateHalf * 2, 40, 6)
+		p.Size = Vector3.new(b[5] or MapData.GateHalf * 2, 40, 0.2) -- (a flat plane across the gate: QM)
 		-- (its yaw as the map editor's: the wall runs along x turned -yaw degrees)
 		p.CFrame = CFrame.new(b[3], MapFile.groundAt(MapData, b[3], b[4]) + 40 / 2 - 0.5, b[4])
 			* CFrame.Angles(0, math.rad(b[6] or 0), 0)
