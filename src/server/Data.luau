@@ -1,6 +1,6 @@
 -- Saving (QM, Oct 24): each player's progress lives in their attributes while they play
--- (Cash, Strength, Eggs, Rebirths, Train<Name> for each training ground bought and
--- Region<Name> for each region) and is
+-- (Cash, Strength, Eggs, Rebirths, Train<Name> for each training ground bought,
+-- Region<Name> for each region, and Weapons and Weapon: Server/Arsenal) and is
 -- saved to a DataStore when they leave, every Config.Data.AutoSave seconds, and when the
 -- server shuts down. Nothing is saved for a player whose data failed to load (so a
 -- DataStore outage can't wipe anyone), and in a Studio playtest without API access it
@@ -26,7 +26,7 @@ local loaded = {} -- [player] = true once their data is in
 local warned = false
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end

@@ -1,19 +1,20 @@
 -- Readies the map (Server/Map: the one baked into the place) and starts what runs on
--- it: pens, eggs and the bosses' fights, the training grounds. Gives every player the
--- sword, relays slashes so other players see them (and lets them hit bosses, mobs and
--- dummies: Server/Combat), and spawns a boss on /boss. Your pet (player attribute Pet,
+-- it: pens, eggs and the bosses' fights, the training grounds, and the weapons bosses
+-- drop (Server/Arsenal: everyone starts with the sword). Relays slashes and shots so
+-- other players see them (and lets them hit bosses, mobs and dummies: Server/Combat),
+-- and spawns a boss on /boss. Your pet (player attribute Pet,
 -- the Horse to start) is all your health and speed (Shared/Pets); /ride <pet> swaps it.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterPack = game:GetService("StarterPack")
 local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Pets = require(Shared.Pets)
 local SlashTuning = require(Shared.SlashTuning)
-local Sword = require(Shared.Weapons.Sword)
+local Weapons = require(Shared.Weapons.Weapons)
+local Arsenal = require(script.Arsenal)
 local WorldColors = require(Shared.WorldColors)
 local Bosses = require(script.Bosses)
 local Combat = require(script.Combat)
@@ -40,21 +41,11 @@ Eggs.start(map)
 Training.start(map)
 Regions.start()
 Data.start() -- (after Training: it loads over the grounds' defaults)
+Arsenal.start() -- (each player's weapon tool, and the spin when a boss dies)
 
 local remote = Instance.new("RemoteEvent")
 remote.Name = "Slash"
 remote.Parent = ReplicatedStorage
-
--- StarterPack hands a copy to each character as it spawns; players already in the
--- game (a Studio playtest can start before this runs) get one now.
-local tool = Sword.makeTool()
-tool.Parent = StarterPack
-for _, player in Players:GetPlayers() do
-	local backpack = player:FindFirstChildOfClass("Backpack")
-	if backpack and not backpack:FindFirstChild(tool.Name) then
-		tool:Clone().Parent = backpack
-	end
-end
 
 -- Everyone rides (client/Riding.luau): their pet's health and speed (QM, Oct 25: nothing
 -- else adds to them), and no jumping
@@ -69,7 +60,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss, swapPet, givePet -- (below)
+local requestBoss, reboss, swapPet, givePet, testSpin, giveWeapon -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your slash's damage (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -91,6 +82,10 @@ local function joined(player)
 			swapPet(player, message)
 		elseif message:lower():match("^/give") then
 			givePet(player, message)
+		elseif message:lower():match("^/spin") then
+			testSpin(player, message)
+		elseif message:lower():match("^/weapon") then
+			giveWeapon(player, message)
 		end
 	end)
 	if player.Character then
@@ -110,8 +105,14 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 	if typeof(yaw) ~= "number" or yaw ~= yaw or math.abs(yaw) > 10 then
 		return
 	end
+	-- (only with a melee weapon equipped, at most as often as it swings)
+	local id = player:GetAttribute("Weapon")
+	if Weapons.get(id).Type ~= "Melee" then
+		return
+	end
+	local c = Weapons.slash(Config.Slash, id)
 	local now = os.clock()
-	if last[player] and now - last[player] < Config.Slash.Cooldown * 0.8 then
+	if last[player] and now - last[player] < c.Cooldown * 0.8 then
 		return
 	end
 	last[player] = now
@@ -121,8 +122,35 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 		end
 	end
 	-- the hit lands as the arc sweeps through (wind-up, then half the sweep)
-	local c = Config.Slash
 	task.delay(c.Windup + c.Sweep * 0.5, Combat.slash, player, yaw, c)
+end)
+
+-- Ranged and Magic weapons: the client fires (Shoot, with the yaw), the server runs the
+-- shots for the damage (Server/Combat) and tells everyone else to draw them (client/Shots)
+local shoot = Instance.new("RemoteEvent")
+shoot.Name = "Shoot"
+shoot.Parent = ReplicatedStorage
+local lastShot = {}
+shoot.OnServerEvent:Connect(function(player, yaw)
+	if typeof(yaw) ~= "number" or yaw ~= yaw or math.abs(yaw) > 10 then
+		return
+	end
+	local id = player:GetAttribute("Weapon")
+	local w = Weapons.get(id)
+	if not w.Shot then
+		return
+	end
+	local now = os.clock()
+	if lastShot[player] and now - lastShot[player] < w.Shot.Cooldown * 0.8 then
+		return
+	end
+	lastShot[player] = now
+	for _, other in Players:GetPlayers() do
+		if other ~= player then
+			shoot:FireClient(other, player, id, yaw)
+		end
+	end
+	Combat.shoot(player, id, yaw)
 end)
 
 -- /boss: a chicken boss in front of you. The command is a TextChatCommand; its client
@@ -243,7 +271,59 @@ giveRequest.OnServerEvent:Connect(function(player, message)
 	end
 end)
 
+-- /spin [boss]: the weapon spin a boss kill gives (QM, Oct 25: for trying it), as if that
+-- boss (a Config.Bosses key or name, the Mother Hen if none) had died. /weapon <weapon>
+-- owns and equips one ("/weapon" alone lists them). The game's owner, or anyone in a
+-- Studio playtest.
+local function squash(text)
+	return (text:lower():gsub("[%s_']", ""))
+end
+function testSpin(player, message)
+	if not mayReboss(player) then
+		return
+	end
+	local want = squash(message:match("^/%a+%s+(.-)%s*$") or "")
+	local kind = "MotherHen"
+	for key, c in Config.Bosses do
+		if want ~= "" and (squash(key) == want or squash(c.Name or "") == want) then
+			kind = key
+		end
+	end
+	Arsenal.spin(player, kind)
+end
+function giveWeapon(player, message)
+	if not mayReboss(player) then
+		return
+	end
+	local want = squash(message:match("^/%a+%s+(.-)%s*$") or "")
+	local ids = {}
+	for id, w in Config.Weapons do
+		table.insert(ids, id)
+		if want ~= "" and (squash(id) == want or squash(w.Name) == want) then
+			Arsenal.give(player, id, true)
+			return
+		end
+	end
+	table.sort(ids)
+	print("/weapon one of: " .. table.concat(ids, ", "))
+end
+for _, cmd in { { "Spin", testSpin }, { "Weapon", giveWeapon } } do
+	local command = Instance.new("TextChatCommand")
+	command.Name = cmd[1] .. "Command"
+	command.TriggerText = "/" .. cmd[1]:lower()
+	command.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
+	local request = Instance.new("RemoteEvent")
+	request.Name = cmd[1] .. "Request"
+	request.Parent = ReplicatedStorage
+	request.OnServerEvent:Connect(function(player, message)
+		if typeof(message) == "string" and #message < 100 then
+			cmd[2](player, message)
+		end
+	end)
+end
+
 Players.PlayerRemoving:Connect(function(player)
 	last[player] = nil
+	lastShot[player] = nil
 	lastBoss[player] = nil
 end)

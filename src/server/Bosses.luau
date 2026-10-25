@@ -20,6 +20,9 @@
 --   Bosses.alive(biome) -> its boss is up (not dead, waiting to respawn)
 --   Bosses.defeated                  -- BindableEvent: Event(biome)
 --   Bosses.engaged                   -- BindableEvent: Event(player, biome), on a hit
+--   Bosses.killed                    -- BindableEvent: Event(kind, players), when one is
+--                                       beaten (not on /reboss): everyone in its fight and
+--                                       everyone who hit it, for their weapon spin
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -33,6 +36,7 @@ local Combat = require(script.Parent.Combat)
 local Bosses = {}
 Bosses.defeated = Instance.new("BindableEvent")
 Bosses.engaged = Instance.new("BindableEvent")
+Bosses.killed = Instance.new("BindableEvent")
 
 local folder = Instance.new("Folder")
 folder.Name = "Bosses"
@@ -65,6 +69,16 @@ local function hurt(body, amount)
 		local b = live[body]
 		live[body] = nil
 		Combat.remove(body)
+		if b then
+			-- (gathered before Bosses.defeated sets the fight's players free)
+			local winners = {}
+			for _, player in Players:GetPlayers() do
+				if b.hitters[player] or (b.biome and player:GetAttribute("LockedIn") == b.biome) then
+					table.insert(winners, player)
+				end
+			end
+			Bosses.killed:Fire(b.kind, winners)
+		end
 		task.delay(0.6, function() -- (time for clients to play its death)
 			body:Destroy()
 		end)
@@ -99,7 +113,7 @@ local function make(kind, at, yaw)
 	body:SetAttribute("Health", c.Health)
 	body:SetAttribute("MaxHealth", c.Health)
 	body:SetAttribute("Radius", c.Radius)
-	local b = { kind = kind, c = c, yaw = yaw, home = at, calm = 0 }
+	local b = { kind = kind, c = c, yaw = yaw, home = at, calm = 0, hitters = {} }
 	live[body] = b
 	Combat.add(body, function(player, damage)
 		if not live[body] then
@@ -110,6 +124,7 @@ local function make(kind, at, yaw)
 			Bosses.wake(b.biome)
 		end
 		Combat.train(player, c.Strength or 1)
+		b.hitters[player] = true
 		hurt(body, damage)
 	end)
 	return body, b

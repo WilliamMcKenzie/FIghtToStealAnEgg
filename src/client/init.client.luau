@@ -1,4 +1,7 @@
--- The sword: it's always out, and it attacks by itself (QM, Oct 24, Archero-style).
+-- Your weapon (the sword to start; bosses drop more: client/WeaponSpin): it's always
+-- out, and it attacks by itself (QM, Oct 24, Archero-style). Melee weapons slash as
+-- below; Ranged and Magic ones shoot at the nearest target in their Range (client/Shots
+-- draws the shots, the server runs them for the damage).
 -- While a boss (or a training mob or dummy) is within AimRange the torso turns toward it, eased (not snapped), and
 -- whenever one is within AttackRange and the cooldown allows, it slashes along that aim:
 -- the upper body swings the held sword (SwingPose) along the arc (SlashFx). It plays
@@ -17,7 +20,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local SlashFx = require(Shared.SlashFx)
 local SlashTuning = require(Shared.SlashTuning)
 local WorldColors = require(Shared.WorldColors)
+local Weapons = require(Shared.Weapons.Weapons)
 local Riding = require(script.Riding)
+local Shots = require(script.Shots)
 local SlashCam = require(script.SlashCam)
 local SwingPose = require(script.SwingPose)
 require(script.BossView)
@@ -28,14 +33,19 @@ require(script.Barriers)
 require(script.FightBarrierFx)
 require(script.Regions)
 require(script.Liquid)
+require(script.WeaponSpin)
 local remote = ReplicatedStorage:WaitForChild("Slash")
+local shootRemote = ReplicatedStorage:WaitForChild("Shoot")
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
--- Config.Slash, with workspace.SlashTuning's live values applied (see SlashTuning)
-local function settings(_tool)
-	return SlashTuning.read()
+-- Config.Slash, with workspace.SlashTuning's live values applied (see SlashTuning), and
+-- the tool's weapon's own Slash values over them
+local function settings(tool)
+	local c = SlashTuning.read()
+	local id = tool and tool:GetAttribute("Weapon")
+	return if id then Weapons.slash(c, id) else c
 end
 SlashTuning.watchPrint()
 task.spawn(WorldColors.watch)
@@ -160,25 +170,37 @@ RunService.Heartbeat:Connect(function(dt)
 	if not root then
 		return
 	end
-	local c = settings(nil)
+	local tool = character:FindFirstChildOfClass("Tool")
+	local id = tool and tool:GetAttribute("Weapon")
+	local c = settings(tool)
+	local range = if id then Weapons.range(id, c) else c.AttackRange
 	local facing = yawOf(root.CFrame.LookVector)
-	local target = nearestBoss(root, c.AimRange)
+	local target = nearestBoss(root, math.max(c.AimRange, range + 8))
 	local want = if target then yawOf((target.Position - root.Position) * Vector3.new(1, 0, 1)) else facing
 	aimYaw = aimYaw or facing
 	-- (eased: the further off, the faster it turns, never a snap)
 	aimYaw = wrap(aimYaw + wrap(want - aimYaw) * (1 - math.exp(-dt * c.AimTurn)))
 	SwingPose.aim(character, math.clamp(wrap(aimYaw - facing), -math.rad(c.AimTwist), math.rad(c.AimTwist)))
 
-	local tool = character:FindFirstChildOfClass("Tool")
-	if not (tool and tool.Name == "Sword") then
+	if not id or os.clock() < ready then
 		return
 	end
-	if os.clock() >= ready and nearestBoss(root, c.AttackRange) then
+	local inRange = nearestBoss(root, range)
+	if not inRange then
+		return
+	end
+	if Weapons.get(id).Shot then
+		-- (shots go straight at it, not along the eased aim)
+		local yaw = yawOf((inRange.Position - root.Position) * Vector3.new(1, 0, 1))
+		ready = os.clock() + Weapons.cooldown(id, c)
+		Shots.fire(character, id, yaw)
+		shootRemote:FireServer(yaw)
+	else
 		slash(tool, aimYaw)
 	end
 end)
 
--- the sword is always out: no inventory bar (so no keys to put it away), and it's
+-- the weapon is always out: no inventory bar (so no keys to put it away), and it's
 -- equipped whenever it's in the backpack
 local function hideBackpack()
 	-- (SetCoreGuiEnabled can fail if the core scripts aren't up yet: retry briefly)
@@ -194,7 +216,7 @@ local function autoEquip(character)
 	local humanoid = character:WaitForChild("Humanoid")
 	local backpack = player:WaitForChild("Backpack")
 	local function equip(tool)
-		if tool:IsA("Tool") and tool.Name == "Sword" and humanoid.Health > 0 then
+		if tool:IsA("Tool") and tool:GetAttribute("Weapon") and humanoid.Health > 0 then
 			task.defer(function()
 				if tool.Parent == backpack then
 					humanoid:EquipTool(tool)
@@ -218,6 +240,9 @@ remote.OnClientEvent:Connect(function(other, dir, seed, yaw)
 	if character then
 		play(character, dir, character:FindFirstChildOfClass("Tool"), seed, yaw)
 	end
+end)
+shootRemote.OnClientEvent:Connect(function(other, id, yaw)
+	Shots.fire(other.Character, id, yaw)
 end)
 
 -- top-down camera toggle (T): straight down onto the player, for judging the slash

@@ -160,9 +160,10 @@ local function release(joints)
 	end
 end
 
+-- (any melee weapon: Ranged and Magic ones are held out in the tool pose)
 local function holdingSword(character)
 	local tool = character:FindFirstChildOfClass("Tool")
-	return tool ~= nil and tool.Name == "Sword"
+	return tool ~= nil and tool:GetAttribute("WeaponType") == "Melee"
 end
 
 RunService.PreSimulation:Connect(function(dt)

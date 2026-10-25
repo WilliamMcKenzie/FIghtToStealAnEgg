@@ -70,6 +70,9 @@ function Rig.build(spec)
 		part.Size = def.size
 		part.Color = def.color
 		part.Material = if def.neon then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		if def.shape then
+			part.Shape = Enum.PartType[def.shape] -- ("Ball", "Cylinder": weapon models)
+		end
 		part.Anchored = false
 		part.CanCollide = false
 		part.CanQuery = false
@@ -286,6 +289,7 @@ function Rig.buildFromData(data, name, studTexture)
 			plain = part.plain,
 			neon = part.neon,
 			metal = part.metal,
+			shape = part.shape,
 		})
 	end
 	local model, byName, motors = Rig.build({ name = name, studTexture = studTexture, parts = list })

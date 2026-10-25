@@ -600,4 +600,250 @@ return {
 		Damage = 10, -- per slash that catches a boss (server checks it)
 		Alternate = true, -- swing left-to-right, then right-to-left
 	},
+
+	-- weapons (QM, Oct 25): bosses drop them. Kill a boss and everyone in its fight gets a
+	-- spin (client/WeaponSpin, Server/Arsenal) that lands on one of these; the weapon you
+	-- won is equipped (the chip bottom right switches between the ones you own). Three
+	-- types: Melee slashes (Config.Slash with the weapon's Slash values over it), Ranged
+	-- shoots straight (arrows, bolts, thrown things), Magic fires slightly homing missiles
+	-- (Shared/Projectiles, client/Shots draws them). Every weapon auto-attacks like the sword.
+	--   Name     shown in the spin and on the chip
+	--   Type     "Melee", "Ranged" or "Magic"
+	--   Rarity   one of Rarities (above): its colour in the spin
+	--   Damage   times your Power (Server/Combat: Slash.Damage + Strength) per hit
+	--   Weight   its share of a drop (nil: never drops; the Sword is everyone's to start)
+	--   Boss     a boss-only item: only that boss (a Bosses key) drops it, and the spin
+	--            shows BONUS when it lands
+	--   Slash    (Melee) Config.Slash values to change: Arc, Radius, Forward, Width,
+	--            Cooldown, AttackRange, Color, Variety...
+	--   Shot     (Ranged, Magic) Look (how client/Shots draws it: Arrow, Bolt, Needle, Orb,
+	--            Petal, Fireball, Horn, Egg), Cooldown (s), Range and Speed (studs, studs/s),
+	--            Count (shots at once) fanned over Spread degrees, Homing (degrees/s it can
+	--            turn toward a target, Magic), Pierce (extra targets it goes through),
+	--            Splash (studs: hits everything that close to where it lands), Size, Color
+	Weapons = {
+		-- melee
+		Sword = { Name = "Sword", Type = "Melee", Rarity = "Common", Damage = 1 },
+		Dagger = {
+			Name = "Dagger",
+			Type = "Melee",
+			Rarity = "Common",
+			Damage = 0.7,
+			Weight = 30,
+			Slash = { Cooldown = 0.2, Radius = 7, Width = 2.2, Arc = 150, AttackRange = 9 },
+		},
+		BattleAxe = {
+			Name = "Battle Axe",
+			Type = "Melee",
+			Rarity = "Rare",
+			Damage = 1.8,
+			Weight = 15,
+			Slash = {
+				Cooldown = 0.55,
+				Radius = 12.5,
+				Width = 4,
+				Arc = 220,
+				AttackRange = 14,
+				Color = Color3.fromRGB(255, 236, 200),
+			},
+		},
+		Spear = {
+			Name = "Spear",
+			Type = "Melee",
+			Rarity = "Rare",
+			Damage = 1.3,
+			Weight = 15,
+			Slash = { Cooldown = 0.4, Arc = 80, Radius = 9, Forward = 7, Width = 2.5, AttackRange = 18 },
+		},
+		-- ranged
+		Bow = {
+			Name = "Bow",
+			Type = "Ranged",
+			Rarity = "Common",
+			Damage = 0.8,
+			Weight = 30,
+			Shot = { Look = "Arrow", Cooldown = 0.5, Range = 55, Speed = 110 },
+		},
+		Crossbow = {
+			Name = "Crossbow",
+			Type = "Ranged",
+			Rarity = "Rare",
+			Damage = 1.6,
+			Weight = 15,
+			Shot = { Look = "Bolt", Cooldown = 0.9, Range = 70, Speed = 160, Pierce = 1 },
+		},
+		TripleBow = {
+			Name = "Triple Bow",
+			Type = "Ranged",
+			Rarity = "Epic",
+			Damage = 0.65,
+			Weight = 6,
+			Shot = { Look = "Arrow", Cooldown = 0.55, Range = 55, Speed = 110, Count = 3, Spread = 16 },
+		},
+		-- magic
+		SparkWand = {
+			Name = "Spark Wand",
+			Type = "Magic",
+			Rarity = "Common",
+			Damage = 0.9,
+			Weight = 30,
+			Shot = {
+				Look = "Orb",
+				Cooldown = 0.6,
+				Range = 50,
+				Speed = 55,
+				Homing = 200,
+				Size = 1,
+				Color = Color3.fromRGB(110, 230, 255),
+			},
+		},
+		FireStaff = {
+			Name = "Fire Staff",
+			Type = "Magic",
+			Rarity = "Rare",
+			Damage = 1.2,
+			Weight = 15,
+			Shot = {
+				Look = "Orb",
+				Cooldown = 0.8,
+				Range = 50,
+				Speed = 50,
+				Homing = 160,
+				Splash = 7,
+				Size = 1.4,
+				Color = Color3.fromRGB(255, 130, 40),
+			},
+		},
+		ArcaneOrb = {
+			Name = "Arcane Orb",
+			Type = "Magic",
+			Rarity = "Epic",
+			Damage = 0.6,
+			Weight = 6,
+			Shot = {
+				Look = "Orb",
+				Cooldown = 0.7,
+				Range = 50,
+				Speed = 50,
+				Homing = 260,
+				Count = 3,
+				Spread = 50,
+				Size = 0.9,
+				Color = Color3.fromRGB(196, 110, 255),
+			},
+		},
+		-- boss-only (super rare): one for each boss in BossPools
+		GoldenEgg = {
+			Name = "Golden Egg",
+			Type = "Ranged",
+			Rarity = "Mythic",
+			Boss = "MotherHen",
+			Damage = 2.5,
+			Weight = 2,
+			Shot = { Look = "Egg", Cooldown = 0.9, Range = 50, Speed = 70, Splash = 9, Size = 1.2 },
+		},
+		RafflesiaBloom = {
+			Name = "Rafflesia Bloom",
+			Type = "Magic",
+			Rarity = "Mythic",
+			Boss = "GiantRafflesia",
+			Damage = 0.8,
+			Weight = 2,
+			Shot = {
+				Look = "Petal",
+				Cooldown = 0.7,
+				Range = 50,
+				Speed = 55,
+				Homing = 240,
+				Count = 5,
+				Spread = 70,
+				Color = Color3.fromRGB(235, 70, 90),
+			},
+		},
+		UnicornHorn = {
+			Name = "Unicorn Horn",
+			Type = "Ranged",
+			Rarity = "Mythic",
+			Boss = "MajesticUnicorn",
+			Damage = 2.2,
+			Weight = 2,
+			Shot = { Look = "Horn", Cooldown = 0.7, Range = 70, Speed = 120, Pierce = 99 },
+		},
+		VenusFlytrap = {
+			Name = "Venus Flytrap",
+			Type = "Melee",
+			Rarity = "Mythic",
+			Boss = "VenusFlytrap",
+			Damage = 2,
+			Weight = 2,
+			-- (all the way round you: QM)
+			Slash = {
+				Arc = 360,
+				Forward = 0,
+				Radius = 12,
+				Width = 4,
+				Cooldown = 0.45,
+				AttackRange = 11,
+				Color = Color3.fromRGB(150, 255, 110),
+				Variety = { Arc = { 1, 1 } },
+			},
+		},
+		CactusNeedler = {
+			Name = "Cactus Needler",
+			Type = "Ranged",
+			Rarity = "Mythic",
+			Boss = "CactusBoss",
+			Damage = 0.9,
+			Weight = 2,
+			Shot = { Look = "Needle", Cooldown = 0.6, Range = 55, Speed = 130, Count = 7, Spread = 50, Pierce = 1 },
+		},
+		ElderTusk = {
+			Name = "Elder Tusk",
+			Type = "Melee",
+			Rarity = "Mythic",
+			Boss = "ElderBoar",
+			Damage = 3.2,
+			Weight = 2,
+			Slash = {
+				Arc = 240,
+				Radius = 15,
+				Width = 5,
+				Cooldown = 0.7,
+				AttackRange = 17,
+				Color = Color3.fromRGB(190, 230, 255),
+			},
+		},
+		WyrmFangStaff = {
+			Name = "Wyrm Fang Staff",
+			Type = "Magic",
+			Rarity = "Mythic",
+			Boss = "LavaWyrm",
+			Damage = 4,
+			Weight = 2,
+			Shot = {
+				Look = "Fireball",
+				Cooldown = 1,
+				Range = 60,
+				Speed = 45,
+				Homing = 120,
+				Splash = 12,
+				Size = 2.4,
+				Color = Color3.fromRGB(255, 90, 30),
+			},
+		},
+	},
+	-- the spin when a boss dies (client/WeaponSpin, Server/Arsenal)
+	WeaponDrops = {
+		Start = "Sword", -- everyone owns this one
+		Reel = 24, -- items it flicks through before it stops
+		SpinTime = 4, -- seconds from the first flick to the stop
+		Show = 2.2, -- seconds the winner stays up before the spin fades out
+		Equip = true, -- equip what you win as it lands
+	},
+	-- shots (Shared/Projectiles): what Ranged and Magic weapons fire
+	Shots = {
+		Height = 0.8, -- above the rider's hips, like the slash
+		Radius = 0.6, -- a shot's own width for hitting (studs)
+		HomingCone = 80, -- a missile only bends toward targets this many degrees either side of its path
+	},
 }
