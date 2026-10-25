@@ -928,7 +928,7 @@ return {
 			Rarity = "Common",
 			Damage = 0.8,
 			Weight = 30,
-			Shot = { Cooldown = 0.45, Range = 45, Size = 1.8 },
+			Shot = { Cooldown = 0.45, Range = 45 },
 		},
 		Staff = { -- (a plain staff, no element: QM, Oct 25)
 			Name = "Staff",
@@ -990,7 +990,14 @@ return {
 			Rarity = "Uncommon",
 			Damage = 1.6,
 			Weight = 18,
-			Shot = { Cooldown = 0.8, Range = 75, Size = 2.4 },
+			Shot = {
+				Cooldown = 0.8,
+				Count = 3,
+				Range = 75,
+				Spread = 16,
+				TrailLength = 0.2,
+				TrailTransparency = 0.6,
+			},
 		},
 		WindStaff = {
 			Name = "Wind Staff",
@@ -1102,23 +1109,34 @@ return {
 			Name = "Nature Bow",
 			Type = "Ranged",
 			Rarity = "Epic",
-			Damage = 1.3,
+			Damage = 0.3,
 			Weight = 4,
 			Shot = {
-				Cooldown = 0.6,
+				Cooldown = 0.2,
+				Count = 2,
 				Range = 60,
-				Count = 3,
-				Spread = 18,
-				TrailColor = Color3.fromRGB(140, 255, 110),
+				Spread = 8,
+				TrailColor = Color3.fromRGB(51, 255, 0),
+				TrailLength = 0.3,
+				TrailTransparency = 0.7,
 			},
 		},
 		BloodBow = {
 			Name = "Blood Bow",
 			Type = "Ranged",
 			Rarity = "Epic",
-			Damage = 2.2,
+			Damage = 4,
 			Weight = 4,
-			Shot = { Cooldown = 0.55, Range = 65, Pierce = 2, TrailColor = Color3.fromRGB(230, 30, 50) },
+			Shot = {
+				Cooldown = 0.4,
+				Pierce = 1,
+				Range = 65,
+				Size = 3,
+				Spread = 5,
+				TrailColor = Color3.fromRGB(230, 30, 50),
+				TrailLength = 0.5,
+				TrailTransparency = 0.9,
+			},
 		},
 		FireStaff = {
 			Name = "Fire Staff",
@@ -1168,13 +1186,15 @@ return {
 	Shots = {
 		Height = 0.8, -- above the rider's hips, like the slash
 		Radius = 0.6, -- a shot's own width for hitting (studs), times its Size
+		Slack = 1.5, -- studs added to every target's width for shots (QM: more forgiving; height never counts)
+		Trust = 12, -- studs: how far the shooter's own spot may be from the server's (Server/Combat)
 		-- every Ranged weapon's Shot starts from these (its own values go over them)
 		Ranged = {
 			Look = "Arrow", -- (the one arrow every Ranged weapon shoots; boss ones have their own)
 			Cooldown = 0.6, -- seconds between shots
 			Range = 55, -- studs it flies
 			Speed = 80, -- studs a second (every bow: QM, Oct 25)
-			Size = 2, -- the arrow's size (and how wide it hits) (QM: 2x)
+			Size = 1.8, -- the arrow's size (and how wide it hits) (QM: every bow the Shortbow's)
 			Count = 1, -- shots at once...
 			Spread = 0, -- ...fanned over this many degrees
 			Pierce = 0, -- extra targets it goes through

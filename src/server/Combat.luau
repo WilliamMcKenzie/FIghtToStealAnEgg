@@ -110,13 +110,23 @@ end
 local flying = {}
 local MAX_FLYING = 300
 
-function Combat.shoot(player, id, yaw, seed)
+-- (from where the shooter's own screen fired it, when that's close to where the server has
+-- them: a rider moves a few studs in the time the message takes, and shots run from the
+-- server's spot flew a little to the side of the ones drawn, missing what they hit there)
+function Combat.shoot(player, id, yaw, seed, origin)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if not root or #flying > MAX_FLYING then
 		return
 	end
+	local from = root.Position
+	if origin and origin == origin then
+		local off = Vector3.new(origin.X - from.X, 0, origin.Z - from.Z)
+		if off.Magnitude <= Config.Shots.Trust then
+			from += off
+		end
+	end
 	local damage = Combat.damage(player) * Weapons.get(id).Damage
-	for _, shot in Projectiles.spawn(id, root.Position, yaw, seed) do
+	for _, shot in Projectiles.spawn(id, from, yaw, seed) do
 		table.insert(flying, { shot = shot, player = player, damage = damage })
 	end
 end

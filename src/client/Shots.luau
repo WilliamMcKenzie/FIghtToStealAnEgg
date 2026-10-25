@@ -265,7 +265,9 @@ RunService.RenderStepped:Connect(function(dt)
 		local shot = a.shot
 		for _ in Projectiles.step(shot, dt, list) do
 			local at = shot.pos
-			pop(at, a.color, 1.2 * (a.s.Size or 1))
+			if a.s.Look ~= "Arrow" then -- (no burst where an arrow lands: QM)
+				pop(at, a.color, 1.2 * (a.s.Size or 1))
+			end
 			sound(a.s.HitSound, a.s.HitVolume, nil, at)
 			if shot.splash then
 				ring(Vector3.new(at.X, at.Y - 1.5, at.Z), a.color, shot.splash)

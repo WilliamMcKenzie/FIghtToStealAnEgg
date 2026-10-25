@@ -6,7 +6,8 @@
 -- hit as many targets as it may (1 + Pierce). A Magic shot with Homing bends toward the
 -- nearest target ahead of it (within its HomingCone) by up to Homing degrees a
 -- second: enough to curve onto a target that's moving, not enough to turn round. Targets
--- are flat circles: { body, pos, radius } (a boss's or mob's body and its Radius).
+-- are flat circles: { body, pos, radius } (a boss's or mob's body and its Radius), so a
+-- shot hits whatever height it flies at; Config.Shots.Slack widens every one a little.
 --
 --   Projectiles.spawn(id, origin, yaw, seed) -> { shot, ... }   -- a weapon's volley
 --   Projectiles.step(shot, dt, targets) -> { target, ... } -- what it hit this step;
@@ -108,7 +109,7 @@ function Projectiles.step(shot, dt, targets)
 		if not shot.hit[t.body] then
 			local p = flat(t.pos)
 			local c = closest(flat(from), flat(to), p)
-			if (c - p).Magnitude <= t.radius + shot.radius then
+			if (c - p).Magnitude <= t.radius + shot.radius + Config.Shots.Slack then
 				table.insert(hits, { t = t, d = (c - flat(from)).Magnitude, at = Vector3.new(c.X, from.Y, c.Z) })
 			end
 		end

@@ -200,7 +200,8 @@ RunService.Heartbeat:Connect(function(dt)
 		local seed = math.random(0, 2 ^ 30 - 1) -- (the same shots here, on the server and for everyone)
 		Shots.fire(character, id, yaw, seed)
 		SwingPose.shoot(character, id, yaw, interval)
-		shootRemote:FireServer(yaw, seed)
+		local root = character:FindFirstChild("HumanoidRootPart")
+		shootRemote:FireServer(yaw, seed, root and root.Position) -- (from where it's drawn here)
 	else
 		slash(tool, aimYaw)
 	end
