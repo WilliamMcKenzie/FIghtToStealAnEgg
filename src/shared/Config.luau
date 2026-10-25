@@ -908,8 +908,8 @@ return {
 			Weight = 2,
 			Shot = { Look = "Egg", Cooldown = 0.9, Range = 50, Speed = 70, Splash = 9, Size = 1.2 },
 		},
-		RafflesiaBloom = {
-			Name = "Rafflesia Bloom",
+		RafflesiaBloom = { -- (the Flower Staff: QM renamed it, Oct 25; the id stays for saves)
+			Name = "Flower Staff",
 			Type = "Magic",
 			Rarity = "Mythic",
 			Boss = "GiantRafflesia",
@@ -923,8 +923,9 @@ return {
 				Homing = 240,
 				Count = 5,
 				Spread = 70,
-				Color = Color3.fromRGB(235, 70, 90),
-				Color2 = Color3.fromRGB(255, 200, 210),
+				Size = 1.6, -- (petals 1.6x bigger: QM)
+				Color = Color3.fromRGB(120, 186, 70),
+				Color2 = Color3.fromRGB(200, 235, 170),
 			},
 		},
 		UnicornHorn = {

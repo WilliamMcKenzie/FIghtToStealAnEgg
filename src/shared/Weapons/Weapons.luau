@@ -37,6 +37,7 @@ local WindStaffModel = require(script.Parent.WindStaffModel)
 local LightningStaffModel = require(script.Parent.LightningStaffModel)
 local WaterStaffModel = require(script.Parent.WaterStaffModel)
 local FireStaffModel = require(script.Parent.FireStaffModel)
+local FlowerStaffModel = require(script.Parent.FlowerStaffModel)
 local WeaponModels = require(script.Parent.WeaponModels)
 
 local Weapons = {}
@@ -70,6 +71,7 @@ local DRAWN = {
 	LightningStaff = LightningStaffModel,
 	WaterStaff = WaterStaffModel,
 	FireStaff = FireStaffModel,
+	RafflesiaBloom = FlowerStaffModel, -- (the Flower Staff)
 }
 
 local STUDS = { image = Studs.IMAGE, tile = 0.5 }

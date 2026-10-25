@@ -97,27 +97,12 @@ for i = 0, 3 do
 	table.insert(cactus, block(V(0.06, 0.06, 0.3), V(0.2 - (i % 2) * 0.4, 0.3 + i * 0.35, 0.36), IVORY, 0, { plain = true }))
 end
 
--- the rafflesia bloom: five red petals round a yellow middle
-local bloom = {
-	block(V(0.22, 0.5, 0.22), V(0, -0.25, 0), rgb(60, 110, 50)),
-	block(V(0.16, 1.1, 0.16), V(0, 0.45, 0), rgb(80, 150, 60)),
-}
-for i = 0, 4 do
-	local a = math.rad(i * 72)
-	table.insert(
-		bloom,
-		block(V(0.55, 0.5, 0.12), V(math.sin(a) * 0.36, 1.2 + math.cos(a) * 0.36, 0), rgb(220, 60, 70), -i * 72)
-	)
-end
-table.insert(bloom, block(V(0.32, 0.32, 0.16), V(0, 1.2, 0.04), rgb(255, 220, 90), 45, { neon = true }))
-
 return {
 	GoldenEgg = model({
 		block(V(0.8, 0.8, 0.8), V(0, 0.15, 0), rgb(255, 205, 60), 0, { shape = "Ball" }),
 		block(V(0.64, 0.64, 0.64), V(0, 0.48, 0), rgb(255, 214, 90), 0, { shape = "Ball" }),
 		block(V(0.2, 0.2, 0.2), V(0.22, 0.4, -0.25), rgb(255, 250, 220), 0, { neon = true, shape = "Ball" }),
 	}),
-	RafflesiaBloom = model(bloom),
 	UnicornHorn = model(horn),
 	VenusFlytrap = model(flytrap),
 	CactusNeedler = model(cactus),

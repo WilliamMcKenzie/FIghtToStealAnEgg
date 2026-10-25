@@ -555,7 +555,7 @@ def main(src, dst, mesh_dir=None):
         out.append(f'\t\t{anim["name"]} = {{')
         out.append(f'\t\t\tlength = {anim["length"]:g},')
         out.append("\t\t\ttracks = {")
-        for uid, a in anim["animators"].items():
+        for uid, a in anim.get("animators", {}).items():
             if not a.get("keyframes"):
                 continue
             chans = {}
