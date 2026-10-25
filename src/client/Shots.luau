@@ -53,7 +53,7 @@ local function block(model, size, cf, color, props)
 	return p
 end
 
-local function trail(part, width, color, lifetime, emission)
+local function trail(part, width, color, lifetime, emission, opacity)
 	local a0 = Instance.new("Attachment")
 	a0.Position = Vector3.new(width / 2, 0, 0)
 	a0.Parent = part
@@ -66,7 +66,7 @@ local function trail(part, width, color, lifetime, emission)
 	t.Lifetime = lifetime
 	t.LightEmission = emission or 0.6
 	t.Color = if typeof(color) == "ColorSequence" then color else ColorSequence.new(color)
-	t.Transparency = NumberSequence.new(0.2, 1)
+	t.Transparency = NumberSequence.new(opacity or 0.2, 1)
 	t.WidthScale = NumberSequence.new(1, 0)
 	t.Parent = part
 	return t
@@ -201,7 +201,10 @@ local function build(s)
 		end
 		d.ring, d.flareLength = ring, (s.FlareLength or 1.6) * size
 		d.flareSpin = math.rad(s.FlareSpin or 220)
-		trail(root, (s.TrailWidth or 0.9) * size, ColorSequence.new(color:Lerp(WHITE, 0.4), color), s.TrailLength or 0.25, 1)
+		-- (the trail comes off the glow seamlessly, QM: as wide as the halo, its colour, as
+		-- see-through, fading out behind; lit like the Neon balls are)
+		local halo = (s.HaloSize or 1.9) * size
+		trail(root, halo * (s.TrailWidth or 1), color, s.TrailLength or 0.25, 1, s.HaloTransparency or 0.8)
 		if (s.Sparkles or 0) > 0 then
 			sparkles(root, color:Lerp(WHITE, 0.4), (s.SparkleSize or 0.3) * size, s.Sparkles)
 		end

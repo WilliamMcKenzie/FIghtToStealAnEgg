@@ -997,7 +997,7 @@ return {
 			FlareSpin = 220, -- degrees a second they turn round it
 			FlareTransparency = 0.25,
 			TrailLength = 0.25, -- seconds
-			TrailWidth = 0.9, -- studs (x Size)
+			TrailWidth = 1, -- times the halo's width (it starts as the halo: its colour and HaloTransparency)
 			Sparkles = 0, -- a second (QM: none on the orb)
 			SparkleSize = 0.3,
 			Flicker = 0, -- 0..1: the core jitters in size every frame
