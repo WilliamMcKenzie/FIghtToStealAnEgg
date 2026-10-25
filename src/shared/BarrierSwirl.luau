@@ -29,6 +29,7 @@
 --   local swirl = BarrierSwirl.new(wall, guiParent)   -- guiParent: where its SurfaceGuis live
 --   swirl:draw(offset, style)                        -- offset: time drift (BarrierSwirl.step)
 --   swirl:show(on)                                   -- hide it without throwing it away
+--   swirl:prepare(style)                             -- do the heavy maths now (on join)
 --   swirl:destroy()
 --   BarrierSwirl.knob(style, name)
 --
@@ -312,6 +313,15 @@ local function paint(canvas, offset, style)
 		end
 	end
 	canvas.image:WritePixelsBuffer(Vector2.zero, Vector2.new(W, H), pixels)
+end
+
+-- the heavy part ahead of time (QM, Oct 25: once, when you join): its image and the
+-- per-pixel waves, so its first draw costs no more than any other
+function BarrierSwirl:prepare(style)
+	if self:build(knob(style, "PixelsPerStud")) then
+		shape(self.canvas, style)
+		palette(self.canvas, style)
+	end
 end
 
 function BarrierSwirl:draw(offset, style)

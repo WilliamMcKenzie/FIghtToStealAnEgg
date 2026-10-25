@@ -43,6 +43,22 @@ local function drop(wall)
 	end
 end
 
+-- every barrier's heavy maths once, when you join (QM, Oct 25), one a frame so joining
+-- doesn't hitch; a fight starting later only has to show it
+task.spawn(function()
+	local biomes = map:WaitForChild("Biomes", 30)
+	local markers = biomes and biomes:WaitForChild("Barriers", 30)
+	for _, wall in if markers then markers:GetChildren() else {} do
+		if wall:IsA("BasePart") and not swirls[wall] then
+			local swirl = BarrierSwirl.new(wall)
+			swirl:show(false)
+			swirls[wall] = swirl
+			swirl:prepare(style)
+			task.wait()
+		end
+	end
+end)
+
 local offset = 0
 local last = 0
 local camera = workspace.CurrentCamera
