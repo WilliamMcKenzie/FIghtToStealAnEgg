@@ -23,7 +23,7 @@ local Hotbar = {}
 
 local player = Players.LocalPlayer
 local SLOT = 96
-local PANEL = "rbxassetid://86824541929406" -- LassoAPet's InventoryBG (assets/ui/InventoryBG.png: grey, dark border)
+local PANEL = "rbxassetid://118593193834683" -- LassoAPet's InventoryBG (assets/ui/InventoryBG.png: grey, dark border)
 local PANEL_SIZE = 96
 local PANEL_CORNER = 18 / 96 -- (its corners' radius, of its width)
 local GAP = 12
