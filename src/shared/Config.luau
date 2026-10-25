@@ -369,12 +369,49 @@ return {
 	},
 	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home, heals and sleeps
 	-- a sleeping boss (client/BossView, QM Oct 25): settled low on the ground, its head
-	-- swelling a little with each snore
+	-- swelling a little with each snore. A Model with a pose in Poses lies down in it
+	-- instead (no sinking or swelling): eyes shut, breathing slowly, Zzz drifting up.
 	BossSleep = {
 		Sink = 0.15, -- how far into the ground it settles, of its height
 		Snore = 1.1, -- its head's size at the top of a snore (1 at the bottom)
-		Breath = 3, -- seconds a snore takes
+		Breath = 3, -- seconds a snore (or a breath) takes
 		Settle = 0.6, -- seconds to settle down (or get up)
+		-- per Model, in its Blockbench drawing's studs and radians (it scales with the boss):
+		--   Bones   = { bone = { x, y, z, rx, ry, rz } } -- its pose, replacing idle's
+		--   Breathe = { bone = { x, y, z, rx, ry, rz } } -- added at the top of each breath
+		--   Shut    = { part names } -- eyes, squashed into a dark line
+		--   Hide    = { part names } -- pupils, gone while its eyes are shut
+		--   Zzz     = Vector3 -- where its Zzz start (drawing studs, from the neck bone)
+		Poses = {
+			Chicken = {
+				Bones = {
+					root = { 0, -2.75, 0, -0.06, 0, 0 }, -- (sat right down on the ground, a feather loaf)
+					LegL = { 0, 0.4, -0.8, -1.57, 0, 0 }, -- (legs folded flat under it)
+					LegR = { 0, 0.4, -0.8, -1.57, 0, 0 },
+					neck = { 0, -1.6, 0.6, -0.14, 0.08, 0.12 }, -- (head sunk into its shoulders, beak down, lolled)
+					WingL = { 0.1, -0.2, 0, 0, 0, -0.06 },
+					WingR = { -0.1, -0.2, 0, 0, 0, 0.06 },
+					Tail = { 0, -0.3, 0, 0.35, 0, 0 }, -- (drooped back)
+				},
+				Breathe = {
+					root = { 0, 0.14, 0, 0, 0, 0 },
+					neck = { 0, 0.1, 0, -0.07, 0, 0 },
+					WingL = { 0, 0.05, 0, 0, 0, -0.07 },
+					WingR = { 0, 0.05, 0, 0, 0, 0.07 },
+					Tail = { 0, 0, 0, -0.08, 0, 0 },
+				},
+				Shut = { "EyeL" },
+				Hide = { "PupilL" },
+				Zzz = Vector3.new(1.2, 4.5, -1.2),
+			},
+		},
+		Zzz = {
+			Count = 3, -- Zs in a run, one run per breath as it breathes out (each bigger than the last)
+			Gap = 0.6, -- seconds between them
+			Size = 2, -- the first Z's height, drawing studs (it scales with the boss)
+			Rise = 5, -- drawing studs each drifts up (and Rise/2 sideways, swaying)
+			Life = 2.4, -- seconds each lasts
+		},
 	},
 
 	-- eggs (Server/Eggs): one in every nest round each biome's edges. Hold E to steal one:

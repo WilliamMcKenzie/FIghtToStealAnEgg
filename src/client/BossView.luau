@@ -65,6 +65,11 @@ local NUMBER_RISE = 3 -- studs it floats up
 local NUMBER_LIFE = 0.7 -- seconds on screen
 local DEATH = 0.5 -- seconds it takes to shrink away
 local SLEEP = Config.BossSleep
+local ZZZ = SLEEP.Zzz
+-- Zzz: outlined Montserrat, warm light at the top going cool blue at the bottom (QM's UI)
+local ZZZ_GRADIENT = ColorSequence.new(Color3.fromRGB(255, 246, 232), Color3.fromRGB(143, 180, 255))
+local ZZZ_OUTLINE = Color3.fromRGB(27, 31, 74)
+local SHUT_COLOUR = Color3.fromRGB(30, 23, 40) -- a shut eye's line
 
 local views = {} -- [body] = { animal, last position, colours, flashUntil, diedAt }
 
@@ -104,6 +109,55 @@ local function damageNumber(body, amount)
 	task.delay(NUMBER_LIFE, gui.Destroy, gui)
 end
 
+-- one Z drifting up off a sleeping boss's head (the i-th of its run, each bigger), growing
+-- in and fading out
+local function zed(view, i)
+	local animal = view.animal
+	local k = animal.size * animal.scale
+	local at = animal.model.PrimaryPart.CFrame.Rotation * (view.pose.Zzz * k)
+	local size = ZZZ.Size * k * (1 + 0.25 * (i - 1))
+	local gui = Instance.new("BillboardGui")
+	gui.Adornee = animal.neck
+	gui.LightInfluence = 0
+	gui.Size = UDim2.fromScale(size * 0.5, size * 0.5)
+	gui.StudsOffsetWorldSpace = at
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.Size = UDim2.fromScale(1, 1)
+	label.FontFace = NUMBER_FONT
+	label.TextScaled = true
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextTransparency = 1
+	label.Text = "Z"
+	local gradient = Instance.new("UIGradient")
+	gradient.Color = ZZZ_GRADIENT
+	gradient.Rotation = 90
+	gradient.Parent = label
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = ZZZ_OUTLINE
+	stroke.Thickness = 3
+	stroke.Transparency = 1
+	stroke.Parent = label
+	label.Parent = gui
+	gui.Parent = animal.model
+	local rise = ZZZ.Rise * k
+	local drift = animal.model.PrimaryPart.CFrame.RightVector * rise / 2
+	TweenService:Create(gui, TweenInfo.new(ZZZ.Life, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		StudsOffsetWorldSpace = at + drift + Vector3.new(0, rise, 0),
+	}):Play()
+	TweenService:Create(gui, TweenInfo.new(ZZZ.Life / 4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = UDim2.fromScale(size, size),
+	}):Play()
+	local appear = TweenInfo.new(ZZZ.Life / 6)
+	TweenService:Create(label, appear, { TextTransparency = 0 }):Play()
+	TweenService:Create(stroke, appear, { Transparency = 0 }):Play()
+	local fade =
+		TweenInfo.new(ZZZ.Life / 3, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, ZZZ.Life * 2 / 3)
+	TweenService:Create(label, fade, { TextTransparency = 1 }):Play()
+	TweenService:Create(stroke, fade, { Transparency = 1 }):Play()
+	task.delay(ZZZ.Life, gui.Destroy, gui)
+end
+
 local function add(body)
 	if not body:IsA("BasePart") then
 		return
@@ -130,7 +184,22 @@ local function add(body)
 	}
 	-- (the head, for snoring: the neck bone and everything hung off it, their sizes and
 	-- joint offsets as built, so it can swell about the neck's pivot)
-	local neck = animal.model:FindFirstChild("neckBone")
+	-- (a Model with a sleeping pose lies down in it instead: its eyes to shut and pupils to
+	-- hide while it does)
+	local pose = SLEEP.Poses[body:GetAttribute("Model")]
+	if pose then
+		view.pose = pose
+		view.phase = math.random() -- (so a server's bosses don't all breathe together)
+		view.shut, view.hidden = {}, {}
+		for _, part in animal.model:GetChildren() do
+			if table.find(pose.Shut, part.Name) then
+				view.shut[part] = part.Size
+			elseif table.find(pose.Hide, part.Name) then
+				view.hidden[part] = part.Transparency
+			end
+		end
+	end
+	local neck = not pose and animal.model:FindFirstChild("neckBone")
 		or animal.model:FindFirstChild("HeadBone")
 		or animal.model:FindFirstChild("FlowerBone") -- (the Rafflesia's head is its flower)
 	if neck then
@@ -209,8 +278,53 @@ RunService.RenderStepped:Connect(function(dt)
 		local want = if body:GetAttribute("Asleep") then 1 else 0
 		view.sleep += math.clamp(want - view.sleep, -dt / SLEEP.Settle, dt / SLEEP.Settle)
 		local s = view.sleep * view.sleep * (3 - 2 * view.sleep)
-		ground -= Vector3.new(0, body.Size.Y * SLEEP.Sink * s, 0)
+		if not view.pose then
+			ground -= Vector3.new(0, body.Size.Y * SLEEP.Sink * s, 0)
+		end
 		animal.model:PivotTo(CFrame.new(ground) * body.CFrame.Rotation)
+		if view.pose and s > 0 then
+			-- lying in its pose, breathing (over whatever idle had it doing, by how asleep it is)
+			local pose = view.pose
+			local clock = now / SLEEP.Breath + view.phase
+			local breath = 0.5 - 0.5 * math.cos(clock * 2 * math.pi)
+			local sc = animal.scale * animal.size
+			for bone, motor in animal.bones do
+				local p, a, b = animal.pose[bone], pose.Bones[bone], pose.Breathe[bone]
+				local v = view.blend or {}
+				view.blend = v
+				for i = 1, 6 do
+					v[i] = p[i] + ((a and a[i] or 0) + (b and b[i] * breath or 0) - p[i]) * s
+				end
+				motor.Transform = CFrame.new(v[1] * sc, v[2] * sc, v[3] * sc) * CFrame.Angles(v[4], v[5], v[6])
+			end
+			-- a run of Zs as each breath goes out, while it's properly asleep
+			local run = math.floor(clock + 0.5)
+			if run ~= view.zzzRun then
+				if view.zzzRun and want == 1 and s > 0.5 then
+					for i = 1, ZZZ.Count do
+						task.delay((i - 1) * ZZZ.Gap, function()
+							if views[body] == view and body:GetAttribute("Asleep") then
+								zed(view, i)
+							end
+						end)
+					end
+				end
+				view.zzzRun = run
+			end
+		end
+		if view.pose then
+			local shut = s > 0.5
+			if shut ~= view.eyesShut then
+				view.eyesShut = shut
+				for part, size in view.shut do
+					part.Size = if shut then size * Vector3.new(1, 0.18, 1) else size
+					part.Color = if shut then SHUT_COLOUR else view.colours[part]
+				end
+				for part, transparency in view.hidden do
+					part.Transparency = if shut then 1 else transparency
+				end
+			end
+		end
 		if view.head then
 			local k = 1 + (SLEEP.Snore - 1) * s * (0.5 - 0.5 * math.cos(now / SLEEP.Breath * 2 * math.pi))
 			if math.abs(k - (view.headScale or 1)) > 1e-4 then
@@ -231,6 +345,7 @@ RunService.RenderStepped:Connect(function(dt)
 			for part, colour in view.colours do
 				part.Color = if flashing then Color3.new(1, 1, 1) else colour
 			end
+			view.eyesShut = nil -- (shut eyes take their dark line back after the flash)
 		end
 	end
 end)
