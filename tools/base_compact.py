@@ -21,12 +21,12 @@ from serve import dump  # noqa: E402
 WORLD = os.path.join(HERE, "..", "maps", "world.map")
 
 HALF = 176  # inside: x -176..176, as before (the side walls stay where they were)
-NORTH, SOUTH = -152, 56  # its north edge (the Meadow's south wall) and south edge (was 152)
+NORTH, SOUTH = -152, 72  # its north edge (the Meadow's south wall) and south edge (was 152; 56, then 72 for room between the pens and the training grounds, QM Oct 25)
 WALL = 48  # the outer walls' thickness
 OLD_SOUTH = 152  # (the old south wall, cleared)
 GATE_HALF = 24
 PEN_SIZE, TRAIN_SIZE = 56, 48
-PENS = [(x, 16) for x in (-136, -68, 0, 68, 136)]  # a row along the south wall
+PENS = [(x, 32) for x in (-136, -68, 0, 68, 136)]  # a row along the south wall
 TRAINING = [("Meadow", -140, -112), ("Desert", -140, -52), ("Ice", 140, -112), ("Lava", 140, -52)]
 SPAWN = (0, -72)
 
@@ -57,7 +57,7 @@ def main():
         d |= abs(x) < GATE_HALF and z < sz
         d |= any(abs(z - tz) < 8 and abs(x) < abs(tx) - TRAIN_SIZE / 2 for _, tx, tz in TRAINING)
         d |= abs(x) < 12 and sz < z < 0
-        d |= -28 < z < -12 and abs(x) < 164
+        d |= -28 < z < 4 and abs(x) < 164
         inside = any(abs(x - px) < PEN_SIZE / 2 and abs(z - pz) < PEN_SIZE / 2 for px, pz in PENS)
         inside |= any(abs(x - tx) < TRAIN_SIZE / 2 and abs(z - tz) < TRAIN_SIZE / 2 for _, tx, tz in TRAINING)
         edge = abs(x) > HALF - 4 or z > SOUTH - 4 or (z < NORTH + 4 and abs(x) >= GATE_HALF)
