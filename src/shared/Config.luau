@@ -694,7 +694,6 @@ return {
 				Homing = 220,
 				Size = 0.9,
 				Color = Color3.fromRGB(90, 230, 200),
-				Color2 = Color3.fromRGB(210, 255, 245),
 			},
 		},
 		-- tier 2
@@ -733,9 +732,6 @@ return {
 				Homing = 260,
 				Size = 0.85,
 				Color = Color3.fromRGB(255, 210, 40),
-				Color2 = Color3.fromRGB(255, 250, 170),
-				Sparks = 5,
-				SparkTransparency = 0.35,
 			},
 		},
 		-- tier 3
@@ -751,7 +747,6 @@ return {
 				Splash = 6,
 				Size = 1.2,
 				Color = Color3.fromRGB(40, 120, 255),
-				Color2 = Color3.fromRGB(150, 220, 255),
 			},
 		},
 		Bomb = {
@@ -842,7 +837,6 @@ return {
 				Splash = 8,
 				Size = 1.4,
 				Color = Color3.fromRGB(255, 90, 20),
-				Color2 = Color3.fromRGB(255, 200, 80),
 			},
 		},
 		-- boss-only (super rare): one for each boss in BossPools
@@ -942,7 +936,6 @@ return {
 				Splash = 12,
 				Size = 2.2,
 				Color = Color3.fromRGB(230, 40, 10),
-				Color2 = Color3.fromRGB(255, 170, 60),
 			},
 		},
 	},
@@ -973,9 +966,9 @@ return {
 			TrailLength = 0.12, -- seconds the trail lasts
 		},
 		-- every Magic weapon's Shot starts from these. Every staff fires the same orb (QM, Oct
-		-- 25, after QM's purple orb reference), only recoloured and resized: a white-hot core
-		-- inside a ring of Color, a soft halo of Color2 round it, wispy flares curling over
-		-- it, a faint crackle of electricity, a trail and a few sparkles (client/Shots)
+		-- 25, after QM's purple orb reference), only recoloured and resized, in one Color: a
+		-- core that's always white inside a ring of Color, a fainter halo and haze of Color
+		-- round it, wispy flares curling over it, a trail and a few sparkles (client/Shots)
 		Magic = {
 			Look = "Orb", -- Orb (every staff), Bomb, Petal (boss weapons)
 			Cooldown = 0.7,
@@ -990,14 +983,12 @@ return {
 			HomingCone = 135, -- it only bends toward targets this many degrees either side of its path
 			Launch = 90, -- sets off up to this many degrees either side of the aim, at random (QM)
 			-- the orb's look
-			Color = Color3.fromRGB(150, 60, 255), -- the ring round the core
-			Color2 = Color3.fromRGB(235, 140, 255), -- the halo, flares and trail
-			CoreColor = Color3.fromRGB(255, 255, 255),
+			Color = Color3.fromRGB(150, 60, 255), -- its one colour: the ring, halo, flares and trail (the core is white)
 			CoreSize = 0.55, -- studs (x Size)
 			RingSize = 1, -- studs (x Size)
 			RingTransparency = 0.3,
 			HaloSize = 1.9, -- studs (x Size)
-			HaloTransparency = 0.8,
+			HaloTransparency = 0.8, -- (the same Color, fainter)
 			HazeSize = 2.8, -- a fainter, wider glow past the halo (0: none)
 			HazeTransparency = 0.93,
 			Flares = 3, -- wispy flames curling over the orb
@@ -1005,10 +996,6 @@ return {
 			FlareWidth = 0.45, -- (x Size)
 			FlareSpin = 220, -- degrees a second they turn round it
 			FlareTransparency = 0.25,
-			Sparks = 3, -- little bolts of electricity crackling round it (0: none)
-			SparkReach = 1.3, -- how far out they reach (x Size)
-			SparkTransparency = 0.6, -- faint (QM: a subtle, low opacity crackle)
-			SparkRate = 18, -- times a second they jump to new shapes
 			TrailLength = 0.25, -- seconds
 			TrailWidth = 0.9, -- studs (x Size)
 			Sparkles = 10, -- a second

@@ -7,8 +7,8 @@
 -- (FaceCamera, so it reads from any angle). Every Ranged weapon shoots the same arrow
 -- (QM, Oct 25: its Size and TrailColor differ). Magic is built from its numbers
 -- (Config.Shots.Magic, tunable live): every staff fires the same orb, recoloured and
--- resized (QM): a white core in a ring of colour inside a soft halo, flares curling over
--- it, a faint crackle of electricity, a trail and sparkles. A Bomb is a dark ball with a
+-- resized (QM), in one colour: a white core in a ring of the colour inside a fainter
+-- halo of it, flares curling over it, a trail and sparkles. A Bomb is a dark ball with a
 -- lit fuse. Hits flash a neon ball that swells and fades;
 -- splashes add a flat ring.
 --
@@ -33,7 +33,6 @@ folder.Name = "Shots"
 folder.Parent = workspace
 
 local WHITE = Color3.new(1, 1, 1)
-local rng = Random.new() -- (the sparks' zigzags: only looks, so not seeded)
 local active = {} -- { { shot, model, spin, look, color } }
 
 local function block(model, size, cf, color, props)
@@ -95,7 +94,7 @@ local RAINBOW = ColorSequence.new({
 
 -- a shot's look, as a model whose PrimaryPart is moved each frame (facing -Z = its way).
 -- Returns the drawing: { model, color, spin = { speed, axis } } and, for the orb, its
--- core, flares and sparks to animate
+-- core and flares to animate
 local function build(s)
 	local look = s.Look or "Arrow"
 	local size = s.Size or 1
@@ -151,11 +150,11 @@ local function build(s)
 		d.spin = if look == "Horn" then { speed = 25, axis = "Z" } else { speed = 12, axis = "X" }
 		d.color = if look == "Horn" then WHITE else Color3.fromRGB(255, 220, 90)
 	else
-		-- every staff's orb (QM's purple orb reference, Oct 25), from Config.Shots.Magic:
-		-- glowing balls stacked inside each other (Neon, more see-through the further out),
-		-- so the white core shows through a ring of Color, inside a soft halo and a haze of
-		-- Color2; Beams curling over it for flares; a faint crackle of short zigzag Beams;
-		-- a trail and sparkles. No textures: it's all built-in parts, beams and particles.
+		-- every staff's orb (QM's purple orb reference, Oct 25), from Config.Shots.Magic, in
+		-- one Color: glowing balls stacked inside each other (Neon, more see-through the
+		-- further out), so the always-white core shows through a ring of Color, inside a
+		-- fainter halo and haze of it; Beams curling over it for flares; a trail and
+		-- sparkles. No textures: it's all built-in parts, beams and particles.
 		local function ball(diameter, c, transparency)
 			return block(model, Vector3.one * diameter, CFrame.new(), c, {
 				Shape = Enum.PartType.Ball,
@@ -164,12 +163,12 @@ local function build(s)
 			})
 		end
 		local coreSize = (s.CoreSize or 0.55) * size
-		root = ball(coreSize, s.CoreColor or WHITE, 0)
+		root = ball(coreSize, WHITE, 0)
 		d.core, d.coreSize = root, coreSize
 		ball((s.RingSize or 1) * size, color, s.RingTransparency or 0.3)
-		ball((s.HaloSize or 1.9) * size, color2, s.HaloTransparency or 0.8)
+		ball((s.HaloSize or 1.9) * size, color, s.HaloTransparency or 0.8)
 		if (s.HazeSize or 0) > 0 then
-			ball(s.HazeSize * size, color2, s.HazeTransparency or 0.93)
+			ball(s.HazeSize * size, color, s.HazeTransparency or 0.93)
 		end
 		-- flares: each a Beam from low on one side of the ring, bowing out and up over the
 		-- top to a point further round, wide at its root and tapering to nothing
@@ -183,7 +182,7 @@ local function build(s)
 			beam.FaceCamera = true
 			beam.Segments = 12
 			beam.LightEmission = 1
-			beam.Color = ColorSequence.new(color2, color)
+			beam.Color = ColorSequence.new(color:Lerp(WHITE, 0.4), color)
 			beam.Transparency = NumberSequence.new(s.FlareTransparency or 0.25, 1)
 			beam.Width0 = (s.FlareWidth or 0.45) * size
 			beam.Width1 = 0
@@ -193,36 +192,9 @@ local function build(s)
 		end
 		d.ring, d.flareLength = ring, (s.FlareLength or 1.6) * size
 		d.flareSpin = math.rad(s.FlareSpin or 220)
-		-- sparks: little bolts of three segments, jumping to a new shape SparkRate times a second
-		d.sparks = {}
-		for _ = 1, math.floor(s.Sparks or 0) do
-			local atts, beams = {}, {}
-			for n = 1, 4 do
-				local a = Instance.new("Attachment")
-				a.Parent = root
-				atts[n] = a
-				if n > 1 then
-					local beam = Instance.new("Beam")
-					beam.Attachment0, beam.Attachment1 = atts[n - 1], a
-					beam.FaceCamera = true
-					beam.Segments = 1
-					beam.LightEmission = 1
-					beam.Color = ColorSequence.new(WHITE, color2)
-					beam.Transparency = NumberSequence.new(s.SparkTransparency or 0.6)
-					beam.Width0 = 0.07 * size
-					beam.Width1 = 0.04 * size
-					beam.Parent = root
-					beams[n - 1] = beam
-				end
-			end
-			table.insert(d.sparks, { atts = atts, beams = beams })
-		end
-		d.sparkReach = (s.SparkReach or 1.3) * size
-		d.sparkEvery = 1 / math.max(s.SparkRate or 18, 1)
-		d.sparkClock = 0
-		trail(root, (s.TrailWidth or 0.9) * size, ColorSequence.new(color2, color), s.TrailLength or 0.25, 1)
+		trail(root, (s.TrailWidth or 0.9) * size, ColorSequence.new(color:Lerp(WHITE, 0.4), color), s.TrailLength or 0.25, 1)
 		if (s.Sparkles or 0) > 0 then
-			sparkles(root, color2, (s.SparkleSize or 0.3) * size, s.Sparkles)
+			sparkles(root, color:Lerp(WHITE, 0.4), (s.SparkleSize or 0.3) * size, s.Sparkles)
 		end
 		d.flicker = s.Flicker or 0
 	end
@@ -325,28 +297,6 @@ RunService.RenderStepped:Connect(function(dt)
 			-- (Attachment0's X axis is where the beam bows: out and up)
 			f.a0.CFrame = CFrame.fromMatrix(p0, (out0 + Vector3.yAxis * 0.6).Unit, Vector3.yAxis:Cross(out0).Unit)
 			f.a1.Position = p1
-		end
-		-- (the sparks jump to new zigzags now and then, and some blink out)
-		if a.sparks and #a.sparks > 0 then
-			a.sparkClock -= dt
-			if a.sparkClock <= 0 then
-				a.sparkClock = a.sparkEvery
-				for _, sp in a.sparks do
-					local on = math.random() < 0.75
-					local from = rng:NextUnitVector()
-					local to = (from + rng:NextUnitVector() * 0.8).Unit
-					for n, att in sp.atts do
-						local u = (n - 1) / 3
-						local dir = from:Lerp(to, u).Unit
-						local r = a.ring + (a.sparkReach - a.ring) * u
-						local jitter = if n > 1 and n < 4 then rng:NextUnitVector() * a.ring * 0.35 else Vector3.zero
-						att.Position = dir * r + jitter
-					end
-					for _, beam in sp.beams do
-						beam.Enabled = on
-					end
-				end
-			end
 		end
 		if shot.dead then
 			table.remove(active, i)
