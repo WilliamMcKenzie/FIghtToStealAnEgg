@@ -968,7 +968,7 @@ return {
 		-- every Magic weapon's Shot starts from these. Every staff fires the same orb (QM, Oct
 		-- 25, after QM's purple orb reference), only recoloured and resized, in one Color: a
 		-- core that's always white inside a ring of Color, a fainter halo and haze of Color
-		-- round it, wispy flares curling over it, a trail and a few sparkles (client/Shots)
+		-- round it, wispy flares curling over it, and a trail (client/Shots)
 		Magic = {
 			Look = "Orb", -- Orb (every staff), Bomb, Petal (boss weapons)
 			Cooldown = 0.7,
@@ -998,7 +998,7 @@ return {
 			FlareTransparency = 0.25,
 			TrailLength = 0.25, -- seconds
 			TrailWidth = 0.9, -- studs (x Size)
-			Sparkles = 10, -- a second
+			Sparkles = 0, -- a second (QM: none on the orb)
 			SparkleSize = 0.3,
 			Flicker = 0, -- 0..1: the core jitters in size every frame
 			Spin = 0, -- degrees a second (a bomb's tumble)

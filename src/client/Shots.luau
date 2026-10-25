@@ -162,9 +162,18 @@ local function build(s)
 				Transparency = transparency,
 			})
 		end
+		-- (the middle the rest hangs on: trail and flares)
+		root = block(model, Vector3.one * 0.2, CFrame.new(), WHITE, { Transparency = 1 })
+		-- the core: pure white (QM). Inside the coloured balls it'd be tinted by them, so it's
+		-- drawn outside them instead, on the line from the camera to the orb's middle, just in
+		-- front of the outermost ball and shrunk to look the same size (moved every frame)
 		local coreSize = (s.CoreSize or 0.55) * size
-		root = ball(coreSize, WHITE, 0)
-		d.core, d.coreSize = root, coreSize
+		d.core = block(folder, Vector3.one * coreSize, CFrame.new(), WHITE, {
+			Shape = Enum.PartType.Ball,
+			Material = Enum.Material.Neon,
+		})
+		d.coreSize = coreSize
+		d.front = math.max(s.RingSize or 1, s.HaloSize or 1.9, if (s.HazeSize or 0) > 0 then s.HazeSize else 0) * size / 2 + 0.05
 		ball((s.RingSize or 1) * size, color, s.RingTransparency or 0.3)
 		ball((s.HaloSize or 1.9) * size, color, s.HaloTransparency or 0.8)
 		if (s.HazeSize or 0) > 0 then
@@ -283,9 +292,18 @@ RunService.RenderStepped:Connect(function(dt)
 				else CFrame.Angles(0, 0, t)
 		end
 		a.model:PivotTo(cf)
-		-- (the core jitters in size)
-		if a.flicker and a.flicker > 0 then
-			a.core.Size = Vector3.one * a.coreSize * (1 + (math.random() * 2 - 1) * a.flicker)
+		-- (the white core, in front of the coloured balls as the camera sees them: see build)
+		if a.core then
+			local toCam = workspace.CurrentCamera.CFrame.Position - shot.pos
+			local dist = toCam.Magnitude
+			local k = 1 + (math.random() * 2 - 1) * (a.flicker or 0)
+			if dist > a.front + 0.5 then
+				a.core.CFrame = CFrame.new(shot.pos + toCam.Unit * a.front)
+				a.core.Size = Vector3.one * a.coreSize * k * (dist - a.front) / dist
+			else
+				a.core.CFrame = CFrame.new(shot.pos)
+				a.core.Size = Vector3.one * a.coreSize * k
+			end
 		end
 		-- (the flares turn round the orb, curling up over its top)
 		for _, f in a.flares or {} do
@@ -314,6 +332,9 @@ RunService.RenderStepped:Connect(function(dt)
 				end
 			end
 			Debris:AddItem(a.model, 0.5)
+			if a.core then
+				a.core:Destroy()
+			end
 		end
 	end
 end)
