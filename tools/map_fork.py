@@ -8,6 +8,8 @@ the Ocean Trench (pale blue sand, outcrops of darker blue stone, dark blue stone
 a map already forked.
 
 Run: python3 tools/map_fork.py && python3 tools/map_bake.py maps/world.map
+     python3 tools/map_fork.py --right   (QM, Oct 25: lays the right branch afresh at the sizes
+                                          here, leaving the rest of the map as it is)
 """
 
 import json
@@ -26,13 +28,14 @@ NORTH = -1704  # the grid's north edge
 LAVA_NORTH = -1064  # where QM's corridors leave the old grid
 DUNGEON = dict(x0=-340, x1=-20, south=-1096, north=-1336)
 CASTLE = dict(x0=-340, x1=-20, south=-1368, north=-1656)
-FOREST = dict(x0=20, x1=340, south=-1096, north=-1336)
-OCEAN = dict(x0=20, x1=340, south=-1368, north=-1656)
+# (QM, Oct 25: the right fork's arenas tighter, the Forest Meadow-sized, the Ocean Desert-sized)
+FOREST = dict(x0=20, x1=244, south=-1096, north=-1272)
+OCEAN = dict(x0=56, x1=304, south=-1304, north=-1504)
 CORRIDOR_O = (140, 220)  # (Forest -> Ocean)
 CORRIDOR_1 = (-128, -48)  # (QM's left corridor, carried on north)
 CORRIDOR_R = (52, 136)  # (QM's right corridor)
 WAY = (82, 106)  # the Forest's stone path in
-PLAZA = 64  # the stone plaza's radius, round the Forest's centre
+PLAZA = 44  # the stone plaza's radius, round the Forest's centre
 CORRIDOR_2 = (-220, -140)  # (Dungeon -> Castle)
 RUNNER = (-192, -168)  # the Castle's carpet runner
 RUG = (-228, -132, -1548, -1476)  # x0, x1, north, south: round the boss
@@ -67,17 +70,25 @@ def outcrop(x, z):
     return v > 1.5
 
 
-def main():
+def main(right=False):
+    """Fork the map; or, with `right` (--right), lay the right branch (x >= 0) afresh on a
+    forked map, as its sizes here now say (the left branch and the rest untouched)."""
     d = json.loads(open(PATH).read())
-    if any(a["name"] == "Dungeon" for a in d["areas"]):
-        sys.exit("already forked")
-    used = {t["id"] for t in d["tiles"]}
-    assert not used & {t["id"] for t in TILES}, "tile ids taken"
     cell = d["cell"]
-    west = (d["origin"][0] + EDGE) // cell
-    east = (EDGE - (d["origin"][0] + d["size"][0] * cell)) // cell
-    north = (d["origin"][1] - NORTH) // cell
-    grow(d, west, east, north, 0)
+    if right:
+        assert any(a["name"] == "Forest" for a in d["areas"]), "not forked yet"
+    else:
+        if any(a["name"] == "Dungeon" for a in d["areas"]):
+            sys.exit("already forked (--right lays the right branch afresh)")
+        used = {t["id"] for t in d["tiles"]}
+        assert not used & {t["id"] for t in TILES}, "tile ids taken"
+        west = (d["origin"][0] + EDGE) // cell
+        east = (EDGE - (d["origin"][0] + d["size"][0] * cell)) // cell
+        north = (d["origin"][1] - NORTH) // cell
+        grow(d, west, east, north, 0)
+        d["tiles"] += TILES
+    # (the tiles by key: QM's tabs may have added tiles since)
+    by = {t["key"]: t["id"] for t in d["tiles"] if t["area"] in ("Dungeon", "Castle", "Forest", "Ocean")}
     X0, Z0 = d["origin"]
     rows = [list(r) for r in d["rows"]]
 
@@ -90,35 +101,40 @@ def main():
             break
         for c in range(len(rows[r])):
             x = X0 + c * cell + cell / 2
+            if right and x < 0:
+                continue
             if inside(x, z, DUNGEON) or (CORRIDOR_1[0] <= x < CORRIDOR_1[1] and z >= DUNGEON["south"]):
-                ch = "u" if slate(x, z) else "t"
+                ch = by["DungeonSlate" if slate(x, z) else "DungeonStone"]
             elif inside(x, z, CASTLE) or (CORRIDOR_2[0] <= x < CORRIDOR_2[1] and CASTLE["south"] <= z < DUNGEON["north"]):
                 rug = RUG[0] <= x < RUG[1] and RUG[2] <= z < RUG[3]
                 runner = RUNNER[0] <= x < RUNNER[1] and z >= RUG[2]
-                ch = "x" if rug or runner else "w"
+                ch = by["CastleCarpet" if rug or runner else "CastleFloor"]
             elif inside(x, z, FOREST) or (CORRIDOR_R[0] <= x < CORRIDOR_R[1] and z >= FOREST["south"]):
                 cx, cz = (FOREST["x0"] + FOREST["x1"]) / 2, (FOREST["south"] + FOREST["north"]) / 2
                 plaza = math.hypot(x - cx, z - cz) < PLAZA
                 path = (WAY[0] <= x < WAY[1] and z >= cz) or z >= FOREST["south"]  # (stone in the corridor: grass is a stud above the Lava's magma)
-                ch = "A" if plaza or path else "z"
+                ch = by["ForestStone" if plaza or path else "ForestGrass"]
             elif inside(x, z, OCEAN) or (CORRIDOR_O[0] <= x < CORRIDOR_O[1] and OCEAN["south"] <= z < FOREST["north"]):
-                ch = "D" if outcrop(x, z) else "C"
+                ch = by["OceanStone" if outcrop(x, z) else "OceanSand"]
             elif x >= 0:
-                ch = "B" if z > (FOREST["north"] + OCEAN["south"]) / 2 else "E"
+                ch = by["ForestWall" if z > (FOREST["north"] + OCEAN["south"]) / 2 else "OceanWall"]
             else:
-                ch = "v" if z > (DUNGEON["north"] + CASTLE["south"]) / 2 else "y"
+                ch = by["DungeonWall" if z > (DUNGEON["north"] + CASTLE["south"]) / 2 else "CastleWall"]
             rows[r][c] = ch
     d["rows"] = ["".join(r) for r in rows]
-    d["tiles"] += TILES
-    d["areas"] += [
-        {"name": "Dungeon", "bounds": [DUNGEON["x0"], DUNGEON["south"], DUNGEON["x1"], DUNGEON["north"]], "daisRadius": 44},
-        {"name": "Castle", "bounds": [CASTLE["x0"], CASTLE["south"], CASTLE["x1"], CASTLE["north"]], "daisRadius": 48},
-        {"name": "Forest", "bounds": [FOREST["x0"], FOREST["south"], FOREST["x1"], FOREST["north"]], "daisRadius": 44},
-        {"name": "Ocean", "bounds": [OCEAN["x0"], OCEAN["south"], OCEAN["x1"], OCEAN["north"]], "daisRadius": 48},
-    ]
+    areas = {
+        "Dungeon": {"name": "Dungeon", "bounds": [DUNGEON["x0"], DUNGEON["south"], DUNGEON["x1"], DUNGEON["north"]], "daisRadius": 44},
+        "Castle": {"name": "Castle", "bounds": [CASTLE["x0"], CASTLE["south"], CASTLE["x1"], CASTLE["north"]], "daisRadius": 48},
+        "Forest": {"name": "Forest", "bounds": [FOREST["x0"], FOREST["south"], FOREST["x1"], FOREST["north"]], "daisRadius": 32},
+        "Ocean": {"name": "Ocean", "bounds": [OCEAN["x0"], OCEAN["south"], OCEAN["x1"], OCEAN["north"]], "daisRadius": 36},
+    }
+    if right:
+        d["areas"] = [areas[a["name"]] if a["name"] in ("Forest", "Ocean") else a for a in d["areas"]]
+    else:
+        d["areas"] += list(areas.values())
     open(PATH, "w").write(dump_map(d))
     print("world.map: %d x %d cells, origin %s" % (*d["size"], d["origin"]))
 
 
 if __name__ == "__main__":
-    main()
+    main("--right" in sys.argv)
