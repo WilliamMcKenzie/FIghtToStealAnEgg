@@ -10,7 +10,6 @@ local function rgb(r, g, b)
 end
 
 local WOOD = rgb(117, 71, 34)
-local DARK_WOOD = rgb(78, 48, 26)
 local GOLD = rgb(234, 212, 0)
 local WHITE = rgb(255, 255, 255)
 local IVORY = rgb(246, 236, 210)
@@ -44,18 +43,6 @@ local function model(parts)
 end
 
 local V = Vector3.new
-
--- a staff: a long shaft, two prongs and a glowing gem (or ball) at the top
-local function staff(shaft, prong, gem, ball)
-	return {
-		block(V(0.18, 3.0, 0.18), V(0, 0.5, 0), shaft),
-		block(V(0.12, 0.5, 0.12), V(-0.18, 2.15, 0), prong, 20),
-		block(V(0.12, 0.5, 0.12), V(0.18, 2.15, 0), prong, -20),
-		if ball
-			then block(V(0.5, 0.5, 0.5), V(0, 2.3, 0), gem, 0, { neon = true, shape = "Ball" })
-			else block(V(0.4, 0.4, 0.4), V(0, 2.25, 0), gem, 45, { neon = true }),
-	}
-end
 
 -- the unicorn's horn: a twisting stack, each block narrower and turned a little more
 local horn = { block(V(0.36, 0.5, 0.36), V(0, -0.25, 0), rgb(255, 214, 236)) }
@@ -125,11 +112,6 @@ end
 table.insert(bloom, block(V(0.32, 0.32, 0.16), V(0, 1.2, 0.04), rgb(255, 220, 90), 45, { neon = true }))
 
 return {
-	Staff = model(staff(WOOD, DARK_WOOD, rgb(180, 140, 255), true)),
-	WindStaff = model(staff(rgb(220, 226, 230), rgb(170, 220, 210), rgb(200, 255, 240), true)),
-	LightningStaff = model(staff(rgb(60, 60, 80), rgb(255, 230, 90), rgb(255, 244, 120))),
-	WaterStaff = model(staff(rgb(40, 90, 150), rgb(120, 200, 255), rgb(70, 160, 255), true)),
-	FireStaff = model(staff(WOOD, DARK_WOOD, rgb(255, 130, 40))),
 	Bomb = model({
 		block(V(1.0, 1.0, 1.0), V(0, 0.3, 0), rgb(40, 40, 48), 0, { shape = "Ball" }),
 		block(V(0.3, 0.16, 0.3), V(0, 0.82, 0), rgb(90, 90, 100)),

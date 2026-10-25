@@ -32,6 +32,11 @@ local ShortbowModel = require(script.Parent.ShortbowModel)
 local LongbowModel = require(script.Parent.LongbowModel)
 local NatureBowModel = require(script.Parent.NatureBowModel)
 local BloodBowModel = require(script.Parent.BloodBowModel)
+local StaffModel = require(script.Parent.StaffModel)
+local WindStaffModel = require(script.Parent.WindStaffModel)
+local LightningStaffModel = require(script.Parent.LightningStaffModel)
+local WaterStaffModel = require(script.Parent.WaterStaffModel)
+local FireStaffModel = require(script.Parent.FireStaffModel)
 local WeaponModels = require(script.Parent.WeaponModels)
 
 local Weapons = {}
@@ -60,6 +65,11 @@ local DRAWN = {
 	Longbow = centred(LongbowModel),
 	NatureBow = centred(NatureBowModel),
 	BloodBow = centred(BloodBowModel),
+	Staff = StaffModel,
+	WindStaff = WindStaffModel,
+	LightningStaff = LightningStaffModel,
+	WaterStaff = WaterStaffModel,
+	FireStaff = FireStaffModel,
 }
 
 local STUDS = { image = Studs.IMAGE, tile = 0.5 }
