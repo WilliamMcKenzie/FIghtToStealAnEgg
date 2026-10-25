@@ -4,7 +4,7 @@
 --
 --   Pens.start(map)                       -- once, after Map.ensure()
 --   Pens.of(player) -> the pen Model or nil
---   Pens.addEgg(player, biome, makeEgg)   -- one more egg sat in their pen
+--   Pens.addEgg(player, makeEgg)   -- one more egg sat in their pen (makeEgg() -> its box)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -41,7 +41,7 @@ local function clearEggs(pen)
 	end
 end
 
-function Pens.addEgg(player, biome, makeEgg)
+function Pens.addEgg(player, makeEgg)
 	local pen = Pens.of(player)
 	local area = pen and pen:FindFirstChild("Area")
 	if not area then
@@ -61,7 +61,7 @@ function Pens.addEgg(player, biome, makeEgg)
 	-- (rows of 6, from the back of the pen)
 	local col, row = n % 6, n // 6
 	local half = area.Size.X / 2 - 8
-	local egg = makeEgg(biome)
+	local egg = makeEgg()
 	egg.Anchored = true
 	local floor = area.Position.Y - area.Size.Y / 2 -- (the pen's floor: its Area marker's bottom)
 	egg.CFrame = CFrame.new(

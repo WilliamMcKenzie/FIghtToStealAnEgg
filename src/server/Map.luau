@@ -720,12 +720,13 @@ end
 local function nest(parent, x, z, rng)
 	local model = Instance.new("Model")
 	model.Name = "Nest"
+	local y = MapFile.groundAt(MapData, x, z) -- (on whatever floor it's on)
 	local disc = Instance.new("Part")
 	disc.Name = "Bed"
 	disc.Shape = Enum.PartType.Cylinder
 	disc.Anchored = true
 	disc.Size = Vector3.new(1, 11, 11)
-	disc.CFrame = CFrame.new(x, 0.5, z) * CFrame.Angles(0, 0, math.pi / 2)
+	disc.CFrame = CFrame.new(x, y + 0.5, z) * CFrame.Angles(0, 0, math.pi / 2)
 	disc.Material = Enum.Material.SmoothPlastic
 	disc:SetAttribute("ColorKey", "Straw")
 	disc.Color = color("Straw")
@@ -736,7 +737,7 @@ local function nest(parent, x, z, rng)
 	for i = 1, n do
 		local a = (i + rng:NextNumber(-0.3, 0.3)) / n * 2 * math.pi
 		local r = 5.6 + rng:NextNumber(-0.3, 0.3)
-		local at = CFrame.new(x + math.cos(a) * r, 1.1 + rng:NextNumber(0, 0.5), z + math.sin(a) * r)
+		local at = CFrame.new(x + math.cos(a) * r, y + 1.1 + rng:NextNumber(0, 0.5), z + math.sin(a) * r)
 			* CFrame.Angles(0, -a, 0)
 			* CFrame.Angles(math.rad(rng:NextNumber(-20, 20)), 0, math.rad(rng:NextNumber(-12, 12)))
 		block(
@@ -749,6 +750,7 @@ local function nest(parent, x, z, rng)
 		)
 	end
 	model:SetAttribute("EggX", x)
+	model:SetAttribute("EggY", y + 1) -- (where its egg sits: on the bed)
 	model:SetAttribute("EggZ", z)
 	model.Parent = parent
 	return model
@@ -757,14 +759,19 @@ end
 local function biomeFurniture(parent)
 	local rng = Random.new(1024)
 	for _, area in MapData.Areas do
-		if area.Boss then
+		-- (every biome with nests gets them, boss or not: the nests QM places in the editor)
+		local hasNests = area.Nests and #area.Nests > 0
+		if area.Boss or hasNests then
 			local f = folder(area.Name, parent)
 			local nests = folder("Nests", f)
-			for i, p in area.Nests do
+			for i, p in area.Nests or {} do
 				local n = nest(nests, p[1], p[2], rng)
 				n.Name = "Nest" .. i
 				n:SetAttribute("Biome", area.Name)
 			end
+		end
+		if area.Boss then
+			local f = parent:FindFirstChild(area.Name)
 			local spot = Instance.new("Part")
 			spot.Name = "BossSpot"
 			spot.Anchored, spot.CanCollide, spot.CanQuery, spot.CanTouch = true, false, false, false
@@ -779,17 +786,18 @@ local function biomeFurniture(parent)
 	for _, b in MapData.Barriers do
 		local p = Instance.new("Part")
 		p.Name = "Barrier"
-		-- (a marker: client/Barriers.luau puts a solid red copy here for the players locked
-		-- into either side's fight, so only they see it and bump into it)
+		-- (shown here so it's there to see in Studio, QM Oct 25; client/Barriers hides it for
+		-- everyone and shows it, solid, only to the players locked into either side's fight)
 		p.Anchored = true
-		p.Transparency = 1
+		p.Transparency = 0.1
 		p.CanCollide = false
 		p.CanQuery = false
 		p.CanTouch = false
 		p.Material = Enum.Material.ForceField
 		p.Color = Color3.fromRGB(255, 80, 60)
+		-- (as tall as a region's blocker, from the floor: QM)
 		p.Size = Vector3.new(b[5] or MapData.GateHalf * 2, 40, 6)
-		p.CFrame = CFrame.new(b[3], 18, b[4])
+		p.CFrame = CFrame.new(b[3], MapFile.groundAt(MapData, b[3], b[4]) + 40 / 2 - 0.5, b[4])
 		p:SetAttribute("South", b[1])
 		p:SetAttribute("North", b[2])
 		p.Parent = barriers

@@ -18,28 +18,21 @@ local map = workspace:WaitForChild("Map")
 
 -- ---- the fight's barriers ------------------------------------------------------------
 
-local shown = {} -- local barrier parts
+-- (the barriers are built into the map, visible in Studio: here they start hidden and
+-- only the ones round your fight show, solid for you alone)
 local function barriers()
-	for _, part in shown do
-		part:Destroy()
-	end
-	table.clear(shown)
 	local biome = player:GetAttribute("LockedIn")
 	local markers = map:FindFirstChild("Biomes") and map.Biomes:FindFirstChild("Barriers")
-	if not (biome and markers) then
-		return
-	end
-	for _, marker in markers:GetChildren() do
-		if marker:GetAttribute("South") == biome or marker:GetAttribute("North") == biome then
-			local wall = marker:Clone()
-			wall.Name = "LockedBarrier"
-			wall.CanCollide = true
-			wall.Material = Enum.Material.ForceField
-			wall.Color = RED
+	for _, wall in if markers then markers:GetChildren() else {} do
+		local mine = biome ~= nil and (wall:GetAttribute("South") == biome or wall:GetAttribute("North") == biome)
+		wall.Color = RED
+		wall.Material = Enum.Material.ForceField
+		wall.CanCollide = mine
+		if mine then
 			wall.Transparency = 1
-			wall.Parent = workspace
 			TweenService:Create(wall, TweenInfo.new(0.35), { Transparency = 0.1 }):Play()
-			table.insert(shown, wall)
+		else
+			wall.Transparency = 1
 		end
 	end
 end

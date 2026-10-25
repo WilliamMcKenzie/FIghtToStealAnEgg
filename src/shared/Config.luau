@@ -316,14 +316,21 @@ return {
 	Eggs = {
 		StealTime = 0.6, -- seconds holding E
 		Respawn = 40, -- seconds before a nest lays again
-		Size = Vector3.new(2.6, 3.3, 2.6),
-		Colors = { -- shell, by biome
-			Meadow = Color3.fromRGB(250, 246, 232),
-			Desert = Color3.fromRGB(240, 206, 140),
-			Ice = Color3.fromRGB(190, 226, 255),
-			Lava = Color3.fromRGB(255, 120, 40),
+		-- (QM, Oct 25: real eggs, LassoAPet's, one per animal: Shared/Eggs/<Kind>EggModel)
+		-- each nest lays one of its biome's kinds at random
+		Kinds = {
+			Meadow = { "Pig", "Bunny", "Fox", "Horse" },
+			Desert = { "Cactus", "Scorpion", "Scarab", "Sandworm" },
+			Ice = { "Penguin", "Snowman", "IceGolem", "Icebringer" },
+			Lava = { "RockHog", "VolcanoTortoise", "Firebird", "FireLobster" },
+			Dungeon = { "SkeletonDog", "Ghost", "Bat", "Beholder" },
+			Castle = { "Werewolf", "BlackCat", "ZombieBear", "Kitsune" },
+			Forest = { "Unicorn", "WispWolf", "ToadstoolFrog", "SwollFairy" },
+			Ocean = { "Clownfish", "Squid", "Starfish", "Kraken" },
 		},
-		Reward = { Meadow = 100, Desert = 600, Ice = 3000, Lava = 15000 },
+		Scale = { Nest = 1.3, Carried = 0.6, Pen = 0.9 }, -- times the egg's drawing (about 4 studs tall)
+		Twitch = { 3, 8 }, -- seconds between an egg's AFK twitches (random in this range)
+		Reward = { Meadow = 100, Desert = 600, Ice = 3000, Lava = 15000, Dungeon = 60000, Forest = 60000, Castle = 250000, Ocean = 250000 },
 		PenShows = 24, -- most eggs sat in a pen
 	},
 
