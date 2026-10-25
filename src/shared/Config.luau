@@ -9,9 +9,9 @@ return {
 	AnimalScale = {},
 	StudTransparency = 0.5, -- every stud Texture (floor, walls, sword, horse): 0.5 = half strength (QM, Oct 24)
 
-	-- the horse everyone rides (Animals/Horse.luau): its size, times the Blockbench drawing
+	-- the horse everyone starts on (Animals/Horse.luau): its size, times the Blockbench drawing
+	-- (every pet's speed: its rarity's, PetStats below)
 	HorseSize = 0.6,
-	RideSpeed = 25.6, -- studs/s riding: Roblox's default 16 x 1.6 (QM, Oct 23)
 
 	-- every world colour, by the ColorKey attribute on the parts (and checker Textures)
 	-- that wear it. Live-tunable in Play through workspace.WorldColors (Shared/WorldColors).
@@ -380,17 +380,18 @@ return {
 		StealTime = 0.6, -- seconds holding E
 		Respawn = 40, -- seconds before a nest lays again
 		-- (QM, Oct 25: real eggs, LassoAPet's: Shared/Eggs/<Kind>EggModel, one per animal.)
-		-- Each nest lays one of its biome's kinds at random; the Horse is the only animal
-		-- so far, so it's every biome's egg. A new animal: its egg model, then its name here.
+		-- Each nest lays one of its biome's kinds, by these weights (LassoAPet's spawn odds:
+		-- each biome's Herd there). A new animal: its egg model, Pets above, then here.
+		-- The biomes past the Tundra are still to come (QM): Horse eggs until then.
 		Kinds = {
-			Meadow = { "Horse" },
-			Desert = { "Horse" },
-			Ice = { "Horse" },
-			Lava = { "Horse" },
-			Dungeon = { "Horse" },
-			Castle = { "Horse" },
-			Forest = { "Horse" },
-			Ocean = { "Horse" },
+			Meadow = { Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
+			Desert = { Cactus = 0.3, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
+			Ice = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, Icebringer = 0.02 },
+			Lava = { Horse = 1 },
+			Dungeon = { Horse = 1 },
+			Castle = { Horse = 1 },
+			Forest = { Horse = 1 },
+			Ocean = { Horse = 1 },
 		},
 		Scale = { Nest = 1.3, Carried = 0.6, Pen = 0.9 }, -- times the egg's drawing (about 4 studs tall)
 		Twitch = { 3, 8 }, -- seconds between an egg's AFK twitches (random in this range)
@@ -423,7 +424,58 @@ return {
 		Legendary = { Fill = Color3.fromRGB(255, 214, 94), Stroke = Color3.fromRGB(122, 74, 0) },
 		Mythic = { Fill = Color3.fromRGB(255, 122, 156), Stroke = Color3.fromRGB(110, 10, 42) },
 	},
-	AnimalRarity = { Horse = "Common" }, -- (the animal you ride; its name shows over you in its rarity's colours)
+
+	-- pets (QM, Oct 25: LassoAPet's, with their rarity, cash a second and egg odds). The
+	-- pet you ride is all your health and speed (Shared/Pets works them out, PetStats
+	-- below); its name shows over you in its rarity's colours (Rarities above).
+	--   Rarity  its rarity
+	--   Cash    cash a second it earns (LassoAPet's PetIncome, the Tundra's after its
+	--           income curve; not paid out yet: nothing hatches so far)
+	--   Tier    its size tier (LassoAPet's PetTiers): 1 reads as big as the Horse, each
+	--           tier PetStats.TierGrowth x bigger
+	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
+	--           (a guess from how fast each ran in LassoAPet)
+	Pets = {
+		Horse = { Rarity = "Common", Cash = 3, Tier = 1, Lean = 0 },
+		-- Meadow
+		Pig = { Rarity = "Uncommon", Cash = 9, Tier = 1, Lean = 0.5 },
+		Bunny = { Rarity = "Uncommon", Cash = 12, Tier = 1, Lean = -0.6 },
+		Pinto = { Rarity = "Uncommon", Cash = 15, Tier = 1, Lean = -0.2 },
+		Fish = { Rarity = "Rare", Cash = 24, Tier = 1, Lean = 0.6 },
+		Rhino = { Rarity = "Epic", Cash = 90, Tier = 2, Lean = 0.6 },
+		Unicorn = { Rarity = "Legendary", Cash = 450, Tier = 2, Lean = -0.4 },
+		-- Desert
+		Cactus = { Rarity = "Uncommon", Cash = 18, Tier = 1, Lean = 0.2 },
+		Scorpion = { Rarity = "Rare", Cash = 60, Tier = 1, Lean = 0 },
+		Sandworm = { Rarity = "Epic", Cash = 180, Tier = 2, Lean = 0.5 },
+		SpineLizard = { Rarity = "Epic", Cash = 240, Tier = 2, Lean = -0.5 },
+		Snake = { Rarity = "Legendary", Cash = 750, Tier = 3, Lean = -0.3 },
+		-- Tundra
+		Penguin = { Rarity = "Uncommon", Cash = 45, Tier = 1, Lean = 0.3 },
+		Boar = { Rarity = "Uncommon", Cash = 91, Tier = 1, Lean = -0.2 },
+		Snowman = { Rarity = "Rare", Cash = 180, Tier = 1, Lean = 0.4 },
+		IceGolem = { Rarity = "Epic", Cash = 760, Tier = 2, Lean = 0.4 },
+		SnackYak = { Rarity = "Epic", Cash = 9000, Tier = 2, Lean = 0.5 }, -- (a Robux pet in LassoAPet: in no egg)
+		Icebringer = { Rarity = "Legendary", Cash = 2000, Tier = 3, Lean = 0.2 },
+	},
+	-- a pet's health and speed (Shared/Pets): set by its rarity, not its biome (QM, Oct 25:
+	-- they're mostly a status signal; later biomes' pets earn more, not fight better).
+	-- Within a rarity, more health means less speed (Lean), and a bigger body is easier to
+	-- hit, so it gets more health: x (its hitbox / the Horse's) ^ Hitbox. Its hitbox is
+	-- half its footprint (the square root of its box's width x length), in studs.
+	PetStats = {
+		Rarity = {
+			Common = { Health = 100, Speed = 25.6 }, -- (the Horse: Roblox's default 16 x 1.6, QM Oct 23)
+			Uncommon = { Health = 115, Speed = 26.9 },
+			Rare = { Health = 130, Speed = 28.2 },
+			Epic = { Health = 150, Speed = 29.6 },
+			Legendary = { Health = 175, Speed = 31 },
+			Mythic = { Health = 200, Speed = 32.5 },
+		},
+		Lean = 0.25, -- Lean 1: +25% health, -25% speed (Lean -1 the other way)
+		Hitbox = 0.5, -- 0: size doesn't matter; 1: twice the hitbox, twice the health
+		TierGrowth = 1.6, -- each size tier reads this much bigger than the one below (LassoAPet's)
+	},
 
 	-- regions (QM, Oct 25): each biome past the Meadow is bought with cash. Until you own
 	-- it, its gate shows a blocker only you see (client/Regions: a navy wall with its name,

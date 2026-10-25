@@ -2,7 +2,8 @@
 -- The shape, bones and animations come from QM's Blockbench model
 -- (designs/Horse.bbmodel), converted into Animals/HorseModel.luau by
 --   python3 tools/bbmodel_to_luau.py --zyx designs/Horse.bbmodel src/shared/Animals/HorseModel.luau
--- Units are studs; the horse faces -Z. Its size is Config.HorseSize times the drawing.
+-- Units are studs; the horse faces -Z. Its size is Config.HorseSize times the drawing
+-- (every other pet is sized to read as big as it, a tier up bigger: tierSize below).
 --
 --   local horse = Horse.new()
 --   horse.model.Parent = workspace
@@ -68,13 +69,52 @@ end
 
 local Horse = {} -- the methods every variant shares
 
+-- A model's box at its own size, in studs (x wide, y tall, z long).
+local function extent(data)
+	local lo, hi = Vector3.one * math.huge, -Vector3.one * math.huge
+	for _, part in data.parts do
+		if not part.hidden then
+			local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = part.cframe:GetComponents()
+			local h = part.size / 2
+			local e = Vector3.new(
+				math.abs(r00) * h.X + math.abs(r01) * h.Y + math.abs(r02) * h.Z,
+				math.abs(r10) * h.X + math.abs(r11) * h.Y + math.abs(r12) * h.Z,
+				math.abs(r20) * h.X + math.abs(r21) * h.Y + math.abs(r22) * h.Z
+			)
+			local c = Vector3.new(x, y, z)
+			lo, hi = lo:Min(c - e), hi:Max(c + e)
+		end
+	end
+	return hi - lo
+end
+
+-- How big a model reads: the square root of its box's two biggest sides multiplied (so a
+-- long snake and a tall cactus compare fairly; LassoAPet's sizing).
+local function silhouette(data)
+	local d = extent(data)
+	local sides = { d.X, d.Y, d.Z }
+	table.sort(sides)
+	return math.sqrt(sides[2] * sides[3])
+end
+
+-- A pet's size from its model (QM, Oct 25: LassoAPet's tiers): a tier 1 pet reads as big
+-- as the Horse at Config.HorseSize, each tier up Config.PetStats.TierGrowth x the one below.
+local HORSE_READS = Config.HorseSize * silhouette(HorseModel)
+local function tierSize(name, data)
+	local pet = Config.Pets[name]
+	local tier = pet and pet.Tier or 1
+	local size = HORSE_READS * Config.PetStats.TierGrowth ^ (tier - 1) / silhouette(data)
+	return math.round(size * 100) / 100 -- (one template per animal: Rig caches by size)
+end
+
 -- A kind of animal: its own model data and rarity, Horse's methods.
 -- points (optional): { seat = Vector3, neck = { center = Vector3, radius = number },
 -- seatOnNeck = true (the seat rides on the neck bone, e.g. a squid's mantle, which
 -- its run swings about: the rider moves with it but stays upright),
 -- seatBone = bone name (the same, on any bone: the Loong's saddle is on its chest,
 -- which its slither swings about),
--- size = number (the whole animal scaled from its model; by default Config.HorseSize), gallopOnSprint = true (its gallop only while it's ridden
+-- size = number (the whole animal scaled from its model; by default sized to its tier,
+-- Config.Pets), gallopOnSprint = true (its gallop only while it's ridden
 -- at a sprint, its walk otherwise) }
 local function variant(name, data, rarity, points)
 	points = points or {}
@@ -90,7 +130,7 @@ local function variant(name, data, rarity, points)
 		gallopOnly = points.gallopOnly, -- never walks: gallops whenever it moves (QM, Oct 23)
 		neckLoop = points.neck or NECK_LOOP,
 		-- (x Config.AnimalScale: how big it looks, QM, Oct 11)
-		size = (points.size or Config.HorseSize) * (Config.AnimalScale[name] or 1),
+		size = (points.size or tierSize(name, data)) * (Config.AnimalScale[name] or 1),
 	}, { __index = Horse })
 	class.__index = class
 
@@ -280,4 +320,5 @@ end
 
 local Common = variant("Horse", HorseModel, "Common", { gallopOnly = true })
 Common.variant = variant
+Common.extent = extent
 return Common

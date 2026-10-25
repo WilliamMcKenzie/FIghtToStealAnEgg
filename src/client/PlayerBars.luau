@@ -1,16 +1,17 @@
 -- Over every player (QM, Oct 25): the name of the animal they ride, coloured by its rarity
--- (Config.Rarities, Config.AnimalRarity), and their health as QM's little green bar
+-- (Config.Rarities, its Config.Pets rarity), and their health as QM's little green bar
 -- (assets/ui/HpBack.png under HpFill.png, the fill cut from the right as they're hurt).
 -- Roblox's own name and health over characters is turned off.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Pets = require(Shared:WaitForChild("Pets"))
 
 local FILL, BACK = "rbxassetid://90275415984527", "rbxassetid://133695040857929"
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
-local ANIMAL = "Horse" -- (everyone rides the Horse for now)
 
 local function attach(character)
 	local humanoid = character:WaitForChild("Humanoid", 10)
@@ -31,19 +32,30 @@ local function attach(character)
 	gui.MaxDistance = 120
 	gui.LightInfluence = 0
 	-- the animal's name
-	local rarity = Config.Rarities[Config.AnimalRarity[ANIMAL] or "Common"] or Config.Rarities.Common
 	local name = Instance.new("TextLabel")
 	name.BackgroundTransparency = 1
 	name.Size = UDim2.fromScale(1, 0.55)
 	name.FontFace = FONT
 	name.TextScaled = true
-	name.Text = ANIMAL
-	name.TextColor3 = rarity.Fill
 	local stroke = Instance.new("UIStroke")
-	stroke.Color = rarity.Stroke
 	stroke.LineJoinMode = Enum.LineJoinMode.Round
 	stroke.Parent = name
 	name.Parent = gui
+	local player = Players:GetPlayerFromCharacter(character)
+	local function pet()
+		local stats = Pets.stats(player and player:GetAttribute("Pet") or "Horse")
+		local rarity = Config.Rarities[stats.Rarity] or Config.Rarities.Common
+		name.Text = stats.Name
+		name.TextColor3 = rarity.Fill
+		stroke.Color = rarity.Stroke
+	end
+	pet()
+	if player then
+		local changed = player:GetAttributeChangedSignal("Pet"):Connect(pet)
+		gui.Destroying:Connect(function()
+			changed:Disconnect()
+		end)
+	end
 	-- the health bar (216 x 18 art)
 	local bar = Instance.new("Frame")
 	bar.BackgroundTransparency = 1

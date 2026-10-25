@@ -18,6 +18,7 @@ local RunService = game:GetService("RunService")
 local CollectionService = game:GetService("CollectionService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Pets = require(ReplicatedStorage.Shared:WaitForChild("Pets"))
 local Bosses = require(script.Parent.Bosses)
 local Map = require(script.Parent.Map)
 local Pens = require(script.Parent.Pens)
@@ -32,9 +33,20 @@ local carried = {} -- [player] = egg part on their back
 -- in your pen. The box is the egg's size, its bottom face on the ground.
 local EGG_HEIGHT = 4 -- studs, an egg's drawing at scale 1 (about)
 
+-- a nest's egg: one of its biome's kinds, by their weights (Config.Eggs.Kinds)
 function Eggs.kindFor(biome)
-	local kinds = Config.Eggs.Kinds[biome]
-	return if kinds and #kinds > 0 then kinds[math.random(#kinds)] else "Horse"
+	local total = 0
+	for _, weight in Config.Eggs.Kinds[biome] or {} do
+		total += weight
+	end
+	local roll = math.random() * total
+	for kind, weight in Config.Eggs.Kinds[biome] or {} do
+		roll -= weight
+		if weight > 0 and roll <= 0 then
+			return kind
+		end
+	end
+	return "Horse"
 end
 
 function Eggs.make(biome, kind, scale)
@@ -98,7 +110,7 @@ local function lay(nest, biome)
 	egg.CFrame = CFrame.new(x, y + egg.Size.Y / 2, z) * CFrame.Angles(0, math.random() * math.pi * 2, 0)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Steal"
-	prompt.ObjectText = kind:gsub("(%l)(%u)", "%1 %2") .. " Egg"
+	prompt.ObjectText = Pets.name(kind) .. " Egg"
 	prompt.HoldDuration = Config.Eggs.StealTime
 	prompt.MaxActivationDistance = 14
 	prompt.RequiresLineOfSight = false

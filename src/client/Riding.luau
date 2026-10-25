@@ -1,4 +1,5 @@
--- Everyone is always riding their horse (QM, Oct 23).
+-- Everyone is always riding their pet (QM, Oct 23; the player attribute Pet, the Horse to
+-- start: Shared/Pets. A new pet swaps in under you). Also passes /ride <pet> to the server.
 --
 -- The character still walks with its normal Humanoid (so movement, collisions and the
 -- sword all work as before); the horse is a client-side model under it, and the rider
@@ -17,9 +18,10 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Horse = require(Shared.Animals.Horse)
+local Pets = require(Shared.Pets)
 
 local Riding = {}
 
@@ -35,7 +37,12 @@ local LEGS = {
 }
 local HIP_UP = 0.35 -- the LowerTorso's centre sits this far above the seat
 
-local mounts = {} -- [character] = { horse, root, humanoid, joint, legs, yaw }
+local mounts = {} -- [character] = { horse, kind, root, humanoid, joint, legs, yaw }
+
+local function petOf(character)
+	local player = Players:GetPlayerFromCharacter(character)
+	return player and player:GetAttribute("Pet") or "Horse"
+end
 
 local function rest(joint)
 	-- (the frame the joint's Part1 hangs from, and Part1's own joint offset)
@@ -71,10 +78,11 @@ local function mount(character)
 	if character == Players.LocalPlayer.Character then
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 	end
-	local horse = Horse.new()
-	horse.model.Name = character.Name .. "Horse"
+	local kind = petOf(character)
+	local horse = Pets.class(kind).new()
+	horse.model.Name = character.Name .. kind
 	horse.model.Parent = workspace
-	local m = { horse = horse, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil }
+	local m = { horse = horse, kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil }
 	mounts[character] = m
 	return m
 end
@@ -103,6 +111,14 @@ RunService.PreSimulation:Connect(function(dt)
 		if not character.Parent or m.humanoid.Health <= 0 or not m.root.Parent then
 			dismount(character)
 			continue
+		end
+		local kind = petOf(character)
+		if kind ~= m.kind then
+			-- (a new pet: swapped in under the rider, nothing else changes)
+			m.horse.model:Destroy()
+			m.horse, m.kind = Pets.class(kind).new(), kind
+			m.horse.model.Name = character.Name .. kind
+			m.horse.model.Parent = workspace
 		end
 		local root, horse = m.root, m.horse
 
@@ -140,6 +156,18 @@ RunService.PreSimulation:Connect(function(dt)
 		for _, leg in m.legs do
 			leg.joint.Transform = leg.pose
 		end
+	end
+end)
+
+-- /ride <pet> (TextChatService runs a command's Triggered where it's typed: pass it on)
+task.spawn(function()
+	local commands = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
+	local command = commands:WaitForChild("RideCommand", 10)
+	local request = ReplicatedStorage:WaitForChild("RideRequest", 10)
+	if command and request then
+		command.Triggered:Connect(function(_source, text)
+			request:FireServer(text)
+		end)
 	end
 end)
 

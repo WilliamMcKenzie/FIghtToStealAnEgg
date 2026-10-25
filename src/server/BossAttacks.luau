@@ -15,13 +15,18 @@
 --         after Windup.
 --
 -- Only players locked into its fight (LockedIn = its biome) are hit, so someone passing
--- through is never caught. All of it is server parts in workspace.BossFx.
+-- through is never caught. All of it is server parts in workspace.BossFx. A pet bigger
+-- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Pets = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pets"))
+local HORSE_HITBOX = Pets.stats("Horse").Hitbox
 
 local BossAttacks = {}
 
@@ -44,7 +49,9 @@ local function fighters(biome)
 			local root = character and character:FindFirstChild("HumanoidRootPart")
 			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 			if root and humanoid and humanoid.Health > 0 then
-				table.insert(out, { root = root, humanoid = humanoid })
+				-- extra: how much further its pet's hitbox reaches than the Horse's
+				local extra = Pets.stats(player:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
+				table.insert(out, { root = root, humanoid = humanoid, extra = extra })
 			end
 		end
 	end
@@ -98,7 +105,7 @@ local function circle(biome, centre, radius, windup, damage)
 		:Play()
 	task.delay(windup, function()
 		for _, f in fighters(biome) do
-			if flat(f.root.Position - centre).Magnitude <= radius + 1 then
+			if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra then
 				f.humanoid:TakeDamage(damage)
 			end
 		end
@@ -168,7 +175,7 @@ function BossAttacks.update(body, b, dt, list)
 			-- too close and it hurts: everyone within Reach of its edge, every Every seconds
 			local hit = false
 			for _, f in list do
-				if flat(f.root.Position - pos).Magnitude - b.c.Radius <= a.Reach then
+				if flat(f.root.Position - pos).Magnitude - b.c.Radius - f.extra <= a.Reach then
 					f.humanoid:TakeDamage(a.Damage)
 					hit = true
 				end
@@ -218,7 +225,7 @@ RunService.Heartbeat:Connect(function(dt)
 		s.travelled += step
 		local hit = false
 		for _, f in fighters(s.biome) do
-			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + 1.5 then
+			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + 1.5 + f.extra then
 				f.humanoid:TakeDamage(s.damage)
 				hit = true
 				break

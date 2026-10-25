@@ -1,12 +1,13 @@
 -- Wading (QM, Oct 24): a biome's liquid tiles (water, magma; Map marks their parts Liquid)
 -- sink you a little (their beds sit Config.Map.LiquidSink under the surface) and slow
--- you to Config.Map.LiquidSlow of your speed while you're in them.
+-- you to Config.Map.LiquidSlow of your speed (your pet's, Shared/Pets) while you're in them.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Pets = require(ReplicatedStorage.Shared:WaitForChild("Pets"))
 
 local player = Players.LocalPlayer
 local params = RaycastParams.new()
@@ -31,9 +32,10 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 	local hit = workspace:Raycast(root.Position, Vector3.new(0, -40, 0), params)
 	local now = hit ~= nil and hit.Instance:GetAttribute("Liquid") == true
-	if now ~= wading then
+	local speed = Pets.stats(player:GetAttribute("Pet") or "Horse").Speed * (if now then Config.Map.LiquidSlow else 1)
+	if now ~= wading or math.abs(humanoid.WalkSpeed - speed) > 0.01 then -- (or a new pet)
 		wading = now
-		humanoid.WalkSpeed = Config.RideSpeed * (if now then Config.Map.LiquidSlow else 1)
+		humanoid.WalkSpeed = speed
 	end
 end)
 

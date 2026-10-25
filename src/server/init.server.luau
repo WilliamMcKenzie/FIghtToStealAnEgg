@@ -1,7 +1,8 @@
 -- Readies the map (Server/Map: the one baked into the place) and starts what runs on
 -- it: pens, eggs and the bosses' fights, the training grounds. Gives every player the
 -- sword, relays slashes so other players see them (and lets them hit bosses, mobs and
--- dummies: Server/Combat), and spawns a boss on /boss.
+-- dummies: Server/Combat), and spawns a boss on /boss. Your pet (player attribute Pet,
+-- the Horse to start) is all your health and speed (Shared/Pets); /ride <pet> swaps it.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,6 +11,7 @@ local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Pets = require(Shared.Pets)
 local SlashTuning = require(Shared.SlashTuning)
 local Sword = require(Shared.Weapons.Sword)
 local WorldColors = require(Shared.WorldColors)
@@ -54,25 +56,39 @@ for _, player in Players:GetPlayers() do
 	end
 end
 
--- Everyone rides (client/Riding.luau): horse speed, and no jumping
+-- Everyone rides (client/Riding.luau): their pet's health and speed (QM, Oct 25: nothing
+-- else adds to them), and no jumping
 local function ride(character)
+	local player = Players:GetPlayerFromCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
-	humanoid.WalkSpeed = Config.RideSpeed
+	local pet = Pets.stats(player and player:GetAttribute("Pet") or "Horse")
+	local hurt = humanoid.MaxHealth - humanoid.Health -- (a swap mid-fight keeps your damage)
+	humanoid.MaxHealth = pet.Health
+	humanoid.Health = math.max(1, pet.Health - hurt)
+	humanoid.WalkSpeed = pet.Speed -- (client/Liquid slows it in water)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss -- (below)
+local requestBoss, reboss, swapPet -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your slash's damage (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
 	player:SetAttribute("Cash", player:GetAttribute("Cash") or 0)
+	player:SetAttribute("Pet", player:GetAttribute("Pet") or "Horse")
 	player.CharacterAdded:Connect(ride)
+	player:GetAttributeChangedSignal("Pet"):Connect(function()
+		if player.Character then
+			ride(player.Character)
+		end
+	end)
 	-- (/boss typed in chat also works when the place uses the legacy chat)
 	player.Chatted:Connect(function(message)
 		if message:lower():match("^/reboss") then
 			reboss(player)
 		elseif message:lower():match("^/boss") then
 			requestBoss(player)
+		elseif message:lower():match("^/ride") then
+			swapPet(player, message)
 		end
 	end)
 	if player.Character then
@@ -168,6 +184,34 @@ local rebossRequest = Instance.new("RemoteEvent")
 rebossRequest.Name = "RebossRequest"
 rebossRequest.Parent = ReplicatedStorage
 rebossRequest.OnServerEvent:Connect(reboss)
+
+-- /ride <pet>: ride that pet (QM, Oct 25: for trying the pets out until hatching comes),
+-- "/ride" alone lists them. The game's owner, or anyone in a Studio playtest.
+function swapPet(player, message)
+	if not mayReboss(player) then
+		return
+	end
+	local want = (message:match("^/%a+%s+(.-)%s*$") or ""):lower():gsub("%s", "")
+	for _, kind in Pets.kinds() do
+		if kind:lower() == want then
+			player:SetAttribute("Pet", kind)
+			return
+		end
+	end
+	print("/ride one of: " .. table.concat(Pets.kinds(), ", "))
+end
+local rideCommand = Instance.new("TextChatCommand")
+rideCommand.Name = "RideCommand"
+rideCommand.TriggerText = "/ride"
+rideCommand.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
+local rideRequest = Instance.new("RemoteEvent")
+rideRequest.Name = "RideRequest"
+rideRequest.Parent = ReplicatedStorage
+rideRequest.OnServerEvent:Connect(function(player, message)
+	if typeof(message) == "string" and #message < 100 then
+		swapPet(player, message)
+	end
+end)
 
 Players.PlayerRemoving:Connect(function(player)
 	last[player] = nil
