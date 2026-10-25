@@ -59,7 +59,7 @@ local function spawnMob(name, x, z, half)
 		if not mobs[body] or not Training.unlocked(player, name) then
 			return
 		end
-		Combat.train(player, g.Strength, g)
+		Combat.train(player, damage, g.Strength)
 		local health = math.max(0, body:GetAttribute("Health") - damage)
 		body:SetAttribute("Health", health)
 		if health <= 0 then
@@ -87,8 +87,8 @@ local function dummyTarget(model)
 	body:SetAttribute("Dummy", true)
 	body.Parent = folder
 	local wobbling = false
-	Combat.add(body, function(player)
-		Combat.train(player, Config.Training.Grounds.Dummies.Strength, Config.Training.Grounds.Dummies)
+	Combat.add(body, function(player, damage)
+		Combat.train(player, damage, Config.Training.Grounds.Dummies.Strength)
 		local character = player.Character
 		if wobbling or not character then
 			return

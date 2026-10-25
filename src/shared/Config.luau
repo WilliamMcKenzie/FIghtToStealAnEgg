@@ -229,11 +229,11 @@ return {
 	-- bosses (server/Bosses.luau, client/BossView.luau). Each biome's sleeps in its arena's
 	-- middle until someone steals one of its eggs or hits it (Server/Eggs); /boss spawns a
 	-- Chicken in front of you. Model is a module in Shared/Animals (<Model>Model.luau),
-	-- Size times its Blockbench drawing. Strength is what each hit on it trains (its biome's
-	-- training ground's band applies: Config.Training). Health (QM, Oct 25): Mother Hen is
+	-- Size times its Blockbench drawing. Strength is what each hit on it trains (x the damage
+	-- you dealt: Config.Training). Health (QM, Oct 25): Mother Hen is
 	-- 20 Sword hits at 0 Strength and 5 at 1,000 (Config.Power); each later boss takes 20,
 	-- 30, 40, 50 Sword hits at the Strength you'd have reaching it: Meadow's at 0, Cactus
-	-- Boss at 2,000 (Meadow outgrown), Elder Boar at 18,000, Lava Wyrm at 140,000.
+	-- Boss at 2,000, Elder Boar at 18,000, Lava Wyrm at 140,000.
 	Bosses = {
 		Chicken = {
 			Model = "Chicken",
@@ -254,7 +254,7 @@ return {
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 11,
 			Turn = 4,
-			Strength = 1,
+			Strength = 2,
 			Respawn = 20, -- seconds after it dies before it's back asleep on its dais
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -271,7 +271,7 @@ return {
 			StopAt = 1,
 			Radius = 9,
 			Turn = 3.5,
-			Strength = 1,
+			Strength = 2,
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
@@ -286,7 +286,7 @@ return {
 			StopAt = 1,
 			Radius = 8,
 			Turn = 4,
-			Strength = 1,
+			Strength = 2,
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
@@ -301,7 +301,7 @@ return {
 			StopAt = 1,
 			Radius = 9,
 			Turn = 4,
-			Strength = 1,
+			Strength = 2,
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
@@ -316,7 +316,7 @@ return {
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 13,
 			Turn = 3.5,
-			Strength = 4,
+			Strength = 6,
 			Respawn = 25,
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -333,7 +333,7 @@ return {
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 12,
 			Turn = 3,
-			Strength = 15,
+			Strength = 20,
 			Respawn = 30,
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -350,7 +350,7 @@ return {
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 10,
 			Turn = 2.5,
-			Strength = 50,
+			Strength = 60,
 			Respawn = 35,
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -517,36 +517,24 @@ return {
 	},
 
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
-	-- trains the enemy's Strength (a boss trains its biome's ground's, below). The training
-	-- grounds at the south of the base, one per biome, are fenced off until bought with
-	-- cash (a rebirth will lock them again); their mobs wander and come back Respawn
-	-- seconds after they fall, for AFK training (RuneScape's sand crabs).
-	--
-	-- Pacing (QM, Oct 25: you outgrew everything in seconds). Each ground has a band of
-	-- Strength it's for, Need up to Outgrow. Inside the band every hit trains its full
-	-- Strength; below Need you're flailing, (yours / Need) ^ Under of it; past Outgrow it's
-	-- too easy, (Outgrow / yours) ^ Over of it. Every hit still trains at least Floor
-	-- (QM, Oct 25: a too-hard ground looked broken), the dummies' rate. Each Need is the ground before's Outgrow, so
-	-- the next ground only pays once you've done the last. Training counts once every Every
-	-- seconds however many things a swing or volley hits (so 200 hits a minute, the sword's
-	-- pace; a Dagger or a splash doesn't train faster).
-	-- Target AFK times, non-stop swinging, before any rebirth (each rebirth trains
-	-- StrengthBonus more, so these shrink: 2/3 of them after one):
-	--   Dummies    0 ->       200 at  1/hit    1 min
-	--   Meadow   200 ->     2,000 at  1/hit    9 min
-	--   Desert 2,000 ->    18,000 at  4/hit   20 min
-	--   Tundra 18,000 ->  140,000 at 15/hit   41 min
-	--   Lava  140,000 -> 1,000,000 at 50/hit  86 min   (about 2.5 hours in all)
-	-- To retune a ground: minutes = (Outgrow - Need) / Strength / 200.
-	-- A mob's Health is about 6 Sword hits at its ground's Need (4 by its Outgrow).
+	-- trains the damage it dealt x the enemy's Strength x PerDamage (QM, Oct 25), so it
+	-- grows with your damage, and your damage grows with it on Config.Power's log curve.
+	-- The training grounds at the south of the base, one per biome, are fenced off until
+	-- bought with cash (a rebirth will lock them again); their mobs wander and come back
+	-- Respawn seconds after they fall, for AFK training (RuneScape's sand crabs).
+	-- Rough AFK times from 0 Strength with the Sword, swinging non-stop on one ground:
+	--             to 1K     10K     100K     1M
+	--   Dummies  1.3 min   8 min    56 min   7 h
+	--   Meadow   0.7       4        28       3.5 h
+	--   Desert   0.3       1.6      11       83 min
+	--   Tundra   0.1       0.5      4        28 min
+	--   Lava     -         0.2      1.2      9 min
+	-- A mob's Health is about 6 Sword hits for the Strength you'd have arriving there.
 	Training = {
-		Every = 0.3, -- seconds: at most one training hit this often
-		Under = 1.5, -- below a ground's Need: (Strength / Need) ^ Under of its training
-		Floor = 1, -- but every hit trains at least this much
-		Over = 2, -- past its Outgrow: (Outgrow / Strength) ^ Over of it
+		PerDamage = 0.1, -- (at 0 Strength a Sword hit deals 10: Strength 2 trains 2, as before)
 		Grounds = {
-			Dummies = { Cost = 0, Strength = 1, Need = 0, Outgrow = 200 }, -- free: straw dummies that never fall
-			Meadow = { Cost = 300, Mob = "Pig", Size = 0.55, Health = 180, Count = 4, Strength = 1, Need = 200, Outgrow = 2000, Speed = 4 },
+			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
+			Meadow = { Cost = 300, Mob = "Pig", Size = 0.55, Health = 180, Count = 4, Strength = 2, Speed = 4 },
 			Desert = {
 				Cost = 4000,
 				Mob = "KingCrab",
@@ -555,13 +543,11 @@ return {
 				Size = 1,
 				Health = 270,
 				Count = 5,
-				Strength = 4,
-				Need = 2000,
-				Outgrow = 18000,
+				Strength = 5,
 				Speed = 2.5,
 			},
-			Ice = { Cost = 40000, Mob = "Penguin", Size = 0.6, Health = 350, Count = 4, Strength = 15, Need = 18000, Outgrow = 140000, Speed = 3 },
-			Lava = { Cost = 400000, Mob = "RockHog", Size = 0.5, Health = 430, Count = 4, Strength = 50, Need = 140000, Outgrow = 1000000, Speed = 3.5 },
+			Ice = { Cost = 40000, Mob = "Penguin", Size = 0.6, Health = 350, Count = 4, Strength = 15, Speed = 3 },
+			Lava = { Cost = 400000, Mob = "RockHog", Size = 0.5, Health = 430, Count = 4, Strength = 45, Speed = 3.5 },
 		},
 		Respawn = 4,
 		MobRadius = 2.5, -- a mob's body half-width (hits and reach)

@@ -123,7 +123,7 @@ local function make(kind, at, yaw)
 			Bosses.engaged:Fire(player, b.biome)
 			Bosses.wake(b.biome)
 		end
-		Combat.train(player, c.Strength or 1, b.biome and Config.Training.Grounds[b.biome])
+		Combat.train(player, damage, c.Strength or 1)
 		b.hitters[player] = true
 		hurt(body, damage)
 	end)
