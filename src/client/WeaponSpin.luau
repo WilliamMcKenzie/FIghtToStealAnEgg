@@ -6,7 +6,7 @@
 -- the weapon a burst of light rays turns, in its rarity's colour; under it its name in
 -- white outlined text and its rarity; tilted above-left, its odds as a green "1 / N";
 -- white streaks either side kick out on every flick. A boss's own super rare weapon
--- brings up the BONUS badge (orange gradient text on a dark oval) whenever it's on show.
+-- brings up the BONUS badge (orange text on a dark oval) whenever it's on show.
 -- It lands with a pop, stays up Config.WeaponDrops.Show seconds and shrinks away. Spins
 -- that arrive during one wait their turn.
 --
@@ -21,6 +21,8 @@ local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -96,6 +98,20 @@ gui.IgnoreGuiInset = true
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 5 -- (over the HUD)
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- (while a spin shows: the screen behind it dimmed and blurred like glass, every other bit
+-- of HUD hidden: QM)
+local backdrop = frame(gui, {
+	Name = "Backdrop",
+	BackgroundColor3 = Color3.new(0, 0, 0),
+	BackgroundTransparency = 1,
+	Size = UDim2.fromScale(1, 1),
+	Visible = false,
+	ZIndex = 0,
+})
+local blur = Instance.new("BlurEffect")
+blur.Name = "SpinBlur"
+blur.Size = 0
+blur.Parent = Lighting
 local root = frame(gui, { Name = "Root", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) })
 local uiScale = Instance.new("UIScale")
 uiScale.Parent = root
@@ -220,7 +236,19 @@ local burst = frame(stage, {
 local burstScale = Instance.new("UIScale")
 burstScale.Parent = burst
 local rays = {}
-for i = 1, RAYS do
+-- (QM's sunburst image, tinted the rarity's colour, once it's uploaded: WeaponDrops.RaysImage)
+local raysImage = nil
+if Config.WeaponDrops.RaysImage ~= "" then
+	raysImage = Instance.new("ImageLabel")
+	raysImage.Name = "Rays"
+	raysImage.BackgroundTransparency = 1
+	raysImage.Image = Config.WeaponDrops.RaysImage
+	raysImage.AnchorPoint = Vector2.new(0.5, 0.5)
+	raysImage.Position = UDim2.fromScale(0.5, 0.5)
+	raysImage.Size = UDim2.fromOffset(680, 680)
+	raysImage.Parent = burst
+end
+for i = 1, if raysImage then 0 else RAYS do
 	local long = i % 2 == 1
 	local len = if long then 330 else 230
 	local holder = frame(burst, {
@@ -272,10 +300,7 @@ local oddsLabel = Popups.text(stage, {
 	Rotation = -14,
 	Text = "",
 })
-local oddsGradient = Instance.new("UIGradient")
-oddsGradient.Color = Popups.ramp(GREEN)
-oddsGradient.Rotation = 90
-oddsGradient.Parent = oddsLabel
+oddsLabel.TextColor3 = GREEN -- (solid, no gradient: QM)
 
 -- the streaks: white, bright at the end nearest the middle
 local streaks = {}
@@ -291,7 +316,7 @@ for _, side in { -1, 1 } do
 	streaks[side] = s
 end
 
--- BONUS: orange gradient text on a dark oval with a pale rim
+-- BONUS: orange text on a dark oval with a pale rim
 local bonus = frame(stage, {
 	Name = "Bonus",
 	AnchorPoint = Vector2.new(0.5, 0.5),
@@ -319,19 +344,37 @@ local bonusText = Popups.text(bonus, {
 })
 bonusText:FindFirstChildOfClass("UIStroke").Color = Color3.fromRGB(90, 30, 8)
 bonusText:FindFirstChildOfClass("UIStroke").Thickness = 7
-local bonusGradient = Instance.new("UIGradient")
-bonusGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 236, 190)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 170, 70)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(226, 84, 30)),
-})
-bonusGradient.Rotation = 90
-bonusGradient.Parent = bonusText
+bonusText.TextColor3 = Color3.fromRGB(255, 170, 70) -- (solid, no gradient: QM)
 local bonusScale = Instance.new("UIScale")
 bonusScale.Parent = bonus
 
 local current = nil -- the spin playing: { odds, ... }
 local spinT = 0
+
+local function raysColour(c)
+	if raysImage then
+		raysImage.ImageColor3 = c
+	end
+	for _, ray in rays do
+		ray.BackgroundColor3 = c
+	end
+end
+local function raysFade(t, transparency)
+	if raysImage then
+		if t > 0 then
+			tween(raysImage, t, { ImageTransparency = transparency })
+		else
+			raysImage.ImageTransparency = transparency
+		end
+	end
+	for _, ray in rays do
+		if t > 0 then
+			tween(ray, t, { BackgroundTransparency = transparency })
+		else
+			ray.BackgroundTransparency = transparency
+		end
+	end
+end
 
 local function showItem(id, odds, landed)
 	local r, name = rarityOf(id)
@@ -342,9 +385,7 @@ local function showItem(id, odds, landed)
 	rarityLabel.TextColor3 = r.Fill
 	rarityStroke.Color = r.Stroke
 	oddsLabel.Text = "1 / " .. tostring(odds[id] or 1)
-	for _, ray in rays do
-		ray.BackgroundColor3 = r.Fill
-	end
+	raysColour(r.Fill)
 	for _, g in glows do
 		g.BackgroundColor3 = r.Fill
 	end
@@ -366,18 +407,61 @@ end
 local queue = {}
 local playing = false
 
+local hidden = {} -- what dim(true) hid, to put back
+local CORE = { Enum.CoreGuiType.PlayerList, Enum.CoreGuiType.Chat, Enum.CoreGuiType.EmotesMenu }
+local function dim(on)
+	if on then
+		backdrop.Visible = true
+		backdrop.BackgroundTransparency = 1
+		tween(backdrop, 0.25, { BackgroundTransparency = 0.7 }) -- (black at 30%)
+		tween(blur, 0.25, { Size = 16 })
+		hidden = { guis = {}, core = {} }
+		for _, g in player:WaitForChild("PlayerGui"):GetChildren() do
+			if g:IsA("ScreenGui") and g ~= gui and g.Enabled then
+				g.Enabled = false
+				table.insert(hidden.guis, g)
+			end
+		end
+		for _, kind in CORE do
+			local ok, was = pcall(StarterGui.GetCoreGuiEnabled, StarterGui, kind)
+			if ok and was then
+				pcall(StarterGui.SetCoreGuiEnabled, StarterGui, kind, false)
+				table.insert(hidden.core, kind)
+			end
+		end
+	else
+		tween(backdrop, 0.22, { BackgroundTransparency = 1 })
+		tween(blur, 0.22, { Size = 0 })
+		task.delay(0.22, function()
+			if not playing then
+				backdrop.Visible = false
+			end
+		end)
+		for _, g in hidden.guis or {} do
+			if g.Parent then
+				g.Enabled = true
+			end
+		end
+		for _, kind in hidden.core or {} do
+			pcall(StarterGui.SetCoreGuiEnabled, StarterGui, kind, true)
+		end
+		hidden = {}
+	end
+end
+
 local function play(data)
 	playing = true
 	local d = Config.WeaponDrops
 	local reel = data.reel
 	current = data
 	spinT = 0
+	if not backdrop.Visible or backdrop.BackgroundTransparency > 0.95 then
+		dim(true)
+	end
 	stage.Visible = true
 	stageScale.Scale = 0.3
 	tween(stageScale, 0.25, { Scale = 1 }, Enum.EasingStyle.Back)
-	for _, ray in rays do
-		ray.BackgroundTransparency = 0.35
-	end
+	raysFade(0, 0.35)
 	burstScale.Scale = 0.85
 	-- flicks spaced further and further apart, adding up to SpinTime
 	local n = #reel - 1
@@ -389,9 +473,7 @@ local function play(data)
 		if landed then
 			sound(LAND_SOUND, 0.6, 1)
 			tween(burstScale, 0.4, { Scale = 1.25 }, Enum.EasingStyle.Back)
-			for _, ray in rays do
-				tween(ray, 0.3, { BackgroundTransparency = 0 })
-			end
+			raysFade(0.3, 0)
 			if data.bonus then
 				bonusScale.Scale = 1.5
 				tween(bonusScale, 0.4, { Scale = 1 }, Enum.EasingStyle.Back)
@@ -407,6 +489,9 @@ local function play(data)
 	stage.Visible = false
 	current = nil
 	playing = false
+	if #queue == 0 then
+		dim(false)
+	end
 	if #queue > 0 then
 		task.spawn(play, table.remove(queue, 1))
 	end
