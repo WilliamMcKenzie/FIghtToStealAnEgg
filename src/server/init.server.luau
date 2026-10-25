@@ -175,7 +175,7 @@ end
 bossRequest.OnServerEvent:Connect(requestBoss)
 local command = Instance.new("TextChatCommand")
 command.Name = "BossCommand"
-command.TriggerText = "/boss"
+command.PrimaryAlias = "/boss"
 command.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
 command.Triggered:Connect(function(source)
 	local player = source and Players:GetPlayerByUserId(source.UserId)
@@ -206,7 +206,7 @@ function reboss(player)
 end
 local rebossCommand = Instance.new("TextChatCommand")
 rebossCommand.Name = "RebossCommand"
-rebossCommand.TriggerText = "/reboss"
+rebossCommand.PrimaryAlias = "/reboss"
 rebossCommand.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
 rebossCommand.Triggered:Connect(function(source)
 	local player = source and Players:GetPlayerByUserId(source.UserId)
@@ -236,7 +236,7 @@ function swapPet(player, message)
 end
 local rideCommand = Instance.new("TextChatCommand")
 rideCommand.Name = "RideCommand"
-rideCommand.TriggerText = "/ride"
+rideCommand.PrimaryAlias = "/ride"
 rideCommand.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
 local rideRequest = Instance.new("RemoteEvent")
 rideRequest.Name = "RideRequest"
@@ -264,7 +264,7 @@ function givePet(player, message)
 end
 local giveCommand = Instance.new("TextChatCommand")
 giveCommand.Name = "GiveCommand"
-giveCommand.TriggerText = "/give"
+giveCommand.PrimaryAlias = "/give"
 giveCommand.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
 local giveRequest = Instance.new("RemoteEvent")
 giveRequest.Name = "GiveRequest"
@@ -317,7 +317,8 @@ function giveCash(player, message)
 	if not mayReboss(player) then
 		return
 	end
-	local n = tonumber((message:match("^/%a+%s+(.-)%s*$") or ""):gsub("[,%s_]", "")) or 1e6
+	local digits = (message:match("^/%a+%s+(.-)%s*$") or ""):gsub("[,%s_]", "")
+	local n = tonumber(digits) or 1e6
 	if n ~= n or math.abs(n) == math.huge then
 		return
 	end
@@ -336,7 +337,7 @@ end
 for _, cmd in { { "Spin", testSpin }, { "Weapon", giveWeapon }, { "Cash", giveCash }, { "Reset", resetPlayer } } do
 	local command = Instance.new("TextChatCommand")
 	command.Name = cmd[1] .. "Command"
-	command.TriggerText = "/" .. cmd[1]:lower()
+	command.PrimaryAlias = "/" .. cmd[1]:lower()
 	command.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
 	local request = Instance.new("RemoteEvent")
 	request.Name = cmd[1] .. "Request"
