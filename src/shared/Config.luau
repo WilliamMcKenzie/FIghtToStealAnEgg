@@ -550,6 +550,9 @@ return {
 	Eggs = {
 		StealTime = 0.6, -- seconds holding E
 		Respawn = 40, -- seconds before a nest lays again
+		-- does a stolen egg ride on your back (and earn its reward in your pen)? Off for now
+		-- (QM, Oct 25): stealing only wakes the boss and locks you into its fight
+		Carry = false,
 		-- (QM, Oct 25: real eggs, LassoAPet's: Shared/Eggs/<Kind>EggModel, one per animal.)
 		-- Each nest lays one of its biome's kinds, by these weights (LassoAPet's spawn odds:
 		-- each biome's Herd there). A new animal: its egg model, Pets above, then here.

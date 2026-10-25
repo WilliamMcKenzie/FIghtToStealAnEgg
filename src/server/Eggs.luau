@@ -6,6 +6,8 @@
 -- With the boss dead everyone in its fight goes free; carry the egg into your pen for
 -- its reward (Config.Eggs.Reward). Die holding an egg and it's lost (and you're out of
 -- the fight). A nest lays again Config.Eggs.Respawn seconds after it's robbed.
+-- With Config.Eggs.Carry off (for now: QM, Oct 25) there's no egg to carry: stealing one
+-- only wakes the boss and locks you into its fight.
 --
 -- Player attributes: HeldEgg (biome name), HeldEggKind (its animal), LockedIn (biome name),
 -- Eggs (eggs brought home).
@@ -121,7 +123,10 @@ local function lay(nest, biome)
 			return
 		end
 		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if not (humanoid and humanoid.Health > 0) or not carry(player, biome, kind) then
+		if not (humanoid and humanoid.Health > 0) then
+			return
+		end
+		if Config.Eggs.Carry and not carry(player, biome, kind) then
 			return
 		end
 		egg:Destroy()
