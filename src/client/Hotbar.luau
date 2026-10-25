@@ -1,7 +1,7 @@
 -- The eggs you've stolen this life (QM, Oct 25: "after stealing an egg it appears to the
 -- right of the backpack, like an inventory"): one slot per kind in your EggBag (Server/
--- Hatchery), right of the Backpack button, its egg's icon with "x2" when there's more than
--- one. Click one (or press its number) to hold it instead of your weapon; click it again
+-- Hatchery), right of the Backpack button, in LassoAPet's inventory slots (QM, Oct 25): its
+-- egg's icon with "x2" when there's more than one. Click one (or press its number) to hold it instead of your weapon; click it again
 -- to put it away. The one you hold is outlined white. Put it down in your pen by clicking
 -- there (client/PenEggs).
 --
@@ -22,7 +22,10 @@ local Popups = require(script.Parent.Popups)
 local Hotbar = {}
 
 local player = Players.LocalPlayer
-local SLOT = 104
+local SLOT = 96
+local PANEL = "rbxassetid://86824541929406" -- LassoAPet's InventoryBG (assets/ui/InventoryBG.png: grey, dark border)
+local PANEL_SIZE = 96
+local PANEL_CORNER = 18 / 96 -- (its corners' radius, of its width)
 local GAP = 12
 local FROM_CENTRE = 112 -- design px from the screen's middle to the first slot (past the Backpack button)
 local KEYS = {
@@ -45,8 +48,9 @@ local function picture(parent, kind)
 		img.Image = PetIcons.Eggs[kind]
 		img.ScaleType = Enum.ScaleType.Fit
 		img.AnchorPoint = Vector2.new(0.5, 0.5)
-		img.Position = UDim2.fromScale(0.5, 0.52)
-		img.Size = UDim2.fromScale(0.8, 0.8)
+		img.Position = UDim2.fromScale(0.5, 0.54)
+		img.Size = UDim2.fromScale(0.72, 0.72)
+		img.ZIndex = 2
 		img.Parent = parent
 		return
 	end
@@ -122,40 +126,44 @@ function Hotbar.init(root, hudFrames)
 			b.Size = UDim2.fromOffset(SLOT, SLOT)
 			local scale = Instance.new("UIScale")
 			scale.Parent = b
-			Popups.card(b, { Size = UDim2.fromScale(1, 1), Active = false })
-			picture(b, s.id)
+			-- (LassoAPet's slot, QM Oct 25: its InventoryBG 9-sliced, the number top left,
+			-- "xN" across the middle, a thin white ring on the one in hand)
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(PANEL_CORNER, 0)
+			corner.Parent = b
+			local bg = Instance.new("ImageLabel")
+			bg.BackgroundTransparency = 1
+			bg.Size = UDim2.fromScale(1, 1)
+			bg.Image = PANEL
+			bg.ScaleType = Enum.ScaleType.Slice
+			bg.SliceCenter = Rect.new(24, 24, 72, 72)
+			bg.SliceScale = SLOT / PANEL_SIZE
+			bg.ZIndex = 0
+			bg.Parent = b
 			if holding == s.id then
-				local ring = Instance.new("Frame")
-				ring.BackgroundTransparency = 1
-				ring.Size = UDim2.fromScale(1, 1)
-				local corner = Instance.new("UICorner")
-				corner.CornerRadius = UDim.new(0, 14)
-				corner.Parent = ring
-				local stroke = Instance.new("UIStroke")
-				stroke.Color = Color3.new(1, 1, 1)
-				stroke.Thickness = 4
-				stroke.Parent = ring
+				local ring = Instance.new("UIStroke")
+				ring.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+				ring.Color = Color3.new(1, 1, 1)
+				ring.Thickness = 3
 				ring.Parent = b
-				scale.Scale = 1.08
 			end
-			Popups.text(b, {
+			picture(b, s.id)
+			local number = Popups.text(b, {
 				Text = tostring(i),
-				TextSize = 22,
-				Position = UDim2.fromOffset(8, 4),
-				Size = UDim2.fromOffset(30, 26),
-				TextXAlignment = Enum.TextXAlignment.Left,
+				TextSize = 24,
+				Position = UDim2.fromOffset(6, 3),
+				Size = UDim2.fromOffset(28, 28),
 				ZIndex = 3,
 			})
+			number:FindFirstChildOfClass("UIStroke").Thickness = 2.4
 			if s.n > 1 then
-				Popups.text(b, {
+				local count = Popups.text(b, {
 					Text = "x" .. s.n,
-					TextSize = 26,
-					AnchorPoint = Vector2.new(1, 0),
-					Position = UDim2.new(1, -8, 0, 4),
-					Size = UDim2.new(1, -40, 0, 30),
-					TextXAlignment = Enum.TextXAlignment.Right,
+					TextSize = 40,
+					Size = UDim2.fromScale(1, 1),
 					ZIndex = 3,
 				})
+				count:FindFirstChildOfClass("UIStroke").Thickness = 3.6
 			end
 			local rest = scale.Scale
 			b.MouseEnter:Connect(function()
