@@ -181,7 +181,7 @@ local function remove(body)
 	end
 end
 
-for _, name in { "Bosses", "Mobs" } do
+for _, name in { "Bosses", "Mobs", "PenPets" } do
 	task.spawn(function()
 		local folder = workspace:WaitForChild(name)
 		for _, body in folder:GetChildren() do

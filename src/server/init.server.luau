@@ -69,7 +69,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss, swapPet -- (below)
+local requestBoss, reboss, swapPet, givePet -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your slash's damage (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -89,6 +89,8 @@ local function joined(player)
 			requestBoss(player)
 		elseif message:lower():match("^/ride") then
 			swapPet(player, message)
+		elseif message:lower():match("^/give") then
+			givePet(player, message)
 		end
 	end)
 	if player.Character then
@@ -210,6 +212,34 @@ rideRequest.Parent = ReplicatedStorage
 rideRequest.OnServerEvent:Connect(function(player, message)
 	if typeof(message) == "string" and #message < 100 then
 		swapPet(player, message)
+	end
+end)
+
+-- /give <pet>: that pet in your pen (QM, Oct 25), wandering about. The game's owner, or
+-- anyone in a Studio playtest.
+function givePet(player, message)
+	if not mayReboss(player) then
+		return
+	end
+	local want = (message:match("^/%a+%s+(.-)%s*$") or ""):lower():gsub("%s", "")
+	for _, kind in Pets.kinds() do
+		if kind:lower() == want then
+			Pens.addPet(player, kind)
+			return
+		end
+	end
+	print("/give one of: " .. table.concat(Pets.kinds(), ", "))
+end
+local giveCommand = Instance.new("TextChatCommand")
+giveCommand.Name = "GiveCommand"
+giveCommand.TriggerText = "/give"
+giveCommand.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
+local giveRequest = Instance.new("RemoteEvent")
+giveRequest.Name = "GiveRequest"
+giveRequest.Parent = ReplicatedStorage
+giveRequest.OnServerEvent:Connect(function(player, message)
+	if typeof(message) == "string" and #message < 100 then
+		givePet(player, message)
 	end
 end)
 

@@ -159,15 +159,18 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 end)
 
--- /ride <pet> (TextChatService runs a command's Triggered where it's typed: pass it on)
+-- /ride <pet> and /give <pet> (TextChatService runs a command's Triggered where it's typed:
+-- pass it on)
 task.spawn(function()
 	local commands = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
-	local command = commands:WaitForChild("RideCommand", 10)
-	local request = ReplicatedStorage:WaitForChild("RideRequest", 10)
-	if command and request then
-		command.Triggered:Connect(function(_source, text)
-			request:FireServer(text)
-		end)
+	for _, pair in { { "RideCommand", "RideRequest" }, { "GiveCommand", "GiveRequest" } } do
+		local command = commands:WaitForChild(pair[1], 10)
+		local request = ReplicatedStorage:WaitForChild(pair[2], 10)
+		if command and request then
+			command.Triggered:Connect(function(_source, text)
+				request:FireServer(text)
+			end)
+		end
 	end
 end)
 
