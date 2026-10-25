@@ -106,12 +106,14 @@ end
 fit()
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
 
--- a 3D weapon in a ViewportFrame, turning slowly, blade tilted like an item icon
+-- a 3D weapon in a ViewportFrame, turning slowly, blade tilted like an item icon. Flat,
+-- like the held ones (QM, Oct 25): full ambient and no light, so every face shows its
+-- colour as it is, and no stud texture (Weapons.flatten)
 local function viewport(parent, props)
 	local vp = Instance.new("ViewportFrame")
 	vp.BackgroundTransparency = 1
-	vp.Ambient = Color3.fromRGB(200, 200, 200)
-	vp.LightColor = WHITE
+	vp.Ambient = WHITE
+	vp.LightColor = Color3.new(0, 0, 0)
 	vp.LightDirection = Vector3.new(-1, -1, -1)
 	for k, v in props do
 		vp[k] = v
@@ -132,6 +134,15 @@ local function viewport(parent, props)
 		if not m then
 			m = Weapons.makeModel(id, 1)
 			m:PivotTo(CFrame.identity)
+			for _, d in m:GetDescendants() do
+				if d:IsA("Texture") or d:IsA("Decal") then
+					d:Destroy()
+				elseif d:IsA("BasePart") and d.Material ~= Enum.Material.Neon then
+					d.Material = Enum.Material.SmoothPlastic
+					d.MaterialVariant = ""
+					d.Reflectance = 0
+				end
+			end
 			models[id] = m
 		end
 		m.Parent = vp
