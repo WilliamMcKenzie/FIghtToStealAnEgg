@@ -984,12 +984,12 @@ return {
 			Launch = 90, -- sets off up to this many degrees either side of the aim, at random (QM)
 			-- the orb's look
 			Color = Color3.fromRGB(150, 60, 255), -- its one colour: the ring, halo, flares and trail (the core is white)
-			CoreSize = 0.55, -- studs (x Size)
-			RingSize = 1, -- studs (x Size)
+			CoreSize = 0.88, -- studs (x Size) (QM: the orb 1.6x bigger)
+			RingSize = 1.6, -- studs (x Size)
 			RingTransparency = 0.3,
-			HaloSize = 1.9, -- studs (x Size)
+			HaloSize = 3.04, -- studs (x Size)
 			HaloTransparency = 0.8, -- (the same Color, fainter)
-			HazeSize = 2.8, -- a fainter, wider glow past the halo (0: none)
+			HazeSize = 4.48, -- a fainter, wider glow past the halo (0: none)
 			HazeTransparency = 0.93,
 			Flares = 0, -- wispy flames curling over the orb (QM: off)
 			FlareLength = 1.6, -- (x Size)
