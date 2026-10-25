@@ -28,11 +28,27 @@ local LongswordModel = require(script.Parent.LongswordModel)
 local AxeModel = require(script.Parent.AxeModel)
 local WaraxeModel = require(script.Parent.WaraxeModel)
 local ClubModel = require(script.Parent.ClubModel)
+local ShortbowModel = require(script.Parent.ShortbowModel)
+local LongbowModel = require(script.Parent.LongbowModel)
+local NatureBowModel = require(script.Parent.NatureBowModel)
+local BloodBowModel = require(script.Parent.BloodBowModel)
 local WeaponModels = require(script.Parent.WeaponModels)
 
 local Weapons = {}
 
 -- (QM's, designs/weapons/*.bbmodel)
+-- a bow drawn round its middle, moved down so the hand closes on the middle (y -0.25)
+local function centred(data)
+	local out = table.clone(data)
+	out.parts = {}
+	for i, part in data.parts do
+		local p = table.clone(part)
+		p.cframe = CFrame.new(0, -0.25, 0) * part.cframe
+		out.parts[i] = p
+	end
+	return out
+end
+
 local DRAWN = {
 	KendoStick = KendoStickModel,
 	Shortsword = ShortswordModel,
@@ -40,6 +56,10 @@ local DRAWN = {
 	Axe = AxeModel,
 	Waraxe = WaraxeModel,
 	Club = ClubModel,
+	Shortbow = centred(ShortbowModel),
+	Longbow = centred(LongbowModel),
+	NatureBow = centred(NatureBowModel),
+	BloodBow = centred(BloodBowModel),
 }
 
 local STUDS = { image = Studs.IMAGE, tile = 0.5 }

@@ -855,14 +855,6 @@ return {
 			Slash = { Cooldown = 0.55, Radius = 10, Width = 5, Arc = 140, Belly = 0.4, OuterSegments = 3, AttackRange = 11 },
 		},
 		-- tier 4
-		Crossbow = {
-			Name = "Crossbow",
-			Type = "Ranged",
-			Rarity = "Epic",
-			Damage = 3,
-			Weight = 4,
-			Shot = { Cooldown = 0.9, Range = 70, Speed = 180, Pierce = 1, Size = 1.1 },
-		},
 		NatureBow = {
 			Name = "Nature Bow",
 			Type = "Ranged",

@@ -12,8 +12,6 @@ end
 local WOOD = rgb(117, 71, 34)
 local DARK_WOOD = rgb(78, 48, 26)
 local GOLD = rgb(234, 212, 0)
-local STEEL = rgb(214, 220, 228)
-local STEEL_DARK = rgb(150, 158, 170)
 local WHITE = rgb(255, 255, 255)
 local IVORY = rgb(246, 236, 210)
 
@@ -46,26 +44,6 @@ local function model(parts)
 end
 
 local V = Vector3.new
-
--- a bow's limbs, curving from the grip out to tips at x = 0.5 (times `k`: a longbow is
--- taller), its string, and any extra blocks
-local function bow(limb, string, k, extra)
-	k = k or 1
-	local parts = { block(V(0.24, 0.5, 0.24), V(0, -0.25, 0), DARK_WOOD) }
-	for _, s in { 1, -1 } do
-		local function at(x, y)
-			return V(x, -0.25 + s * y * k, 0)
-		end
-		table.insert(parts, block(V(0.16, 0.6 * k, 0.16), at(0.08, 0.5), limb, s * -12))
-		table.insert(parts, block(V(0.15, 0.6 * k, 0.15), at(0.24, 1.0), limb, s * -28))
-		table.insert(parts, block(V(0.14, 0.5 * k, 0.14), at(0.44, 1.38), limb, s * -42))
-	end
-	table.insert(parts, block(V(0.04, 3.1 * k, 0.04), V(0.56, -0.25, 0), string, 0, { plain = true }))
-	for _, part in extra or {} do
-		table.insert(parts, part)
-	end
-	return parts
-end
 
 -- a staff: a long shaft, two prongs and a glowing gem (or ball) at the top
 local function staff(shaft, prong, gem, ball)
@@ -147,25 +125,6 @@ end
 table.insert(bloom, block(V(0.32, 0.32, 0.16), V(0, 1.2, 0.04), rgb(255, 220, 90), 45, { neon = true }))
 
 return {
-	Shortbow = model(bow(WOOD, WHITE, 0.8)),
-	Longbow = model(bow(rgb(140, 92, 50), WHITE, 1.3)),
-	NatureBow = model(bow(rgb(70, 160, 90), WHITE, 1, {
-		block(V(0.3, 0.12, 0.2), V(0.2, 0.55, 0.1), rgb(120, 220, 90), 30),
-		block(V(0.3, 0.12, 0.2), V(0.2, -1.05, 0.1), rgb(120, 220, 90), -30),
-		block(V(0.18, 0.18, 0.18), V(0, -0.25, 0.14), rgb(160, 255, 120), 45, { neon = true }),
-	})),
-	BloodBow = model(bow(rgb(90, 20, 30), rgb(255, 120, 130), 1.1, {
-		block(V(0.2, 0.2, 0.2), V(0, -0.25, 0.14), rgb(230, 30, 50), 45, { neon = true }),
-		block(V(0.12, 0.3, 0.12), V(0.62, 1.45, 0), rgb(220, 220, 220), -50),
-		block(V(0.12, 0.3, 0.12), V(0.62, -1.95, 0), rgb(220, 220, 220), 50),
-	})),
-	Crossbow = model({
-		block(V(0.24, 0.5, 0.24), V(0, -0.25, 0), DARK_WOOD),
-		block(V(0.26, 1.6, 0.3), V(0, 0.75, 0), WOOD),
-		block(V(1.7, 0.16, 0.16), V(0, 1.35, 0), STEEL_DARK),
-		block(V(1.6, 0.04, 0.04), V(0, 1.15, 0), WHITE, 0, { plain = true }),
-		block(V(0.08, 1.1, 0.08), V(0, 1.2, 0.2), rgb(200, 40, 40)),
-	}),
 	WindStaff = model(staff(rgb(220, 226, 230), rgb(170, 220, 210), rgb(200, 255, 240), true)),
 	LightningStaff = model(staff(rgb(60, 60, 80), rgb(255, 230, 90), rgb(255, 244, 120))),
 	WaterStaff = model(staff(rgb(40, 90, 150), rgb(120, 200, 255), rgb(70, 160, 255), true)),
