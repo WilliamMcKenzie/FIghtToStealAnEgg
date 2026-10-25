@@ -46,24 +46,46 @@ end
 
 local V = Vector3.new
 
--- a bow's limbs, curving from the grip out to tips at x = 0.5, and its string
-local function bow(limb, string)
+-- a bow's limbs, curving from the grip out to tips at x = 0.5 (times `k`: a longbow is
+-- taller), its string, and any extra blocks
+local function bow(limb, string, k, extra)
+	k = k or 1
 	local parts = { block(V(0.24, 0.5, 0.24), V(0, -0.25, 0), DARK_WOOD) }
 	for _, s in { 1, -1 } do
 		local function at(x, y)
-			return V(x, -0.25 + s * y, 0)
+			return V(x, -0.25 + s * y * k, 0)
 		end
-		table.insert(parts, block(V(0.16, 0.6, 0.16), at(0.08, 0.5), limb, s * -12))
-		table.insert(parts, block(V(0.15, 0.6, 0.15), at(0.24, 1.0), limb, s * -28))
-		table.insert(parts, block(V(0.14, 0.5, 0.14), at(0.44, 1.38), limb, s * -42))
+		table.insert(parts, block(V(0.16, 0.6 * k, 0.16), at(0.08, 0.5), limb, s * -12))
+		table.insert(parts, block(V(0.15, 0.6 * k, 0.15), at(0.24, 1.0), limb, s * -28))
+		table.insert(parts, block(V(0.14, 0.5 * k, 0.14), at(0.44, 1.38), limb, s * -42))
 	end
-	table.insert(parts, block(V(0.04, 3.1, 0.04), V(0.56, -0.25, 0), string, 0, { plain = true }))
+	table.insert(parts, block(V(0.04, 3.1 * k, 0.04), V(0.56, -0.25, 0), string, 0, { plain = true }))
+	for _, part in extra or {} do
+		table.insert(parts, part)
+	end
 	return parts
 end
 
-local triple = bow(rgb(70, 160, 90), WHITE)
-for _, y in { 0.4, -0.25, -0.9 } do
-	table.insert(triple, block(V(0.18, 0.18, 0.18), V(0, y, 0.12), rgb(120, 255, 160), 45, { neon = true }))
+-- a staff: a long shaft, two prongs and a glowing gem (or ball) at the top
+local function staff(shaft, prong, gem, ball)
+	return {
+		block(V(0.18, 3.0, 0.18), V(0, 0.5, 0), shaft),
+		block(V(0.12, 0.5, 0.12), V(-0.18, 2.15, 0), prong, 20),
+		block(V(0.12, 0.5, 0.12), V(0.18, 2.15, 0), prong, -20),
+		if ball
+			then block(V(0.5, 0.5, 0.5), V(0, 2.3, 0), gem, 0, { neon = true, shape = "Ball" })
+			else block(V(0.4, 0.4, 0.4), V(0, 2.25, 0), gem, 45, { neon = true }),
+	}
+end
+
+-- a straight sword: grip, guard, blade (length `len`) and a pointed tip
+local function sword(len, width, guard, blade)
+	return {
+		block(V(0.2, 0.5, 0.2), V(0, -0.25, 0), WOOD),
+		block(V(guard, 0.16, 0.22), V(0, 0.08, 0), GOLD),
+		block(V(width, len, 0.08), V(0, 0.16 + len / 2, 0), blade),
+		block(V(width * 0.7, width * 0.7, 0.08), V(0, 0.16 + len, 0), blade, 45),
+	}
 end
 
 -- the unicorn's horn: a twisting stack, each block narrower and turned a little more
@@ -134,27 +156,51 @@ end
 table.insert(bloom, block(V(0.32, 0.32, 0.16), V(0, 1.2, 0.04), rgb(255, 220, 90), 45, { neon = true }))
 
 return {
-	Dagger = model({
-		block(V(0.18, 0.45, 0.18), V(0, -0.25, 0), WOOD),
-		block(V(0.8, 0.14, 0.18), V(0, 0.07, 0), GOLD),
-		block(V(0.4, 0.9, 0.08), V(0, 0.6, 0), STEEL),
-		block(V(0.28, 0.28, 0.08), V(0, 1.05, 0), STEEL, 45),
+	KendoStick = model({
+		block(V(0.22, 0.5, 0.22), V(0, -0.25, 0), rgb(150, 40, 40)),
+		block(V(0.4, 0.08, 0.4), V(0, 0.04, 0), rgb(60, 40, 30)),
+		block(V(0.2, 2.6, 0.2), V(0, 1.38, 0), rgb(222, 196, 130)),
+		block(V(0.23, 0.08, 0.23), V(0, 0.9, 0), rgb(150, 40, 40)),
+		block(V(0.23, 0.08, 0.23), V(0, 2.4, 0), rgb(150, 40, 40)),
+		block(V(0.24, 0.2, 0.24), V(0, 2.72, 0), rgb(240, 226, 196)),
 	}),
-	BattleAxe = model({
-		block(V(0.2, 2.6, 0.2), V(0, 0.8, 0), WOOD),
-		block(V(0.9, 0.8, 0.12), V(0.5, 1.7, 0), STEEL_DARK),
-		block(V(0.18, 1.1, 0.12), V(1.0, 1.7, 0), STEEL),
-		block(V(0.3, 0.4, 0.12), V(-0.25, 1.7, 0), STEEL_DARK),
-		block(V(0.26, 0.2, 0.26), V(0, 2.15, 0), GOLD),
+	Shortsword = model(sword(1.4, 0.5, 0.9, STEEL)),
+	Longsword = model(sword(2.6, 0.5, 1.2, STEEL)),
+	Axe = model({
+		block(V(0.2, 2.2, 0.2), V(0, 0.6, 0), WOOD),
+		block(V(0.8, 0.7, 0.12), V(0.45, 1.4, 0), STEEL_DARK),
+		block(V(0.16, 0.95, 0.12), V(0.9, 1.4, 0), STEEL),
 	}),
-	Spear = model({
-		block(V(0.16, 3.3, 0.16), V(0, 0.95, 0), WOOD),
-		block(V(0.26, 0.2, 0.26), V(0, 2.6, 0), GOLD),
-		block(V(0.42, 0.42, 0.1), V(0, 2.95, 0), STEEL, 45),
-		block(V(0.12, 0.5, 0.1), V(0, 3.25, 0), STEEL),
+	Waraxe = model({
+		block(V(0.22, 2.8, 0.22), V(0, 0.9, 0), DARK_WOOD),
+		block(V(0.9, 0.9, 0.12), V(0.5, 1.9, 0), STEEL_DARK),
+		block(V(0.18, 1.2, 0.12), V(1.0, 1.9, 0), STEEL),
+		block(V(0.9, 0.9, 0.12), V(-0.5, 1.9, 0), STEEL_DARK),
+		block(V(0.18, 1.2, 0.12), V(-1.0, 1.9, 0), STEEL),
+		block(V(0.3, 0.3, 0.3), V(0, 2.4, 0), STEEL, 45),
+		block(V(0.28, 0.2, 0.28), V(0, 1.35, 0), GOLD),
 	}),
-	Bow = model(bow(WOOD, WHITE)),
-	TripleBow = model(triple),
+	Club = model({
+		block(V(0.22, 0.5, 0.22), V(0, -0.25, 0), DARK_WOOD),
+		block(V(0.3, 1.0, 0.3), V(0, 0.5, 0), WOOD),
+		block(V(0.45, 0.9, 0.45), V(0, 1.4, 0), WOOD),
+		block(V(0.6, 0.8, 0.6), V(0, 2.2, 0), WOOD),
+		block(V(0.14, 0.14, 0.3), V(0.32, 2.0, 0), STEEL_DARK, 0, { plain = true }),
+		block(V(0.14, 0.14, 0.3), V(-0.32, 2.4, 0), STEEL_DARK, 0, { plain = true }),
+		block(V(0.3, 0.14, 0.14), V(0, 2.2, 0.32), STEEL_DARK, 0, { plain = true }),
+	}),
+	Shortbow = model(bow(WOOD, WHITE, 0.8)),
+	Longbow = model(bow(rgb(140, 92, 50), WHITE, 1.3)),
+	NatureBow = model(bow(rgb(70, 160, 90), WHITE, 1, {
+		block(V(0.3, 0.12, 0.2), V(0.2, 0.55, 0.1), rgb(120, 220, 90), 30),
+		block(V(0.3, 0.12, 0.2), V(0.2, -1.05, 0.1), rgb(120, 220, 90), -30),
+		block(V(0.18, 0.18, 0.18), V(0, -0.25, 0.14), rgb(160, 255, 120), 45, { neon = true }),
+	})),
+	BloodBow = model(bow(rgb(90, 20, 30), rgb(255, 120, 130), 1.1, {
+		block(V(0.2, 0.2, 0.2), V(0, -0.25, 0.14), rgb(230, 30, 50), 45, { neon = true }),
+		block(V(0.12, 0.3, 0.12), V(0.62, 1.45, 0), rgb(220, 220, 220), -50),
+		block(V(0.12, 0.3, 0.12), V(0.62, -1.95, 0), rgb(220, 220, 220), 50),
+	})),
 	Crossbow = model({
 		block(V(0.24, 0.5, 0.24), V(0, -0.25, 0), DARK_WOOD),
 		block(V(0.26, 1.6, 0.3), V(0, 0.75, 0), WOOD),
@@ -162,21 +208,15 @@ return {
 		block(V(1.6, 0.04, 0.04), V(0, 1.15, 0), WHITE, 0, { plain = true }),
 		block(V(0.08, 1.1, 0.08), V(0, 1.2, 0.2), rgb(200, 40, 40)),
 	}),
-	SparkWand = model({
-		block(V(0.14, 1.5, 0.14), V(0, 0.25, 0), DARK_WOOD),
-		block(V(0.2, 0.12, 0.2), V(0, 0.95, 0), GOLD),
-		block(V(0.3, 0.3, 0.3), V(0, 1.15, 0), rgb(110, 230, 255), 45, { neon = true }),
-	}),
-	FireStaff = model({
-		block(V(0.18, 3.0, 0.18), V(0, 0.5, 0), WOOD),
-		block(V(0.12, 0.5, 0.12), V(-0.18, 2.15, 0), DARK_WOOD, 20),
-		block(V(0.12, 0.5, 0.12), V(0.18, 2.15, 0), DARK_WOOD, -20),
-		block(V(0.4, 0.4, 0.4), V(0, 2.25, 0), rgb(255, 130, 40), 45, { neon = true }),
-	}),
-	ArcaneOrb = model({
-		block(V(0.16, 1.2, 0.16), V(0, 0.1, 0), rgb(60, 40, 90)),
-		block(V(0.5, 0.12, 0.5), V(0, 0.72, 0), GOLD),
-		block(V(0.8, 0.8, 0.8), V(0, 1.15, 0), rgb(196, 110, 255), 0, { neon = true, shape = "Ball" }),
+	WindStaff = model(staff(rgb(220, 226, 230), rgb(170, 220, 210), rgb(200, 255, 240), true)),
+	LightningStaff = model(staff(rgb(60, 60, 80), rgb(255, 230, 90), rgb(255, 244, 120))),
+	WaterStaff = model(staff(rgb(40, 90, 150), rgb(120, 200, 255), rgb(70, 160, 255), true)),
+	FireStaff = model(staff(WOOD, DARK_WOOD, rgb(255, 130, 40))),
+	Bomb = model({
+		block(V(1.0, 1.0, 1.0), V(0, 0.3, 0), rgb(40, 40, 48), 0, { shape = "Ball" }),
+		block(V(0.3, 0.16, 0.3), V(0, 0.82, 0), rgb(90, 90, 100)),
+		block(V(0.08, 0.35, 0.08), V(0.05, 1.05, 0), rgb(120, 90, 60), -15),
+		block(V(0.16, 0.16, 0.16), V(0.1, 1.24, 0), rgb(255, 170, 60), 0, { neon = true, shape = "Ball" }),
 	}),
 	GoldenEgg = model({
 		block(V(0.8, 0.8, 0.8), V(0, 0.15, 0), rgb(255, 205, 60), 0, { shape = "Ball" }),

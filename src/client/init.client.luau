@@ -35,6 +35,7 @@ require(script.FightBarrierFx)
 require(script.Regions)
 require(script.Liquid)
 require(script.WeaponSpin)
+require(script.WeaponTuning)
 local remote = ReplicatedStorage:WaitForChild("Slash")
 local shootRemote = ReplicatedStorage:WaitForChild("Shoot")
 

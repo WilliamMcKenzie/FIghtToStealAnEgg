@@ -3,10 +3,13 @@
 -- (Shared/Projectiles) against the bosses and mobs this client sees, so it flies, bends
 -- and stops where the server's does without anything but the trigger being sent.
 --
--- Cheap on purpose: a shot is one to three anchored blocks moved once a frame, a Trail
--- (FaceCamera, so it reads from any angle) and, for magic, a ForceField shell for shimmer
--- and a few default sparkles. Hits flash a neon ball that swells and fades; splashes add
--- a flat ring.
+-- Cheap on purpose: a shot is one to three anchored blocks moved once a frame and a Trail
+-- (FaceCamera, so it reads from any angle). Every Ranged weapon shoots the same arrow
+-- (QM, Oct 25: its Size and TrailColor differ). Magic is built from its numbers
+-- (Config.Shots.Magic, tunable live): a neon core, a ForceField shell for shimmer, a
+-- trail, a few default sparkles, little bits orbiting it, and a flicker for lightning; a
+-- Bomb is a dark ball with a lit fuse. Hits flash a neon ball that swells and fades;
+-- splashes add a flat ring.
 --
 --   Shots.fire(character, id, yaw, seed)   -- a weapon's volley from that rider (seed: its
 --                                          magic shots' random launch angles)
@@ -88,41 +91,47 @@ local RAINBOW = ColorSequence.new({
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 140, 255)),
 })
 
--- a shot's look, as a model whose PrimaryPart is moved each frame (facing -Z = its way)
-local function build(id, s)
+-- a shot's look, as a model whose PrimaryPart is moved each frame (facing -Z = its way).
+-- Returns the drawing: { model, spin = { speed, axis }, core, shell, orbit = { parts },
+-- orbitRadius, flicker, color }
+local function build(s)
 	local look = s.Look or "Arrow"
 	local size = s.Size or 1
 	local color = s.Color or WHITE
+	local color2 = s.Color2 or WHITE
 	local model = Instance.new("Model")
+	local d = { model = model, color = color }
 	local root
-	local spin = nil -- (radians a second, and round which axis)
 	if look == "Arrow" or look == "Bolt" or look == "Needle" then
-		local len = if look == "Arrow" then 2.2 elseif look == "Bolt" then 1.5 else 1.3
-		local thick = if look == "Bolt" then 0.18 elseif look == "Needle" then 0.09 else 0.12
+		-- (every Ranged weapon's arrow: QM, Oct 25; Size scales it, TrailColor tints its trail)
+		local len = (if look == "Needle" then 1.3 else 2.2) * size
+		local thick = (if look == "Needle" then 0.09 else 0.12) * size
 		local shaft = if look == "Needle" then Color3.fromRGB(246, 236, 210) else Color3.fromRGB(117, 71, 34)
 		root = block(model, Vector3.new(thick, thick, len), CFrame.new(), shaft)
 		if look ~= "Needle" then
-			block(model, Vector3.new(0.3, 0.3, 0.3), CFrame.new(0, 0, -len / 2) * CFrame.Angles(0, math.rad(45), 0), Color3.fromRGB(200, 206, 216))
-			block(model, Vector3.new(0.04, 0.42, 0.5), CFrame.new(0, 0, len / 2 - 0.2), if look == "Bolt" then Color3.fromRGB(200, 40, 40) else WHITE)
+			block(model, Vector3.one * 0.3 * size, CFrame.new(0, 0, -len / 2) * CFrame.Angles(0, math.rad(45), 0), Color3.fromRGB(200, 206, 216))
+			block(model, Vector3.new(0.04, 0.42, 0.5) * size, CFrame.new(0, 0, len / 2 - 0.2 * size), WHITE)
 		end
-		trail(root, if look == "Needle" then 0.25 else 0.35, if look == "Needle" then Color3.fromRGB(150, 255, 120) else WHITE, 0.12)
-	elseif look == "Orb" or look == "Fireball" then
-		local core = 0.8 * size
-		root = block(model, Vector3.one * core, CFrame.new(), color, { Shape = Enum.PartType.Ball, Material = Enum.Material.Neon })
-		block(model, Vector3.one * core * 1.6, CFrame.new(), color, {
+		local tint = s.TrailColor or (if look == "Needle" then Color3.fromRGB(150, 255, 120) else WHITE)
+		trail(root, 0.35 * size, tint, s.TrailLength or 0.12)
+		d.color = tint
+	elseif look == "Bomb" then
+		-- a bomb: a dark ball with a lit fuse, tumbling
+		local r = 0.9 * size
+		root = block(model, Vector3.one * r, CFrame.new(), color, { Shape = Enum.PartType.Ball })
+		block(model, Vector3.new(0.12, 0.3, 0.12) * size, CFrame.new(0, r * 0.55, 0), Color3.fromRGB(120, 90, 60))
+		local spark = block(model, Vector3.one * 0.2 * size, CFrame.new(0, r * 0.55 + 0.18 * size, 0), color2, {
 			Shape = Enum.PartType.Ball,
-			Material = Enum.Material.ForceField,
-			Transparency = 0.1,
+			Material = Enum.Material.Neon,
 		})
-		local tail = if look == "Fireball"
-			then ColorSequence.new(Color3.fromRGB(255, 220, 90), Color3.fromRGB(255, 50, 20))
-			else ColorSequence.new(WHITE, color)
-		trail(root, core * 1.1, tail, if look == "Fireball" then 0.3 else 0.2, 1)
-		sparkles(root, color, 0.35 * size, if look == "Fireball" then 30 else 14)
+		sparkles(spark, color2, (s.SparkleSize or 0.35) * size, s.Sparkles or 20)
+		trail(root, r * 0.6, color2, s.TrailLength or 0.15, 0.6)
+		d.spin = { speed = math.rad(s.Spin or 0), axis = "X" }
+		d.color = color2
 	elseif look == "Petal" then
-		root = block(model, Vector3.new(0.75, 0.12, 0.5), CFrame.new(), color, { Material = Enum.Material.Neon })
-		trail(root, 0.4, ColorSequence.new(Color3.fromRGB(255, 200, 210), color), 0.18, 1)
-		spin = { speed = 14, axis = "Y" }
+		root = block(model, Vector3.new(0.75, 0.12, 0.5) * size, CFrame.new(), color, { Material = Enum.Material.Neon })
+		trail(root, 0.4 * size, ColorSequence.new(color2, color), s.TrailLength or 0.18, 1)
+		d.spin = { speed = 14, axis = "Y" }
 	elseif look == "Horn" or look == "Egg" then
 		root = block(model, Vector3.one * 0.2, CFrame.new(), WHITE, { Transparency = 1 })
 		local held = Weapons.makeModel(if look == "Horn" then "UnicornHorn" else "GoldenEgg", if look == "Horn" then 0.9 else 1.3 * size)
@@ -137,11 +146,40 @@ local function build(id, s)
 		end
 		held.Parent = model
 		trail(root, 0.6, if look == "Horn" then RAINBOW else ColorSequence.new(Color3.fromRGB(255, 220, 90)), 0.22, 0.8)
-		spin = if look == "Horn" then { speed = 25, axis = "Z" } else { speed = 12, axis = "X" }
+		d.spin = if look == "Horn" then { speed = 25, axis = "Z" } else { speed = 12, axis = "X" }
+		d.color = if look == "Horn" then WHITE else Color3.fromRGB(255, 220, 90)
+	else
+		-- magic (Orb, Fireball): built from its numbers (Config.Shots.Magic)
+		local core = 0.8 * size
+		root = block(model, Vector3.one * core, CFrame.new(), color, { Shape = Enum.PartType.Ball, Material = Enum.Material.Neon })
+		d.core, d.coreSize = root, core
+		local shell = s.ShellSize or 1.6
+		if shell > 0 then
+			d.shell = block(model, Vector3.one * core * shell, CFrame.new(), color, {
+				Shape = Enum.PartType.Ball,
+				Material = Enum.Material.ForceField,
+				Transparency = s.ShellTransparency or 0.1,
+			})
+			d.shellSize = core * shell
+		end
+		trail(root, core * (s.TrailWidth or 1.1), ColorSequence.new(color2, color), s.TrailLength or 0.2, 1)
+		if (s.Sparkles or 0) > 0 then
+			sparkles(root, color2, (s.SparkleSize or 0.35) * size, s.Sparkles)
+		end
+		d.flicker = s.Flicker or 0
+		d.orbit = {}
+		for _ = 1, math.floor(s.Orbit or 0) do
+			table.insert(d.orbit, block(folder, Vector3.one * core * 0.35, CFrame.new(), color2, {
+				Shape = Enum.PartType.Ball,
+				Material = Enum.Material.Neon,
+			}))
+		end
+		d.orbitRadius = core * (s.OrbitRadius or 1)
+		d.spinRate = math.rad(s.Spin or 0)
 	end
 	model.PrimaryPart = root
 	model.Parent = folder
-	return model, spin, color
+	return d
 end
 
 local function pop(at, color, size)
@@ -172,16 +210,17 @@ end
 
 function Shots.fire(character, id, yaw, seed)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
-	local w = Config.Weapons[id]
-	if not (root and w and w.Shot) then
+	local w = Weapons.get(id) -- (with any live tuning: client/WeaponTuning)
+	if not (root and w.Shot) then
 		return
 	end
 	local hips = Riding.hips(character)
 	local y = (if hips then hips.Y else root.Position.Y) + Config.Shots.Height
 	local origin = Vector3.new(root.Position.X, y, root.Position.Z)
 	for _, shot in Projectiles.spawn(id, origin, yaw, seed) do
-		local model, spin, color = build(id, w.Shot)
-		table.insert(active, { shot = shot, model = model, spin = spin, color = color, s = w.Shot })
+		local d = build(w.Shot)
+		d.shot, d.s = shot, w.Shot
+		table.insert(active, d)
 	end
 end
 
@@ -209,13 +248,13 @@ RunService.RenderStepped:Connect(function(dt)
 		local shot = a.shot
 		for _ in Projectiles.step(shot, dt, list) do
 			local at = shot.pos
-			pop(at, if a.s.Look == "Arrow" or a.s.Look == "Bolt" then WHITE else a.color, if a.s.Size then 1.2 * a.s.Size else 1.2)
+			pop(at, a.color, 1.2 * (a.s.Size or 1))
 			if shot.splash then
 				ring(Vector3.new(at.X, at.Y - 1.5, at.Z), a.color, shot.splash)
 			end
 		end
 		local cf = CFrame.lookAt(shot.pos, shot.pos + shot.dir)
-		if a.spin then
+		if a.spin and a.spin.speed ~= 0 then
 			local t = shot.age * a.spin.speed
 			cf *= if a.spin.axis == "Y"
 				then CFrame.Angles(0, t, 0)
@@ -223,6 +262,22 @@ RunService.RenderStepped:Connect(function(dt)
 				else CFrame.Angles(0, 0, t)
 		end
 		a.model:PivotTo(cf)
+		-- (lightning: the core and shell jitter in size)
+		if a.flicker and a.flicker > 0 then
+			local k = 1 + (math.random() * 2 - 1) * a.flicker
+			a.core.Size = Vector3.one * a.coreSize * k
+			if a.shell then
+				a.shell.Size = Vector3.one * a.shellSize * (2 - k)
+			end
+		end
+		-- (bits circling it, in the flat plane, round its path)
+		if a.orbit then
+			local n = #a.orbit
+			for k, part in a.orbit do
+				local angle = shot.age * a.spinRate + (k - 1) * 2 * math.pi / n
+				part.CFrame = cf * CFrame.new(math.cos(angle) * a.orbitRadius, math.sin(angle) * a.orbitRadius, 0)
+			end
+		end
 		if shot.dead then
 			table.remove(active, i)
 			-- (the trail's tail fades out on its own)
@@ -234,6 +289,9 @@ RunService.RenderStepped:Connect(function(dt)
 				end
 			end
 			Debris:AddItem(a.model, 0.5)
+			for _, part in a.orbit or {} do
+				part:Destroy()
+			end
 		end
 	end
 end)

@@ -277,6 +277,28 @@ giveRequest.OnServerEvent:Connect(function(player, message)
 	end
 end)
 
+-- Live weapon tuning (client/WeaponTuning: Workspace > Weapon): a tuned value comes in
+-- here so the server's shots and slashes use it too, and goes on to everyone else's game.
+-- key false: back to Config. The game's owner, or anyone in a Studio playtest.
+local weaponTune = Instance.new("RemoteEvent")
+weaponTune.Name = "WeaponTune"
+weaponTune.Parent = ReplicatedStorage
+weaponTune.OnServerEvent:Connect(function(player, id, key, value)
+	if not mayReboss(player) or not Weapons.exists(id) then
+		return
+	end
+	if key == false then
+		Weapons.untune(id)
+	elseif not Weapons.tune(id, key, value) then
+		return
+	end
+	for _, other in Players:GetPlayers() do
+		if other ~= player then
+			weaponTune:FireClient(other, id, key, value)
+		end
+	end
+end)
+
 -- /spin [boss]: the weapon spin a boss kill gives (QM, Oct 25: for trying it), as if that
 -- boss (a Config.Bosses key or name, the Mother Hen if none) had died. /weapon <weapon>
 -- owns and equips one ("/weapon" alone lists them). The game's owner, or anyone in a

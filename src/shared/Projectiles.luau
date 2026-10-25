@@ -4,7 +4,7 @@
 --
 -- A shot flies flat from the rider, at its weapon's Speed, until it's gone its Range or
 -- hit as many targets as it may (1 + Pierce). A Magic shot with Homing bends toward the
--- nearest target ahead of it (within Config.Shots.HomingCone) by up to Homing degrees a
+-- nearest target ahead of it (within its HomingCone) by up to Homing degrees a
 -- second: enough to curve onto a target that's moving, not enough to turn round. Targets
 -- are flat circles: { body, pos, radius } (a boss's or mob's body and its Radius).
 --
@@ -13,6 +13,7 @@
 --                                                         -- shot.dead once it's spent
 
 local Config = require(script.Parent.Config)
+local Weapons = require(script.Parent.Weapons.Weapons)
 
 local Projectiles = {}
 
@@ -25,18 +26,18 @@ local function dirOf(yaw)
 end
 
 function Projectiles.spawn(id, origin, yaw, seed)
-	local w = Config.Weapons[id]
-	local s = w and w.Shot
+	local w = Weapons.get(id) -- (with any live tuning: Weapons.tune)
+	local s = w.Shot
 	if not s then
 		return {}
 	end
-	local count = s.Count or 1
+	local count = math.max(1, math.floor(s.Count or 1))
 	local spread = math.rad(s.Spread or 0)
 	local shots = {}
-	-- (a Magic shot sets off up to Config.Shots.MagicLaunch degrees off the aim, at random
+	-- (a Magic shot sets off up to its Launch degrees off the aim, at random
 	-- from the shot's seed, so its homing curves it in: QM; the server and every client use
 	-- the same seed, so they all fly it the same way)
-	local wobble = if w.Type == "Magic" then math.rad(Config.Shots.MagicLaunch or 0) else 0
+	local wobble = if w.Type == "Magic" then math.rad(s.Launch or 0) else 0
 	local rng = Random.new(math.floor(seed or 0))
 	for i = 1, count do
 		local offset = if count > 1 then spread * ((i - 1) / (count - 1) - 0.5) else 0
@@ -51,8 +52,9 @@ function Projectiles.spawn(id, origin, yaw, seed)
 			left = s.Range or 50,
 			radius = Config.Shots.Radius * (s.Size or 1),
 			homing = math.rad(s.Homing or 0),
-			hits = 1 + (s.Pierce or 0),
-			splash = s.Splash,
+			hits = 1 + math.max(0, math.floor(s.Pierce or 0)),
+			splash = if (s.Splash or 0) > 0 then s.Splash else nil,
+			cone = math.cos(math.rad(s.HomingCone or 135)),
 			hit = {}, -- [body] = true: each target only once
 			age = 0,
 			dead = false,
@@ -76,7 +78,7 @@ function Projectiles.step(shot, dt, targets)
 	shot.age += dt
 	-- homing: turn toward the nearest target ahead, up to `homing` radians a second
 	if shot.homing > 0 then
-		local cone = math.cos(math.rad(Config.Shots.HomingCone))
+		local cone = shot.cone
 		local best, bestDist = nil, math.huge
 		for _, t in targets do
 			if not shot.hit[t.body] then

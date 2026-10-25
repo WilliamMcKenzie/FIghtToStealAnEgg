@@ -643,120 +643,221 @@ return {
 	--            shows BONUS when it lands
 	--   Slash    (Melee) Config.Slash values to change: Arc, Radius, Forward, Width,
 	--            Cooldown, AttackRange, Color, Variety...
-	--   Shot     (Ranged, Magic) Look (how client/Shots draws it: Arrow, Bolt, Needle, Orb,
-	--            Petal, Fireball, Horn, Egg), Cooldown (s), Range and Speed (studs, studs/s),
-	--            Count (shots at once) fanned over Spread degrees, Homing (degrees/s it can
-	--            turn toward a target, Magic), Pierce (extra targets it goes through),
-	--            Splash (studs: hits everything that close to where it lands), Size, Color
+	--   Shot     (Ranged, Magic) values over Config.Shots.Ranged or .Magic (below: every
+	--            value is listed there)
+	-- Every weapon's values can be tuned live in Play: hold it and edit Workspace > Weapon
+	-- (client/WeaponTuning); tick PrintConfig there for its block to paste back here.
 	Weapons = {
-		-- melee
+		-- everyone's to start (never drops)
 		Sword = { Name = "Sword", Type = "Melee", Rarity = "Common", Damage = 1 },
-		Dagger = {
-			Name = "Dagger",
+		-- QM's weapons (Oct 25), in four tiers: Common, Uncommon, Rare, Epic. Every Ranged one
+		-- shoots the same arrow (only its numbers and trail differ); Magic ones are drawn from
+		-- their numbers (client/Shots). Tune any of them live: Workspace > Weapon.
+		-- tier 1
+		KendoStick = {
+			Name = "Kendo Stick",
 			Type = "Melee",
 			Rarity = "Common",
-			Damage = 0.7,
+			Damage = 0.9,
 			Weight = 30,
-			Slash = { Cooldown = 0.2, Radius = 7, Width = 2.2, Arc = 150, AttackRange = 9 },
-		},
-		BattleAxe = {
-			Name = "Battle Axe",
-			Type = "Melee",
-			Rarity = "Rare",
-			Damage = 1.8,
-			Weight = 15,
 			Slash = {
-				Cooldown = 0.55,
-				Radius = 12.5,
-				Width = 4,
-				Arc = 220,
-				AttackRange = 14,
-				Color = Color3.fromRGB(255, 236, 200),
+				Cooldown = 0.25,
+				Radius = 8,
+				Width = 2.4,
+				Arc = 150,
+				AttackRange = 10,
+				Color = Color3.fromRGB(255, 240, 210),
 			},
 		},
-		Spear = {
-			Name = "Spear",
+		Shortsword = {
+			Name = "Shortsword",
 			Type = "Melee",
-			Rarity = "Rare",
-			Damage = 1.3,
-			Weight = 15,
-			Slash = { Cooldown = 0.4, Arc = 80, Radius = 9, Forward = 7, Width = 2.5, AttackRange = 18 },
+			Rarity = "Common",
+			Damage = 1.1,
+			Weight = 30,
+			Slash = { Cooldown = 0.28, Radius = 8.5, Arc = 170, AttackRange = 10 },
 		},
-		-- ranged
-		Bow = {
-			Name = "Bow",
+		Shortbow = {
+			Name = "Shortbow",
 			Type = "Ranged",
 			Rarity = "Common",
 			Damage = 0.8,
 			Weight = 30,
-			Shot = { Look = "Arrow", Cooldown = 0.5, Range = 55, Speed = 110 },
+			Shot = { Cooldown = 0.45, Range = 45, Speed = 100, Size = 0.9 },
 		},
-		Crossbow = {
-			Name = "Crossbow",
-			Type = "Ranged",
-			Rarity = "Rare",
-			Damage = 1.6,
-			Weight = 15,
-			Shot = { Look = "Bolt", Cooldown = 0.9, Range = 70, Speed = 160, Pierce = 1 },
-		},
-		TripleBow = {
-			Name = "Triple Bow",
-			Type = "Ranged",
-			Rarity = "Epic",
-			Damage = 0.65,
-			Weight = 6,
-			Shot = { Look = "Arrow", Cooldown = 0.55, Range = 55, Speed = 110, Count = 3, Spread = 16 },
-		},
-		-- magic
-		SparkWand = {
-			Name = "Spark Wand",
+		WindStaff = {
+			Name = "Wind Staff",
 			Type = "Magic",
 			Rarity = "Common",
 			Damage = 0.9,
 			Weight = 30,
 			Shot = {
-				Look = "Orb",
-				Cooldown = 0.6,
-				Range = 50,
-				Speed = 55,
-				Homing = 200,
-				Size = 1,
-				Color = Color3.fromRGB(110, 230, 255),
+				Speed = 60,
+				Homing = 220,
+				Color = Color3.fromRGB(200, 255, 240),
+				Color2 = Color3.fromRGB(255, 255, 255),
+				ShellSize = 2,
+				ShellTransparency = 0.3,
+				Sparkles = 6,
+				Orbit = 3,
+				OrbitRadius = 0.9,
+				Spin = 720,
 			},
+		},
+		-- tier 2
+		Axe = {
+			Name = "Axe",
+			Type = "Melee",
+			Rarity = "Uncommon",
+			Damage = 1.7,
+			Weight = 18,
+			Slash = { Cooldown = 0.5, Radius = 11, Width = 3.6, Arc = 200, AttackRange = 12 },
+		},
+		Longsword = {
+			Name = "Longsword",
+			Type = "Melee",
+			Rarity = "Uncommon",
+			Damage = 1.5,
+			Weight = 18,
+			Slash = { Cooldown = 0.38, Radius = 13, Forward = 3.5, Width = 3, Arc = 160, AttackRange = 15 },
+		},
+		Longbow = {
+			Name = "Longbow",
+			Type = "Ranged",
+			Rarity = "Uncommon",
+			Damage = 1.6,
+			Weight = 18,
+			Shot = { Cooldown = 0.8, Range = 75, Speed = 150, Size = 1.2 },
+		},
+		LightningStaff = {
+			Name = "Lightning Staff",
+			Type = "Magic",
+			Rarity = "Uncommon",
+			Damage = 1.5,
+			Weight = 18,
+			Shot = {
+				Speed = 85,
+				Homing = 260,
+				Color = Color3.fromRGB(255, 244, 120),
+				Color2 = Color3.fromRGB(130, 200, 255),
+				Size = 0.8,
+				Flicker = 0.6,
+				TrailLength = 0.12,
+				Sparkles = 30,
+			},
+		},
+		-- tier 3
+		WaterStaff = {
+			Name = "Water Staff",
+			Type = "Magic",
+			Rarity = "Rare",
+			Damage = 1.9,
+			Weight = 9,
+			Shot = {
+				Speed = 50,
+				Homing = 180,
+				Splash = 6,
+				Size = 1.3,
+				Color = Color3.fromRGB(70, 160, 255),
+				Color2 = Color3.fromRGB(200, 240, 255),
+				ShellSize = 1.4,
+				ShellTransparency = 0,
+				Orbit = 2,
+				OrbitRadius = 0.8,
+				Spin = 360,
+			},
+		},
+		Bomb = {
+			Name = "Bomb",
+			Type = "Magic", -- (thrown, but it homes like magic: QM)
+			Rarity = "Rare",
+			Damage = 2.8,
+			Weight = 9,
+			Shot = {
+				Look = "Bomb",
+				Cooldown = 1.1,
+				Speed = 40,
+				Homing = 150,
+				Splash = 10,
+				Size = 1.4,
+				Color = Color3.fromRGB(40, 40, 48),
+				Color2 = Color3.fromRGB(255, 170, 60),
+				Sparkles = 20,
+				Spin = 400,
+			},
+		},
+		Waraxe = {
+			Name = "Waraxe",
+			Type = "Melee",
+			Rarity = "Rare",
+			Damage = 2.6,
+			Weight = 9,
+			-- (double bladed, a big sweep round you: QM)
+			Slash = {
+				Arc = 300,
+				Forward = 1,
+				Radius = 15,
+				Width = 5,
+				Cooldown = 0.65,
+				AttackRange = 15,
+				Color = Color3.fromRGB(255, 225, 190),
+			},
+		},
+		Club = {
+			Name = "Club",
+			Type = "Melee",
+			Rarity = "Rare",
+			Damage = 2.4,
+			Weight = 9,
+			Slash = { Cooldown = 0.55, Radius = 10, Width = 5, Arc = 140, Belly = 0.4, OuterSegments = 3, AttackRange = 11 },
+		},
+		-- tier 4
+		Crossbow = {
+			Name = "Crossbow",
+			Type = "Ranged",
+			Rarity = "Epic",
+			Damage = 3,
+			Weight = 4,
+			Shot = { Cooldown = 0.9, Range = 70, Speed = 180, Pierce = 1, Size = 1.1 },
+		},
+		NatureBow = {
+			Name = "Nature Bow",
+			Type = "Ranged",
+			Rarity = "Epic",
+			Damage = 1.3,
+			Weight = 4,
+			Shot = {
+				Cooldown = 0.6,
+				Range = 60,
+				Speed = 120,
+				Count = 3,
+				Spread = 18,
+				TrailColor = Color3.fromRGB(140, 255, 110),
+			},
+		},
+		BloodBow = {
+			Name = "Blood Bow",
+			Type = "Ranged",
+			Rarity = "Epic",
+			Damage = 2.2,
+			Weight = 4,
+			Shot = { Cooldown = 0.55, Range = 65, Speed = 140, Pierce = 2, TrailColor = Color3.fromRGB(230, 30, 50) },
 		},
 		FireStaff = {
 			Name = "Fire Staff",
 			Type = "Magic",
-			Rarity = "Rare",
-			Damage = 1.2,
-			Weight = 15,
-			Shot = {
-				Look = "Orb",
-				Cooldown = 0.8,
-				Range = 50,
-				Speed = 50,
-				Homing = 160,
-				Splash = 7,
-				Size = 1.4,
-				Color = Color3.fromRGB(255, 130, 40),
-			},
-		},
-		ArcaneOrb = {
-			Name = "Arcane Orb",
-			Type = "Magic",
 			Rarity = "Epic",
-			Damage = 0.6,
-			Weight = 6,
+			Damage = 2.6,
+			Weight = 4,
 			Shot = {
-				Look = "Orb",
-				Cooldown = 0.7,
-				Range = 50,
-				Speed = 50,
-				Homing = 260,
-				Count = 3,
-				Spread = 50,
-				Size = 0.9,
-				Color = Color3.fromRGB(196, 110, 255),
+				Speed = 55,
+				Homing = 170,
+				Splash = 8,
+				Size = 1.6,
+				Color = Color3.fromRGB(255, 110, 30),
+				Color2 = Color3.fromRGB(255, 220, 90),
+				Sparkles = 30,
+				TrailLength = 0.3,
 			},
 		},
 		-- boss-only (super rare): one for each boss in BossPools
@@ -785,6 +886,7 @@ return {
 				Count = 5,
 				Spread = 70,
 				Color = Color3.fromRGB(235, 70, 90),
+				Color2 = Color3.fromRGB(255, 200, 210),
 			},
 		},
 		UnicornHorn = {
@@ -856,6 +958,9 @@ return {
 				Splash = 12,
 				Size = 2.4,
 				Color = Color3.fromRGB(255, 90, 30),
+				Color2 = Color3.fromRGB(255, 220, 90),
+				Sparkles = 30,
+				TrailLength = 0.3,
 			},
 		},
 	},
@@ -870,8 +975,49 @@ return {
 	-- shots (Shared/Projectiles): what Ranged and Magic weapons fire
 	Shots = {
 		Height = 0.8, -- above the rider's hips, like the slash
-		Radius = 0.6, -- a shot's own width for hitting (studs)
-		HomingCone = 135, -- a missile only bends toward targets this many degrees either side of its path (wide: magic sets off up to MagicLaunch off the aim)
-		MagicLaunch = 90, -- a Magic shot sets off up to this many degrees either side of the aim, at random (QM)
+		Radius = 0.6, -- a shot's own width for hitting (studs), times its Size
+		-- every Ranged weapon's Shot starts from these (its own values go over them)
+		Ranged = {
+			Look = "Arrow", -- (the one arrow every Ranged weapon shoots; boss ones have their own)
+			Cooldown = 0.6, -- seconds between shots
+			Range = 55, -- studs it flies
+			Speed = 110, -- studs a second
+			Size = 1, -- the arrow's size (and how wide it hits)
+			Count = 1, -- shots at once...
+			Spread = 0, -- ...fanned over this many degrees
+			Pierce = 0, -- extra targets it goes through
+			Splash = 0, -- studs: hits everything this close to where it lands (0: none)
+			TrailColor = Color3.fromRGB(255, 255, 255),
+			TrailLength = 0.12, -- seconds the trail lasts
+		},
+		-- every Magic weapon's Shot starts from these. Its look is built from the numbers: a
+		-- glowing core (Color), a ForceField shell (ShellSize x the core, 0 for none), a trail
+		-- from Color2 to Color, sparkles, bits orbiting it, and a flicker
+		Magic = {
+			Look = "Orb", -- Orb (or Fireball, the same), Bomb, Petal
+			Cooldown = 0.7,
+			Range = 50,
+			Speed = 55,
+			Size = 1,
+			Count = 1,
+			Spread = 0,
+			Pierce = 0,
+			Splash = 0,
+			Homing = 200, -- degrees a second it can turn toward a target: it guides, it can't loop round
+			HomingCone = 135, -- it only bends toward targets this many degrees either side of its path
+			Launch = 90, -- sets off up to this many degrees either side of the aim, at random (QM)
+			Color = Color3.fromRGB(110, 230, 255),
+			Color2 = Color3.fromRGB(255, 255, 255),
+			ShellSize = 1.6,
+			ShellTransparency = 0.1,
+			TrailLength = 0.2,
+			TrailWidth = 1.1, -- times the core
+			Sparkles = 14, -- a second
+			SparkleSize = 0.35,
+			Flicker = 0, -- 0..1: the core jitters in size every frame (lightning)
+			Spin = 0, -- degrees a second it turns (its orbiting bits, a bomb's tumble)
+			Orbit = 0, -- little bits circling it
+			OrbitRadius = 1, -- times the core
+		},
 	},
 }
