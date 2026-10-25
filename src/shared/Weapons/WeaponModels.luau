@@ -125,6 +125,7 @@ end
 table.insert(bloom, block(V(0.32, 0.32, 0.16), V(0, 1.2, 0.04), rgb(255, 220, 90), 45, { neon = true }))
 
 return {
+	Staff = model(staff(WOOD, DARK_WOOD, rgb(180, 140, 255), true)),
 	WindStaff = model(staff(rgb(220, 226, 230), rgb(170, 220, 210), rgb(200, 255, 240), true)),
 	LightningStaff = model(staff(rgb(60, 60, 80), rgb(255, 230, 90), rgb(255, 244, 120))),
 	WaterStaff = model(staff(rgb(40, 90, 150), rgb(120, 200, 255), rgb(70, 160, 255), true)),

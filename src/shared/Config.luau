@@ -744,8 +744,8 @@ return {
 			Weight = 30,
 			Shot = { Cooldown = 0.45, Range = 45, Speed = 100, Size = 0.9 },
 		},
-		WindStaff = {
-			Name = "Wind Staff",
+		Staff = { -- (a plain staff, no element: QM, Oct 25)
+			Name = "Staff",
 			Type = "Magic",
 			Rarity = "Common",
 			Damage = 0.9,
@@ -754,7 +754,7 @@ return {
 				Speed = 60,
 				Homing = 220,
 				Size = 0.9,
-				Color = Color3.fromRGB(90, 230, 200),
+				Color = Color3.fromRGB(180, 140, 255),
 			},
 		},
 		-- tier 2
@@ -781,6 +781,19 @@ return {
 			Damage = 1.6,
 			Weight = 18,
 			Shot = { Cooldown = 0.8, Range = 75, Speed = 150, Size = 1.2 },
+		},
+		WindStaff = {
+			Name = "Wind Staff",
+			Type = "Magic",
+			Rarity = "Uncommon",
+			Damage = 1.2,
+			Weight = 18,
+			Shot = {
+				Speed = 70,
+				Homing = 240,
+				Size = 0.9,
+				Color = Color3.fromRGB(90, 230, 200),
+			},
 		},
 		LightningStaff = {
 			Name = "Lightning Staff",
