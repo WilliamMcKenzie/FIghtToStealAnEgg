@@ -866,7 +866,7 @@ return {
 	WeaponGrip = {
 		GripAngle = Vector3.new(0, 90, 0),
 		GripOffset = Vector3.new(0, 0, -0.25),
-		Ranged = { GripOffset = Vector3.new(0, 0, 0.25) }, -- (bows: QM)
+		Ranged = { GripOffset = Vector3.new(0.5, 0, 0.25) }, -- (bows: QM)
 	},
 
 	-- weapons (QM, Oct 25): bosses drop them. Kill a boss and everyone in its fight gets a
@@ -928,7 +928,7 @@ return {
 			Rarity = "Common",
 			Damage = 0.8,
 			Weight = 30,
-			Shot = { Cooldown = 0.45, Range = 45, Speed = 100, Size = 0.9 },
+			Shot = { Cooldown = 0.45, Range = 45, Size = 1.8 },
 		},
 		Staff = { -- (a plain staff, no element: QM, Oct 25)
 			Name = "Staff",
@@ -990,7 +990,7 @@ return {
 			Rarity = "Uncommon",
 			Damage = 1.6,
 			Weight = 18,
-			Shot = { Cooldown = 0.8, Range = 75, Speed = 150, Size = 1.2 },
+			Shot = { Cooldown = 0.8, Range = 75, Size = 2.4 },
 		},
 		WindStaff = {
 			Name = "Wind Staff",
@@ -1107,7 +1107,6 @@ return {
 			Shot = {
 				Cooldown = 0.6,
 				Range = 60,
-				Speed = 120,
 				Count = 3,
 				Spread = 18,
 				TrailColor = Color3.fromRGB(140, 255, 110),
@@ -1119,7 +1118,7 @@ return {
 			Rarity = "Epic",
 			Damage = 2.2,
 			Weight = 4,
-			Shot = { Cooldown = 0.55, Range = 65, Speed = 140, Pierce = 2, TrailColor = Color3.fromRGB(230, 30, 50) },
+			Shot = { Cooldown = 0.55, Range = 65, Pierce = 2, TrailColor = Color3.fromRGB(230, 30, 50) },
 		},
 		FireStaff = {
 			Name = "Fire Staff",
@@ -1174,14 +1173,15 @@ return {
 			Look = "Arrow", -- (the one arrow every Ranged weapon shoots; boss ones have their own)
 			Cooldown = 0.6, -- seconds between shots
 			Range = 55, -- studs it flies
-			Speed = 110, -- studs a second
-			Size = 1, -- the arrow's size (and how wide it hits)
+			Speed = 80, -- studs a second (every bow: QM, Oct 25)
+			Size = 2, -- the arrow's size (and how wide it hits) (QM: 2x)
 			Count = 1, -- shots at once...
 			Spread = 0, -- ...fanned over this many degrees
 			Pierce = 0, -- extra targets it goes through
 			Splash = 0, -- studs: hits everything this close to where it lands (0: none)
 			TrailColor = Color3.fromRGB(255, 255, 255),
 			TrailLength = 0.12, -- seconds the trail lasts
+			TrailTransparency = 0.6, -- where it starts, fading out (QM: half as opaque)
 			-- sounds (QM, Oct 25), played where it's fired and where it lands
 			FireSound = "rbxassetid://173979241", -- Bow-Fire
 			HitSound = "rbxassetid://114751690910911", -- Arrowhit1

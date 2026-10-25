@@ -104,7 +104,7 @@ local function build(s)
 		block(model, Vector3.one * 0.3 * size, CFrame.new(0, 0, -len / 2) * CFrame.Angles(0, math.rad(45), 0), Color3.fromRGB(200, 206, 216))
 		block(model, Vector3.new(0.04, 0.42, 0.5) * size, CFrame.new(0, 0, len / 2 - 0.2 * size), WHITE)
 		local tint = s.TrailColor or WHITE
-		trail(root, 0.35 * size, tint, s.TrailLength or 0.12)
+		trail(root, 0.35 * size, tint, s.TrailLength or 0.12, nil, s.TrailTransparency)
 		d.color = tint
 	elseif look == "Petal" then
 		root = block(model, Vector3.new(0.75, 0.12, 0.5) * size, CFrame.new(), color, { Material = Enum.Material.Neon })
