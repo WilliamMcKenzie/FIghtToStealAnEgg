@@ -20,7 +20,6 @@ return {
 		{ name = "cube_4", bone = "group", class = "CornerWedgePart", size = Vector3.new(0.35, 0.4, 0.35), cframe = CFrame.new(0.175, 2.9, 0.175, 0, 0, 1, 0, 1, 0, -1, 0, 0), color = Color3.fromRGB(255, 61, 61), plain = true },
 		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.2, 2.2, 0.1), cframe = CFrame.new(0, 0.6, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(117, 71, 34) },
 		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.4, 0.3, 0.3), cframe = CFrame.new(0, 1.55, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(235, 137, 49) },
-		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.25, 1, 0.15), cframe = CFrame.new(0, 0.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(251, 160, 160) },
 		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.8, 0.15, 0.8), cframe = CFrame.new(0, 1.725, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(247, 226, 107) },
 		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.7, 0.4, 0.1), cframe = CFrame.new(-0.56142, 1.87177, 0, 0.793353, 0.608761, 0, -0.608761, 0.793353, 0, 0, 0, 1), color = Color3.fromRGB(247, 226, 107) },
 		{ name = "cube", bone = "short_sword", class = "CornerWedgePart", size = Vector3.new(0.05, 0.3397, 0.1804), cframe = CFrame.new(-0.526832, 2.31141, 0.025, 0, 0.608761, 0.793353, 0, 0.793353, -0.608761, -1, 0, 0), color = Color3.fromRGB(247, 226, 107), plain = true },
