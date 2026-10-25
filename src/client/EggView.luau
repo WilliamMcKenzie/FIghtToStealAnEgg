@@ -20,7 +20,7 @@ local function add(box)
 	if views[box] or not box:IsA("BasePart") then
 		return
 	end
-	local ok, egg = pcall(Egg.new, box:GetAttribute("EggKind") or "Pig", box:GetAttribute("EggScale") or 1)
+	local ok, egg = pcall(Egg.new, box:GetAttribute("EggKind") or "Horse", box:GetAttribute("EggScale") or 1)
 	if not ok then
 		warn("EggView: " .. tostring(egg))
 		return

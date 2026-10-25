@@ -316,17 +316,18 @@ return {
 	Eggs = {
 		StealTime = 0.6, -- seconds holding E
 		Respawn = 40, -- seconds before a nest lays again
-		-- (QM, Oct 25: real eggs, LassoAPet's, one per animal: Shared/Eggs/<Kind>EggModel)
-		-- each nest lays one of its biome's kinds at random
+		-- (QM, Oct 25: real eggs, LassoAPet's: Shared/Eggs/<Kind>EggModel, one per animal.)
+		-- Each nest lays one of its biome's kinds at random; the Horse is the only animal
+		-- so far, so it's every biome's egg. A new animal: its egg model, then its name here.
 		Kinds = {
-			Meadow = { "Pig", "Bunny", "Fox", "Horse" },
-			Desert = { "Cactus", "Scorpion", "Scarab", "Sandworm" },
-			Ice = { "Penguin", "Snowman", "IceGolem", "Icebringer" },
-			Lava = { "RockHog", "VolcanoTortoise", "Firebird", "FireLobster" },
-			Dungeon = { "SkeletonDog", "Ghost", "Bat", "Beholder" },
-			Castle = { "Werewolf", "BlackCat", "ZombieBear", "Kitsune" },
-			Forest = { "Unicorn", "WispWolf", "ToadstoolFrog", "SwollFairy" },
-			Ocean = { "Clownfish", "Squid", "Starfish", "Kraken" },
+			Meadow = { "Horse" },
+			Desert = { "Horse" },
+			Ice = { "Horse" },
+			Lava = { "Horse" },
+			Dungeon = { "Horse" },
+			Castle = { "Horse" },
+			Forest = { "Horse" },
+			Ocean = { "Horse" },
 		},
 		Scale = { Nest = 1.3, Carried = 0.6, Pen = 0.9 }, -- times the egg's drawing (about 4 studs tall)
 		Twitch = { 3, 8 }, -- seconds between an egg's AFK twitches (random in this range)

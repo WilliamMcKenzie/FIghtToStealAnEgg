@@ -3,7 +3,7 @@
 -- tools/bbmodel_to_luau.py. Every egg shares the same bones (egg, bottom, top), so its
 -- AFK twitch and its hatch (for when hatching comes) fit them all.
 --
---   local egg = Egg.new("Pig", scale)   -- scale: times the drawing (default 1)
+--   local egg = Egg.new("Horse", scale)   -- scale: times the drawing (default 1)
 --   egg.model:PivotTo(cframe)           -- pivot is the egg's base, on the ground
 --   egg:play("twitch")                  -- a quick wobble (or "hatch")
 --   egg:update(dt)                      -- every frame while it may be playing
@@ -43,7 +43,7 @@ function Egg.has(kind)
 end
 
 function Egg.new(kind, scale)
-	local data = KINDS[kind] or KINDS.Pig
+	local data = KINDS[kind] or KINDS.Horse
 	local model, _, bones = Rig.fromData(data, kind .. "Egg", STUD_TEXTURE)
 	model.PrimaryPart.PivotOffset = CFrame.identity
 	scale = scale or 1

@@ -34,7 +34,7 @@ local EGG_HEIGHT = 4 -- studs, an egg's drawing at scale 1 (about)
 
 function Eggs.kindFor(biome)
 	local kinds = Config.Eggs.Kinds[biome]
-	return if kinds and #kinds > 0 then kinds[math.random(#kinds)] else "Pig"
+	return if kinds and #kinds > 0 then kinds[math.random(#kinds)] else "Horse"
 end
 
 function Eggs.make(biome, kind, scale)
