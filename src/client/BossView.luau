@@ -3,7 +3,7 @@
 -- each gets its model (the Horse driver with the animal's own data from Shared/Animals,
 -- by its Model, ModelSize and Tint attributes, so idle, walk and gallop blend by its speed),
 -- stood on the ground under the body and facing its way. When its Health drops it
--- flashes white and the damage pops up over its head; at 0 it sinks and shrinks.
+-- flashes red and the damage pops up over its head; at 0 it stays red as it sinks and shrinks.
 -- Also hands the /boss chat command to the server (BossRequest), and B does the same;
 -- /reboss goes as RebossRequest
 -- (a key that works whatever chat the place uses).
@@ -57,7 +57,10 @@ local function kindOf(body)
 	end
 	return kinds[key] or nil
 end
-local FLASH = 0.08 -- seconds a hit flashes white
+-- a hit tints it red and the tint fades back out, restarting on every hit; the same as
+-- QM's kingdom game (its colour multiplied by #FFB3B3, easing back to its own over 300 ms)
+local FLASH = 0.3 -- seconds a hit's tint takes to fade
+local FLASH_TINT = Color3.fromRGB(255, 179, 179)
 -- damage numbers: red Montserrat with a black outline, popping up over its head (QM)
 local NUMBER_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local NUMBER_SIZE = 20
@@ -71,7 +74,7 @@ local ZZZ_GRADIENT = ColorSequence.new(Color3.fromRGB(255, 246, 232), Color3.fro
 local ZZZ_OUTLINE = Color3.fromRGB(27, 31, 74)
 local SHUT_COLOUR = Color3.fromRGB(30, 23, 40) -- a shut eye's line
 
-local views = {} -- [body] = { animal, last position, colours, flashUntil, diedAt }
+local views = {} -- [body] = { animal, last position, colours, hitAt, diedAt }
 
 -- "-10" over the boss's head: pops in, floats up a little off to one side, fades
 local function damageNumber(body, amount)
@@ -179,7 +182,6 @@ local function add(body)
 		animal = animal,
 		last = body.Position,
 		colours = colours,
-		flashUntil = 0,
 		health = body:GetAttribute("Health"),
 	}
 	-- (the head, for snoring: the neck bone and everything hung off it, their sizes and
@@ -232,7 +234,7 @@ local function add(body)
 	body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
 		if health < view.health then
-			view.flashUntil = os.clock() + FLASH
+			view.hitAt = os.clock()
 			damageNumber(body, view.health - health)
 		end
 		view.health = health
@@ -339,13 +341,17 @@ RunService.RenderStepped:Connect(function(dt)
 				end
 			end
 		end
-		local flashing = now < view.flashUntil
-		if flashing ~= view.flashing then
-			view.flashing = flashing
+		-- (dying, it holds the full tint while it shrinks away)
+		local tint = if view.diedAt then 1 elseif view.hitAt then math.max(1 - (now - view.hitAt) / FLASH, 0) else 0
+		if tint > 0 or view.tinted then
+			view.tinted = tint > 0
+			local g, b = 1 - (1 - FLASH_TINT.G) * tint, 1 - (1 - FLASH_TINT.B) * tint
 			for part, colour in view.colours do
-				part.Color = if flashing then Color3.new(1, 1, 1) else colour
+				if view.eyesShut and view.shut[part] then
+					colour = SHUT_COLOUR -- (a shut eye keeps its dark line under the tint)
+				end
+				part.Color = Color3.new(colour.R, colour.G * g, colour.B * b)
 			end
-			view.eyesShut = nil -- (shut eyes take their dark line back after the flash)
 		end
 	end
 end)
