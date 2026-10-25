@@ -405,6 +405,18 @@ return {
 		StrengthBonus = 0.5,
 	},
 
+	-- rarities (QM, Oct 25): a name's colours by its animal's rarity, a bright fill with a
+	-- dark stroke of the same hue (QM picked Rare's; the rest follow it)
+	Rarities = {
+		Common = { Fill = Color3.fromRGB(235, 235, 235), Stroke = Color3.fromRGB(70, 70, 70) },
+		Uncommon = { Fill = Color3.fromRGB(150, 255, 120), Stroke = Color3.fromRGB(28, 104, 18) },
+		Rare = { Fill = Color3.fromRGB(138, 243, 255), Stroke = Color3.fromRGB(0, 88, 106) }, -- #8AF3FF, #00586A (QM)
+		Epic = { Fill = Color3.fromRGB(214, 156, 255), Stroke = Color3.fromRGB(78, 20, 118) },
+		Legendary = { Fill = Color3.fromRGB(255, 214, 94), Stroke = Color3.fromRGB(122, 74, 0) },
+		Mythic = { Fill = Color3.fromRGB(255, 122, 156), Stroke = Color3.fromRGB(110, 10, 42) },
+	},
+	AnimalRarity = { Horse = "Common" }, -- (the animal you ride; its name shows over you in its rarity's colours)
+
 	-- regions (QM, Oct 25): each biome past the Meadow is bought with cash. Until you own
 	-- it, its gate shows a blocker only you see (client/Regions: a navy wall with its name,
 	-- price and a Buy button, and its shadow on the floor); Server/Regions sells it and
