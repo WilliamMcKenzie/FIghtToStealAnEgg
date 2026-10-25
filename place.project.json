@@ -39,8 +39,13 @@
         "EnvironmentSpecularScale": 0,
         "ExposureCompensation": 0.5,
         "ClockTime": 12,
-        "FogStart": 100000,
-        "FogEnd": 100000,
+        "FogStart": 500,
+        "FogEnd": 500,
+        "FogColor": [
+          0.2784313725490196,
+          0.49019607843137253,
+          0.6509803921568628
+        ],
         "GeographicLatitude": 0,
         "ColorShift_Bottom": [
           0,
