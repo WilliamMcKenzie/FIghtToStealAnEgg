@@ -4,7 +4,7 @@
 -- and calls the handler of each it catches with the slash's damage.
 --
 -- Damage is Config.Slash.Damage scaled by the player's Strength (Shared/Power's log curve);
--- the player's Power attribute (the HUD's counter) shows it.
+-- the player's Power attribute (the HUD's counter) shows their Strength.
 --
 --   Combat.add(body, handler)        -- handler(player, damage); body has a Radius attribute
 --   Combat.remove(body)
@@ -45,12 +45,13 @@ function Combat.damage(player)
 	return Config.Slash.Damage * Power.damage(player:GetAttribute("Strength"))
 end
 
+-- (the HUD's counter shows your Strength itself: QM, Oct 25)
 local function showPower(player)
-	player:SetAttribute("Power", Combat.damage(player))
+	player:SetAttribute("Power", player:GetAttribute("Strength") or 0)
 end
 
 -- how much of `amount` a hit trains at this Strength, by the ground's band (Config.Training:
--- full inside Need..Outgrow, less below or past it)
+-- full inside Need..Outgrow, less below or past it, but never under Training.Floor)
 function Combat.gain(strength, amount, ground)
 	if not ground then
 		return amount
@@ -58,11 +59,11 @@ function Combat.gain(strength, amount, ground)
 	local t = Config.Training
 	local need, outgrow = ground.Need or 0, ground.Outgrow
 	if strength < need then
-		return amount * (math.max(strength, 1) / need) ^ t.Under
+		amount *= (math.max(strength, 1) / need) ^ t.Under
 	elseif outgrow and strength > outgrow then
-		return amount * (outgrow / strength) ^ t.Over
+		amount *= (outgrow / strength) ^ t.Over
 	end
-	return amount
+	return math.max(amount, math.min(t.Floor, ground.Strength or t.Floor))
 end
 
 -- at most one training hit every Training.Every seconds: within that window only the best

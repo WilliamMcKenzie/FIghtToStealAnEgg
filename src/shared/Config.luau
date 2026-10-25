@@ -525,7 +525,8 @@ return {
 	-- Pacing (QM, Oct 25: you outgrew everything in seconds). Each ground has a band of
 	-- Strength it's for, Need up to Outgrow. Inside the band every hit trains its full
 	-- Strength; below Need you're flailing, (yours / Need) ^ Under of it; past Outgrow it's
-	-- too easy, (Outgrow / yours) ^ Over of it. Each Need is the ground before's Outgrow, so
+	-- too easy, (Outgrow / yours) ^ Over of it. Every hit still trains at least Floor
+	-- (QM, Oct 25: a too-hard ground looked broken), the dummies' rate. Each Need is the ground before's Outgrow, so
 	-- the next ground only pays once you've done the last. Training counts once every Every
 	-- seconds however many things a swing or volley hits (so 200 hits a minute, the sword's
 	-- pace; a Dagger or a splash doesn't train faster).
@@ -540,7 +541,8 @@ return {
 	-- A mob's Health is about 6 Sword hits at its ground's Need (4 by its Outgrow).
 	Training = {
 		Every = 0.3, -- seconds: at most one training hit this often
-		Under = 3, -- below a ground's Need: (Strength / Need) ^ Under of its training
+		Under = 1.5, -- below a ground's Need: (Strength / Need) ^ Under of its training
+		Floor = 1, -- but every hit trains at least this much
 		Over = 2, -- past its Outgrow: (Outgrow / Strength) ^ Over of it
 		Grounds = {
 			Dummies = { Cost = 0, Strength = 1, Need = 0, Outgrow = 200 }, -- free: straw dummies that never fall

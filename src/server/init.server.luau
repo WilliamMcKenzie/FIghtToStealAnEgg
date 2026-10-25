@@ -63,7 +63,7 @@ local function ride(character)
 end
 local requestBoss, reboss, swapPet, givePet, testSpin, giveWeapon, giveCash, resetPlayer -- (below)
 local function joined(player)
-	-- the HUD's counters (client/Hud.luau): Power is your slash's damage (Server/Combat
+	-- the HUD's counters (client/Hud.luau): Power is your Strength (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
 	player:SetAttribute("Cash", player:GetAttribute("Cash") or 0)
 	player:SetAttribute("Pet", player:GetAttribute("Pet") or "Horse")
