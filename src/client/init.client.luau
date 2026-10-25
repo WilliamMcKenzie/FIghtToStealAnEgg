@@ -137,6 +137,7 @@ local function nearestBoss(root, range)
 			if
 				body:IsA("BasePart")
 				and (body:GetAttribute("Health") or 0) > 0
+				and not body:GetAttribute("Asleep") -- (asleep it can't be hit until an egg's stolen)
 				and (ground == nil or player:GetAttribute("Train" .. ground) ~= false)
 			then
 				local d = ((body.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude

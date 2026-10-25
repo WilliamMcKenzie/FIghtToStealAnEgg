@@ -4,8 +4,9 @@
 -- Radius, and for an arena's boss Biome and Asleep. The HUD's boss bar shows the
 -- nearest awake one.
 --
--- Each biome's boss sleeps on its dais (Map's BossSpot) until it's woken: someone steals
--- one of its eggs, or hits it (Server/Eggs locks them into its fight). Awake, it chases
+-- Each biome's boss sleeps on its dais (Map's BossSpot) until someone steals one of its
+-- eggs (Server/Eggs locks them into its fight); asleep it can't be hit at all (Server/
+-- Combat and the client skip it: QM, Oct 25). Awake, it chases
 -- the nearest player locked into its fight, never leaving its arena, and attacks
 -- (Config.Bosses[biome].Attacks, Server/BossAttacks). With nobody left in
 -- the fight for Config.BossCalmDown seconds it walks home, heals and sleeps. At 0 health
@@ -116,12 +117,12 @@ local function make(kind, at, yaw)
 	local b = { kind = kind, c = c, yaw = yaw, home = at, calm = 0, hitters = {} }
 	live[body] = b
 	Combat.add(body, function(player, damage)
-		if not live[body] then
+		-- (asleep it can't be hurt at all: only stealing one of its eggs wakes it, QM Oct 25)
+		if not live[body] or body:GetAttribute("Asleep") then
 			return
 		end
 		if b.biome then
 			Bosses.engaged:Fire(player, b.biome)
-			Bosses.wake(b.biome)
 		end
 		Combat.train(player, damage, c.Strength or 1)
 		b.hitters[player] = true
