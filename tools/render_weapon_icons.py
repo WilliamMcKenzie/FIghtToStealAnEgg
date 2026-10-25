@@ -104,7 +104,7 @@ const [dataPath, outDir, threePath] = process.argv.slice(2);
     window.R = renderer;
   }, [W]);
   for (const w of data.weapons) {
-    const png = await page.evaluate(([w, tilt, turn]) => {
+    const png = await page.evaluate(([w, tilt, turn, pitch]) => {
       const T = window.THREE;
       const scene = new T.Scene();
       const rgb = (c) => new T.Color().setRGB(c[0] / 255, c[1] / 255, c[2] / 255, T.SRGBColorSpace);
@@ -137,7 +137,8 @@ const [dataPath, outDir, threePath] = process.argv.slice(2);
       group.position.sub(centre);
       holder.add(group);
       holder.rotation.set(0, 0, tilt * Math.PI / 180);
-      const spin = new T.Group(); spin.add(holder); spin.rotation.set(0, turn, 0);
+      // (turned round Y, then tipped toward the camera by pitch: a pet seen from above)
+      const spin = new T.Group(); spin.add(holder); spin.rotation.set(pitch, turn, 0);
       scene.add(spin);
       scene.updateMatrixWorld(true);
       const b = new T.Box3().setFromObject(spin);
@@ -147,7 +148,7 @@ const [dataPath, outDir, threePath] = process.argv.slice(2);
       cam.position.set(0, 0, 50); cam.lookAt(0, 0, 0);
       window.R.render(scene, cam);
       return window.R.domElement.toDataURL('image/png');
-    }, [w, data.tilt, data.turn]);
+    }, [w, w.tilt ?? data.tilt, w.turn ?? data.turn, w.pitch ?? 0]);
     fs.writeFileSync(path.join(outDir, w.id + '.png'), Buffer.from(png.split(',')[1], 'base64'));
     console.log('drew', w.id);
   }

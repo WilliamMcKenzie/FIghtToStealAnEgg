@@ -24,6 +24,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local Pets = require(ReplicatedStorage.Shared:WaitForChild("Pets"))
 local Bosses = require(script.Parent.Bosses)
 local Map = require(script.Parent.Map)
+local Hatchery = require(script.Parent.Hatchery)
 local Pens = require(script.Parent.Pens)
 
 local Eggs = {}
@@ -131,6 +132,7 @@ local function lay(nest, biome)
 			return
 		end
 		egg:Destroy()
+		Hatchery.give(player, kind) -- (yours at once: in your hotbar until you die, QM Oct 25)
 		-- (with its boss dead and not yet back, there's no fight: the egg's yours)
 		if Bosses.alive(biome) then
 			lock(player, biome) -- (first, so their screen knows the boss that appears is theirs)

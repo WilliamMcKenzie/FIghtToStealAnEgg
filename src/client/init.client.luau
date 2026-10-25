@@ -29,6 +29,7 @@ local SwingPose = require(script.SwingPose)
 require(script.BossView)
 require(script.BossIntro)
 require(script.EggView)
+require(script.PenEggs)
 require(script.PlayerBars)
 require(script.Hud)
 require(script.Barriers)
@@ -208,8 +209,8 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 end)
 
--- the weapon is always out: no inventory bar (so no keys to put it away), and it's
--- equipped whenever it's in the backpack
+-- the weapon (or the egg you picked in the hotbar: client/Hotbar) is always out: no Roblox
+-- inventory bar (so no keys to put it away), and it's equipped whenever it's in the backpack
 local function hideBackpack()
 	-- (SetCoreGuiEnabled can fail if the core scripts aren't up yet: retry briefly)
 	for _ = 1, 20 do
@@ -224,7 +225,7 @@ local function autoEquip(character)
 	local humanoid = character:WaitForChild("Humanoid")
 	local backpack = player:WaitForChild("Backpack")
 	local function equip(tool)
-		if tool:IsA("Tool") and tool:GetAttribute("Weapon") and humanoid.Health > 0 then
+		if tool:IsA("Tool") and (tool:GetAttribute("Weapon") or tool:GetAttribute("EggTool")) and humanoid.Health > 0 then
 			task.defer(function()
 				if tool.Parent == backpack then
 					humanoid:EquipTool(tool)

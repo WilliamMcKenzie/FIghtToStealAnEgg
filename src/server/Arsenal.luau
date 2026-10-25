@@ -70,28 +70,52 @@ function Arsenal.give(player, id, equip)
 	end
 end
 
--- the equipped weapon's tool, in the backpack (any other weapon tool goes)
+-- an egg in your hands (QM, Oct 25: Server/Hatchery): an invisible handle the arm holds,
+-- the egg drawn at it by each client (client/PenEggs)
+local function eggTool(kind)
+	local tool = Instance.new("Tool")
+	tool.Name = kind .. " Egg"
+	tool.CanBeDropped = false
+	tool:SetAttribute("EggTool", kind)
+	local handle = Instance.new("Part")
+	handle.Name = "Handle"
+	handle.Size = Vector3.new(1, 1, 1)
+	handle.Transparency = 1
+	handle.CanCollide, handle.CanTouch, handle.CanQuery = false, false, false
+	handle.Massless = true
+	handle.Parent = tool
+	return tool
+end
+
+-- the equipped weapon's tool in the backpack, or the egg they're holding (Holding) in
+-- its place (any other weapon or egg tool goes)
 local function arm(player)
 	local character = player.Character
 	local backpack = player:FindFirstChildOfClass("Backpack")
 	if not (character and backpack) then
 		return
 	end
+	local egg = player:GetAttribute("Holding")
 	local id = player:GetAttribute("Weapon")
 	if not Weapons.exists(id) then
 		id = START
 	end
+	local have = false
 	for _, holder in { character, backpack } do
 		for _, tool in holder:GetChildren() do
-			if tool:IsA("Tool") and tool:GetAttribute("Weapon") ~= nil then
-				if tool:GetAttribute("Weapon") == id then
-					return -- (already holding it)
+			if tool:IsA("Tool") and (tool:GetAttribute("Weapon") ~= nil or tool:GetAttribute("EggTool") ~= nil) then
+				local wanted = if egg then tool:GetAttribute("EggTool") == egg else tool:GetAttribute("Weapon") == id
+				if wanted and not have then
+					have = true -- (already holding it)
+				else
+					tool:Destroy()
 				end
-				tool:Destroy()
 			end
 		end
 	end
-	Weapons.makeTool(id).Parent = backpack
+	if not have then
+		(if egg then eggTool(egg) else Weapons.makeTool(id)).Parent = backpack
+	end
 end
 
 local function roll(list)
@@ -180,6 +204,9 @@ function Arsenal.start()
 		player:GetAttributeChangedSignal("Weapons"):Connect(migrate)
 		player:GetAttributeChangedSignal("Weapon"):Connect(function()
 			migrate()
+			arm(player)
+		end)
+		player:GetAttributeChangedSignal("Holding"):Connect(function()
 			arm(player)
 		end)
 		migrate()

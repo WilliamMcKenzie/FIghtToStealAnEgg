@@ -29,7 +29,7 @@ local IMAGES = {
 	BossBarFill = "rbxassetid://139297500668654",
 	BossBarBack = "rbxassetid://88593547866423",
 	BossBarTrail = "rbxassetid://110382419429261", -- QM's TRAIL 1
-	Backpack = "rbxassetid://120170272419141", -- QM's (assets/ui/Backpack.png; until it's uploaded the button says Backpack in text)
+	Backpack = "rbxassetid://120170272419141", -- QM's (assets/ui/Backpack.png)
 }
 local DESIGN_HEIGHT = 1080
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -235,6 +235,7 @@ count("Cash")
 Popups.abbreviate = Hud.abbreviate
 Popups.init(root, hudFrames)
 require(script.Parent.Backpack).init()
+require(script.Parent.Hotbar).init(root, hudFrames) -- (stolen eggs, right of the Backpack button)
 gui.Parent = player:WaitForChild("PlayerGui")
 -- (no Roblox health bar in the top right: QM, Oct 25)
 task.spawn(function()

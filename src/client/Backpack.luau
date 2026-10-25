@@ -21,6 +21,7 @@ local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local PetIcons = require(Shared.PetIcons)
 local Pets = require(Shared.Pets)
 local Stacks = require(Shared.Stacks)
 local Power = require(Shared.Power)
@@ -197,10 +198,11 @@ local function petModel(kind)
 end
 
 local function icon(parent, tab, id)
-	if tab == "Weapons" and WeaponIcons[id] then
+	local image = if tab == "Weapons" then WeaponIcons[id] else PetIcons.Pets[id]
+	if image then
 		local img = Instance.new("ImageLabel")
 		img.BackgroundTransparency = 1
-		img.Image = WeaponIcons[id]
+		img.Image = image
 		img.ScaleType = Enum.ScaleType.Fit
 		img.AnchorPoint = Vector2.new(0.5, 0.5)
 		img.Position = UDim2.fromScale(0.5, 0.52)
