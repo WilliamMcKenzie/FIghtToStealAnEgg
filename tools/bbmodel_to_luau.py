@@ -396,21 +396,34 @@ def convert(model, merge=None):
     model_center = np.mean([(np.array(e["from"]) + e["to"]) / 2 for e in cubes], axis=0) * SCALE if cubes else np.zeros(3)
 
     def color(e):
-        """The element's colour: its front face (or first textured face) at that face's UV."""
+        """The element's colour: its front face (or first textured face) at that face's UV,
+        or the next face whose pixel there isn't see-through."""
         faces = e["faces"]
-        face = faces.get("north") if faces.get("north", {}).get("texture") is not None else None
-        face = face or next((f for f in faces.values() if f.get("texture") is not None), None)
-        if face is None:
+        order = [faces["north"]] if faces.get("north", {}).get("texture") is not None else []
+        order += [f for f in faces.values() if f.get("texture") is not None and f is not faces.get("north")]
+        if not order:
             return 255, 255, 255  # untextured: Blockbench shows it white
-        im, sx, sy = texs[face["texture"]]
-        uv = face["uv"]
-        if isinstance(uv, list) and len(uv) >= 4:
-            # the middle of the face's UV, not its corner (QM's Ivory Spider: a pupil's
-            # corner pixel was the black outline, so it came out black)
-            u, v = (uv[0] + uv[2]) / 2, (uv[1] + uv[3]) / 2
-        else:
-            u, v = uv[:2] if isinstance(uv, list) else next(iter(uv.values()))
-        return im.getpixel((min(int(u * sx), im.width - 1), min(int(v * sy), im.height - 1)))
+        first = None
+        for face in order:
+            im, sx, sy = texs[face["texture"]]
+            uv = face["uv"]
+            if isinstance(uv, list) and len(uv) >= 4:
+                # the middle of the face's UV, not its corner (QM's Ivory Spider: a pupil's
+                # corner pixel was the black outline, so it came out black)
+                u, v = (uv[0] + uv[2]) / 2, (uv[1] + uv[3]) / 2
+            elif isinstance(uv, dict):
+                # a mesh face: the middle of its UV points (a corner can sit on a clear pixel:
+                # QM's Club spikes came out black)
+                pts = list(uv.values())
+                u, v = sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)
+            else:
+                u, v = uv[:2]
+            px = im.getpixel((min(int(u * sx), im.width - 1), min(int(v * sy), im.height - 1)))
+            if first is None:
+                first = px
+            if len(px) < 4 or px[3] > 0:
+                return px
+        return first
 
     def stripes(e):
         """Vertical stripes on an unrotated cube's front face (QM's fluted podium column):
