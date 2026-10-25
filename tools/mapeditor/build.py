@@ -36,7 +36,10 @@ def main():
                      key=lambda p: ("joint", "corner", "transition", "gate", "rubble").index(p[0]) if p[0] in ("joint", "corner", "transition", "gate", "rubble") else 9)
     bundle = {
         "pillars": [list(p) for p in pillars],
-        "colours": meta["colours"],
+        # (Config's colours as they are now over the sprites' snapshot: a colour added to
+        # Config since sprites.py last ran shows up in the Colours tab without re-rendering)
+        "colours": dict(meta["colours"], **{k: [int(r), int(g_), int(b_)] for k, r, g_, b_ in
+                        re.findall(r"(\w+) = Color3\.fromRGB\((\d+), (\d+), (\d+)\)", world)}),
         "keys": keys,
         "world": world_keys,
         "sprites": sprites,
