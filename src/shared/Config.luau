@@ -341,6 +341,27 @@ return {
 		StrengthBonus = 0.5,
 	},
 
+	-- regions (QM, Oct 25): each biome past the Meadow is bought with cash. Until you own
+	-- it, its gate shows a blocker only you see (client/Regions: a navy wall with its name,
+	-- price and a Buy button, and a shadow spilling off it); Server/Regions sells it and
+	-- Server/Data saves it (Region<Name>). A rebirth locks them again, like the training
+	-- grounds. Prices are placeholders.
+	Regions = {
+		Cost = {
+			Meadow = 0,
+			Desert = 2500,
+			Ice = 25000,
+			Lava = 250000,
+			Dungeon = 2500000,
+			Forest = 2500000,
+			Castle = 25000000,
+			Ocean = 25000000,
+		},
+		Names = { Dungeon = "The Dungeon", Castle = "Red Castle", Forest = "Magic Forest", Ocean = "Ocean Trench" },
+		Color = Color3.fromRGB(0, 28, 78), -- #001C4E: the blocker and its shadow
+		Shadow = 10, -- studs the shadow spreads off it before it's gone
+	},
+
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
 	-- trains the enemy's Strength (a boss's in Bosses above), and each point of Strength
 	-- adds DamagePerStrength to your slash. The training grounds at the south of the base,

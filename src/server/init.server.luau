@@ -19,6 +19,7 @@ local Data = require(script.Data)
 local Eggs = require(script.Eggs)
 local Map = require(script.Map)
 local Pens = require(script.Pens)
+local Regions = require(script.Regions)
 local Training = require(script.Training)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
@@ -27,6 +28,7 @@ WorldColors.create() -- workspace.WorldColors: live world colours (after the map
 Pens.start(map)
 Eggs.start(map)
 Training.start(map)
+Regions.start()
 Data.start() -- (after Training: it loads over the grounds' defaults)
 
 local remote = Instance.new("RemoteEvent")

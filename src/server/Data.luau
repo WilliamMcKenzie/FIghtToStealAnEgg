@@ -1,12 +1,13 @@
 -- Saving (QM, Oct 24): each player's progress lives in their attributes while they play
--- (Cash, Strength, Eggs, Rebirths, and Train<Name> for each training ground bought) and is
+-- (Cash, Strength, Eggs, Rebirths, Train<Name> for each training ground bought and
+-- Region<Name> for each region) and is
 -- saved to a DataStore when they leave, every Config.Data.AutoSave seconds, and when the
 -- server shuts down. Nothing is saved for a player whose data failed to load (so a
 -- DataStore outage can't wipe anyone), and in a Studio playtest without API access it
 -- just doesn't save (it warns once).
 --
--- Rebirth lives here too: with enough cash (Config.Rebirth), your cash, Strength and
--- training grounds reset, and every hit trains StrengthBonus more for each rebirth.
+-- Rebirth lives here too: with enough cash (Config.Rebirth), your cash, Strength,
+-- training grounds and regions reset, and every hit trains StrengthBonus more for each rebirth.
 --
 --   Data.start()                 -- once
 --   Data.rebirthCost(player) -> cash needed for their next rebirth
@@ -28,6 +29,9 @@ local function keys()
 	local list = { "Cash", "Strength", "Eggs", "Rebirths" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
+	end
+	for name in Config.Regions.Cost do
+		table.insert(list, "Region" .. name)
 	end
 	return list
 end
@@ -106,6 +110,9 @@ local function rebirth(player)
 	player:SetAttribute("Strength", 0)
 	for name, g in Config.Training.Grounds do
 		player:SetAttribute("Train" .. name, g.Cost <= 0)
+	end
+	for name in Config.Regions.Cost do
+		player:SetAttribute("Region" .. name, nil)
 	end
 	Combat.refresh(player)
 	task.spawn(save, player)

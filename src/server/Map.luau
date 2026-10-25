@@ -31,9 +31,11 @@ local Shared = script.Parent:FindFirstChild("Shared") or ReplicatedStorage:WaitF
 local Config = require(Shared.Config)
 local MapData = require(Shared.MapData)
 local WorldColors = require(Shared.WorldColors)
+local RegionBlocker = require(Shared.RegionBlocker)
 
 local Map = {}
 Map.data = MapData
+local gates -- (region gates, below)
 
 local COLORS = Config.WorldColors
 -- (the map's own colours, from the editor, over Config's: WorldColors paints from these too)
@@ -976,6 +978,65 @@ local function ruin(parent, r)
 	return model
 end
 
+-- ---- region gates ----------------------------------------------------------------------
+
+-- Each region's gate (QM, Oct 25: regions are bought with cash): the opening between its
+-- two gate (or transition) pillars, as an invisible marker filling it, its Region
+-- attribute the area's name and its local X along the opening, and the region's blocker
+-- in it (Shared/RegionBlocker; client/Regions hides it for a player who's bought it).
+gates = function(parent, blockers)
+	local by = {}
+	for _, p in MapData.Pillars do
+		if p[6] == "gate" or p[6] == "transition" then
+			by[p[1]] = by[p[1]] or {}
+			table.insert(by[p[1]], p)
+		end
+	end
+	for region, pair in by do
+		if #pair ~= 2 or not Map.area(region) then
+			continue
+		end
+		local a, b = pair[1], pair[2]
+		local pa, pb = Vector3.new(a[2], 0, a[3]), Vector3.new(b[2], 0, b[3])
+		local along = (pb - pa).Unit
+		local halfA, halfB = a[4] * (a[8] or 1) / 2, b[4] * (b[8] or 1) / 2
+		local from, to = pa + along * halfA, pb - along * halfB
+		local width = (to - from).Magnitude
+		if width < 4 then
+			continue
+		end
+		local mid = (from + to) / 2
+		local height = 40
+		local marker = Instance.new("Part")
+		marker.Name = region .. "Gate"
+		marker.Anchored, marker.CanCollide, marker.CanQuery, marker.CanTouch = true, false, false, false
+		marker.Transparency = 1
+		marker.Size = Vector3.new(width, height, 1.5)
+		-- (facing out of the region: its front toward whoever walks up to it)
+		local into = Vector3.new(0, 0, 0)
+		local area = Map.area(region)
+		if area.Bounds then
+			local centre = Vector3.new((area.Bounds[1] + area.Bounds[3]) / 2, 0, (area.Bounds[2] + area.Bounds[4]) / 2)
+			into = centre - mid
+		end
+		local normal = Vector3.new(-along.Z, 0, along.X)
+		if normal:Dot(into) > 0 then
+			normal = -normal
+		end
+		marker.CFrame = CFrame.lookAt(mid + Vector3.new(0, height / 2 - 2, 0), mid + Vector3.new(0, height / 2 - 2, 0) + normal)
+		marker:SetAttribute("Region", region)
+		marker:SetAttribute("PillarWidthA", a[4] * (a[8] or 1))
+		marker:SetAttribute("PillarWidthB", b[4] * (b[8] or 1))
+		marker.Parent = parent
+		local blocker = RegionBlocker.build(marker, function(x, z)
+			return MapFile.groundAt(MapData, x, z)
+		end)
+		if blocker then
+			blocker.Parent = blockers
+		end
+	end
+end
+
 -- ---- all of it ---------------------------------------------------------------------------
 
 -- out of the way: the lineup (tools/lineup.luau's workspace.World: its 1024-stud grass
@@ -1064,6 +1125,7 @@ function Map.build(data)
 		local height = if p[6] == "gate" then ARCH_SPRING + 6 else p[5]
 		put(pillar(pillars, p[1], 0, 0, p[4], height, p[6], rng), p[2], p[3], p[7], p[8], p[9])
 	end
+	gates(folder("Gates", map), folder("Blockers", map))
 	for _, a in MapData.Arches do
 		put(arch(pillars, a[1], 0, 0, rng), a[2], a[3], a[4], a[5], a[6])
 	end

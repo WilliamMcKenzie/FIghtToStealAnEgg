@@ -7,5 +7,7 @@
   "BossBarFill": "rbxassetid://139297500668654",
   "BossBarBack": "rbxassetid://88593547866423",
   "BossBarTrail": "rbxassetid://110382419429261",
-  "DarkPanel": "rbxassetid://76862497378032"
+  "DarkPanel": "rbxassetid://76862497378032",
+  "Coin": "rbxassetid://116346549604801",
+  "BuyButton": "rbxassetid://137022984457520"
 }
