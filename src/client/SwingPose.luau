@@ -199,11 +199,18 @@ local function release(joints)
 	end
 end
 
--- the type of weapon out ("Melee", "Ranged", "Magic"), or nil
+-- the type of weapon out ("Melee", "Ranged", "Magic"), or nil, and its Config.WeaponPoses
+local NONE = {}
 local function holding(character)
 	local tool = character:FindFirstChildOfClass("Tool")
-	return tool and tool:GetAttribute("WeaponType")
+	if not tool then
+		return nil, NONE
+	end
+	return tool:GetAttribute("WeaponType"), Config.WeaponPoses[tool:GetAttribute("Weapon")] or NONE
 end
+
+-- (client/PoseTuning: true holds the riding pose still, no breathing or gallop bob)
+SwingPose.still = false
 
 local function angles(j, x)
 	return rotation(j.Order, x or j.X, j.Y, j.Z)
@@ -245,7 +252,7 @@ RunService.PreSimulation:Connect(function(dt)
 			states[character] = nil
 			continue
 		end
-		local kind = holding(character)
+		local kind, own = holding(character)
 		local target = if kind then 1 else 0
 		s.stance += (target - s.stance) * (1 - math.exp(-dt * 3 / ride.BlendTime))
 
@@ -256,6 +263,7 @@ RunService.PreSimulation:Connect(function(dt)
 			cycle = s.cycle
 		end
 		local move = math.clamp(speed / ride.BobFull, 0, 1)
+		local sway = if SwingPose.still then 0 else 1
 
 		-- the bow up while shooting, until a little after the next shot was due
 		local shot = if kind == "Ranged" then s.shot else nil
@@ -300,8 +308,10 @@ RunService.PreSimulation:Connect(function(dt)
 			local j = ride.Joints[name]
 			if j then
 				local bob = math.sin(2 * math.pi * (cycle - j.Lag))
-				local x = j.X + j.Breathe * breath * (1 - move) + j.Bob * bob * move
-				pose = under:Lerp(angles(j, x), stance)
+				local sx = (j.Breathe * breath * (1 - move) + j.Bob * bob * move) * sway
+				local v = own[name] -- (this weapon's own pose for the joint)
+				local held = if v then rotation(j.Order, v.X + sx, v.Y, v.Z) else angles(j, j.X + sx)
+				pose = under:Lerp(held, stance)
 			end
 			if drawing > 0 and archer.Joints[name] then
 				pose = pose:Lerp(drawn(archer, name, u), drawing)

@@ -304,6 +304,17 @@ function Weapons.makeModel(id, scale)
 	return Rig.fromData(data, id, STUDS, SCALE * (scale or 1))
 end
 
+-- where the hand holds weapon `id` (Tool.Grip): the middle of the grip, turned and slid
+-- by its Config.WeaponPoses GripAngle (degrees) and GripOffset (studs)
+function Weapons.grip(id)
+	local pose = Config.WeaponPoses[id] or {}
+	local angle = pose.GripAngle or Vector3.zero
+	local offset = pose.GripOffset or Vector3.zero
+	return CFrame.new(0, GRIP_Y, 0)
+		* CFrame.new(offset)
+		* CFrame.Angles(math.rad(angle.X), math.rad(angle.Y), math.rad(angle.Z))
+end
+
 function Weapons.makeTool(id)
 	if not Weapons.exists(id) then
 		id = Config.WeaponDrops.Start
@@ -319,7 +330,7 @@ function Weapons.makeTool(id)
 	tool:SetAttribute("WeaponType", w.Type)
 	-- Wielded, not pointed: the blade (+Y) comes out of the top of the fist, square to
 	-- the forearm (the R15 grip attachment's +Y), with the hand on the middle of the grip.
-	tool.Grip = CFrame.new(0, GRIP_Y, 0)
+	tool.Grip = Weapons.grip(id)
 	local root = model.PrimaryPart
 	root.Name = "Handle"
 	root.Anchored = false

@@ -689,6 +689,15 @@ return {
 		},
 	},
 
+	-- how each weapon sits in the hand and rides (QM, Oct 25), over the defaults: tune them
+	-- live in Play with Workspace > Pose (client/PoseTuning), tick PrintConfig there and
+	-- paste the block here. Every value is optional, in degrees (Vector3 X, Y, Z) or studs:
+	--   GripAngle   turns the weapon in the hand (about the hand's grip point)
+	--   GripOffset  slides it in the hand (Y: along the handle)
+	--   Waist, Neck, RightShoulder, RightElbow, RightWrist, LeftShoulder, LeftElbow
+	--               that joint's riding pose (RidePose.Joints X, Y, Z above)
+	WeaponPoses = {},
+
 	-- weapons (QM, Oct 25): bosses drop them. Kill a boss and everyone in its fight gets a
 	-- spin (client/WeaponSpin, Server/Arsenal) that lands on one of these; the weapon you
 	-- won is equipped (the chip bottom right switches between the ones you own). Three
