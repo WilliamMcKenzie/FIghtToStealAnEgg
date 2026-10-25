@@ -310,6 +310,13 @@ function giveWeapon(player, message)
 		end
 	end
 	table.sort(ids)
+	if want == "" then
+		-- (/weapon alone: every weapon, QM Oct 25)
+		for _, id in ids do
+			Arsenal.give(player, id, false)
+		end
+		return
+	end
 	print("/weapon one of: " .. table.concat(ids, ", "))
 end
 -- /cash [n]: n more cash (a million without a number); /reset: a brand new account, saved
