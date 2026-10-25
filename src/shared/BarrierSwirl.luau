@@ -17,6 +17,8 @@
 --   BackColor / BackAlpha   the backdrop behind it (0: see-through)
 --   FadeStart / FadeEnd     it fades out toward the top: from FadeStart of the way up (0
 --               bottom, 1 top) to gone at FadeEnd
+--   FadePulse   tick it to make the fade's start breathe instead (a sine wave between
+--               FadePulseMin and FadePulseMax, FadePulseSpeed times a second)
 --   PixelsPerStud           the pixel size (1: stud pixels; more costs more)
 --   Glow        how bright it is (above 1 it glows)
 --   FPS         redraws a second
@@ -32,21 +34,25 @@ local AssetService = game:GetService("AssetService")
 local BarrierSwirl = {}
 BarrierSwirl.__index = BarrierSwirl
 
-BarrierSwirl.DEFAULTS = {
-	Angles = 7,
+BarrierSwirl.DEFAULTS = { -- (QM's picks, Oct 25)
+	Angles = 5,
 	Speed = 1,
-	Scale = 0.35,
+	Scale = 0.25,
 	Modifier = 0,
 	Seed = 0,
 	Contrast = 10,
-	FillColor = Color3.fromRGB(255, 70, 60),
-	FillAlpha = 0.65,
-	BackColor = Color3.fromRGB(190, 20, 40),
-	BackAlpha = 0.3,
-	FadeStart = 0.45,
+	FillColor = Color3.fromRGB(255, 13, 0),
+	FillAlpha = 0.1,
+	BackColor = Color3.fromRGB(255, 70, 60),
+	BackAlpha = 0.4,
+	FadeStart = 0.6,
 	FadeEnd = 1,
+	FadePulse = true,
+	FadePulseMin = 0.45,
+	FadePulseMax = 0.7,
+	FadePulseSpeed = 0.25,
 	PixelsPerStud = 2,
-	Glow = 2,
+	Glow = 3,
 	FPS = 30,
 	PreviewAll = false,
 }
@@ -154,6 +160,10 @@ function BarrierSwirl:draw(offset, style)
 	local n = #dirs
 	local W, H, pixels = self.W, self.H, self.pixels
 	local f0 = knob(style, "FadeStart")
+	if knob(style, "FadePulse") then
+		local lo, hi = knob(style, "FadePulseMin"), knob(style, "FadePulseMax")
+		f0 = lo + (hi - lo) * (0.5 + 0.5 * math.sin(os.clock() * knob(style, "FadePulseSpeed") * 2 * math.pi))
+	end
 	local f1 = math.max(knob(style, "FadeEnd"), f0 + 0.001)
 	for py = 0, H - 1 do
 		local y = (py - H / 2) * scale
