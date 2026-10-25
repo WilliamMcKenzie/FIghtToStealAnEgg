@@ -230,11 +230,10 @@ return {
 	-- middle until someone steals one of its eggs or hits it (Server/Eggs); /boss spawns a
 	-- Chicken in front of you. Model is a module in Shared/Animals (<Model>Model.luau),
 	-- Size times its Blockbench drawing. Strength is what each hit on it trains (its biome's
-	-- training ground's band applies: Config.Training). Health (QM, Oct 25, with the training
-	-- pacing): about 45 s solo with the Sword once you've outgrown the ground before its
-	-- biome's, i.e. 150 x (Slash.Damage + that ground's Outgrow): Meadow's bosses after the
-	-- dummies (200), Cactus Boss after Meadow (2,000), Elder Boar after the Desert (18,000),
-	-- Lava Wyrm after the Tundra (140,000). Faster with friends or a better weapon.
+	-- training ground's band applies: Config.Training). Health (QM, Oct 25): Mother Hen is
+	-- 20 Sword hits at 0 Strength and 5 at 1,000 (Config.Power); each later boss takes 20,
+	-- 30, 40, 50 Sword hits at the Strength you'd have reaching it: Meadow's at 0, Cactus
+	-- Boss at 2,000 (Meadow outgrown), Elder Boar at 18,000, Lava Wyrm at 140,000.
 	Bosses = {
 		Chicken = {
 			Model = "Chicken",
@@ -250,7 +249,7 @@ return {
 			Name = "Mother Hen",
 			Model = "Chicken",
 			Size = 3.84, -- (about 40 studs tall: QM, Oct 25, 1.6x)
-			Health = 30000,
+			Health = 200,
 			Speed = 10,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 11,
@@ -267,7 +266,7 @@ return {
 			Name = "Giant Rafflesia",
 			Model = "GiantRafflesia", -- (LassoAPet's, QM Oct 25: its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
 			Size = 0.6, -- (about 30 studs tall)
-			Health = 30000,
+			Health = 200,
 			Speed = 9,
 			StopAt = 1,
 			Radius = 9,
@@ -282,7 +281,7 @@ return {
 			Name = "Majestic Unicorn",
 			Model = "MajesticUnicorn", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 2.4, -- (about 32 studs tall)
-			Health = 30000,
+			Health = 200,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 8,
@@ -297,7 +296,7 @@ return {
 			Name = "Venus Flytrap",
 			Model = "VenusFlytrap", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 1.8, -- (about 31 studs tall)
-			Health = 30000,
+			Health = 200,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 9,
@@ -312,7 +311,7 @@ return {
 			Name = "Cactus Boss",
 			Model = "CactusBoss", -- (LassoAPet's, QM Oct 24)
 			Size = 2.4, -- (about 29 studs tall)
-			Health = 300000,
+			Health = 1300,
 			Speed = 11,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 13,
@@ -329,7 +328,7 @@ return {
 			Name = "Elder Boar",
 			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
 			Size = 2, -- (about 27 studs tall, 40 long)
-			Health = 2700000,
+			Health = 2350,
 			Speed = 9,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 12,
@@ -346,7 +345,7 @@ return {
 			Name = "Lava Wyrm",
 			Model = "LavaWyrm", -- (LassoAPet's, QM Oct 24)
 			Size = 1.4, -- (about 16 studs tall, 60 long)
-			Health = 21000000,
+			Health = 3600,
 			Speed = 8,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 10,
@@ -502,21 +501,34 @@ return {
 		Shadow = 20, -- studs its shadow spreads across the floor before it's gone
 	},
 
+	-- what Strength does (Shared/Power, QM Oct 25): it scales your damage and, a little,
+	-- your attack speed, both by log(1 + Strength / Scale), so each point counts for less
+	-- the more you have. Damage = Slash.Damage x (1 + Damage x log) x the weapon's Damage;
+	-- attacks come (1 + Speed x log) times faster, at most MaxSpeed.
+	-- QM's targets: Mother Hen (200 health) takes 20 Sword hits at 0 Strength, 5 at 1,000.
+	--   Strength      0     200   1,000   2,000   18,000   140,000   1M
+	--   damage       10      30      40      45       59        72   85
+	--   speed        1x   1.16x   1.25x   1.29x    1.41x     1.52x   1.62x
+	Power = {
+		Scale = 10,
+		Damage = 0.65, -- (3 / log(101): 4x at 1,000)
+		Speed = 0.054, -- (1.25x at 1,000)
+		MaxSpeed = 2,
+	},
+
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
-	-- trains the enemy's Strength (a boss trains its biome's ground's, below), and each
-	-- point of Strength adds DamagePerStrength to your slash. The training grounds at the
-	-- south of the base, one per biome, are fenced off until bought with cash (a rebirth
-	-- will lock them again); their mobs wander and come back Respawn seconds after they
-	-- fall, for AFK training (RuneScape's sand crabs).
+	-- trains the enemy's Strength (a boss trains its biome's ground's, below). The training
+	-- grounds at the south of the base, one per biome, are fenced off until bought with
+	-- cash (a rebirth will lock them again); their mobs wander and come back Respawn
+	-- seconds after they fall, for AFK training (RuneScape's sand crabs).
 	--
 	-- Pacing (QM, Oct 25: you outgrew everything in seconds). Each ground has a band of
-	-- Strength it's for, Need up to Outgrow (Outgrow is its mob's Health: about where your
-	-- slash one-shots it). Inside the band every hit trains its full Strength; below Need
-	-- you're flailing, (yours / Need) ^ Under of it; past Outgrow it's too easy,
-	-- (Outgrow / yours) ^ Over of it. Each Need is the ground before's Outgrow, so the next
-	-- ground only pays once you've done the last. Training counts once every Every seconds
-	-- however many things a swing or volley hits (so 200 hits a minute, the sword's pace;
-	-- a Dagger or a splash doesn't train faster).
+	-- Strength it's for, Need up to Outgrow. Inside the band every hit trains its full
+	-- Strength; below Need you're flailing, (yours / Need) ^ Under of it; past Outgrow it's
+	-- too easy, (Outgrow / yours) ^ Over of it. Each Need is the ground before's Outgrow, so
+	-- the next ground only pays once you've done the last. Training counts once every Every
+	-- seconds however many things a swing or volley hits (so 200 hits a minute, the sword's
+	-- pace; a Dagger or a splash doesn't train faster).
 	-- Target AFK times, non-stop swinging, before any rebirth (each rebirth trains
 	-- StrengthBonus more, so these shrink: 2/3 of them after one):
 	--   Dummies    0 ->       200 at  1/hit    1 min
@@ -524,29 +536,30 @@ return {
 	--   Desert 2,000 ->    18,000 at  4/hit   20 min
 	--   Tundra 18,000 ->  140,000 at 15/hit   41 min
 	--   Lava  140,000 -> 1,000,000 at 50/hit  86 min   (about 2.5 hours in all)
-	-- To retune a ground: minutes = (Health - Need) / Strength / 200.
+	-- To retune a ground: minutes = (Outgrow - Need) / Strength / 200.
+	-- A mob's Health is about 6 Sword hits at its ground's Need (4 by its Outgrow).
 	Training = {
-		DamagePerStrength = 1,
 		Every = 0.3, -- seconds: at most one training hit this often
 		Under = 3, -- below a ground's Need: (Strength / Need) ^ Under of its training
 		Over = 2, -- past its Outgrow: (Outgrow / Strength) ^ Over of it
 		Grounds = {
 			Dummies = { Cost = 0, Strength = 1, Need = 0, Outgrow = 200 }, -- free: straw dummies that never fall
-			Meadow = { Cost = 300, Mob = "Pig", Size = 0.55, Health = 2000, Count = 4, Strength = 1, Need = 200, Speed = 4 },
+			Meadow = { Cost = 300, Mob = "Pig", Size = 0.55, Health = 180, Count = 4, Strength = 1, Need = 200, Outgrow = 2000, Speed = 4 },
 			Desert = {
 				Cost = 4000,
 				Mob = "KingCrab",
 				Name = "Sand Crab",
 				Tint = "Sand",
 				Size = 1,
-				Health = 18000,
+				Health = 270,
 				Count = 5,
 				Strength = 4,
 				Need = 2000,
+				Outgrow = 18000,
 				Speed = 2.5,
 			},
-			Ice = { Cost = 40000, Mob = "Penguin", Size = 0.6, Health = 140000, Count = 4, Strength = 15, Need = 18000, Speed = 3 },
-			Lava = { Cost = 400000, Mob = "RockHog", Size = 0.5, Health = 1000000, Count = 4, Strength = 50, Need = 140000, Speed = 3.5 },
+			Ice = { Cost = 40000, Mob = "Penguin", Size = 0.6, Health = 350, Count = 4, Strength = 15, Need = 18000, Outgrow = 140000, Speed = 3 },
+			Lava = { Cost = 400000, Mob = "RockHog", Size = 0.5, Health = 430, Count = 4, Strength = 50, Need = 140000, Outgrow = 1000000, Speed = 3.5 },
 		},
 		Respawn = 4,
 		MobRadius = 2.5, -- a mob's body half-width (hits and reach)
@@ -636,7 +649,7 @@ return {
 	--   Name     shown in the spin and on the chip
 	--   Type     "Melee", "Ranged" or "Magic"
 	--   Rarity   one of Rarities (above): its colour in the spin
-	--   Damage   times your Power (Server/Combat: Slash.Damage + Strength) per hit
+	--   Damage   times your Power (Server/Combat: Slash.Damage x Shared/Power's Strength curve) per hit
 	--   Weight   its share of a drop (nil: never drops; the Sword is everyone's to start)
 	--   Boss     a boss-only item: only that boss (a Bosses key) drops it, and the spin
 	--            shows BONUS when it lands

@@ -3,7 +3,7 @@
 -- with a handler; a slash checks every one of them (the reach and arc test bosses had)
 -- and calls the handler of each it catches with the slash's damage.
 --
--- Damage is Config.Slash.Damage plus the player's Strength x Training.DamagePerStrength;
+-- Damage is Config.Slash.Damage scaled by the player's Strength (Shared/Power's log curve);
 -- the player's Power attribute (the HUD's counter) shows it.
 --
 --   Combat.add(body, handler)        -- handler(player, damage); body has a Radius attribute
@@ -25,6 +25,7 @@ local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local Power = require(Shared:WaitForChild("Power"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Weapons = require(Shared:WaitForChild("Weapons"):WaitForChild("Weapons"))
 
@@ -41,7 +42,7 @@ function Combat.remove(body)
 end
 
 function Combat.damage(player)
-	return Config.Slash.Damage + (player:GetAttribute("Strength") or 0) * Config.Training.DamagePerStrength
+	return Config.Slash.Damage * Power.damage(player:GetAttribute("Strength"))
 end
 
 local function showPower(player)
@@ -55,7 +56,7 @@ function Combat.gain(strength, amount, ground)
 		return amount
 	end
 	local t = Config.Training
-	local need, outgrow = ground.Need or 0, ground.Outgrow or ground.Health
+	local need, outgrow = ground.Need or 0, ground.Outgrow
 	if strength < need then
 		return amount * (math.max(strength, 1) / need) ^ t.Under
 	elseif outgrow and strength > outgrow then

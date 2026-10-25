@@ -12,6 +12,7 @@ local TextChatService = game:GetService("TextChatService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Pets = require(Shared.Pets)
+local Power = require(Shared.Power)
 local SlashTuning = require(Shared.SlashTuning)
 local Weapons = require(Shared.Weapons.Weapons)
 local Arsenal = require(script.Arsenal)
@@ -116,7 +117,7 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 	end
 	local c = Weapons.slash(Config.Slash, id)
 	local now = os.clock()
-	if last[player] and now - last[player] < c.Cooldown * 0.8 then
+	if last[player] and now - last[player] < c.Cooldown / Power.speed(player:GetAttribute("Strength")) * 0.8 then
 		return
 	end
 	last[player] = now
@@ -145,7 +146,7 @@ shoot.OnServerEvent:Connect(function(player, yaw)
 		return
 	end
 	local now = os.clock()
-	if lastShot[player] and now - lastShot[player] < w.Shot.Cooldown * 0.8 then
+	if lastShot[player] and now - lastShot[player] < Weapons.cooldown(id) / Power.speed(player:GetAttribute("Strength")) * 0.8 then
 		return
 	end
 	lastShot[player] = now

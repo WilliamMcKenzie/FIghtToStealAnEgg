@@ -17,6 +17,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Power = require(Shared.Power)
 local SlashFx = require(Shared.SlashFx)
 local SlashTuning = require(Shared.SlashTuning)
 local WorldColors = require(Shared.WorldColors)
@@ -157,7 +158,7 @@ local function slash(tool, yaw)
 	if c.Alternate then
 		nextDir = -nextDir
 	end
-	ready = os.clock() + c.Cooldown
+	ready = os.clock() + c.Cooldown / Power.speed(player:GetAttribute("Strength")) -- (Strength swings faster)
 	local seed = math.random(1, 2 ^ 30)
 	play(character, dir, tool, seed, yaw)
 	task.delay(c.Windup, SlashCam.zoom, c) -- the camera feels the strike
@@ -192,7 +193,7 @@ RunService.Heartbeat:Connect(function(dt)
 	if Weapons.get(id).Shot then
 		-- (shots go straight at it, not along the eased aim)
 		local yaw = yawOf((inRange.Position - root.Position) * Vector3.new(1, 0, 1))
-		ready = os.clock() + Weapons.cooldown(id, c)
+		ready = os.clock() + Weapons.cooldown(id, c) / Power.speed(player:GetAttribute("Strength"))
 		Shots.fire(character, id, yaw)
 		shootRemote:FireServer(yaw)
 	else
