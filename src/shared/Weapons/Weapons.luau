@@ -1,7 +1,7 @@
 -- Every weapon (Config.Weapons): its tool, its model, and how it attacks.
 --   Weapons.get(id) -> its Config.Weapons entry (the starting weapon's for an unknown id), with its
 --                      Shot filled in from Config.Shots[Type] and any live tuning applied
---   Weapons.makeTool(id)       -- the Tool players hold (attributes Weapon, WeaponType)
+--   Weapons.makeTool(id)       -- the Tool players hold (attributes Weapon, WeaponType), unlit
 --   Weapons.makeModel(id, k)   -- an anchored copy, k times the held size (spin, shots)
 --   Weapons.slash(c, id)       -- Config.Slash (or SlashTuning's live copy) with a melee
 --                              -- weapon's Slash values over it
@@ -328,7 +328,48 @@ function Weapons.makeTool(id)
 		child.Parent = tool
 	end
 	model:Destroy()
+	Weapons.flatten(tool)
 	return tool
+end
+
+-- Unlit, like Blockbench (QM, Oct 25: no shading on weapons). Roblox lights every part,
+-- but a Highlight's fill is drawn flat, so each colour gets one: its parts go in their own
+-- Model under the tool, and a Highlight fills that Model with the colour, hiding only
+-- where other geometry is in front (Occluded). The Handle keeps its place and its own.
+-- (Roblox draws at most 31 Highlights at once; past that a weapon just shows lit.)
+function Weapons.flatten(tool)
+	local groups = {}
+	local function highlight(adornee, color)
+		local h = Instance.new("Highlight")
+		h.Name = "Flat"
+		h.Adornee = adornee
+		h.FillColor = color
+		h.FillTransparency = 0
+		h.OutlineTransparency = 1
+		h.DepthMode = Enum.HighlightDepthMode.Occluded
+		h.Parent = adornee
+	end
+	for _, part in tool:GetChildren() do
+		if not part:IsA("BasePart") or part.Name == "Handle" or part.Transparency >= 1 then
+			continue
+		end
+		local key = part.Color:ToHex() .. (if part.Material == Enum.Material.Neon then "n" else "")
+		local group = groups[key]
+		if not group then
+			group = Instance.new("Model")
+			group.Name = "Flat"
+			group.Parent = tool
+			groups[key] = group
+			if part.Material ~= Enum.Material.Neon then
+				highlight(group, part.Color)
+			end
+		end
+		part.Parent = group
+	end
+	local handle = tool:FindFirstChild("Handle")
+	if handle and handle.Transparency < 1 and handle.Material ~= Enum.Material.Neon then
+		highlight(handle, handle.Color)
+	end
 end
 
 function Weapons.slash(c, id)
