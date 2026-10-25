@@ -60,7 +60,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss, swapPet, givePet, testSpin, giveWeapon -- (below)
+local requestBoss, reboss, swapPet, givePet, testSpin, giveWeapon, giveCash, resetPlayer -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your slash's damage (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -86,6 +86,10 @@ local function joined(player)
 			testSpin(player, message)
 		elseif message:lower():match("^/weapon") then
 			giveWeapon(player, message)
+		elseif message:lower():match("^/cash") then
+			giveCash(player, message)
+		elseif message:lower():match("^/reset") then
+			resetPlayer(player)
 		end
 	end)
 	if player.Character then
@@ -307,7 +311,29 @@ function giveWeapon(player, message)
 	table.sort(ids)
 	print("/weapon one of: " .. table.concat(ids, ", "))
 end
-for _, cmd in { { "Spin", testSpin }, { "Weapon", giveWeapon } } do
+-- /cash [n]: n more cash (a million without a number); /reset: a brand new account, saved
+-- (QM, Oct 25). The game's owner, or anyone in a Studio playtest.
+function giveCash(player, message)
+	if not mayReboss(player) then
+		return
+	end
+	local n = tonumber((message:match("^/%a+%s+(.-)%s*$") or ""):gsub("[,%s_]", "")) or 1e6
+	if n ~= n or math.abs(n) == math.huge then
+		return
+	end
+	player:SetAttribute("Cash", math.max(0, (player:GetAttribute("Cash") or 0) + math.floor(n)))
+end
+function resetPlayer(player)
+	if not mayReboss(player) then
+		return
+	end
+	Pens.clear(player)
+	Data.reset(player)
+	if player.Character then
+		player:LoadCharacter() -- (a fresh start: off any fight, back at the spawn)
+	end
+end
+for _, cmd in { { "Spin", testSpin }, { "Weapon", giveWeapon }, { "Cash", giveCash }, { "Reset", resetPlayer } } do
 	local command = Instance.new("TextChatCommand")
 	command.Name = cmd[1] .. "Command"
 	command.TriggerText = "/" .. cmd[1]:lower()

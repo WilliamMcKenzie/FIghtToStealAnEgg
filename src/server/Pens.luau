@@ -6,6 +6,7 @@
 --   Pens.of(player) -> the pen Model or nil
 --   Pens.addEgg(player, makeEgg)   -- one more egg sat in their pen (makeEgg() -> its box)
 --   Pens.addPet(player, kind)      -- a pet wandering in their pen (the /give command)
+--   Pens.clear(player)             -- no eggs or pets in it (the /reset command)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -135,6 +136,15 @@ local function clearPets(player)
 			penPets[body] = nil
 			body:Destroy()
 		end
+	end
+end
+
+-- an empty pen: no eggs sat in it, no pets wandering (the /reset command)
+function Pens.clear(player)
+	clearPets(player)
+	local pen = Pens.of(player)
+	if pen then
+		clearEggs(pen)
 	end
 end
 

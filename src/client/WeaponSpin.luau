@@ -490,10 +490,10 @@ RunService.RenderStepped:Connect(function(dt)
 	end
 end)
 
--- /spin and /weapon (TextChatService runs a command's Triggered where it's typed: pass it on)
+-- /spin, /weapon, /cash and /reset (TextChatService runs a command's Triggered where it's typed: pass it on)
 task.spawn(function()
 	local commands = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
-	for _, name in { "Spin", "Weapon" } do
+	for _, name in { "Spin", "Weapon", "Cash", "Reset" } do
 		local command = commands:WaitForChild(name .. "Command", 10)
 		local request = ReplicatedStorage:WaitForChild(name .. "Request", 10)
 		if command and request then

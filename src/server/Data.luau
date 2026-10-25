@@ -11,6 +11,7 @@
 --
 --   Data.start()                 -- once
 --   Data.rebirthCost(player) -> cash needed for their next rebirth
+--   Data.reset(player)       -- a brand new account (the /reset command)
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -117,6 +118,29 @@ local function rebirth(player)
 	Combat.refresh(player)
 	task.spawn(save, player)
 	return true
+end
+
+-- back to a brand new account (QM, Oct 25: the /reset command): nothing bought, earned or
+-- owned, the Horse to ride and the starting weapon; saved straight away
+function Data.reset(player)
+	player:SetAttribute("Cash", 0)
+	player:SetAttribute("Strength", 0)
+	player:SetAttribute("Eggs", 0)
+	player:SetAttribute("Rebirths", 0)
+	player:SetAttribute("Weapons", Config.WeaponDrops.Start)
+	player:SetAttribute("Weapon", Config.WeaponDrops.Start)
+	player:SetAttribute("Pet", "Horse")
+	player:SetAttribute("HeldEgg", nil)
+	player:SetAttribute("HeldEggKind", nil)
+	player:SetAttribute("LockedIn", nil)
+	for name, g in Config.Training.Grounds do
+		player:SetAttribute("Train" .. name, g.Cost <= 0)
+	end
+	for name in Config.Regions.Cost do
+		player:SetAttribute("Region" .. name, nil)
+	end
+	Combat.refresh(player)
+	task.spawn(save, player)
 end
 
 function Data.start()
