@@ -279,7 +279,7 @@ local oddsLabel = Popups.text(stage, {
 oddsLabel.TextColor3 = WHITE -- (white on a black outline: QM)
 oddsLabel:FindFirstChildOfClass("UIStroke").Color = Color3.new(0, 0, 0)
 
--- the streaks: white, bright at the end nearest the middle
+-- the streaks: the rarity's colour (set as each weapon shows), bright at the end nearest the middle
 local streaks = {}
 for _, side in { -1, 1 } do
 	local s = frame(stage, {
@@ -362,6 +362,9 @@ local function showItem(id, odds, landed)
 	nameLabel.TextColor3 = r.Fill:Lerp(WHITE, 0.3)
 	oddsLabel.Text = "1/" .. tostring(odds[id] or 1)
 	raysColour(r.Fill)
+	for _, streak in streaks do
+		streak.BackgroundColor3 = r.Fill -- (the rarity's colour, like the rays: QM)
+	end
 	local isBonus = w.Boss ~= nil
 	if isBonus and not bonus.Visible then
 		bonusScale.Scale = 0.6
