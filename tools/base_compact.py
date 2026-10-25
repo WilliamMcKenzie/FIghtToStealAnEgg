@@ -27,7 +27,7 @@ OLD_SOUTH = 152  # (the old south wall, cleared)
 GATE_HALF = 24
 PEN_SIZE, TRAIN_SIZE = 56, 48
 PENS = [(x, 32) for x in (-136, -68, 0, 68, 136)]  # a row along the south wall
-TRAINING = [("Meadow", -140, -112), ("Desert", -140, -52), ("Ice", 140, -112), ("Lava", 140, -52)]
+TRAINING = [("Ice", -140, -112), ("Meadow", -140, -52), ("Lava", 140, -112), ("Desert", 140, -52)]  # (QM, Oct 25: matched to the floors QM painted)
 SPAWN = (0, -72)
 
 

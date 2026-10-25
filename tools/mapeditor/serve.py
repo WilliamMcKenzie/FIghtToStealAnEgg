@@ -26,7 +26,22 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 STUDIO = os.path.join(ROOT, "tools", "studio")
 WORLD = os.path.join(ROOT, "maps", "world.map")
-SERVED = {}  # version -> the text served under it (a tab saves against the version it opened)
+# every version served, on disk so a restart of this server still knows what an open tab
+# opened (a tab saves against that version; without it the save would overwrite the file)
+SERVED_DIR = os.path.join(tempfile.gettempdir(), "mapeditor_served")
+os.makedirs(SERVED_DIR, exist_ok=True)
+
+
+class Served:
+    def __setitem__(self, v, text):
+        open(os.path.join(SERVED_DIR, v), "w").write(text)
+
+    def get(self, v, default=None):
+        path = os.path.join(SERVED_DIR, os.path.basename(v)) if v else ""
+        return open(path).read() if v and os.path.exists(path) else default
+
+
+SERVED = Served()
 PARTS = ("colours", "areas", "tiles", "objects", "fixed", "rows")
 
 
