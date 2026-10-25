@@ -41,6 +41,7 @@ folder.Parent = workspace
 local live = {} -- [body] = { kind, c, yaw, home, bounds, biome, calm }
 local arenas = {} -- [biome] = { spot, bounds }
 local extents = {}
+local HOME_YAW = math.pi -- (facing +z, south: every arena's gateway is on its south side)
 
 -- the drawing's box (studs, at 1x), for the body's size
 local function extent(model)
@@ -141,7 +142,8 @@ function Bosses.arena(biome, spot, bounds)
 		return nil
 	end
 	arenas[biome] = { spot = spot, bounds = bounds }
-	local body, b = make(list[math.random(#list)], spot * Vector3.new(1, 0, 1), 0)
+	-- (asleep facing south, the way intruders come in from: QM)
+	local body, b = make(list[math.random(#list)], spot * Vector3.new(1, 0, 1), HOME_YAW)
 	b.biome, b.bounds = biome, bounds
 	body:SetAttribute("Biome", biome)
 	body:SetAttribute("Asleep", true)
@@ -236,7 +238,7 @@ RunService.Heartbeat:Connect(function(dt)
 				if offset.Magnitude < 1 then
 					body:SetAttribute("Health", c.Health)
 					body:SetAttribute("Asleep", true)
-					b.yaw = 0
+					b.yaw = HOME_YAW
 				else
 					turnToward(b, offset, dt)
 					pos += offset.Unit * math.min(c.Speed * dt, offset.Magnitude)

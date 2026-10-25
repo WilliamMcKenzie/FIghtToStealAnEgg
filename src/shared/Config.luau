@@ -364,6 +364,14 @@ return {
 		Lava = { "LavaWyrm" },
 	},
 	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home, heals and sleeps
+	-- a sleeping boss (client/BossView, QM Oct 25): settled low on the ground, its head
+	-- swelling a little with each snore
+	BossSleep = {
+		Sink = 0.15, -- how far into the ground it settles, of its height
+		Snore = 1.1, -- its head's size at the top of a snore (1 at the bottom)
+		Breath = 3, -- seconds a snore takes
+		Settle = 0.6, -- seconds to settle down (or get up)
+	},
 
 	-- eggs (Server/Eggs): one in every nest round each biome's edges. Hold E to steal one:
 	-- its boss wakes and red barriers (only you see them) lock you in the biome until

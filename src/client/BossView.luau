@@ -15,6 +15,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared.Config)
 local Horse = require(Shared.Animals.Horse)
 
 -- Recolours (a mob's Tint): each part's colour through fn, the rest of the data shared
@@ -63,6 +64,7 @@ local NUMBER_SIZE = 20
 local NUMBER_RISE = 3 -- studs it floats up
 local NUMBER_LIFE = 0.7 -- seconds on screen
 local DEATH = 0.5 -- seconds it takes to shrink away
+local SLEEP = Config.BossSleep
 
 local views = {} -- [body] = { animal, last position, colours, flashUntil, diedAt }
 
@@ -126,6 +128,37 @@ local function add(body)
 		flashUntil = 0,
 		health = body:GetAttribute("Health"),
 	}
+	-- (the head, for snoring: the neck bone and everything hung off it, their sizes and
+	-- joint offsets as built, so it can swell about the neck's pivot)
+	local neck = animal.model:FindFirstChild("neckBone")
+		or animal.model:FindFirstChild("HeadBone")
+		or animal.model:FindFirstChild("FlowerBone") -- (the Rafflesia's head is its flower)
+	if neck then
+		local inHead = { [neck] = true }
+		local head = {}
+		for _, part in animal.model:GetDescendants() do
+			if part:IsA("BasePart") then
+				local p, chain = part, {}
+				while p and p ~= neck and not inHead[p] do
+					table.insert(chain, p)
+					local joint = p:FindFirstChildWhichIsA("JointInstance")
+					p = joint and joint.Part0
+				end
+				if p == neck or inHead[p] then
+					for _, q in chain do
+						inHead[q] = true
+					end
+				end
+			end
+		end
+		for part in inHead do
+			local joint = part:FindFirstChildWhichIsA("JointInstance")
+			table.insert(head, { part = part, size = part.Size, joint = joint, c0 = joint and joint.C0, c1 = joint and joint.C1 })
+		end
+		view.head = head
+		view.headRoot = neck
+	end
+	view.sleep = if body:GetAttribute("Asleep") then 1 else 0
 	views[body] = view
 	body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
@@ -172,7 +205,26 @@ RunService.RenderStepped:Connect(function(dt)
 			animal:setScale(math.max(1 - k, 0.05))
 		end
 		local ground = pos - Vector3.new(0, body.Size.Y / 2, 0)
+		-- asleep: settled low, snoring (eased in and out as it nods off or gets up)
+		local want = if body:GetAttribute("Asleep") then 1 else 0
+		view.sleep += math.clamp(want - view.sleep, -dt / SLEEP.Settle, dt / SLEEP.Settle)
+		local s = view.sleep * view.sleep * (3 - 2 * view.sleep)
+		ground -= Vector3.new(0, body.Size.Y * SLEEP.Sink * s, 0)
 		animal.model:PivotTo(CFrame.new(ground) * body.CFrame.Rotation)
+		if view.head then
+			local k = 1 + (SLEEP.Snore - 1) * s * (0.5 - 0.5 * math.cos(now / SLEEP.Breath * 2 * math.pi))
+			if math.abs(k - (view.headScale or 1)) > 1e-4 then
+				view.headScale = k
+				for _, h in view.head do
+					h.part.Size = h.size * k
+					-- (a joint inside the head swells with it: its offsets from the neck scale too)
+					if h.joint and h.part ~= view.headRoot then
+						h.joint.C0 = CFrame.new(h.c0.Position * k) * h.c0.Rotation
+						h.joint.C1 = CFrame.new(h.c1.Position * k) * h.c1.Rotation
+					end
+				end
+			end
+		end
 		local flashing = now < view.flashUntil
 		if flashing ~= view.flashing then
 			view.flashing = flashing
