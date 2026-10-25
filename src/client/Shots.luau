@@ -241,14 +241,19 @@ function Shots.fire(character, id, yaw, seed)
 	end
 end
 
--- what a shot can hit here: every living boss and mob (flat circles); a sleeping boss
--- isn't there to hit, shots pass over it
+-- what a shot can hit here: every living boss and mob (flat circles); a boss still
+-- arriving (or asleep) isn't there to hit, shots pass over it
 local function targets()
 	local list = {}
 	for _, name in { "Bosses", "Mobs" } do
 		local f = workspace:FindFirstChild(name)
 		for _, body in if f then f:GetChildren() else {} do
-			if body:IsA("BasePart") and (body:GetAttribute("Health") or 0) > 0 and not body:GetAttribute("Asleep") then
+			if
+				body:IsA("BasePart")
+				and (body:GetAttribute("Health") or 0) > 0
+				and not body:GetAttribute("Asleep")
+				and not body:GetAttribute("Intro")
+			then
 				table.insert(list, { body = body, pos = body.Position, radius = body:GetAttribute("Radius") or 0 })
 			end
 		end

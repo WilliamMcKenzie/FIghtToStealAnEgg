@@ -27,6 +27,7 @@ local Shots = require(script.Shots)
 local SlashCam = require(script.SlashCam)
 local SwingPose = require(script.SwingPose)
 require(script.BossView)
+require(script.BossIntro)
 require(script.EggView)
 require(script.PlayerBars)
 require(script.Hud)
@@ -137,7 +138,8 @@ local function nearestBoss(root, range)
 			if
 				body:IsA("BasePart")
 				and (body:GetAttribute("Health") or 0) > 0
-				and not body:GetAttribute("Asleep") -- (asleep it can't be hit until an egg's stolen)
+				and not body:GetAttribute("Asleep") -- (arriving, or asleep, it can't be hit)
+				and not body:GetAttribute("Intro")
 				and (ground == nil or player:GetAttribute("Train" .. ground) ~= false)
 			then
 				local d = ((body.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude
