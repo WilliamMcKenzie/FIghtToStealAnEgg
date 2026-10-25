@@ -404,6 +404,136 @@ return {
 				Hide = { "PupilL" },
 				-- Zzz = Vector3.new(1.2, 4.5, -1.2), -- (no Zs on the hen: QM, Oct 25)
 			},
+			GiantRafflesia = {
+				Bones = {
+					Stem = { 0, 0, 0, -0.12, 0, 0.06 }, -- (bowed over a little)
+					Flower = { 0, 0, 0, -0.9, 0, 0 }, -- (hung face down)
+					-- (each petal curled up round the middle, a closed bud: about its own edge)
+					Petal1 = { 0, 0, 0, -0.7, 0, 0 },
+					Petal2 = { 0, 0, 0, -0.2, -0.069, 0.661 },
+					Petal3 = { 0, 0, 0, 0.552, 0.112, 0.391 },
+					Petal4 = { 0, 0, 0, 0.552, -0.112, -0.391 },
+					Petal5 = { 0, 0, 0, -0.2, 0.069, -0.661 },
+				},
+				Breathe = {
+					Stem = { 0, 0, 0, 0.03, 0, 0 },
+					Flower = { 0, 0, 0, 0.06, 0, 0 },
+					Petal1 = { 0, 0, 0, 0.1, 0, 0 }, -- (opening a touch with each breath)
+					Petal2 = { 0, 0, 0, 0.031, 0.001, -0.095 },
+					Petal3 = { 0, 0, 0, -0.081, -0.002, -0.059 },
+					Petal4 = { 0, 0, 0, -0.081, 0.002, 0.059 },
+					Petal5 = { 0, 0, 0, 0.031, -0.001, 0.095 },
+				},
+				Shut = {},
+				Hide = {},
+			},
+			MajesticUnicorn = {
+				Bones = {
+					root = { 0, -2.9, 0, 0, 0, 0 }, -- (lying down on its belly)
+					LegFL = { 0, 0.5, 0.2, -1.5, 0, 0 }, -- (front legs folded back under its chest)
+					LegFR = { 0, 0.5, 0.2, -1.5, 0, 0 },
+					LegHL = { 0, 0.5, -0.4, 1.5, 0, 0 }, -- (hind legs folded forward under its belly)
+					LegHR = { 0, 0.5, -0.4, 1.5, 0, 0 },
+					neck = { 0, -0.4, 0, -0.3, 0.25, 0.08 }, -- (head down, turned a little to one side)
+					EarL = { 0, 0, 0, 0.45, 0, 0.25 }, -- (ears laid back)
+					EarR = { 0, 0, 0, 0.45, 0, -0.25 },
+					Tail = { 0, 0, 0, -0.3, 0, 0 }, -- (tail drooped onto the ground and curled round)
+					Tail2 = { 0, 0, 0, -0.6, 0.3, 0 },
+					Tail3 = { 0, 0, 0, -0.6, 0.3, 0 },
+					Tail4 = { 0, 0, 0, -0.3, 0.3, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.15, 0, 0, 0, 0 },
+					neck = { 0, 0, 0, -0.06, 0, 0 },
+					Tail = { 0, 0, 0, 0.04, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = { "PupilL", "PupilR" },
+			},
+			VenusFlytrap = {
+				Bones = {
+					root = { 0, -1.3, 0, 0, 0, 0 }, -- (squatted down, its leaves splayed out flat)
+					LegFL = { 0, 0, 0, 0.25, 0, -0.6 },
+					LegHL = { 0, 0, 0, -0.25, 0, -0.6 },
+					LegFR = { 0, 0, 0, 0.25, 0, 0.6 },
+					LegHR = { 0, 0, 0, -0.25, 0, 0.6 },
+					neck = { 0, 0, 0, -0.4, 0, 0.12 }, -- (stalk bowed over)
+					Jaw = { 0, 0, 0, -0.55, 0, 0 }, -- (its mouth shut)
+					group = { 0, 0, 0, 0.35, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.12, 0, 0, 0, 0 },
+					neck = { 0, 0, 0, 0.06, 0, 0 },
+					Jaw = { 0, 0, 0, 0.05, 0, 0 },
+				},
+				Shut = { "EyeL" },
+				Hide = { "PupilL" },
+			},
+			CactusBoss = {
+				Bones = {
+					root = { 0, -2.2, 0.4, 0.12, 0, 0 }, -- (sat down on the ground, leaning back)
+					LegFL = { 0, 0.6, 0, 1.45, 0, 0 }, -- (stumpy legs stuck out in front)
+					LegFR = { 0, 0.6, 0, 1.45, 0, 0 },
+					neck = { 0, 0, 0, -0.25, 0, 0.12 }, -- (its flowery top nodding forward)
+					ArmL = { 0, 0, 0, -0.15, 0, 0.35 }, -- (arms slumped at its sides)
+					ArmR = { 0, 0, 0, -0.15, 0, -0.35 },
+				},
+				Breathe = {
+					root = { 0, 0.12, 0, -0.03, 0, 0 },
+					neck = { 0, 0, 0, -0.05, 0, 0 },
+					ArmL = { 0, 0, 0, 0, 0, -0.06 },
+					ArmR = { 0, 0, 0, 0, 0, 0.06 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			ElderBoar = {
+				Bones = {
+					root = { 0, -3.3, 0, 0, 0, 0 }, -- (lying down on its belly)
+					LegFL = { 0, 0.8, 0.3, -1.5, 0, 0 }, -- (legs folded under)
+					LegFR = { 0, 0.8, 0.3, -1.5, 0, 0 },
+					LegHL = { 0, 0.8, -0.3, 1.5, 0, 0 },
+					LegHR = { 0, 0.8, -0.3, 1.5, 0, 0 },
+					neck = { 0, 1.2, 0, 0.12, 0.2, 0 }, -- (chin resting on the ground, turned a little)
+					EarL = { 0, 0, 0, 0.3, 0, 0.5 }, -- (ears drooped)
+					EarR = { 0, 0, 0, 0.3, 0, -0.5 },
+					Tail = { 0, 0, 0, -0.5, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.2, 0, 0, 0, 0 },
+					neck = { 0, -0.1, 0, -0.03, 0, 0 },
+				},
+				Shut = { "EyeL" },
+				Hide = { "PupilL" },
+			},
+			LavaWyrm = {
+				Bones = {
+					-- (its tail curled round beside it)
+					Seg2 = { 0, 0, 0, 0, 0.35, 0 },
+					Seg3 = { 0, 0, 0, 0, 0.4, 0 },
+					Seg4 = { 0, 0, 0, 0, 0.45, 0 },
+					Seg5 = { 0, 0, 0, 0, 0.5, 0 },
+					Seg6 = { 0, 0, 0, 0, 0.5, 0 },
+					Seg7 = { 0, 0, 0, 0, 0.55, 0 },
+					Seg8 = { 0, 0, 0, 0, 0.6, 0 },
+					-- (neck curled the other way, head down on the ground)
+					NeckBase = { 0, 0, 0, 0, 0.3, 0 },
+					neck = { 0, 0, 0, 0, 0.35, 0 },
+					NeckTop = { 0, -0.2, 0, 0.05, 0.35, 0 },
+					Head = { 0, -0.3, 0, 0.06, 0.2, 0.1 },
+					Jaw = { 0, 0, 0, 0.33, 0, 0 }, -- (mouth shut)
+					Crest = { 0, -0.4, 0.4, 1.1, 0, 0 }, -- (its fan folded flat down its neck)
+				},
+				Breathe = {
+					root = { 0, 0.1, 0, 0, 0, 0 },
+					Seg2 = { 0, 0.08, 0, 0, 0, 0 },
+					Seg3 = { 0, 0.06, 0, 0, 0, 0 },
+					NeckBase = { 0, 0.08, 0, 0, 0, 0 },
+					Crest = { 0, 0, 0, -0.12, 0, 0 }, -- (its fan lifting a little with each breath)
+				},
+				Shut = { "GlowAmber_iris_L", "GlowAmber_iris_R" },
+				Hide = { "GlowSlit_pupil_L", "GlowSlit_pupil_R" },
+			},
 		},
 		Zzz = {
 			Count = 3, -- Zs in a run, one run per breath as it breathes out (each bigger than the last)

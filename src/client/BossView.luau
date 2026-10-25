@@ -193,7 +193,21 @@ local function add(body)
 		view.shut, view.hidden = {}, {}
 		for _, part in animal.model:GetChildren() do
 			if table.find(pose.Shut, part.Name) then
-				view.shut[part] = part.Size
+				-- (a shut eye squashes along whichever of its two broad sides stands most upright)
+				local size, cf = part.Size, part.CFrame
+				local axes = { cf.RightVector, cf.UpVector, cf.LookVector }
+				local sides = { size.X, size.Y, size.Z }
+				local thin = table.find(sides, math.min(size.X, size.Y, size.Z))
+				local best, squash = -1, 2
+				for i = 1, 3 do
+					local up = math.abs(axes[i]:Dot(animal.model.PrimaryPart.CFrame.UpVector))
+					if i ~= thin and up > best then
+						best, squash = up, i
+					end
+				end
+				local k = { 1, 1, 1 }
+				k[squash] = 0.18
+				view.shut[part] = { size = size, squashed = size * Vector3.new(k[1], k[2], k[3]) }
 			elseif table.find(pose.Hide, part.Name) then
 				view.hidden[part] = part.Transparency
 			end
@@ -316,8 +330,8 @@ RunService.RenderStepped:Connect(function(dt)
 			local shut = s > 0.5
 			if shut ~= view.eyesShut then
 				view.eyesShut = shut
-				for part, size in view.shut do
-					part.Size = if shut then size * Vector3.new(1, 0.18, 1) else size
+				for part, eye in view.shut do
+					part.Size = if shut then eye.squashed else eye.size
 					part.Color = if shut then SHUT_COLOUR else view.colours[part]
 				end
 				for part, transparency in view.hidden do
