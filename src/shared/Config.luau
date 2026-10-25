@@ -629,9 +629,8 @@ return {
 	},
 
 	-- the rider's upper body with a weapon out (client/SwingPose; QM, Oct 25). Every weapon
-	-- rides like cavalry: the weapon arm out to the side, the weapon (blade, bow, staff)
-	-- hanging down and forward by the mount's front leg, the torso twisted a little and leaning into the
-	-- ride, the other hand forward on the reins. Swords and staffs swing from it and settle
+	-- rides in the one pose QM tuned (Oct 25), the torso twisted a little and leaning into
+	-- the ride. Swords and staffs swing from it and settle
 	-- back into it; bows snap up into the Archer pose below while shooting.
 	-- Angles are degrees about the joint's parent-part axes: X pitch (arms: 90 = straight
 	-- out in front, below 0 = behind; Waist: below 0 = leaning forward), Y yaw (+ = turn
@@ -648,14 +647,12 @@ return {
 		Joints = {
 			Waist = { Order = "YXZ", X = -12, Y = -18, Z = -4, Breathe = 2, Bob = 3, Lag = 0 },
 			Neck = { Order = "YXZ", X = 8, Y = 14, Z = 0, Breathe = -1, Bob = -2, Lag = 0.05 },
-			-- (QM: the arm straight out to the side, the wrist straight with a normal grip, the
-			-- weapon hanging down and forward by the mount's front leg, its head flat alongside
-			-- the body, not sticking out from it. Z twists the arm, and so the head, round)
-			RightShoulder = { Order = "YXY", X = 100, Y = -80, Z = 135, Breathe = 1.5, Bob = 3, Lag = 0.15 },
+			-- (QM tuned these in Play, Oct 25: the default for every weapon type)
+			RightShoulder = { Order = "YXY", X = 45, Y = -25, Z = 45, Breathe = 1.5, Bob = 3, Lag = 0.15 },
 			RightElbow = { Order = "YXZ", X = 5, Y = 0, Z = 0, Breathe = 1, Bob = 3, Lag = 0.2 },
 			RightWrist = { Order = "YXZ", X = 0, Y = 0, Z = 0, Breathe = 0, Bob = 0, Lag = 0.25 },
-			LeftShoulder = { Order = "YXZ", X = 55, Y = 5, Z = 0, Breathe = 1.5, Bob = 3, Lag = 0.1 },
-			LeftElbow = { Order = "YXZ", X = 45, Y = 0, Z = 0, Breathe = 1, Bob = 4, Lag = 0.15 },
+			LeftShoulder = { Order = "YXZ", X = -25, Y = 25, Z = 0, Breathe = 1.5, Bob = 3, Lag = 0.1 },
+			LeftElbow = { Order = "YXZ", X = 25, Y = 0, Z = 0, Breathe = 1, Bob = 4, Lag = 0.15 },
 		},
 		-- bows (every Ranged weapon) while shooting (QM's archer ref): the bow arm straight out
 		-- at the target, the body side-on, and the other hand drawing to the cheek. Each shot
