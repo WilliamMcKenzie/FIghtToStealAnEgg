@@ -601,6 +601,18 @@ local function dummy(parent, at)
 	return model
 end
 
+-- A yard's gate: in the side facing the spawn (QM, Oct 24: pens along the south, training
+-- grounds down the sides). Its outward direction, and a frame at the middle of that side
+-- turned to face out (a sign or gate part runs along its X).
+local function gateOf(base, x, z, size)
+	local dx, dz = base.Spawn[1] - x, base.Spawn[2] - z
+	local out = if math.abs(dx) > math.abs(dz)
+		then Vector3.new(math.sign(dx), 0, 0)
+		else Vector3.new(0, 0, if dz < 0 then -1 else 1)
+	local at = Vector3.new(x, 0, z) + out * (size / 2)
+	return out, CFrame.lookAt(at, at + out)
+end
+
 local function baseFurniture(parent)
 	local base = Map.area("Base")
 	local pens = folder("Pens", parent)
@@ -609,8 +621,8 @@ local function baseFurniture(parent)
 		local pen = Instance.new("Model")
 		pen.Name = "Pen" .. i
 		pen:SetAttribute("Index", i)
-		local gateSide = if x < 0 then 1 else -1 -- (the side facing the middle)
-		fence(pen, x, z, base.PenSize, 0, Vector3.new(gateSide, 0, 0))
+		local out, side = gateOf(base, x, z, base.PenSize)
+		fence(pen, x, z, base.PenSize, 0, out)
 		local marker = Instance.new("Part")
 		marker.Name = "Area"
 		marker.Anchored, marker.CanCollide, marker.CanQuery, marker.CanTouch = true, false, false, false
@@ -618,13 +630,11 @@ local function baseFurniture(parent)
 		marker.Size = Vector3.new(base.PenSize, 12, base.PenSize)
 		marker.CFrame = CFrame.new(x, 6, z)
 		marker.Parent = pen
-		local signAt = CFrame.new(x + gateSide * (base.PenSize / 2 + 3), 0, z + 9)
-			* CFrame.Angles(0, if gateSide > 0 then math.pi / 2 else -math.pi / 2, 0)
-		local sign = Map.sign(pen, signAt, "Empty Pen", 10)
+		local sign = Map.sign(pen, side * CFrame.new(9, 0, -3), "Empty Pen", 10)
 		sign.Name = "OwnerSign"
 		pen.Parent = pens
 	end
-	-- the training grounds: fenced yards, their gates facing the plaza (Server/Training
+	-- the training grounds: fenced yards, their gates facing the spawn (Server/Training
 	-- fills them and sells their gates; client/Barriers keeps a locked gate solid)
 	local training = folder("Training", parent)
 	local size = base.TrainSize
@@ -634,7 +644,8 @@ local function baseFurniture(parent)
 		zone.Name = name
 		zone:SetAttribute("X", x)
 		zone:SetAttribute("Z", z)
-		fence(zone, x, z, size, 0, Vector3.new(0, 0, -1))
+		local out, side = gateOf(base, x, z, size)
+		fence(zone, x, z, size, 0, out)
 		if name == "Dummies" then
 			local dummies = folder("Dummies", zone)
 			for k = -1, 1 do
@@ -652,10 +663,10 @@ local function baseFurniture(parent)
 		gate.Anchored, gate.CanCollide, gate.CanQuery, gate.CanTouch = true, false, false, false
 		gate.Transparency = 1
 		gate.Size = Vector3.new(10, 8, 1.2)
-		gate.CFrame = CFrame.new(x, 4, z - size / 2 + 1)
+		gate.CFrame = side * CFrame.new(0, 4, 1)
 		gate.Parent = zone
 		local title = if name == "Dummies" then "TRAINING DUMMIES" else string.upper(name) .. " TRAINING"
-		Map.sign(zone, CFrame.new(x + 14, 0, z - size / 2 - 3), title, 13)
+		Map.sign(zone, side * CFrame.new(14, 0, -3), title, 13)
 		zone.Parent = training
 	end
 	-- the spawn: an invisible point in the dirt yard (QM, Oct 24: no spawn plate), you
