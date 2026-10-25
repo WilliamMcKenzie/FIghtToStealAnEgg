@@ -309,10 +309,16 @@ end
 
 -- where the hand holds weapon `id` (Tool.Grip): the middle of the grip, turned and slid
 -- by its Config.WeaponPoses GripAngle (degrees) and GripOffset (studs), else Config.WeaponGrip's
+-- weapon `id`'s GripAngle or GripOffset: its own, else its type's, else every weapon's
+function Weapons.gripValue(id, key)
+	local own = Config.WeaponPoses[id]
+	local kind = Config.WeaponGrip[Weapons.get(id).Type]
+	return own and own[key] or kind and kind[key] or Config.WeaponGrip[key]
+end
+
 function Weapons.grip(id)
-	local pose = Config.WeaponPoses[id] or {}
-	local angle = pose.GripAngle or Config.WeaponGrip.GripAngle
-	local offset = pose.GripOffset or Config.WeaponGrip.GripOffset
+	local angle = Weapons.gripValue(id, "GripAngle")
+	local offset = Weapons.gripValue(id, "GripOffset")
 	return CFrame.new(0, GRIP_Y, 0)
 		* CFrame.new(offset)
 		* CFrame.Angles(math.rad(angle.X), math.rad(angle.Y), math.rad(angle.Z))

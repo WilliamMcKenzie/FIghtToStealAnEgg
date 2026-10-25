@@ -56,7 +56,7 @@ local function value(id, key)
 		return own[key]
 	end
 	if key == "GripAngle" or key == "GripOffset" then
-		return Config.WeaponGrip[key]
+		return Weapons.gripValue(id, key)
 	end
 	local j = Config.RidePose.Joints[key]
 	return Vector3.new(j.X, j.Y, j.Z)

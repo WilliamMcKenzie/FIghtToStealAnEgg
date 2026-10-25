@@ -695,10 +695,11 @@ return {
 	--               that joint's riding pose (RidePose.Joints X, Y, Z above)
 	WeaponPoses = {},
 	-- how every weapon sits in the hand unless its WeaponPoses says otherwise (QM tuned it
-	-- in Play, Oct 25)
+	-- in Play, Oct 25), with a weapon type's own values over it
 	WeaponGrip = {
 		GripAngle = Vector3.new(0, 90, 0),
 		GripOffset = Vector3.new(0, 0, -0.25),
+		Ranged = { GripOffset = Vector3.new(0, 0, 0.25) }, -- (bows: QM)
 	},
 
 	-- weapons (QM, Oct 25): bosses drop them. Kill a boss and everyone in its fight gets a
