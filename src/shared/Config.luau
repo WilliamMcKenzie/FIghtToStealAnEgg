@@ -871,7 +871,7 @@ return {
 	Shots = {
 		Height = 0.8, -- above the rider's hips, like the slash
 		Radius = 0.6, -- a shot's own width for hitting (studs)
-		HomingCone = 80, -- a missile only bends toward targets this many degrees either side of its path
-		MagicLaunch = 45, -- a Magic shot sets off up to this many degrees either side of the aim, at random (QM)
+		HomingCone = 135, -- a missile only bends toward targets this many degrees either side of its path (wide: magic sets off up to MagicLaunch off the aim)
+		MagicLaunch = 90, -- a Magic shot sets off up to this many degrees either side of the aim, at random (QM)
 	},
 }
