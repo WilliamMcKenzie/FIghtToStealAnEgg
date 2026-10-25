@@ -29,7 +29,7 @@ local IMAGES = {
 	BossBarFill = "rbxassetid://139297500668654",
 	BossBarBack = "rbxassetid://88593547866423",
 	BossBarTrail = "rbxassetid://110382419429261", -- QM's TRAIL 1
-	Backpack = "", -- QM's (assets/ui/Backpack.png; until it's uploaded the button says Backpack in text)
+	Backpack = "rbxassetid://120170272419141", -- QM's (assets/ui/Backpack.png; until it's uploaded the button says Backpack in text)
 }
 local DESIGN_HEIGHT = 1080
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
