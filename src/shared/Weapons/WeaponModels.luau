@@ -79,16 +79,6 @@ local function staff(shaft, prong, gem, ball)
 	}
 end
 
--- a straight sword: grip, guard, blade (length `len`) and a pointed tip
-local function sword(len, width, guard, blade)
-	return {
-		block(V(0.2, 0.5, 0.2), V(0, -0.25, 0), WOOD),
-		block(V(guard, 0.16, 0.22), V(0, 0.08, 0), GOLD),
-		block(V(width, len, 0.08), V(0, 0.16 + len / 2, 0), blade),
-		block(V(width * 0.7, width * 0.7, 0.08), V(0, 0.16 + len, 0), blade, 45),
-	}
-end
-
 -- the unicorn's horn: a twisting stack, each block narrower and turned a little more
 local horn = { block(V(0.36, 0.5, 0.36), V(0, -0.25, 0), rgb(255, 214, 236)) }
 for i = 0, 5 do
@@ -157,30 +147,6 @@ end
 table.insert(bloom, block(V(0.32, 0.32, 0.16), V(0, 1.2, 0.04), rgb(255, 220, 90), 45, { neon = true }))
 
 return {
-	Longsword = model(sword(2.6, 0.5, 1.2, STEEL)),
-	Axe = model({
-		block(V(0.2, 2.2, 0.2), V(0, 0.6, 0), WOOD),
-		block(V(0.8, 0.7, 0.12), V(0.45, 1.4, 0), STEEL_DARK),
-		block(V(0.16, 0.95, 0.12), V(0.9, 1.4, 0), STEEL),
-	}),
-	Waraxe = model({
-		block(V(0.22, 2.8, 0.22), V(0, 0.9, 0), DARK_WOOD),
-		block(V(0.9, 0.9, 0.12), V(0.5, 1.9, 0), STEEL_DARK),
-		block(V(0.18, 1.2, 0.12), V(1.0, 1.9, 0), STEEL),
-		block(V(0.9, 0.9, 0.12), V(-0.5, 1.9, 0), STEEL_DARK),
-		block(V(0.18, 1.2, 0.12), V(-1.0, 1.9, 0), STEEL),
-		block(V(0.3, 0.3, 0.3), V(0, 2.4, 0), STEEL, 45),
-		block(V(0.28, 0.2, 0.28), V(0, 1.35, 0), GOLD),
-	}),
-	Club = model({
-		block(V(0.22, 0.5, 0.22), V(0, -0.25, 0), DARK_WOOD),
-		block(V(0.3, 1.0, 0.3), V(0, 0.5, 0), WOOD),
-		block(V(0.45, 0.9, 0.45), V(0, 1.4, 0), WOOD),
-		block(V(0.6, 0.8, 0.6), V(0, 2.2, 0), WOOD),
-		block(V(0.14, 0.14, 0.3), V(0.32, 2.0, 0), STEEL_DARK, 0, { plain = true }),
-		block(V(0.14, 0.14, 0.3), V(-0.32, 2.4, 0), STEEL_DARK, 0, { plain = true }),
-		block(V(0.3, 0.14, 0.14), V(0, 2.2, 0.32), STEEL_DARK, 0, { plain = true }),
-	}),
 	Shortbow = model(bow(WOOD, WHITE, 0.8)),
 	Longbow = model(bow(rgb(140, 92, 50), WHITE, 1.3)),
 	NatureBow = model(bow(rgb(70, 160, 90), WHITE, 1, {

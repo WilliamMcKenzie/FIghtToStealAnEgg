@@ -24,11 +24,23 @@ local Rig = require(script.Parent.Parent.Rig)
 local Studs = require(script.Parent.Parent.Studs)
 local KendoStickModel = require(script.Parent.KendoStickModel)
 local ShortswordModel = require(script.Parent.ShortswordModel)
+local LongswordModel = require(script.Parent.LongswordModel)
+local AxeModel = require(script.Parent.AxeModel)
+local WaraxeModel = require(script.Parent.WaraxeModel)
+local ClubModel = require(script.Parent.ClubModel)
 local WeaponModels = require(script.Parent.WeaponModels)
 
 local Weapons = {}
 
-local DRAWN = { KendoStick = KendoStickModel, Shortsword = ShortswordModel } -- (designs/weapons/*.bbmodel)
+-- (QM's, designs/weapons/*.bbmodel)
+local DRAWN = {
+	KendoStick = KendoStickModel,
+	Shortsword = ShortswordModel,
+	Longsword = LongswordModel,
+	Axe = AxeModel,
+	Waraxe = WaraxeModel,
+	Club = ClubModel,
+}
 
 local STUDS = { image = Studs.IMAGE, tile = 0.5 }
 local SCALE = 1.6 -- held size, times the drawing (as the old sword's: QM, Oct 23)
