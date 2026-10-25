@@ -324,13 +324,10 @@ function giveWeapon(player, message)
 		return
 	end
 	local want = squash(message:match("^/%a+%s+(.-)%s*$") or "")
+	-- (every weapon in Config.Weapons, so the list keeps up with whatever's in there)
 	local ids = {}
-	for id, w in Config.Weapons do
+	for id in Config.Weapons do
 		table.insert(ids, id)
-		if want ~= "" and (squash(id) == want or squash(w.Name) == want) then
-			Arsenal.give(player, id, true)
-			return
-		end
 	end
 	table.sort(ids)
 	if want == "" then
@@ -338,9 +335,34 @@ function giveWeapon(player, message)
 		for _, id in ids do
 			Arsenal.give(player, id, false)
 		end
+		print("/weapon: gave all " .. #ids .. " weapons")
 		return
 	end
-	print("/weapon one of: " .. table.concat(ids, ", "))
+	-- its exact id or name first, then the first whose name starts with it, then contains it
+	-- ("/weapon kendo", "/weapon horn")
+	local found = nil
+	for _, test in {
+		function(key)
+			return key == want
+		end,
+		function(key)
+			return key:sub(1, #want) == want
+		end,
+		function(key)
+			return key:find(want, 1, true) ~= nil
+		end,
+	} do
+		for _, id in ids do
+			if not found and (test(squash(id)) or test(squash(Config.Weapons[id].Name))) then
+				found = id
+			end
+		end
+	end
+	if found then
+		Arsenal.give(player, found, true)
+	else
+		print("/weapon one of: " .. table.concat(ids, ", "))
+	end
 end
 -- /cash [n]: n more cash (a million without a number); /reset: a brand new account, saved
 -- (QM, Oct 25). The game's owner, or anyone in a Studio playtest.
