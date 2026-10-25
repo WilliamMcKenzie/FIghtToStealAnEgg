@@ -61,7 +61,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss, swapPet, givePet, testSpin, giveWeapon, giveCash, resetPlayer -- (below)
+local requestBoss, reboss, swapPet, givePet, testSpin, giveWeapon, giveWeapons, giveCash, resetPlayer -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your Strength (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -85,6 +85,8 @@ local function joined(player)
 			givePet(player, message)
 		elseif message:lower():match("^/spin") then
 			testSpin(player, message)
+		elseif message:lower():match("^/swords") or message:lower():match("^/staffs") or message:lower():match("^/bows") then
+			giveWeapons(player, message)
 		elseif message:lower():match("^/weapon") then
 			giveWeapon(player, message)
 		elseif message:lower():match("^/cash") then
@@ -364,6 +366,28 @@ function giveWeapon(player, message)
 		print("/weapon one of: " .. table.concat(ids, ", "))
 	end
 end
+-- /swords, /staffs, /bows: every Melee, Magic or Ranged weapon (QM, Oct 25), the same people
+local KINDS = { swords = "Melee", staffs = "Magic", bows = "Ranged" }
+function giveWeapons(player, message)
+	if not mayReboss(player) then
+		return
+	end
+	local kind = KINDS[(message:lower():match("^/(%a+)") or "")]
+	if not kind then
+		return
+	end
+	local ids = {}
+	for id, w in Config.Weapons do
+		if w.Type == kind then
+			table.insert(ids, id)
+		end
+	end
+	table.sort(ids)
+	for _, id in ids do
+		Arsenal.give(player, id, false)
+	end
+	print(message:match("^/%a+") .. ": gave " .. table.concat(ids, ", "))
+end
 -- /cash [n]: n more cash (a million without a number); /reset: a brand new account, saved
 -- (QM, Oct 25). The game's owner, or anyone in a Studio playtest.
 function giveCash(player, message)
@@ -387,7 +411,15 @@ function resetPlayer(player)
 		player:LoadCharacter() -- (a fresh start: off any fight, back at the spawn)
 	end
 end
-for _, cmd in { { "Spin", testSpin }, { "Weapon", giveWeapon }, { "Cash", giveCash }, { "Reset", resetPlayer } } do
+for _, cmd in {
+	{ "Spin", testSpin },
+	{ "Weapon", giveWeapon },
+	{ "Swords", giveWeapons },
+	{ "Staffs", giveWeapons },
+	{ "Bows", giveWeapons },
+	{ "Cash", giveCash },
+	{ "Reset", resetPlayer },
+} do
 	local command = Instance.new("TextChatCommand")
 	command.Name = cmd[1] .. "Command"
 	command.PrimaryAlias = "/" .. cmd[1]:lower()
