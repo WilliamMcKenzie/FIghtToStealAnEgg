@@ -8,7 +8,7 @@ return {
 	},
 	parts = {
 		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.4, 0.2, 0.2), cframe = CFrame.new(0, -0.6, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(157, 157, 157) },
-		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.7, 0.7, 0.7), cframe = CFrame.new(0, 2.35, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(247, 226, 107) },
+		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.7, 0.7, 0.7), cframe = CFrame.new(0, 2.35, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 238, 0) },
 		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.2, 2.2, 0.1), cframe = CFrame.new(0, 0.6, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(117, 71, 34) },
 		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.4, 0.3, 0.3), cframe = CFrame.new(0, 1.55, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(157, 157, 157) },
 		{ name = "cube", bone = "short_sword", class = "Part", size = Vector3.new(0.25, 1, 0.15), cframe = CFrame.new(0, 0.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(199, 163, 129) },
