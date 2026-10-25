@@ -13,6 +13,7 @@
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 
 local Popups = require(script.Parent.Popups)
@@ -34,6 +35,7 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 local TEXT = 45
 local BAR_EASE = 25 -- how fast the red catches up with the health (quick, not a pop)
 local TRAIL_LAG = 0.5 -- seconds the trail bar lags behind the red (QM, Oct 24)
+local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight starts (QM, Oct 25)
 
 local player = Players.LocalPlayer
 
@@ -163,6 +165,7 @@ local bossName = text(bar, {
 
 -- buttons (positions from the mockup, at the design size)
 local hudFrames = {} -- (hidden while a popup is open)
+local sideButtons = {} -- (hidden while the boss bar is up too: QM, Oct 25)
 for _, b in { { "Shop", 34, 323 }, { "Index", 177, 450 }, { "Rebirth", 23, 570 } } do
 	local img = image(root, b[1], { button = true, Position = UDim2.fromOffset(b[2], b[3]) })
 	img.Size = UDim2.fromOffset(
@@ -174,6 +177,7 @@ for _, b in { { "Shop", 34, 323 }, { "Index", 177, 450 }, { "Rebirth", 23, 570 }
 		Popups.toggle(b[1])
 	end)
 	table.insert(hudFrames, img)
+	table.insert(sideButtons, img)
 end
 
 -- counters
@@ -206,12 +210,23 @@ count("Cash")
 Popups.abbreviate = Hud.abbreviate
 Popups.init(root, hudFrames)
 gui.Parent = player:WaitForChild("PlayerGui")
+-- (no Roblox health bar in the top right: QM, Oct 25)
+task.spawn(function()
+	for _ = 1, 10 do
+		if pcall(StarterGui.SetCoreGuiEnabled, StarterGui, Enum.CoreGuiType.Health, false) then
+			return
+		end
+		task.wait(1)
+	end
+end)
 
 -- the boss bar follows the nearest living, awake boss within BAR_RANGE
 local BAR_RANGE = 260
 local shown = 1 -- the red's width
 local history = {} -- { { os.clock(), red width }, ... } over the last TRAIL_LAG seconds
 local following = nil
+local filling = 0 -- (os.clock() the bar started filling up from empty)
+local barWas = false
 RunService.RenderStepped:Connect(function(dt)
 	local folder = workspace:FindFirstChild("Bosses")
 	local character = player.Character
@@ -229,6 +244,13 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 	bar.Visible = best ~= nil and not Popups.isOpen()
+	-- the side buttons step aside for the boss bar (and come back after, unless a popup's open)
+	if bar.Visible ~= barWas then
+		barWas = bar.Visible
+		for _, b in sideButtons do
+			b.Visible = not bar.Visible and not Popups.isOpen()
+		end
+	end
 	if not best then
 		following = nil
 		return
@@ -237,11 +259,19 @@ RunService.RenderStepped:Connect(function(dt)
 	local now = os.clock()
 	if best ~= following then
 		following = best
-		shown = fraction
+		shown = 0
+		filling = now
 		table.clear(history)
 		bossName.Text = string.upper(best:GetAttribute("Name") or best:GetAttribute("Kind") or "Boss")
 	end
-	shown += (fraction - shown) * (1 - math.exp(-dt * BAR_EASE))
+	if now - filling < FILL_IN then
+		-- (a new fight: up from empty, easing out, to its health)
+		local t = (now - filling) / FILL_IN
+		shown = fraction * (1 - (1 - t) ^ 3)
+		table.clear(history)
+	else
+		shown += (fraction - shown) * (1 - math.exp(-dt * BAR_EASE))
+	end
 	clip.Size = UDim2.fromScale(shown, 1)
 
 	-- the trail: the red's width TRAIL_LAG seconds ago (the oldest sample not newer)

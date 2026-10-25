@@ -3,8 +3,7 @@
 -- each gets its model (the Horse driver with the animal's own data from Shared/Animals,
 -- by its Model, ModelSize and Tint attributes, so idle, walk and gallop blend by its speed),
 -- stood on the ground under the body and facing its way. When its Health drops it
--- flashes white and the damage pops up over its head; at 0 it sinks and shrinks. A
--- sleeping boss (Asleep) has Zzz floating over it.
+-- flashes white and the damage pops up over its head; at 0 it sinks and shrinks.
 -- Also hands the /boss chat command to the server (BossRequest), and B does the same;
 -- /reboss goes as RebossRequest
 -- (a key that works whatever chat the place uses).
@@ -128,30 +127,6 @@ local function add(body)
 		health = body:GetAttribute("Health"),
 	}
 	views[body] = view
-	-- sleeping: Zzz over its head
-	local zzz = Instance.new("BillboardGui")
-	zzz.Name = "Zzz"
-	zzz.Adornee = body
-	zzz.Size = UDim2.fromOffset(120, 60)
-	zzz.StudsOffset = Vector3.new(2, body.Size.Y / 2 + 2, 0)
-	local label = Instance.new("TextLabel")
-	label.BackgroundTransparency = 1
-	label.Size = UDim2.fromScale(1, 1)
-	label.FontFace = NUMBER_FONT
-	label.TextScaled = true
-	label.TextColor3 = Color3.fromRGB(200, 225, 255)
-	label.Text = "Zzz"
-	local zStroke = Instance.new("UIStroke")
-	zStroke.Thickness = 2
-	zStroke.Parent = label
-	label.Parent = zzz
-	zzz.Parent = body
-	view.zzz = zzz
-	local function sleep()
-		zzz.Enabled = body:GetAttribute("Asleep") == true
-	end
-	sleep()
-	body:GetAttributeChangedSignal("Asleep"):Connect(sleep)
 	body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
 		if health < view.health then
@@ -192,10 +167,6 @@ RunService.RenderStepped:Connect(function(dt)
 		local speed = ((pos - view.last) * Vector3.new(1, 0, 1)).Magnitude / math.max(dt, 1e-3)
 		view.last = pos
 		animal:update(dt, speed, 0)
-		if view.zzz.Enabled then
-			view.zzz.StudsOffset =
-				Vector3.new(2 + math.sin(now * 1.3) * 0.6, body.Size.Y / 2 + 2 + math.sin(now * 2) * 0.4, 0)
-		end
 		if view.diedAt then
 			local k = math.clamp((now - view.diedAt) / DEATH, 0, 1)
 			animal:setScale(math.max(1 - k, 0.05))
