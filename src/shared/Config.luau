@@ -1024,8 +1024,8 @@ return {
 			-- sounds (QM, Oct 25), played where it's fired and where it lands
 			FireSound = "rbxassetid://173979241", -- Bow-Fire
 			HitSound = "rbxassetid://114751690910911", -- Arrowhit1
-			FireVolume = 0.6,
-			HitVolume = 0.6,
+			FireVolume = 0.3, -- (QM: half)
+			HitVolume = 1.2, -- (QM: double)
 		},
 		-- every Magic weapon's Shot starts from these. Every staff fires the same orb (QM, Oct
 		-- 25, after QM's purple orb reference), only recoloured and resized, in one Color: a
