@@ -376,7 +376,13 @@ local function showItem(id, odds, landed)
 	tween(itemScale, if landed then 0.45 else 0.12, { Scale = 1 }, if landed then Enum.EasingStyle.Back else Enum.EasingStyle.Quad)
 	for side, s in streaks do
 		s.Position = UDim2.new(0.5, side * 250, 0.5, 0)
-		tween(s, 0.16, { Position = UDim2.new(0.5, side * 290, 0.5, 0) })
+		if landed then
+			-- (only while it's rolling: once it lands they fly off and fade, QM)
+			tween(s, 0.3, { Position = UDim2.new(0.5, side * 360, 0.5, 0), BackgroundTransparency = 1 })
+		else
+			s.BackgroundTransparency = 0
+			tween(s, 0.16, { Position = UDim2.new(0.5, side * 290, 0.5, 0) })
+		end
 	end
 end
 
