@@ -8,11 +8,9 @@
 -- - A banner at the top says what to do: beat the boss, or take your egg home.
 
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
-local RED = Color3.fromRGB(255, 60, 50)
 
 local map = workspace:WaitForChild("Map")
 
@@ -25,15 +23,9 @@ local function barriers()
 	local markers = map:FindFirstChild("Biomes") and map.Biomes:FindFirstChild("Barriers")
 	for _, wall in if markers then markers:GetChildren() else {} do
 		local mine = biome ~= nil and (wall:GetAttribute("South") == biome or wall:GetAttribute("North") == biome)
-		wall.Color = RED
-		wall.Material = Enum.Material.ForceField
+		-- (solid for you when it's yours; client/FightBarrierFx draws it, quasicrystal)
 		wall.CanCollide = mine
-		if mine then
-			wall.Transparency = 1
-			TweenService:Create(wall, TweenInfo.new(0.35), { Transparency = 0.1 }):Play()
-		else
-			wall.Transparency = 1
-		end
+		wall.Transparency = 1
 	end
 end
 

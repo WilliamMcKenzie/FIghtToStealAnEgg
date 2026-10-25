@@ -23,6 +23,13 @@ local Regions = require(script.Regions)
 local Training = require(script.Training)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
+-- ReplicatedStorage.FightBarrierStyle: the red fight barriers' quasicrystal knobs
+-- (client/FightBarrierFx), kept with the place when it's there, made here when it isn't
+if not ReplicatedStorage:FindFirstChild("FightBarrierStyle") then
+	local style = Instance.new("Configuration")
+	style.Name = "FightBarrierStyle"
+	style.Parent = ReplicatedStorage
+end
 local map = Map.ensure() -- workspace.Map (baked into the place in Studio, or built now)
 WorldColors.create() -- workspace.WorldColors: live world colours (after the map: it paints it)
 Pens.start(map)
