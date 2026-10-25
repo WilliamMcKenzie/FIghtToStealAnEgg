@@ -51,6 +51,7 @@ RunService.RenderStepped:Connect(function(dt)
 	local markers = map:FindFirstChild("Biomes") and map.Biomes:FindFirstChild("Barriers")
 	for _, wall in if markers then markers:GetChildren() else {} do
 		local want = shownFor(wall)
+		BarrierSwirl.shadows(wall, style, want)
 		if want and not swirls[wall] then
 			swirls[wall] = BarrierSwirl.new(wall)
 		elseif not want and swirls[wall] then

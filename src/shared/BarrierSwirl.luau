@@ -23,6 +23,8 @@
 --   Glow        how bright it is (above 1 it glows)
 --   FPS         redraws a second
 --   PreviewAll  (in game) tick it to see every barrier drawn, fight or not
+--   ShadowColor / ShadowAlpha / ShadowLength   its red shadow on the floor either side:
+--               colour, opacity at the barrier, and how far it spreads
 --
 --   local swirl = BarrierSwirl.new(wall, guiParent)   -- guiParent: where its SurfaceGuis live
 --   swirl:draw(offset, style)                        -- offset: time drift (BarrierSwirl.step)
@@ -55,6 +57,9 @@ BarrierSwirl.DEFAULTS = { -- (QM's picks, Oct 25)
 	Glow = 3,
 	FPS = 30,
 	PreviewAll = false,
+	ShadowColor = Color3.fromRGB(255, 40, 30),
+	ShadowAlpha = 0.4, -- (how opaque the floor shadow is at the barrier)
+	ShadowLength = 20, -- (studs it spreads before it's gone)
 }
 local DEFAULTS = BarrierSwirl.DEFAULTS
 
@@ -193,6 +198,29 @@ function BarrierSwirl:draw(offset, style)
 		end
 	end
 	self.image:WritePixelsBuffer(Vector2.zero, Vector2.new(W, H), pixels)
+end
+
+-- a barrier's floor shadows (beams Server/Map put on it) tuned from the style, shown or not
+function BarrierSwirl.shadows(wall, style, shown)
+	local colour = knob(style, "ShadowColor")
+	local alpha = math.clamp(knob(style, "ShadowAlpha"), 0, 1)
+	local length = math.max(knob(style, "ShadowLength"), 0.1)
+	for _, beam in wall:GetDescendants() do
+		if beam:IsA("Beam") and beam.Name == "Shadow" then
+			beam.Enabled = shown
+			if shown then
+				beam.Color = ColorSequence.new(colour)
+				beam.Transparency = NumberSequence.new(1 - alpha, 1)
+				local a0, a1 = beam.Attachment0, beam.Attachment1
+				if a0 and a1 then
+					local dir = (a1.Position - a0.Position)
+					if dir.Magnitude > 1e-3 then
+						a1.Position = a0.Position + dir.Unit * length
+					end
+				end
+			end
+		end
+	end
 end
 
 return BarrierSwirl

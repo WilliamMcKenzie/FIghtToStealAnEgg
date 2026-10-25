@@ -851,6 +851,28 @@ local function biomeFurniture(parent)
 			* CFrame.Angles(0, math.rad(b[6] or 0), 0)
 		p:SetAttribute("South", b[1])
 		p:SetAttribute("North", b[2])
+		-- its red shadow on the floor either side (QM, Oct 25: like a region blocker's), a
+		-- beam a side; Shared/BarrierSwirl.shadows tunes and shows it with the swirl
+		local y = MapFile.groundAt(MapData, b[3], b[4]) + 0.06
+		for _, side in { 1, -1 } do
+			local n = p.CFrame.LookVector * side
+			local at = Vector3.new(p.Position.X, y, p.Position.Z) + n * (p.Size.Z / 2)
+			local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
+			a0.Name, a1.Name = "ShadowFrom", "ShadowTo"
+			a0.CFrame = p.CFrame:ToObjectSpace(CFrame.fromMatrix(at, n, p.CFrame.RightVector))
+			a1.CFrame = p.CFrame:ToObjectSpace(CFrame.fromMatrix(at + n * 20, n, p.CFrame.RightVector))
+			a0.Parent, a1.Parent = p, p
+			local beam = Instance.new("Beam")
+			beam.Name = "Shadow"
+			beam.Attachment0, beam.Attachment1 = a0, a1
+			beam.Width0, beam.Width1 = p.Size.X, p.Size.X
+			beam.FaceCamera = false
+			beam.Segments = 1
+			beam.LightInfluence = 0
+			beam.Color = ColorSequence.new(Color3.fromRGB(255, 40, 30))
+			beam.Transparency = NumberSequence.new(0.6, 1)
+			beam.Parent = a0
+		end
 		p.Parent = barriers
 	end
 end

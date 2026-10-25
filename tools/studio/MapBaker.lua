@@ -167,6 +167,12 @@ beat = RunService.Heartbeat:Connect(function(dt)
 	local seen = {}
 	-- (just the base's gate into the Meadow, or else the first one)
 	local list = if markers then markers:GetChildren() else {}
+	-- (every barrier's floor shadow follows the style; cheap, so all of them)
+	if code.shadows then
+		for _, wall in list do
+			code.shadows(wall, style, true)
+		end
+	end
 	local first = nil
 	for _, wall in list do
 		if wall:IsA("BasePart") and (first == nil or wall:GetAttribute("South") == "Base") then
