@@ -1185,7 +1185,7 @@ return {
 	-- the spin when a boss dies (client/WeaponSpin, Server/Arsenal)
 	WeaponDrops = {
 		Start = "KendoStick", -- everyone owns this one (QM, Oct 25: the Sword's gone)
-		RaysImage = "", -- QM's sunburst behind the weapon (assets/ui/SpinRays.png, once uploaded; "" draws rays)
+		RaysImage = "rbxassetid://137700902661762", -- QM's sunburst behind the weapon (assets/ui/SpinRays.png, once uploaded; "" draws rays)
 		Reel = 24, -- items it flicks through before it stops
 		SpinTime = 4, -- seconds from the first flick to the stop
 		Show = 2.2, -- seconds the winner stays up before the spin fades out
