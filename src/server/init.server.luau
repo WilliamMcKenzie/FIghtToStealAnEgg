@@ -83,7 +83,7 @@ local function joined(player)
 			swapPet(player, message)
 		elseif message:lower():match("^/give") then
 			givePet(player, message)
-		elseif message:lower():match("^/spin") then
+		elseif message:lower():match("^/spin") or message:lower():match("^/rng") then
 			testSpin(player, message)
 		elseif message:lower():match("^/swords") or message:lower():match("^/staffs") or message:lower():match("^/bows") then
 			giveWeapons(player, message)
@@ -314,6 +314,15 @@ function testSpin(player, message)
 	end
 	local want = squash(message:match("^/%a+%s+(.-)%s*$") or "")
 	local kind = "MotherHen"
+	if want == "" and message:lower():match("^/rng") then
+		-- (/rng: any boss's spin, so its own weapon can come up too: QM, for trying the screen)
+		local kinds = {}
+		for key in Config.Bosses do
+			table.insert(kinds, key)
+		end
+		table.sort(kinds)
+		kind = kinds[math.random(#kinds)]
+	end
 	for key, c in Config.Bosses do
 		if want ~= "" and (squash(key) == want or squash(c.Name or "") == want) then
 			kind = key
@@ -413,6 +422,7 @@ function resetPlayer(player)
 end
 for _, cmd in {
 	{ "Spin", testSpin },
+	{ "Rng", testSpin },
 	{ "Weapon", giveWeapon },
 	{ "Swords", giveWeapons },
 	{ "Staffs", giveWeapons },
