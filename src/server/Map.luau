@@ -601,13 +601,14 @@ local function dummy(parent, at)
 	return model
 end
 
--- A yard's gate: in the side facing the spawn (QM, Oct 24: pens along the south, training
--- grounds down the sides). Its outward direction, and a frame at the middle of that side
--- turned to face out (a sign or gate part runs along its X).
-local function gateOf(base, x, z, size)
+-- A yard's gate: toward the spawn, in a north or south side for a pen (they stand in a row
+-- along the south wall) and an east or west side for a training ground (down the sides:
+-- QM, Oct 25). Its outward direction, and a frame at the middle of that side turned to
+-- face out (a sign or gate part runs along its X).
+local function gateOf(base, x, z, size, alongX)
 	local dx, dz = base.Spawn[1] - x, base.Spawn[2] - z
-	local out = if math.abs(dx) > math.abs(dz)
-		then Vector3.new(math.sign(dx), 0, 0)
+	local out = if alongX
+		then Vector3.new(if dx < 0 then -1 else 1, 0, 0)
 		else Vector3.new(0, 0, if dz < 0 then -1 else 1)
 	local at = Vector3.new(x, 0, z) + out * (size / 2)
 	return out, CFrame.lookAt(at, at + out)
@@ -621,7 +622,7 @@ local function baseFurniture(parent)
 		local pen = Instance.new("Model")
 		pen.Name = "Pen" .. i
 		pen:SetAttribute("Index", i)
-		local out, side = gateOf(base, x, z, base.PenSize)
+		local out, side = gateOf(base, x, z, base.PenSize, false)
 		fence(pen, x, z, base.PenSize, 0, out)
 		local marker = Instance.new("Part")
 		marker.Name = "Area"
@@ -644,7 +645,7 @@ local function baseFurniture(parent)
 		zone.Name = name
 		zone:SetAttribute("X", x)
 		zone:SetAttribute("Z", z)
-		local out, side = gateOf(base, x, z, size)
+		local out, side = gateOf(base, x, z, size, true)
 		fence(zone, x, z, size, 0, out)
 		if name == "Dummies" then
 			local dummies = folder("Dummies", zone)

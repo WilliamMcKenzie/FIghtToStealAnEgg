@@ -477,10 +477,11 @@ function drawFurniture(g) {
   if (!base) return;
   // (each gate on the side facing spawn, as Server/Map's gateOf: the compact base, Oct 25)
   const sp = base.spawn || [0, 0];
-  const gateOf = (x, z) => { const dx = sp[0] - x, dz = sp[1] - z; return Math.abs(dx) > Math.abs(dz) ? [Math.sign(dx), 0] : [0, dz < 0 ? -1 : 1]; };
-  for (const [x, z] of base.pens || []) drawFence(g, x, z, base.penSize, gateOf(x, z));
+  // (pens: a north or south side; training grounds: east or west)
+  const gateOf = (x, z, alongX) => { const dx = sp[0] - x, dz = sp[1] - z; return alongX ? [dx < 0 ? -1 : 1, 0] : [0, dz < 0 ? -1 : 1]; };
+  for (const [x, z] of base.pens || []) drawFence(g, x, z, base.penSize, gateOf(x, z, false));
   for (const [name, x, z] of base.training || []) {
-    drawFence(g, x, z, base.trainSize, gateOf(x, z));
+    drawFence(g, x, z, base.trainSize, gateOf(x, z, true));
     if (name === "Dummies") for (let k = -1; k <= 1; k++) for (let row = 0; row <= 1; row++) {
       const px = x + k * 12 + row * 6 - 3, pz = z - 4 + row * 12;
       g.save(); g.translate(px, pz); g.rotate(k * 10 * Math.PI / 180);
