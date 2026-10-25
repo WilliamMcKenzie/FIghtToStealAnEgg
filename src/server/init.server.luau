@@ -23,6 +23,7 @@ local Data = require(script.Data)
 local Eggs = require(script.Eggs)
 local Map = require(script.Map)
 local Pens = require(script.Pens)
+local PetInventory = require(script.PetInventory)
 local Regions = require(script.Regions)
 local Training = require(script.Training)
 
@@ -38,6 +39,7 @@ end
 local map = Map.ensure() -- workspace.Map (baked into the place in Studio, or built now)
 WorldColors.create() -- workspace.WorldColors: live world colours (after the map: it paints it)
 Pens.start(map)
+PetInventory.start() -- (the pets you own and keep in your pen: the Backpack)
 Eggs.start(map)
 Training.start(map)
 Regions.start()
@@ -251,8 +253,8 @@ rideRequest.OnServerEvent:Connect(function(player, message)
 	end
 end)
 
--- /give <pet>: that pet in your pen (QM, Oct 25), wandering about. The game's owner, or
--- anyone in a Studio playtest.
+-- /give <pet>: one more of that pet in your Backpack (QM, Oct 25), wandering in your pen
+-- if it has room. The game's owner, or anyone in a Studio playtest.
 function givePet(player, message)
 	if not mayReboss(player) then
 		return
@@ -260,7 +262,7 @@ function givePet(player, message)
 	local want = (message:match("^/%a+%s+(.-)%s*$") or ""):lower():gsub("%s", "")
 	for _, kind in Pets.kinds() do
 		if kind:lower() == want then
-			Pens.addPet(player, kind)
+			PetInventory.give(player, kind)
 			return
 		end
 	end

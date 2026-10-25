@@ -1,10 +1,10 @@
 -- Weapons a player owns, the one they hold, and the spin a boss kill gives (QM, Oct 25).
 --
--- Player attributes (saved by Server/Data): Weapons, the ids owned, comma separated
--- (everyone has Config.WeaponDrops.Start); Weapon, the one equipped. The equipped one's
--- tool (Shared/Weapons) is put in the backpack whenever it changes and on every spawn;
--- the client equips it at once. The backpack proper is still to come (QM: TBD): the chip
--- bottom right (client/WeaponSpin) switches between owned weapons through EquipWeapon.
+-- Player attributes (saved by Server/Data): Weapons, the ids owned with how many of each
+-- (Shared/Stacks: "Axe:3,Staff"; everyone has Config.WeaponDrops.Start); Weapon, the one
+-- equipped. The equipped one's tool (Shared/Weapons) is put in the Roblox backpack
+-- whenever it changes and on every spawn; the client equips it at once. The Backpack
+-- popup (client/Backpack) picks between owned weapons through EquipWeapon.
 --
 -- When a boss dies (Bosses.killed) everyone in its fight gets a spin: the server rolls
 -- the weapon from that boss's drops (Weapons.drops: every droppable weapon by Weight,
@@ -20,6 +20,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Stacks = require(Shared.Stacks)
 local Weapons = require(Shared.Weapons.Weapons)
 local Bosses = require(script.Parent.Bosses)
 
@@ -31,16 +32,19 @@ spinRemote.Parent = ReplicatedStorage
 
 local START = Config.WeaponDrops.Start
 
-function Arsenal.owned(player)
-	local list, seen = {}, {}
-	for id in string.gmatch(player:GetAttribute("Weapons") or "", "[^,]+") do
-		if Weapons.exists(id) and not seen[id] then
-			seen[id] = true
-			table.insert(list, id)
-		end
+-- what they own, with how many of each ({ { id, n }, ... }), the starting weapon first
+function Arsenal.stacks(player)
+	local list = Stacks.parse(player:GetAttribute("Weapons"), Weapons.exists)
+	if Stacks.count(list, START) == 0 then
+		table.insert(list, 1, { id = START, n = 1 })
 	end
-	if not seen[START] then
-		table.insert(list, 1, START)
+	return list
+end
+
+function Arsenal.owned(player)
+	local list = {}
+	for _, s in Arsenal.stacks(player) do
+		table.insert(list, s.id)
 	end
 	return list
 end
@@ -55,15 +59,12 @@ function Arsenal.equip(player, id)
 	end
 end
 
+-- one more of it (a duplicate stacks: x2, x3... in the backpack), and equips it
 function Arsenal.give(player, id, equip)
 	if not Weapons.exists(id) then
 		return
 	end
-	local list = Arsenal.owned(player)
-	if not table.find(list, id) then
-		table.insert(list, id)
-		player:SetAttribute("Weapons", table.concat(list, ","))
-	end
+	player:SetAttribute("Weapons", Stacks.format(Stacks.add(Arsenal.stacks(player), id, 1)))
 	if equip then
 		Arsenal.equip(player, id)
 	end
@@ -171,7 +172,7 @@ function Arsenal.start()
 			if not Weapons.exists(player:GetAttribute("Weapon")) then
 				player:SetAttribute("Weapon", START)
 			end
-			local list = table.concat(Arsenal.owned(player), ",")
+			local list = Stacks.format(Arsenal.stacks(player))
 			if player:GetAttribute("Weapons") ~= list then
 				player:SetAttribute("Weapons", list)
 			end

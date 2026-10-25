@@ -1,5 +1,5 @@
--- The weapon spin when a boss dies (QM, Oct 25, in the style of QM's screenshots), and the
--- weapon chip that switches between the weapons you own.
+-- The weapon spin when a boss dies (QM, Oct 25, in the style of QM's screenshots). (The
+-- weapons you own are picked between in the Backpack: client/Backpack.)
 --
 -- The spin: weapons flick past one at a time in the middle of the screen, big and
 -- glowing, slowing down until one lands (the server picked it: Server/Arsenal). Behind
@@ -9,9 +9,6 @@
 -- brings up the BONUS badge (orange text on a dark oval) whenever it's on show.
 -- It lands with a pop, stays up Config.WeaponDrops.Show seconds and shrinks away. Spins
 -- that arrive during one wait their turn.
---
--- The chip (bottom right, until the backpack comes: QM, TBD): the weapon you hold, its
--- name and type; click it for the next weapon you own (EquipWeapon).
 --
 -- Also hands /spin and /weapon on to the server (SpinRequest, WeaponRequest).
 
@@ -122,7 +119,7 @@ end
 fit()
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
 
--- a weapon in the spin or the chip: its outlined icon (QM, Oct 25: drawn once, Shared/
+-- a weapon in the spin: its outlined icon (QM, Oct 25: drawn once, Shared/
 -- Weapons/WeaponIcons), rocking gently; or, for one without an icon yet, the 3D model in a
 -- ViewportFrame, turning slowly, blade tilted like an item icon. Flat, like the held ones
 -- (QM, Oct 25): full ambient and no light, so every face shows its colour as it is, and no
@@ -490,96 +487,7 @@ ReplicatedStorage:WaitForChild("WeaponSpin").OnClientEvent:Connect(function(data
 	end
 end)
 
--- ---- the weapon chip ---------------------------------------------------------------
-
-local chip = Instance.new("ImageButton")
-chip.Name = "WeaponChip"
-chip.BackgroundTransparency = 1
-chip.Image = ""
-chip.AnchorPoint = Vector2.new(1, 1)
-chip.Position = UDim2.new(1, -24, 1, -24)
-chip.Size = UDim2.fromOffset(330, 104)
-chip.Parent = root
-Popups.card(chip, { Size = UDim2.fromScale(1, 1), Active = false })
-local chipItem = viewport(chip, {
-	AnchorPoint = Vector2.new(0, 0.5),
-	Position = UDim2.new(0, 8, 0.5, 0),
-	Size = UDim2.fromOffset(92, 92),
-})
-local chipName = Popups.text(chip, {
-	AnchorPoint = Vector2.new(0, 0),
-	Position = UDim2.fromOffset(108, 14),
-	Size = UDim2.fromOffset(212, 40),
-	TextSize = 32,
-	TextXAlignment = Enum.TextXAlignment.Left,
-	TextScaled = true,
-	Text = "",
-})
-local chipInfo = Popups.text(chip, {
-	AnchorPoint = Vector2.new(0, 0),
-	Position = UDim2.fromOffset(108, 56),
-	Size = UDim2.fromOffset(212, 30),
-	TextSize = 22,
-	TextXAlignment = Enum.TextXAlignment.Left,
-	Text = "",
-})
-local chipStroke = chipInfo:FindFirstChildOfClass("UIStroke")
-local chipScale = Instance.new("UIScale")
-chipScale.Parent = chip
-
-local function owned()
-	local list = {}
-	for id in string.gmatch(player:GetAttribute("Weapons") or "", "[^,]+") do
-		if Weapons.exists(id) then
-			table.insert(list, id)
-		end
-	end
-	if #list == 0 then
-		list = { Config.WeaponDrops.Start }
-	end
-	return list
-end
-
-local function refreshChip()
-	local id = player:GetAttribute("Weapon") or Config.WeaponDrops.Start
-	if not Weapons.exists(id) then
-		id = Config.WeaponDrops.Start
-	end
-	local w = Weapons.get(id)
-	local r = rarityOf(id)
-	local list = owned()
-	chipItem.show(id)
-	chipName.Text = w.Name
-	chipInfo.Text = string.upper(w.Type)
-		.. (if #list > 1 then "  ·  " .. (table.find(list, id) or 1) .. "/" .. #list else "")
-	chipInfo.TextColor3 = r.Fill
-	chipStroke.Color = r.Stroke
-end
-player:GetAttributeChangedSignal("Weapon"):Connect(refreshChip)
-player:GetAttributeChangedSignal("Weapons"):Connect(refreshChip)
-refreshChip()
-
-local equipRemote = ReplicatedStorage:WaitForChild("EquipWeapon")
-chip.Activated:Connect(function()
-	local list = owned()
-	if #list < 2 then
-		return
-	end
-	local i = table.find(list, player:GetAttribute("Weapon")) or 0
-	equipRemote:FireServer(list[i % #list + 1])
-	chipScale.Scale = 0.92
-	tween(chipScale, 0.2, { Scale = 1 }, Enum.EasingStyle.Back)
-end)
-chip.MouseEnter:Connect(function()
-	tween(chipScale, 0.15, { Scale = 1.05 }, Enum.EasingStyle.Back)
-end)
-chip.MouseLeave:Connect(function()
-	tween(chipScale, 0.15, { Scale = 1 }, Enum.EasingStyle.Back)
-end)
-
 RunService.RenderStepped:Connect(function(dt)
-	chip.Visible = not Popups.isOpen() and not stage.Visible
-	chipItem.turn(os.clock() * 0.8)
 	if current then
 		spinT += dt
 		burst.Rotation = spinT * 25

@@ -29,6 +29,7 @@ local IMAGES = {
 	BossBarFill = "rbxassetid://139297500668654",
 	BossBarBack = "rbxassetid://88593547866423",
 	BossBarTrail = "rbxassetid://110382419429261", -- QM's TRAIL 1
+	Backpack = "", -- QM's (assets/ui/Backpack.png; until it's uploaded the button says Backpack in text)
 }
 local DESIGN_HEIGHT = 1080
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -180,6 +181,30 @@ for _, b in { { "Shop", 34, 323 }, { "Index", 177, 450 }, { "Rebirth", 23, 570 }
 	table.insert(sideButtons, img)
 end
 
+-- the Backpack button (QM, Oct 25), bottom centre: opens client/Backpack
+do
+	local img = image(root, "Backpack", {
+		button = true,
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -10),
+		Size = UDim2.fromOffset(173, 149),
+	})
+	if img.Image == "" then
+		text(img, {
+			Text = "Backpack",
+			TextSize = 40,
+			AnchorPoint = Vector2.new(0.5, 1),
+			Position = UDim2.fromScale(0.5, 1),
+			Size = UDim2.new(1, 0, 0, 50),
+		})
+	end
+	bouncy(img)
+	img.Activated:Connect(function()
+		Popups.toggle("Backpack")
+	end)
+	table.insert(hudFrames, img)
+end
+
 -- counters
 local counters = {}
 for i, name in { "Power", "Cash" } do
@@ -209,6 +234,7 @@ count("Cash")
 
 Popups.abbreviate = Hud.abbreviate
 Popups.init(root, hudFrames)
+require(script.Parent.Backpack).init()
 gui.Parent = player:WaitForChild("PlayerGui")
 -- (no Roblox health bar in the top right: QM, Oct 25)
 task.spawn(function()

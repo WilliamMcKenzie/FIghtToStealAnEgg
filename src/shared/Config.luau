@@ -616,6 +616,13 @@ return {
 		Mythic = { Fill = Color3.fromRGB(255, 122, 156), Stroke = Color3.fromRGB(110, 10, 42) },
 	},
 
+	-- the Backpack (QM, Oct 25: client/Backpack, Server/PetInventory): the pets you own
+	-- and the weapons bosses dropped you, duplicates stacked ("x5"). Pets you equip wander
+	-- in your pen, up to PenSlots of them; the weapon you equip is the one you hold.
+	Backpack = {
+		PenSlots = 4,
+	},
+
 	-- pets (QM, Oct 25: LassoAPet's, with their rarity, cash a second and egg odds). The
 	-- pet you ride is all your health and speed (Shared/Pets works them out, PetStats
 	-- below); its name shows over you in its rarity's colours (Rarities above).
@@ -891,11 +898,11 @@ return {
 
 	-- weapons (QM, Oct 25): bosses drop them. Kill a boss and everyone in its fight gets a
 	-- spin (client/WeaponSpin, Server/Arsenal) that lands on one of these; the weapon you
-	-- won is equipped (the chip bottom right switches between the ones you own). Three
+	-- won is equipped (the Backpack switches between the ones you own). Three
 	-- types: Melee slashes (Config.Slash with the weapon's Slash values over it), Ranged
 	-- shoots straight (arrows, bolts, thrown things), Magic fires slightly homing missiles
 	-- (Shared/Projectiles, client/Shots draws them). Every weapon auto-attacks like the sword.
-	--   Name     shown in the spin and on the chip
+	--   Name     shown in the spin and the Backpack
 	--   Type     "Melee", "Ranged" or "Magic"
 	--   Rarity   one of Rarities (above): its colour in the spin
 	--   Damage   times your Power (Server/Combat: Slash.Damage x Shared/Power's Strength curve) per hit

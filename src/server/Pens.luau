@@ -5,7 +5,8 @@
 --   Pens.start(map)                       -- once, after Map.ensure()
 --   Pens.of(player) -> the pen Model or nil
 --   Pens.addEgg(player, makeEgg)   -- one more egg sat in their pen (makeEgg() -> its box)
---   Pens.addPet(player, kind)      -- a pet wandering in their pen (the /give command)
+--   Pens.setPets(player, kinds)    -- these pets wandering in their pen (the ones they
+--                                  -- equipped in the Backpack: Server/PetInventory)
 --   Pens.clear(player)             -- no eggs or pets in it (the /reset command)
 
 local Players = game:GetService("Players")
@@ -79,34 +80,16 @@ function Pens.addEgg(player, makeEgg)
 	egg.Parent = shown
 end
 
--- Pets sat in your pen (QM, Oct 25: /give, until hatching), wandering about inside it:
--- each an invisible body in workspace.PenPets that client/BossView draws (Model is the
+-- Pets in your pen (QM, Oct 25: the ones equipped in your Backpack), wandering about
+-- inside it: each an invisible body in workspace.PenPets that client/BossView draws (Model is the
 -- pet's kind, ModelSize its size), like the training mobs.
 local petFolder = Instance.new("Folder")
 petFolder.Name = "PenPets"
 petFolder.Parent = workspace
 local penPets = {} -- [body] = { owner, area, yaw, goal, wait, speed, rng }
-local MAX_PETS = 12 -- most pets wandering a pen
 
-function Pens.addPet(player, kind)
-	local pen = Pens.of(player)
-	local area = pen and pen:FindFirstChild("Area")
-	if not area then
-		return false
-	end
+local function spawnPet(player, area, kind)
 	local class = Pets.class(kind)
-	local count = 0
-	local oldest = nil
-	for body, p in penPets do
-		if p.owner == player then
-			count += 1
-			oldest = oldest or body
-		end
-	end
-	if count >= MAX_PETS and oldest then
-		penPets[oldest] = nil
-		oldest:Destroy()
-	end
 	local box = Horse.extent(class.data) * class.size
 	local floor = area.Position.Y - area.Size.Y / 2
 	local body = Instance.new("Part")
@@ -125,9 +108,44 @@ function Pens.addPet(player, kind)
 	body:SetAttribute("ModelSize", class.size)
 	body:SetAttribute("Name", Pets.name(kind))
 	body:SetAttribute("Owner", player.UserId)
-	penPets[body] = { owner = player, area = area, yaw = rng:NextNumber(-math.pi, math.pi), wait = rng:NextNumber(0, 2), speed = 4, rng = rng }
+	penPets[body] = {
+		owner = player,
+		kind = kind,
+		area = area,
+		yaw = rng:NextNumber(-math.pi, math.pi),
+		wait = rng:NextNumber(0, 2),
+		speed = 4,
+		rng = rng,
+	}
 	body.Parent = petFolder
-	return true
+end
+
+-- exactly these pets in their pen (a kind listed twice: two of them); the ones already
+-- there stay where they are, only the difference comes and goes
+function Pens.setPets(player, kinds)
+	local pen = Pens.of(player)
+	local area = pen and pen:FindFirstChild("Area")
+	local want = {}
+	if area then
+		for _, kind in kinds do
+			want[kind] = (want[kind] or 0) + 1
+		end
+	end
+	for body, p in penPets do
+		if p.owner == player then
+			if (want[p.kind] or 0) > 0 and p.area == area then
+				want[p.kind] -= 1
+			else
+				penPets[body] = nil
+				body:Destroy()
+			end
+		end
+	end
+	for kind, n in want do
+		for _ = 1, n do
+			spawnPet(player, area, kind)
+		end
+	end
 end
 
 local function clearPets(player)

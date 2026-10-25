@@ -12,7 +12,9 @@
 --
 --   Popups.init(root, hudFrames)  -- once, from Hud (root = its scaled frame; the boss
 --                                  -- bar hides itself while Popups.isOpen())
---   Popups.toggle(name)                     -- "Shop", "Index", "Rebirth"
+--   Popups.toggle(name)                     -- "Shop", "Index", "Rebirth", "Backpack"
+--   Popups.frame(name, title, size) -> body, holder  -- another popup (client/Backpack),
+--                                  -- after init: its content goes in body
 
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
@@ -321,6 +323,12 @@ local function frame(name, title, size)
 	popups[name] = { holder = holder, scale = scale, body = body }
 	return body
 end
+
+Popups.frame = function(name, title, size)
+	local body = frame(name, title, size)
+	return body, popups[name].holder
+end
+Popups.darkPanel = darkPanel
 
 -- ---- the three popups (placeholder content in the real layout) ----------------------
 
