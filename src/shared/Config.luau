@@ -629,14 +629,15 @@ return {
 	},
 
 	-- the rider's upper body with a weapon out (client/SwingPose; QM, Oct 25). Every weapon
-	-- rides like cavalry: the weapon arm swept out to the side and back, the blade (or bow,
-	-- or staff) trailing behind and low, the torso twisted a little and leaning into the
+	-- rides like cavalry: the weapon hand low by the hip, the blade (or bow, or staff) rising
+	-- up and back with its tip high behind the rider, the torso twisted a little and leaning into the
 	-- ride, the other hand forward on the reins. Swords and staffs swing from it and settle
 	-- back into it; bows snap up into the Archer pose below while shooting.
 	-- Angles are degrees about the joint's parent-part axes: X pitch (arms: 90 = straight
 	-- out in front, below 0 = behind; Waist: below 0 = leaning forward), Y yaw (+ = turn
 	-- left), Z roll (or, for a "YXY" arm, a twist about the arm before it's raised). The
-	-- weapon comes out of the top of the fist, so RightWrist's X aims it (-90: along the arm).
+	-- weapon comes out of the top of the fist, so RightWrist's X aims it (0: forward with the
+	-- arm hanging, + tips it up, -90: along the arm).
 	--   Breathe  a slow sway on X when standing still (degrees)
 	--   Bob      the gallop's bob on X at full speed (degrees), Lag (strides) lets it trail
 	RidePose = {
@@ -647,9 +648,10 @@ return {
 		Joints = {
 			Waist = { Order = "YXZ", X = -12, Y = -18, Z = -4, Breathe = 2, Bob = 3, Lag = 0 },
 			Neck = { Order = "YXZ", X = 8, Y = 14, Z = 0, Breathe = -1, Bob = -2, Lag = 0.05 },
-			RightShoulder = { Order = "YXY", X = 58, Y = -122, Z = 40, Breathe = 1.5, Bob = 5, Lag = 0.15 },
-			RightElbow = { Order = "YXZ", X = 12, Y = 0, Z = 0, Breathe = 1, Bob = 4, Lag = 0.2 },
-			RightWrist = { Order = "YXZ", X = -110, Y = 0, Z = 0, Breathe = 0, Bob = 3, Lag = 0.25 },
+			-- (QM's drawing: the hand low by the hip, the weapon rising up and back past the head)
+			RightShoulder = { Order = "YXY", X = -10, Y = -60, Z = 60, Breathe = 1.5, Bob = 3, Lag = 0.15 },
+			RightElbow = { Order = "YXZ", X = 80, Y = 0, Z = 0, Breathe = 1, Bob = 3, Lag = 0.2 },
+			RightWrist = { Order = "YXZ", X = 60, Y = 0, Z = 0, Breathe = 0, Bob = 2, Lag = 0.25 },
 			LeftShoulder = { Order = "YXZ", X = 55, Y = 5, Z = 0, Breathe = 1.5, Bob = 3, Lag = 0.1 },
 			LeftElbow = { Order = "YXZ", X = 45, Y = 0, Z = 0, Breathe = 1, Bob = 4, Lag = 0.15 },
 		},
