@@ -241,6 +241,28 @@ local function ring(at, color, radius)
 	Debris:AddItem(p, 0.32)
 end
 
+-- a sound from `parent` (a part), or at a point (an Attachment in Terrain, then gone)
+local function sound(id, volume, parent, at)
+	if type(id) ~= "string" or id == "" or (volume or 0) <= 0 then
+		return
+	end
+	local holder = parent
+	if not holder then
+		holder = Instance.new("Attachment")
+		holder.WorldPosition = at
+		holder.Parent = workspace.Terrain
+		Debris:AddItem(holder, 4)
+	end
+	local snd = Instance.new("Sound")
+	snd.SoundId = id
+	snd.Volume = volume
+	snd.RollOffMinDistance = 10
+	snd.RollOffMaxDistance = 150
+	snd.Parent = holder
+	snd:Play()
+	Debris:AddItem(snd, 4)
+end
+
 function Shots.fire(character, id, yaw, seed)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local w = Weapons.get(id) -- (with any live tuning: client/WeaponTuning)
@@ -250,6 +272,7 @@ function Shots.fire(character, id, yaw, seed)
 	local hips = Riding.hips(character)
 	local y = (if hips then hips.Y else root.Position.Y) + Config.Shots.Height
 	local origin = Vector3.new(root.Position.X, y, root.Position.Z)
+	sound(w.Shot.FireSound, w.Shot.FireVolume, root) -- (once a volley, not once a shot)
 	for _, shot in Projectiles.spawn(id, origin, yaw, seed) do
 		local d = build(w.Shot)
 		d.shot, d.s = shot, w.Shot
@@ -282,6 +305,7 @@ RunService.RenderStepped:Connect(function(dt)
 		for _ in Projectiles.step(shot, dt, list) do
 			local at = shot.pos
 			pop(at, a.color, 1.2 * (a.s.Size or 1))
+			sound(a.s.HitSound, a.s.HitVolume, nil, at)
 			if shot.splash then
 				ring(Vector3.new(at.X, at.Y - 1.5, at.Z), a.color, shot.splash)
 			end

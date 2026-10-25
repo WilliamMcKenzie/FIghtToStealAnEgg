@@ -964,6 +964,11 @@ return {
 			Splash = 0, -- studs: hits everything this close to where it lands (0: none)
 			TrailColor = Color3.fromRGB(255, 255, 255),
 			TrailLength = 0.12, -- seconds the trail lasts
+			-- sounds (QM, Oct 25), played where it's fired and where it lands
+			FireSound = "rbxassetid://173979241", -- Bow-Fire
+			HitSound = "rbxassetid://114751690910911", -- Arrowhit1
+			FireVolume = 0.6,
+			HitVolume = 0.6,
 		},
 		-- every Magic weapon's Shot starts from these. Every staff fires the same orb (QM, Oct
 		-- 25, after QM's purple orb reference), only recoloured and resized, in one Color: a
@@ -1002,6 +1007,11 @@ return {
 			SparkleSize = 0.3,
 			Flicker = 0, -- 0..1: the core jitters in size every frame
 			Spin = 0, -- degrees a second (a bomb's tumble)
+			-- sounds (QM, Oct 25), played where it's cast and where it lands
+			FireSound = "rbxassetid://138498992667102", -- Magic
+			HitSound = "rbxassetid://140209514807090", -- Magic-Bullet-s12-hit
+			FireVolume = 0.6,
+			HitVolume = 0.6,
 		},
 	},
 }
