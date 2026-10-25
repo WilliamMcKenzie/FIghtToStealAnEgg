@@ -37,6 +37,8 @@ return {
 		Wood = Color3.fromRGB(150, 98, 56),
 		WoodDark = Color3.fromRGB(110, 72, 42),
 		Straw = Color3.fromRGB(226, 196, 110),
+		NestStick = Color3.fromRGB(143, 74, 44), -- (the nests' woven sticks: LassoAPet's, QM Oct 25)
+		NestStickDark = Color3.fromRGB(110, 56, 34),
 		StrawDark = Color3.fromRGB(196, 164, 84),
 		Egg = Color3.fromRGB(250, 246, 232),
 		EggSpot = Color3.fromRGB(150, 200, 90),

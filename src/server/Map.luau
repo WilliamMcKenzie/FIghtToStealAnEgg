@@ -716,41 +716,89 @@ end
 
 -- ---- nests, boss spots, barriers --------------------------------------------------------
 
--- a nest: a straw bowl of twigs round a soft middle (the egg is Server/Eggs')
+-- a nest: LassoAPet's woven stick bowl (its tools/nest_design.py: a criss-cross mat, five
+-- rings of sticks leaning out, a few strays), the egg on the mat (the egg is Server/Eggs')
+local NEST_SCALE = 1.3 -- (the nest egg's scale too: Config.Eggs.Scale.Nest)
+local NEST_KEYS = { "NestStick", "NestStickDark" }
 local function nest(parent, x, z, rng)
 	local model = Instance.new("Model")
 	model.Name = "Nest"
 	local y = MapFile.groundAt(MapData, x, z) -- (on whatever floor it's on)
-	local disc = Instance.new("Part")
-	disc.Name = "Bed"
-	disc.Shape = Enum.PartType.Cylinder
-	disc.Anchored = true
-	disc.Size = Vector3.new(1, 11, 11)
-	disc.CFrame = CFrame.new(x, y + 0.5, z) * CFrame.Angles(0, 0, math.pi / 2)
-	disc.Material = Enum.Material.SmoothPlastic
-	disc:SetAttribute("ColorKey", "Straw")
-	disc.Color = color("Straw")
-	texture(disc, Enum.NormalId.Left, STUDS, 1, nil, 2)
-	texture(disc, Enum.NormalId.Right, STUDS, 1, nil, 2)
-	disc.Parent = model
-	local n = 14
-	for i = 1, n do
-		local a = (i + rng:NextNumber(-0.3, 0.3)) / n * 2 * math.pi
-		local r = 5.6 + rng:NextNumber(-0.3, 0.3)
-		local at = CFrame.new(x + math.cos(a) * r, y + 1.1 + rng:NextNumber(0, 0.5), z + math.sin(a) * r)
-			* CFrame.Angles(0, -a, 0)
-			* CFrame.Angles(math.rad(rng:NextNumber(-20, 20)), 0, math.rad(rng:NextNumber(-12, 12)))
-		block(
-			"Twig",
-			model,
-			at,
-			Vector3.new(0.8, 0.8, rng:NextNumber(4, 5.5)),
-			if i % 3 == 0 then "Wood" else "StrawDark",
-			SIDES
+	local origin = CFrame.new(x, y, z)
+	local S = NEST_SCALE
+	local function stick(name, length, w, h, cf)
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Anchored = true
+		p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
+		p.Material = Enum.Material.SmoothPlastic
+		p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+		p.Size = Vector3.new(length, h, w) * S
+		p.CFrame = origin * CFrame.new(cf.Position * S) * cf.Rotation
+		local key = NEST_KEYS[rng:NextInteger(1, #NEST_KEYS)]
+		p:SetAttribute("ColorKey", key)
+		p:SetAttribute("Shade", math.round(rng:NextNumber(0.86, 1.12) * 100) / 100)
+		p.Color = WorldColors.shaded(color(key), p)
+		p.Locked = true
+		p.Parent = model
+	end
+	local function deg(a)
+		return math.rad(a)
+	end
+	-- (a stick on a ring: local X along the ring, Y up, Z pointing inward)
+	local function ring(a, r, h)
+		return CFrame.fromMatrix(Vector3.new(r * math.cos(a), h, r * math.sin(a)), Vector3.new(-math.sin(a), 0, math.cos(a)), Vector3.yAxis)
+	end
+	-- floor: a criss-cross mat the egg sits on
+	for i = 1, 30 do
+		local a, d = rng:NextNumber(0, 2 * math.pi), math.sqrt(rng:NextNumber()) * 2
+		stick(
+			"Floor" .. i,
+			rng:NextNumber(3.2, 4.6),
+			rng:NextNumber(0.3, 0.42),
+			0.24,
+			CFrame.new(d * math.cos(a), rng:NextNumber(0.12, 0.3), d * math.sin(a))
+				* CFrame.Angles(0, deg(rng:NextNumber(0, 180)), 0)
+				* CFrame.Angles(0, 0, deg(rng:NextNumber(-5, 5)))
+				* CFrame.Angles(deg(rng:NextNumber(-8, 8)), 0, 0)
+		)
+	end
+	-- rim: rings of sticks woven round, each layer wider and leaning further out
+	for layer = 0, 4 do
+		local r, h = 2.2 + 0.34 * layer, 0.22 + 0.24 * layer
+		local n, lean = 13 + 2 * layer, 18 + 7 * layer
+		for j = 0, n - 1 do
+			local a = 2 * math.pi * (j + rng:NextNumber(-0.25, 0.25)) / n
+			local length = 2 * math.pi * r / n * rng:NextNumber(1.35, 1.8)
+			stick(
+				"Rim" .. layer .. "_" .. j,
+				length,
+				rng:NextNumber(0.38, 0.5),
+				rng:NextNumber(0.26, 0.34),
+				ring(a, r + rng:NextNumber(-0.12, 0.12), h + rng:NextNumber(-0.06, 0.06))
+					* CFrame.Angles(0, deg(rng:NextNumber(-12, 12)), 0)
+					* CFrame.Angles(0, 0, deg(rng:NextNumber(-9, 9)))
+					* CFrame.Angles(deg(-lean + rng:NextNumber(-6, 6)), 0, 0)
+			)
+		end
+	end
+	-- strays: loose sticks poking out of the rim at odd angles
+	for i = 0, 13 do
+		local a = 2 * math.pi * (i + rng:NextNumber(-0.4, 0.4)) / 14
+		local side = if rng:NextNumber() < 0.5 then -1 else 1
+		stick(
+			"Stray" .. i,
+			rng:NextNumber(2.2, 3.4),
+			rng:NextNumber(0.24, 0.32),
+			rng:NextNumber(0.2, 0.26),
+			ring(a, rng:NextNumber(3.1, 3.7), rng:NextNumber(0.7, 1.3))
+				* CFrame.Angles(0, deg(side * rng:NextNumber(25, 50)), 0)
+				* CFrame.Angles(0, 0, deg(rng:NextNumber(-18, 18)))
+				* CFrame.Angles(deg(-rng:NextNumber(20, 45)), 0, 0)
 		)
 	end
 	model:SetAttribute("EggX", x)
-	model:SetAttribute("EggY", y + 1) -- (where its egg sits: on the bed)
+	model:SetAttribute("EggY", y + 0.4 * S) -- (where its egg sits: on the mat)
 	model:SetAttribute("EggZ", z)
 	model.Parent = parent
 	return model
