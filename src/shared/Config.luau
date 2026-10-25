@@ -766,7 +766,7 @@ return {
 				Speed = 60,
 				Homing = 220,
 				Size = 0.9,
-				Color = Color3.fromRGB(180, 140, 255),
+				Color = Color3.fromRGB(49, 200, 242),
 			},
 		},
 		-- tier 2
@@ -804,7 +804,7 @@ return {
 				Speed = 70,
 				Homing = 240,
 				Size = 0.9,
-				Color = Color3.fromRGB(90, 230, 200),
+				Color = Color3.fromRGB(201, 201, 201),
 			},
 		},
 		LightningStaff = {
@@ -817,7 +817,7 @@ return {
 				Speed = 85,
 				Homing = 260,
 				Size = 0.85,
-				Color = Color3.fromRGB(255, 210, 40),
+				Color = Color3.fromRGB(255, 238, 0),
 			},
 		},
 		-- tier 3
@@ -832,7 +832,7 @@ return {
 				Homing = 180,
 				Splash = 6,
 				Size = 1.2,
-				Color = Color3.fromRGB(40, 120, 255),
+				Color = Color3.fromRGB(49, 162, 242),
 			},
 		},
 		Waraxe = {
@@ -895,7 +895,7 @@ return {
 				Homing = 170,
 				Splash = 8,
 				Size = 1.4,
-				Color = Color3.fromRGB(255, 90, 20),
+				Color = Color3.fromRGB(255, 61, 61),
 			},
 		},
 		-- boss-only (super rare): one for each boss in BossPools
