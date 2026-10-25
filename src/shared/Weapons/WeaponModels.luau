@@ -112,12 +112,6 @@ end
 table.insert(bloom, block(V(0.32, 0.32, 0.16), V(0, 1.2, 0.04), rgb(255, 220, 90), 45, { neon = true }))
 
 return {
-	Bomb = model({
-		block(V(1.0, 1.0, 1.0), V(0, 0.3, 0), rgb(40, 40, 48), 0, { shape = "Ball" }),
-		block(V(0.3, 0.16, 0.3), V(0, 0.82, 0), rgb(90, 90, 100)),
-		block(V(0.08, 0.35, 0.08), V(0.05, 1.05, 0), rgb(120, 90, 60), -15),
-		block(V(0.16, 0.16, 0.16), V(0.1, 1.24, 0), rgb(255, 170, 60), 0, { neon = true, shape = "Ball" }),
-	}),
 	GoldenEgg = model({
 		block(V(0.8, 0.8, 0.8), V(0, 0.15, 0), rgb(255, 205, 60), 0, { shape = "Ball" }),
 		block(V(0.64, 0.64, 0.64), V(0, 0.48, 0), rgb(255, 214, 90), 0, { shape = "Ball" }),

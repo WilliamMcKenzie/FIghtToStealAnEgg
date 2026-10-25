@@ -829,25 +829,6 @@ return {
 				Color = Color3.fromRGB(40, 120, 255),
 			},
 		},
-		Bomb = {
-			Name = "Bomb",
-			Type = "Magic", -- (thrown, but it homes like magic: QM)
-			Rarity = "Rare",
-			Damage = 2.8,
-			Weight = 9,
-			Shot = {
-				Look = "Bomb",
-				Cooldown = 1.1,
-				Speed = 40,
-				Homing = 150,
-				Splash = 10,
-				Size = 1.4,
-				Color = Color3.fromRGB(40, 40, 48),
-				Color2 = Color3.fromRGB(255, 170, 60),
-				Sparkles = 20,
-				Spin = 400,
-			},
-		},
 		Waraxe = {
 			Name = "Waraxe",
 			Type = "Melee",
@@ -1047,7 +1028,7 @@ return {
 		-- core that's always white inside a ring of Color, a fainter halo and haze of Color
 		-- round it, wispy flares curling over it, and a trail (client/Shots)
 		Magic = {
-			Look = "Orb", -- Orb (every staff), Bomb, Petal (boss weapons)
+			Look = "Orb", -- Orb (every staff), Petal (boss weapons)
 			Cooldown = 0.7,
 			Range = 50,
 			Speed = 55,

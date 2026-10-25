@@ -8,8 +8,7 @@
 -- (QM, Oct 25: its Size and TrailColor differ). Magic is built from its numbers
 -- (Config.Shots.Magic, tunable live): every staff fires the same orb, recoloured and
 -- resized (QM), in one colour: a white core in a ring of the colour inside a fainter
--- halo of it, flares curling over it, a trail and sparkles. A Bomb is a dark ball with a
--- lit fuse. Hits flash a neon ball that swells and fades;
+-- halo of it, flares curling over it, a trail and sparkles. Hits flash a neon ball that swells and fades;
 -- splashes add a flat ring.
 --
 --   Shots.fire(character, id, yaw, seed)   -- a weapon's volley from that rider (seed: its
@@ -116,19 +115,6 @@ local function build(s)
 		local tint = s.TrailColor or (if look == "Needle" then Color3.fromRGB(150, 255, 120) else WHITE)
 		trail(root, 0.35 * size, tint, s.TrailLength or 0.12)
 		d.color = tint
-	elseif look == "Bomb" then
-		-- a bomb: a dark ball with a lit fuse, tumbling
-		local r = 0.9 * size
-		root = block(model, Vector3.one * r, CFrame.new(), color, { Shape = Enum.PartType.Ball })
-		block(model, Vector3.new(0.12, 0.3, 0.12) * size, CFrame.new(0, r * 0.55, 0), Color3.fromRGB(120, 90, 60))
-		local spark = block(model, Vector3.one * 0.2 * size, CFrame.new(0, r * 0.55 + 0.18 * size, 0), color2, {
-			Shape = Enum.PartType.Ball,
-			Material = Enum.Material.Neon,
-		})
-		sparkles(spark, color2, (s.SparkleSize or 0.35) * size, s.Sparkles or 20)
-		trail(root, r * 0.6, color2, s.TrailLength or 0.15, 0.6)
-		d.spin = { speed = math.rad(s.Spin or 0), axis = "X" }
-		d.color = color2
 	elseif look == "Petal" then
 		root = block(model, Vector3.new(0.75, 0.12, 0.5) * size, CFrame.new(), color, { Material = Enum.Material.Neon })
 		trail(root, 0.4 * size, ColorSequence.new(color2, color), s.TrailLength or 0.18, 1)
