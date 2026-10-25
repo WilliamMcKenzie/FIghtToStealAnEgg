@@ -15,30 +15,13 @@
 -- Arms: pitch 90 = held straight out in front, yaw swings it round. The sword comes out
 -- of the top of the fist (Weapons.makeTool's Grip), so the wrist's pitch aims the blade.
 --
--- idle: the guard stance held while the sword is out, a two-handed grip low in front with
--- the blade angled up and across (QM's katana reference). The arm angles were solved with
--- IK on the default R15 rig so the hands meet on the grip; `breathe` adds a slow sway
--- (degrees on x, per joint) at `speed` radians a second.
+-- The pose it swings from (and settles back into) is the riding pose in Config.RidePose.
 
 return {
 	MIRROR = { x = false, y = true, z = true },
 
 	-- how much of the pose is ours (vs the Animator's) at each phase
 	weight = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.6, 1, 0, 0 }, { 3, 1, 0, 0 }, { 4, 0, 0, 0 } } },
-
-	idle = {
-		speed = 1.7,
-		blendTime = 0.12, -- seconds to ease into / out of the stance on equip / unequip
-		joints = {
-			Waist = { order = "YXZ", x = -6, y = -25, z = 0, breathe = 2 }, -- side-on, leaning in
-			Neck = { order = "YXZ", x = 4, y = 18, z = 0, breathe = -1 }, -- eyes back on the target
-			RightShoulder = { order = "YXY", x = 40, y = 63, z = -2, breathe = 1.5 },
-			RightElbow = { order = "YXZ", x = 35, y = 0, z = 0, breathe = 1 },
-			RightWrist = { order = "YXZ", x = -19, y = -9, z = 6, breathe = 0 },
-			LeftShoulder = { order = "YXZ", x = 40, y = -66, z = 0, breathe = 1.5 },
-			LeftElbow = { order = "YXZ", x = 15, y = 0, z = 0, breathe = 1 },
-		},
-	},
 
 	joints = {
 		Waist = { -- pitch, yaw, roll: coil right, unwind hard through, lean into it

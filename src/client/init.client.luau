@@ -194,9 +194,11 @@ RunService.Heartbeat:Connect(function(dt)
 	if Weapons.get(id).Shot then
 		-- (shots go straight at it, not along the eased aim)
 		local yaw = yawOf((inRange.Position - root.Position) * Vector3.new(1, 0, 1))
-		ready = os.clock() + Weapons.cooldown(id, c) / Power.speed(player:GetAttribute("Strength"))
+		local interval = Weapons.cooldown(id, c) / Power.speed(player:GetAttribute("Strength"))
+		ready = os.clock() + interval
 		local seed = math.random(0, 2 ^ 30 - 1) -- (the same shots here, on the server and for everyone)
 		Shots.fire(character, id, yaw, seed)
+		SwingPose.shoot(character, id, yaw, interval)
 		shootRemote:FireServer(yaw, seed)
 	else
 		slash(tool, aimYaw)
@@ -246,6 +248,10 @@ remote.OnClientEvent:Connect(function(other, dir, seed, yaw)
 end)
 shootRemote.OnClientEvent:Connect(function(other, id, yaw, seed)
 	Shots.fire(other.Character, id, yaw, seed)
+	if other.Character then
+		-- (their Strength speeds them up too: SwingPose times the draw by their shots' gaps)
+		SwingPose.shoot(other.Character, id, yaw, Weapons.cooldown(id))
+	end
 end)
 
 -- top-down camera toggle (T): straight down onto the player, for judging the slash

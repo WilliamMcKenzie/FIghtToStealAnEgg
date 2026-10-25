@@ -174,6 +174,21 @@ task.spawn(function()
 	end
 end)
 
+-- the pet's stride under the rider, for the upper body's gallop bob (client/SwingPose):
+-- where it is in its gallop (0..1, nil if this pet has no gallop to follow) and how fast
+-- it's going (studs a second, eased like its gaits)
+function Riding.gait(character)
+	local m = mounts[character]
+	if not m then
+		return nil, 0
+	end
+	local horse = m.horse
+	local gallop = horse.data and horse.data.animations and horse.data.animations.gallop
+	local clock = horse.clocks and horse.clocks.gallop
+	local cycle = if gallop and clock and gallop.length > 0 then clock / gallop.length else nil
+	return cycle, horse.speed or 0
+end
+
 -- the height of the rider's hips (for things drawn at the rider, like the slash)
 function Riding.hips(character)
 	local lower = character:FindFirstChild("LowerTorso")

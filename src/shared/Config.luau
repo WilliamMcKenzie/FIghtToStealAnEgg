@@ -628,6 +628,63 @@ return {
 		Alternate = true, -- swing left-to-right, then right-to-left
 	},
 
+	-- the rider's upper body with a weapon out (client/SwingPose; QM, Oct 25). Every weapon
+	-- rides like cavalry: the weapon arm swept out to the side and back, the blade (or bow,
+	-- or staff) trailing behind and low, the torso twisted a little and leaning into the
+	-- ride, the other hand forward on the reins. Swords and staffs swing from it and settle
+	-- back into it; bows snap up into the Archer pose below while shooting.
+	-- Angles are degrees about the joint's parent-part axes: X pitch (arms: 90 = straight
+	-- out in front, below 0 = behind; Waist: below 0 = leaning forward), Y yaw (+ = turn
+	-- left), Z roll (or, for a "YXY" arm, a twist about the arm before it's raised). The
+	-- weapon comes out of the top of the fist, so RightWrist's X aims it (-90: along the arm).
+	--   Breathe  a slow sway on X when standing still (degrees)
+	--   Bob      the gallop's bob on X at full speed (degrees), Lag (strides) lets it trail
+	RidePose = {
+		BlendTime = 0.12, -- seconds to ease in / out when a weapon is equipped / put away
+		BreatheSpeed = 1.7, -- radians a second
+		BobFull = 12, -- the pet's speed (studs a second) where the bob is at full strength
+		BobRate = 2.2, -- strides a second, for a pet with no gallop of its own to follow
+		Joints = {
+			Waist = { Order = "YXZ", X = -12, Y = -18, Z = -4, Breathe = 2, Bob = 3, Lag = 0 },
+			Neck = { Order = "YXZ", X = 8, Y = 14, Z = 0, Breathe = -1, Bob = -2, Lag = 0.05 },
+			RightShoulder = { Order = "YXY", X = 58, Y = -122, Z = 40, Breathe = 1.5, Bob = 5, Lag = 0.15 },
+			RightElbow = { Order = "YXZ", X = 12, Y = 0, Z = 0, Breathe = 1, Bob = 4, Lag = 0.2 },
+			RightWrist = { Order = "YXZ", X = -110, Y = 0, Z = 0, Breathe = 0, Bob = 3, Lag = 0.25 },
+			LeftShoulder = { Order = "YXZ", X = 55, Y = 5, Z = 0, Breathe = 1.5, Bob = 3, Lag = 0.1 },
+			LeftElbow = { Order = "YXZ", X = 45, Y = 0, Z = 0, Breathe = 1, Bob = 4, Lag = 0.15 },
+		},
+		-- bows (every Ranged weapon) while shooting (QM's archer ref): the bow arm straight out
+		-- at the target, the body side-on, and the other hand drawing to the cheek. Each shot
+		-- releases it and draws again in time for the next, so fast bows look like arrow spam.
+		Archer = {
+			BlendIn = 0.05, -- seconds to snap up into it on the first shot
+			BlendOut = 0.25, -- seconds back to the ride pose...
+			Hold = 0.4, -- ...once this long has passed after the next shot was due
+			-- the draw hand's cycle, as fractions of the time between shots: flung back off the
+			-- string by Release, forward to the string by Nock, back at the cheek by Draw
+			Release = 0.15,
+			Nock = 0.45,
+			Draw = 0.85,
+			Joints = { -- at full draw
+				Waist = { Order = "YXZ", X = -6, Y = 55, Z = 0 },
+				Neck = { Order = "YXZ", X = 0, Y = -50, Z = 0 },
+				RightShoulder = { Order = "YXY", X = 97, Y = -55, Z = 0 },
+				RightElbow = { Order = "YXZ", X = 0, Y = 0, Z = 0 },
+				RightWrist = { Order = "YXZ", X = 0, Y = 0, Z = 0 },
+				LeftShoulder = { Order = "YXY", X = 105, Y = -105, Z = 75 },
+				LeftElbow = { Order = "YXZ", X = 70, Y = 0, Z = 0 },
+			},
+			ReleaseJoints = { -- the draw hand just after letting go: flicked back past the ear
+				LeftShoulder = { Order = "YXY", X = 85, Y = -70, Z = -45 },
+				LeftElbow = { Order = "YXZ", X = 120, Y = 0, Z = 0 },
+			},
+			NockJoints = { -- the draw hand reaching forward to the string
+				LeftShoulder = { Order = "YXY", X = 95, Y = -50, Z = 45 },
+				LeftElbow = { Order = "YXZ", X = 10, Y = 0, Z = 0 },
+			},
+		},
+	},
+
 	-- weapons (QM, Oct 25): bosses drop them. Kill a boss and everyone in its fight gets a
 	-- spin (client/WeaponSpin, Server/Arsenal) that lands on one of these; the weapon you
 	-- won is equipped (the chip bottom right switches between the ones you own). Three
