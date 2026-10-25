@@ -1,5 +1,6 @@
--- Block models for every weapon but the Sword (that one's QM's designs/Sword.bbmodel, in
--- SwordModel.luau), in the same shape Rig.fromData reads: one bone, parts in studs.
+-- Block models for every weapon QM hasn't drawn yet (the drawn ones are designs/weapons/
+-- *.bbmodel, converted to <Name>Model.luau), in the same shape Rig.fromData reads: one
+-- bone, parts in studs.
 -- Like the sword, each points up its +Y with the hand round the grip at y -0.5..0, so a
 -- tool holds them all the same way (Weapons.makeTool). Hand-made, block by block: change
 -- them here, or draw a .bbmodel and swap one for its generated module.
@@ -156,15 +157,6 @@ end
 table.insert(bloom, block(V(0.32, 0.32, 0.16), V(0, 1.2, 0.04), rgb(255, 220, 90), 45, { neon = true }))
 
 return {
-	KendoStick = model({
-		block(V(0.22, 0.5, 0.22), V(0, -0.25, 0), rgb(150, 40, 40)),
-		block(V(0.4, 0.08, 0.4), V(0, 0.04, 0), rgb(60, 40, 30)),
-		block(V(0.2, 2.6, 0.2), V(0, 1.38, 0), rgb(222, 196, 130)),
-		block(V(0.23, 0.08, 0.23), V(0, 0.9, 0), rgb(150, 40, 40)),
-		block(V(0.23, 0.08, 0.23), V(0, 2.4, 0), rgb(150, 40, 40)),
-		block(V(0.24, 0.2, 0.24), V(0, 2.72, 0), rgb(240, 226, 196)),
-	}),
-	Shortsword = model(sword(1.4, 0.5, 0.9, STEEL)),
 	Longsword = model(sword(2.6, 0.5, 1.2, STEEL)),
 	Axe = model({
 		block(V(0.2, 2.2, 0.2), V(0, 0.6, 0), WOOD),

@@ -231,8 +231,8 @@ return {
 	-- Chicken in front of you. Model is a module in Shared/Animals (<Model>Model.luau),
 	-- Size times its Blockbench drawing. Strength is what each hit on it trains (x the damage
 	-- you dealt: Config.Training). Health (QM, Oct 25): Mother Hen is
-	-- 20 Sword hits at 0 Strength and 5 at 1,000 (Config.Power); each later boss takes 20,
-	-- 30, 40, 50 Sword hits at the Strength you'd have reaching it: Meadow's at 0, Cactus
+	-- 20 Kendo Stick hits at 0 Strength and 5 at 1,000 (Config.Power); each later boss takes 20,
+	-- 30, 40, 50 Kendo Stick hits at the Strength you'd have reaching it: Meadow's at 0, Cactus
 	-- Boss at 2,000, Elder Boar at 18,000, Lava Wyrm at 140,000.
 	Bosses = {
 		Chicken = {
@@ -505,7 +505,7 @@ return {
 	-- your attack speed, both by log(1 + Strength / Scale), so each point counts for less
 	-- the more you have. Damage = Slash.Damage x (1 + Damage x log) x the weapon's Damage;
 	-- attacks come (1 + Speed x log) times faster, at most MaxSpeed.
-	-- QM's targets: Mother Hen (200 health) takes 20 Sword hits at 0 Strength, 5 at 1,000.
+	-- QM's targets: Mother Hen (200 health) takes 20 Kendo Stick hits at 0 Strength, 5 at 1,000.
 	--   Strength      0     200   1,000   2,000   18,000   140,000   1M
 	--   damage       10      30      40      45       59        72   85
 	--   speed        1x   1.16x   1.25x   1.29x    1.41x     1.52x   1.62x
@@ -522,16 +522,16 @@ return {
 	-- The training grounds at the south of the base, one per biome, are fenced off until
 	-- bought with cash (a rebirth will lock them again); their mobs wander and come back
 	-- Respawn seconds after they fall, for AFK training (RuneScape's sand crabs).
-	-- Rough AFK times from 0 Strength with the Sword, swinging non-stop on one ground:
+	-- Rough AFK times from 0 Strength with the Kendo Stick, swinging non-stop on one ground:
 	--             to 1K     10K     100K     1M
 	--   Dummies  1.3 min   8 min    56 min   7 h
 	--   Meadow   0.7       4        28       3.5 h
 	--   Desert   0.3       1.6      11       83 min
 	--   Tundra   0.1       0.5      4        28 min
 	--   Lava     -         0.2      1.2      9 min
-	-- A mob's Health is about 6 Sword hits for the Strength you'd have arriving there.
+	-- A mob's Health is about 6 Kendo Stick hits for the Strength you'd have arriving there.
 	Training = {
-		PerDamage = 0.1, -- (at 0 Strength a Sword hit deals 10: Strength 2 trains 2, as before)
+		PerDamage = 0.1, -- (at 0 Strength a Kendo Stick hit deals 10: Strength 2 trains 2, as before)
 		Grounds = {
 			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
 			Meadow = { Cost = 300, Mob = "Pig", Size = 0.55, Health = 180, Count = 4, Strength = 2, Speed = 4 },
@@ -638,7 +638,7 @@ return {
 	--   Type     "Melee", "Ranged" or "Magic"
 	--   Rarity   one of Rarities (above): its colour in the spin
 	--   Damage   times your Power (Server/Combat: Slash.Damage x Shared/Power's Strength curve) per hit
-	--   Weight   its share of a drop (nil: never drops; the Sword is everyone's to start)
+	--   Weight   its share of a drop (nil: never drops; the Kendo Stick is everyone's to start)
 	--   Boss     a boss-only item: only that boss (a Bosses key) drops it, and the spin
 	--            shows BONUS when it lands
 	--   Slash    (Melee) Config.Slash values to change: Arc, Radius, Forward, Width,
@@ -648,18 +648,16 @@ return {
 	-- Every weapon's values can be tuned live in Play: hold it and edit Workspace > Weapon
 	-- (client/WeaponTuning); tick PrintConfig there for its block to paste back here.
 	Weapons = {
-		-- everyone's to start (never drops)
-		Sword = { Name = "Sword", Type = "Melee", Rarity = "Common", Damage = 1 },
 		-- QM's weapons (Oct 25), in four tiers: Common, Uncommon, Rare, Epic. Every Ranged one
 		-- shoots the same arrow (only its numbers and trail differ); Magic ones are drawn from
 		-- their numbers (client/Shots). Tune any of them live: Workspace > Weapon.
 		-- tier 1
+		-- (everyone's to start: WeaponDrops.Start, so it never drops)
 		KendoStick = {
 			Name = "Kendo Stick",
 			Type = "Melee",
 			Rarity = "Common",
-			Damage = 0.9,
-			Weight = 30,
+			Damage = 1,
 			Slash = {
 				Cooldown = 0.25,
 				Radius = 8,
@@ -950,7 +948,7 @@ return {
 	},
 	-- the spin when a boss dies (client/WeaponSpin, Server/Arsenal)
 	WeaponDrops = {
-		Start = "Sword", -- everyone owns this one
+		Start = "KendoStick", -- everyone owns this one (QM, Oct 25: the Sword's gone)
 		Reel = 24, -- items it flicks through before it stops
 		SpinTime = 4, -- seconds from the first flick to the stop
 		Show = 2.2, -- seconds the winner stays up before the spin fades out

@@ -165,9 +165,23 @@ function Arsenal.start()
 	local function joined(player)
 		player:SetAttribute("Weapons", player:GetAttribute("Weapons") or START)
 		player:SetAttribute("Weapon", player:GetAttribute("Weapon") or START)
+		-- (a save from before a weapon was cut, like the Sword: QM, Oct 25, holds the
+		-- starting weapon instead, and the cut ones leave the list)
+		local function migrate()
+			if not Weapons.exists(player:GetAttribute("Weapon")) then
+				player:SetAttribute("Weapon", START)
+			end
+			local list = table.concat(Arsenal.owned(player), ",")
+			if player:GetAttribute("Weapons") ~= list then
+				player:SetAttribute("Weapons", list)
+			end
+		end
+		player:GetAttributeChangedSignal("Weapons"):Connect(migrate)
 		player:GetAttributeChangedSignal("Weapon"):Connect(function()
+			migrate()
 			arm(player)
 		end)
+		migrate()
 		player.CharacterAdded:Connect(function(character)
 			player:WaitForChild("Backpack")
 			character:WaitForChild("Humanoid")

@@ -1,5 +1,5 @@
 -- Every weapon (Config.Weapons): its tool, its model, and how it attacks.
---   Weapons.get(id) -> its Config.Weapons entry (the Sword's for an unknown id), with its
+--   Weapons.get(id) -> its Config.Weapons entry (the starting weapon's for an unknown id), with its
 --                      Shot filled in from Config.Shots[Type] and any live tuning applied
 --   Weapons.makeTool(id)       -- the Tool players hold (attributes Weapon, WeaponType)
 --   Weapons.makeModel(id, k)   -- an anchored copy, k times the held size (spin, shots)
@@ -22,13 +22,16 @@
 local Config = require(script.Parent.Parent.Config)
 local Rig = require(script.Parent.Parent.Rig)
 local Studs = require(script.Parent.Parent.Studs)
-local SwordModel = require(script.Parent.SwordModel)
+local KendoStickModel = require(script.Parent.KendoStickModel)
+local ShortswordModel = require(script.Parent.ShortswordModel)
 local WeaponModels = require(script.Parent.WeaponModels)
 
 local Weapons = {}
 
+local DRAWN = { KendoStick = KendoStickModel, Shortsword = ShortswordModel } -- (designs/weapons/*.bbmodel)
+
 local STUDS = { image = Studs.IMAGE, tile = 0.5 }
-local SCALE = 1.6 -- held size, times the drawing (the sword's: QM, Oct 23)
+local SCALE = 1.6 -- held size, times the drawing (as the old sword's: QM, Oct 23)
 local GRIP_Y = -0.25 * SCALE -- the middle of the grip, where the hand closes
 
 -- live tuning: [id] = { Damage = n, Slash = { k = v }, Shot = { k = v } }
@@ -41,7 +44,7 @@ end
 
 function Weapons.get(id)
 	if not Config.Weapons[id] then
-		id = "Sword"
+		id = Config.WeaponDrops.Start
 	end
 	local out = merged[id]
 	if out then
@@ -254,13 +257,14 @@ function Weapons.exists(id)
 end
 
 function Weapons.makeModel(id, scale)
-	local data = if id == "Sword" then SwordModel else WeaponModels[id] or SwordModel
+	-- (QM's Blockbench ones, via tools/bbmodel_to_luau.py, then the hand-made blocks)
+	local data = DRAWN[id] or WeaponModels[id] or KendoStickModel
 	return Rig.fromData(data, id, STUDS, SCALE * (scale or 1))
 end
 
 function Weapons.makeTool(id)
 	if not Weapons.exists(id) then
-		id = "Sword"
+		id = Config.WeaponDrops.Start
 	end
 	local w = Weapons.get(id)
 	local model = Weapons.makeModel(id, 1)

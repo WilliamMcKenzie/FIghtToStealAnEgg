@@ -13,7 +13,7 @@
 -- Angles are degrees about the joint's parent-part axes: x pitch (+ = back / forward
 -- raise for arms), y yaw (+ = turn left), z roll. Each key is { phase, x, y, z }.
 -- Arms: pitch 90 = held straight out in front, yaw swings it round. The sword comes out
--- of the top of the fist (Sword.makeTool's Grip), so the wrist's pitch aims the blade.
+-- of the top of the fist (Weapons.makeTool's Grip), so the wrist's pitch aims the blade.
 --
 -- idle: the guard stance held while the sword is out, a two-handed grip low in front with
 -- the blade angled up and across (QM's katana reference). The arm angles were solved with
