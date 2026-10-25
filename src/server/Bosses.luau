@@ -1,24 +1,28 @@
 -- Bosses, on the server: each is an invisible anchored body in workspace.Bosses (its
 -- hitbox and position, replicated), with attributes Kind (its Config.Bosses entry),
 -- Model and ModelSize (what clients draw: client/BossView.luau), Name, Health, MaxHealth,
--- Radius, and for an arena's boss Biome and Asleep. The HUD's boss bar shows the
--- nearest awake one.
+-- Radius, and for an arena's boss Biome and Intro (and Asleep, unused for now). The HUD's
+-- boss bar shows the nearest awake one.
 --
--- Each biome's boss sleeps on its dais (Map's BossSpot) until someone steals one of its
--- eggs (Server/Eggs locks them into its fight); asleep it can't be hit at all (Server/
--- Combat and the client skip it: QM, Oct 25). Awake, it chases
--- the nearest player locked into its fight, never leaving its arena, and attacks
--- (Config.Bosses[biome].Attacks, Server/BossAttacks). With nobody left in
--- the fight for Config.BossCalmDown seconds it walks home, heals and sleeps. At 0 health
--- it dies (Bosses.defeated fires: the fight's players go free) and comes back asleep
--- Respawn seconds later.
+-- A biome's boss isn't there until someone steals one of its eggs (QM, Oct 25): then it
+-- appears on its dais (Map's BossSpot), one of Config.BossPools[biome] at random, with
+-- Intro set for Config.BossIntro's length while client/BossIntro shows it arriving. Until
+-- that's over it can't be hit and doesn't move or attack. Then it chases the nearest
+-- player locked into its fight (Server/Eggs locks them in), never leaving its arena, and
+-- attacks (Config.Bosses[biome].Attacks, Server/BossAttacks). With nobody left in the
+-- fight for Config.BossCalmDown seconds it walks home and leaves. At 0 health it dies
+-- (Bosses.defeated fires: the fight's players go free) and can't be called up again for
+-- Respawn seconds.
+-- (The old sleeping bosses, QM Oct 25: Asleep bodies can't be hit and stand still, and
+-- client/BossView still draws them sleeping; nothing sets Asleep now.)
 --
 --   Bosses.spawn(kind, player)       -- a boss in front of the player (the /boss command)
---   Bosses.arena(biome, spot, bounds) -- a biome's sleeping boss on its spot (one of its
---                                        Config.BossPools at random)
---   Bosses.reroll()                  -- every biome's boss swapped for a fresh random one
+--   Bosses.arena(biome, spot, bounds) -- a biome's arena, empty until summoned
+--   Bosses.summon(biome, player)     -- its boss arrives (facing the player), if it's not
+--                                        there yet and not dead and waiting -> body or nil
+--   Bosses.reroll()                  -- every biome's boss gone, ready to be summoned again
 --   Bosses.wake(biome)
---   Bosses.alive(biome) -> its boss is up (not dead, waiting to respawn)
+--   Bosses.alive(biome) -> its boss is up or can be summoned (not dead, waiting)
 --   Bosses.defeated                  -- BindableEvent: Event(biome)
 --   Bosses.engaged                   -- BindableEvent: Event(player, biome), on a hit
 --   Bosses.killed                    -- BindableEvent: Event(kind, players), when one is
@@ -44,7 +48,7 @@ folder.Name = "Bosses"
 folder.Parent = workspace
 
 local live = {} -- [body] = { kind, c, yaw, home, bounds, biome, calm }
-local arenas = {} -- [biome] = { spot, bounds }
+local arenas = {} -- [biome] = { spot, bounds, ready (a boss can be summoned) }
 local extents = {}
 local HOME_YAW = math.pi -- (facing +z, south: every arena's gateway is on its south side)
 
@@ -88,7 +92,7 @@ local function hurt(body, amount)
 			local arena = arenas[b.biome]
 			task.delay(b.c.Respawn or 20, function()
 				if arenas[b.biome] == arena then
-					Bosses.arena(b.biome, arena.spot, arena.bounds)
+					arena.ready = true
 				end
 			end)
 		end
@@ -117,8 +121,8 @@ local function make(kind, at, yaw)
 	local b = { kind = kind, c = c, yaw = yaw, home = at, calm = 0, hitters = {} }
 	live[body] = b
 	Combat.add(body, function(player, damage)
-		-- (asleep it can't be hurt at all: only stealing one of its eggs wakes it, QM Oct 25)
-		if not live[body] or body:GetAttribute("Asleep") then
+		-- (arriving, or asleep, it can't be hurt at all: QM Oct 25)
+		if not live[body] or body:GetAttribute("Asleep") or body:GetAttribute("Intro") then
 			return
 		end
 		if b.biome then
@@ -144,31 +148,63 @@ function Bosses.spawn(kind, player)
 	return body
 end
 
--- bounds = { x0, z0 (south), x1, z1 (north) }: the arena it never leaves. Which boss: one
--- of Config.BossPools[biome] at random, each time.
-function Bosses.arena(biome, spot, bounds)
-	local pool = Config.BossPools[biome]
+local function pool(biome)
 	local list = {}
-	for _, kind in pool or {} do
+	for _, kind in Config.BossPools[biome] or {} do
 		if Config.Bosses[kind] then
 			table.insert(list, kind)
 		end
 	end
-	if #list == 0 then
+	return list
+end
+
+-- bounds = { x0, z0 (south), x1, z1 (north) }: the arena its boss never leaves
+function Bosses.arena(biome, spot, bounds)
+	if #pool(biome) == 0 then
 		return nil
 	end
-	arenas[biome] = { spot = spot, bounds = bounds }
-	-- (asleep facing south, the way intruders come in from: QM)
-	local body, b = make(list[math.random(#list)], spot * Vector3.new(1, 0, 1), HOME_YAW)
-	b.biome, b.bounds = biome, bounds
+	arenas[biome] = { spot = spot, bounds = bounds, ready = true }
+	return arenas[biome]
+end
+
+function Bosses.summon(biome, player)
+	for body, b in live do
+		if b.biome == biome then
+			return body
+		end
+	end
+	local arena = arenas[biome]
+	local list = pool(biome)
+	if not (arena and arena.ready) or #list == 0 then
+		return nil
+	end
+	arena.ready = false
+	local at = arena.spot * Vector3.new(1, 0, 1)
+	-- (facing whoever called it up; else south, the way intruders come in from: QM)
+	local yaw = HOME_YAW
+	local root = player and player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if root then
+		local look = (at - root.Position) * Vector3.new(1, 0, 1)
+		if look.Magnitude > 1e-3 then
+			yaw = math.atan2(look.X, look.Z)
+		end
+	end
+	local body, b = make(list[math.random(#list)], at, yaw)
+	b.biome, b.bounds = biome, arena.bounds
 	body:SetAttribute("Biome", biome)
-	body:SetAttribute("Asleep", true)
+	body:SetAttribute("Intro", true)
 	body.Parent = folder
+	local intro = Config.BossIntro
+	task.delay(intro.PanIn + intro.Hold + intro.PanOut, function()
+		if live[body] then
+			body:SetAttribute("Intro", false)
+		end
+	end)
 	return body
 end
 
--- every arena's boss gone and a fresh one rolled in its place, asleep (the /reboss
--- command); anyone in a fight goes free
+-- every arena's boss gone, each ready to be summoned again (a fresh roll from its pool:
+-- the /reboss command); anyone in a fight goes free
 function Bosses.reroll()
 	for body, b in live do
 		if b.biome then
@@ -178,19 +214,19 @@ function Bosses.reroll()
 			Bosses.defeated:Fire(b.biome)
 		end
 	end
-	for biome, arena in arenas do
-		Bosses.arena(biome, arena.spot, arena.bounds)
+	for _, arena in arenas do
+		arena.ready = true
 	end
 end
 
--- is this biome's boss there to fight (not dead and waiting to come back)?
+-- is this biome's boss there to fight, or ready to be summoned (not dead and waiting)?
 function Bosses.alive(biome)
 	for _, b in live do
 		if b.biome == biome then
 			return true
 		end
 	end
-	return false
+	return arenas[biome] ~= nil and arenas[biome].ready
 end
 
 function Bosses.wake(biome)
@@ -231,7 +267,7 @@ RunService.Heartbeat:Connect(function(dt)
 	for body, b in live do
 		local c = b.c
 		local pos = body.Position
-		if body:GetAttribute("Asleep") then
+		if body:GetAttribute("Asleep") or body:GetAttribute("Intro") then
 			continue
 		end
 		local target, distance = nearestPlayer(pos, b.biome)
@@ -247,14 +283,19 @@ RunService.Heartbeat:Connect(function(dt)
 				pos += CFrame.Angles(0, b.yaw, 0).LookVector * step
 			end
 		elseif b.biome then
-			-- nobody left in the fight: wait, then walk home, heal and sleep
+			-- nobody left in the fight: wait, then walk home and leave (till its next egg's
+			-- stolen)
 			b.calm += dt
 			if b.calm > Config.BossCalmDown then
 				local offset = (b.home - pos) * Vector3.new(1, 0, 1)
 				if offset.Magnitude < 1 then
-					body:SetAttribute("Health", c.Health)
-					body:SetAttribute("Asleep", true)
-					b.yaw = HOME_YAW
+					live[body] = nil
+					Combat.remove(body)
+					body:Destroy()
+					if arenas[b.biome] then
+						arenas[b.biome].ready = true
+					end
+					continue
 				else
 					turnToward(b, offset, dt)
 					pos += offset.Unit * math.min(c.Speed * dt, offset.Magnitude)

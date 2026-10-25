@@ -84,8 +84,8 @@ function Combat.slash(player, yaw, c)
 	local damage = Combat.damage(player) * Weapons.get(player:GetAttribute("Weapon")).Damage
 	local hits = {}
 	for body, handler in targets do
-		if body:GetAttribute("Asleep") then
-			continue -- (a sleeping boss can't be hit: QM, Oct 25)
+		if body:GetAttribute("Asleep") or body:GetAttribute("Intro") then
+			continue -- (a boss arriving, or asleep, can't be hit: QM, Oct 25)
 		elseif body.Parent then
 			local radius = body:GetAttribute("Radius") or 0
 			local offset = (body.Position - root.Position) * Vector3.new(1, 0, 1)
@@ -139,7 +139,7 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 	local list = {}
 	for body, handler in targets do
-		if body.Parent and not body:GetAttribute("Asleep") then
+		if body.Parent and not body:GetAttribute("Asleep") and not body:GetAttribute("Intro") then
 			table.insert(list, { body = body, pos = body.Position, radius = body:GetAttribute("Radius") or 0, handler = handler })
 		end
 	end

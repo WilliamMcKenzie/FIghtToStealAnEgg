@@ -367,7 +367,24 @@ return {
 		Ice = { "ElderBoar" },
 		Lava = { "LavaWyrm" },
 	},
-	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home, heals and sleeps
+	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home and leaves
+	-- a boss arriving (QM, Oct 25: they only appear once you steal an egg): the camera of
+	-- everyone locked into its fight pans over to its dais, it pops up there while the screen's
+	-- edges pulse red (it's after you), then the camera pans back and the fight starts
+	-- (client/BossIntro; till then it can't be hit and does nothing: Server/Bosses)
+	BossIntro = {
+		PanIn = 0.8, -- seconds the camera takes to swing over to it
+		Hold = 1.6, -- seconds looking at it (it appears at the start of this)
+		PanOut = 0.6, -- seconds back to your own camera; the fight starts once it's back
+		Appear = 0.5, -- seconds it takes to grow from nothing to full size
+		Distance = 2.2, -- the shot's distance from it, in its own sizes (plus 10 studs)
+		Height = 0.6, -- how high the camera sits, of that distance
+		Pulses = 2, -- red pulses round the screen's edge
+		PulseTime = 0.55, -- seconds each pulse takes
+		VignetteColor = Color3.fromRGB(255, 30, 30),
+		VignetteWidth = 0.28, -- how far in from each edge the red reaches, of the screen
+		VignetteAlpha = 0.25, -- its transparency at the very edge at a pulse's peak (0 = solid)
+	},
 	-- a sleeping boss (client/BossView, QM Oct 25): settled low on the ground, its head
 	-- swelling a little with each snore. A Model with a pose in Poses lies down in it
 	-- instead (no sinking or swelling): eyes shut, breathing slowly, Zzz drifting up.

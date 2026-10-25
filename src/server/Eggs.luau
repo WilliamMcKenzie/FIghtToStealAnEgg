@@ -1,5 +1,6 @@
 -- Eggs and the fight they start (QM, Oct 24). Every nest round a biome's edges holds an
--- egg. Hold E to steal it: it rides on your back, the biome's boss wakes, and you're
+-- egg. Hold E to steal it: it rides on your back, the biome's boss appears (Server/
+-- Bosses.summon, with its arrival shown: client/BossIntro), and you're
 -- locked into its fight (player attribute LockedIn = the biome): red barriers across its
 -- ways out, drawn and solid only for you (client/Barriers.luau), keep you in until the
 -- boss is dead. Anyone who hits the boss is locked in too, so a group fights it together.
@@ -7,7 +8,7 @@
 -- its reward (Config.Eggs.Reward). Die holding an egg and it's lost (and you're out of
 -- the fight). A nest lays again Config.Eggs.Respawn seconds after it's robbed.
 -- With Config.Eggs.Carry off (for now: QM, Oct 25) there's no egg to carry: stealing one
--- only wakes the boss and locks you into its fight.
+-- only calls up the boss and locks you into its fight.
 --
 -- Player attributes: HeldEgg (biome name), HeldEggKind (its animal), LockedIn (biome name),
 -- Eggs (eggs brought home).
@@ -132,8 +133,8 @@ local function lay(nest, biome)
 		egg:Destroy()
 		-- (with its boss dead and not yet back, there's no fight: the egg's yours)
 		if Bosses.alive(biome) then
-			lock(player, biome)
-			Bosses.wake(biome)
+			lock(player, biome) -- (first, so their screen knows the boss that appears is theirs)
+			Bosses.summon(biome, player)
 		end
 		task.delay(Config.Eggs.Respawn, lay, nest, biome)
 	end)

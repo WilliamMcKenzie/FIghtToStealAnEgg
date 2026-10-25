@@ -68,6 +68,7 @@ local NUMBER_RISE = 3 -- studs it floats up
 local NUMBER_LIFE = 0.7 -- seconds on screen
 local DEATH = 0.5 -- seconds it takes to shrink away
 local SLEEP = Config.BossSleep
+local INTRO = Config.BossIntro
 local ZZZ = SLEEP.Zzz
 -- Zzz: outlined Montserrat, warm light at the top going cool blue at the bottom (QM's UI)
 local ZZZ_GRADIENT = ColorSequence.new(Color3.fromRGB(255, 246, 232), Color3.fromRGB(143, 180, 255))
@@ -244,6 +245,11 @@ local function add(body)
 		view.headRoot = neck
 	end
 	view.sleep = if body:GetAttribute("Asleep") then 1 else 0
+	-- (a boss just summoned rises up out of its dais, growing, once the camera's on it:
+	-- client/BossIntro)
+	if body:GetAttribute("Intro") then
+		view.appearAt = os.clock() + INTRO.PanIn
+	end
 	views[body] = view
 	body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
@@ -290,6 +296,17 @@ RunService.RenderStepped:Connect(function(dt)
 			animal:setScale(math.max(1 - k, 0.05))
 		end
 		local ground = pos - Vector3.new(0, body.Size.Y / 2, 0)
+		if view.appearAt then
+			local k = math.clamp((now - view.appearAt) / INTRO.Appear, 0, 1)
+			-- (overshooting a little and settling: an ease-out "back")
+			local e = 1 + 2.70158 * (k - 1) ^ 3 + 1.70158 * (k - 1) ^ 2
+			animal:setScale(math.max(e, 0.05))
+			ground -= Vector3.new(0, body.Size.Y * (1 - math.min(e, 1)), 0)
+			if k >= 1 then
+				animal:setScale(1)
+				view.appearAt = nil
+			end
+		end
 		-- asleep: settled low, snoring (eased in and out as it nods off or gets up)
 		local want = if body:GetAttribute("Asleep") then 1 else 0
 		view.sleep += math.clamp(want - view.sleep, -dt / SLEEP.Settle, dt / SLEEP.Settle)
