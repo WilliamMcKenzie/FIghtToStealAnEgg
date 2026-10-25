@@ -23,6 +23,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Pets = require(Shared.Pets)
 local Stacks = require(Shared.Stacks)
+local Power = require(Shared.Power)
 local Weapons = require(Shared.Weapons.Weapons)
 local WeaponIcons = require(Shared.Weapons.WeaponIcons)
 local Popups = require(script.Parent.Popups)
@@ -35,9 +36,15 @@ local SOFT = Color3.fromRGB(200, 200, 212)
 local BLUE = Color3.fromRGB(64, 150, 255)
 local RED_TEXT = Color3.fromRGB(255, 110, 110)
 local RANK = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5, Mythic = 6 }
-local SIZE = Vector2.new(1180, 720)
+local SIZE = Vector2.new(1180, 780)
 local CELL = Vector2.new(160, 160)
-local SLOT = 150
+local SLOT = 140
+-- (the layout inside the panel, top down: the header, the equipped row, the line, the grid)
+local HEADER_Y = 22
+local ROW_Y = 84
+local LINE_Y = ROW_Y + SLOT + 26
+local GRID_Y = LINE_Y + 18
+local SIDE = 28 -- (margin either side of the row's line and the grid)
 
 local function rarityColors(rarity)
 	return Config.Rarities[rarity] or Config.Rarities.Common
@@ -79,6 +86,16 @@ local function weaponOdds(id)
 	return math.max(1, math.round(total / w.Weight))
 end
 
+-- a weapon's damage a second at your Strength: each hit (Server/Combat) x shots per attack,
+-- over its cooldown (Strength attacks faster too: Power.speed)
+local function dps(id)
+	local w = Weapons.get(id)
+	local strength = player:GetAttribute("Strength")
+	local hit = Config.Slash.Damage * Power.damage(strength) * (w.Damage or 1)
+	local count = if w.Shot then w.Shot.Count or 1 else 1
+	return hit * count * Power.speed(strength) / math.max(Weapons.cooldown(id), 0.05)
+end
+
 local TABS = {}
 
 TABS.Pets = {
@@ -109,7 +126,7 @@ TABS.Pets = {
 	odds = petOdds,
 	detail = function(kind)
 		local p = Config.Pets[kind]
-		return string.format("%s  ·  %s  ·  %s Cash/s", Pets.name(kind), p.Rarity, Popups.abbreviate(p.Cash or 0))
+		return string.format("%s  •  %s  •  %s Cash/s", Pets.name(kind), p.Rarity, Popups.abbreviate(p.Cash or 0))
 	end,
 	header = function(equipped)
 		local cash = 0
@@ -117,7 +134,7 @@ TABS.Pets = {
 			cash += Config.Pets[kind].Cash or 0
 		end
 		return string.format(
-			"%d/%d In Your Pen  ·  %s Cash/s",
+			"%d/%d In Your Pen  •  %s Cash/s",
 			#equipped,
 			Config.Backpack.PenSlots,
 			Popups.abbreviate(cash)
@@ -155,11 +172,11 @@ TABS.Weapons = {
 	odds = weaponOdds,
 	detail = function(id)
 		local w = Weapons.get(id)
-		return string.format("%s  ·  %s  ·  %s", w.Name, w.Rarity, string.upper(w.Type))
+		return string.format("%s  •  %s DPS", w.Name, Popups.abbreviate(math.round(dps(id))))
 	end,
 	header = function(equipped)
-		local w = Weapons.get(equipped[1])
-		return string.format("Holding  ·  %s  ·  %s", w.Name, string.upper(w.Type))
+		local id = equipped[1]
+		return string.format("%s  •  %s DPS", Weapons.get(id).Name, Popups.abbreviate(math.round(dps(id))))
 	end,
 	empty = "Beat bosses to win weapons!",
 	attributes = { "Weapons", "Weapon" },
@@ -234,27 +251,53 @@ function Backpack.init()
 		Name = "Header",
 		Text = "",
 		TextSize = 32,
-		Position = UDim2.fromOffset(0, -6),
+		Position = UDim2.fromOffset(0, HEADER_Y),
 		Size = UDim2.new(1, 0, 0, 40),
 	})
+	-- (short soft lines either side of it, like QM's reference)
+	local dashes = {}
+	for side = -1, 1, 2 do
+		local d = Instance.new("Frame")
+		d.BackgroundColor3 = WHITE
+		d.BorderSizePixel = 0
+		d.AnchorPoint = Vector2.new(0.5, 0.5)
+		d.Size = UDim2.fromOffset(110, 4)
+		local g = Instance.new("UIGradient")
+		g.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.5, 0.45),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		g.Parent = d
+		d.Parent = body
+		dashes[side] = d
+	end
+	local function placeDashes()
+		local half = header.TextBounds.X / 2 + 90
+		for side, d in dashes do
+			d.Position = UDim2.new(0.5, side * half, 0, HEADER_Y + 20)
+		end
+	end
+	header:GetPropertyChangedSignal("TextBounds"):Connect(placeDashes)
 	local headerText = ""
 	local function setHeader(text, color)
 		header.Text = text
 		header.TextColor3 = color or WHITE
+		placeDashes()
 	end
 
 	-- the equipped row
 	local row = Instance.new("Frame")
 	row.Name = "Equipped"
 	row.BackgroundTransparency = 1
-	row.Position = UDim2.fromOffset(0, 40)
+	row.Position = UDim2.fromOffset(0, ROW_Y)
 	row.Size = UDim2.new(1, 0, 0, SLOT)
 	row.Parent = body
 	local rowLayout = Instance.new("UIListLayout")
 	rowLayout.FillDirection = Enum.FillDirection.Horizontal
 	rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	rowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	rowLayout.Padding = UDim.new(0, 18)
+	rowLayout.Padding = UDim.new(0, 30)
 	rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	rowLayout.Parent = row
 
@@ -263,8 +306,8 @@ function Backpack.init()
 	line.BackgroundColor3 = WHITE
 	line.BorderSizePixel = 0
 	line.AnchorPoint = Vector2.new(0.5, 0)
-	line.Position = UDim2.new(0.5, 0, 0, 40 + SLOT + 14)
-	line.Size = UDim2.new(1, -40, 0, 3)
+	line.Position = UDim2.new(0.5, 0, 0, LINE_Y)
+	line.Size = UDim2.new(1, -2 * SIDE, 0, 3)
 	line.Parent = body
 	local fade = Instance.new("UIGradient")
 	fade.Transparency = NumberSequence.new({
@@ -276,13 +319,13 @@ function Backpack.init()
 	fade.Parent = line
 
 	-- the grid of everything else owned
-	local gridTop = 40 + SLOT + 30
+	local gridTop = GRID_Y
 	local grid = Instance.new("ScrollingFrame")
 	grid.Name = "Grid"
 	grid.BackgroundTransparency = 1
 	grid.BorderSizePixel = 0
-	grid.Position = UDim2.fromOffset(0, gridTop)
-	grid.Size = UDim2.new(1, 0, 1, -gridTop)
+	grid.Position = UDim2.fromOffset(SIDE, gridTop)
+	grid.Size = UDim2.new(1, -2 * SIDE, 1, -gridTop - 6)
 	grid.CanvasSize = UDim2.new()
 	grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	grid.ScrollingDirection = Enum.ScrollingDirection.Y
@@ -291,15 +334,16 @@ function Backpack.init()
 	grid.ScrollBarImageTransparency = 0.5
 	grid.Parent = body
 	local pad = Instance.new("UIPadding")
-	pad.PaddingTop = UDim.new(0, 8)
-	pad.PaddingBottom = UDim.new(0, 8)
-	pad.PaddingLeft = UDim.new(0, 10)
-	pad.PaddingRight = UDim.new(0, 10)
+	pad.PaddingTop = UDim.new(0, 14)
+	pad.PaddingBottom = UDim.new(0, 14)
+	pad.PaddingLeft = UDim.new(0, 6)
+	pad.PaddingRight = UDim.new(0, 6)
 	pad.Parent = grid
 	local gridLayout = Instance.new("UIGridLayout")
 	gridLayout.CellSize = UDim2.fromOffset(CELL.X, CELL.Y)
 	gridLayout.CellPadding = UDim2.fromOffset(18, 16)
 	gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	gridLayout.Parent = grid
 	local emptyNote = Popups.text(body, {
 		Text = "",
@@ -574,7 +618,7 @@ function Backpack.init()
 		stroke.Color = WHITE
 		stroke.Thickness = 4
 		stroke.Parent = ring
-		local art = icon(b, name, if name == "Pets" then "Horse" else Config.WeaponDrops.Start)
+		local art = icon(b, name, if name == "Pets" then "Horse" else "Shortsword")
 		art.Position = UDim2.fromScale(0.5, 0.42)
 		art.Size = UDim2.fromScale(0.72, 0.72)
 		local label = Popups.text(b, {
@@ -614,6 +658,15 @@ function Backpack.init()
 			player:GetAttributeChangedSignal(attr):Connect(changed)
 		end
 	end
+	-- (the held weapon's DPS goes up with your Strength)
+	player:GetAttributeChangedSignal("Strength"):Connect(function()
+		if tab == "Weapons" then
+			headerText = TABS.Weapons.header(TABS.Weapons.equipped())
+			if os.clock() > flashUntil then
+				setHeader(headerText)
+			end
+		end
+	end)
 	holder:GetPropertyChangedSignal("Visible"):Connect(function()
 		if holder.Visible and dirty then
 			dirty = false
