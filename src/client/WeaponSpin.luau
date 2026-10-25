@@ -25,6 +25,7 @@ local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Weapons = require(Shared.Weapons.Weapons)
+local WeaponIcons = require(Shared.Weapons.WeaponIcons)
 local Popups = require(script.Parent.Popups)
 
 local player = Players.LocalPlayer
@@ -106,9 +107,11 @@ end
 fit()
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
 
--- a 3D weapon in a ViewportFrame, turning slowly, blade tilted like an item icon. Flat,
--- like the held ones (QM, Oct 25): full ambient and no light, so every face shows its
--- colour as it is, and no stud texture (Weapons.flatten)
+-- a weapon in the spin or the chip: its outlined icon (QM, Oct 25: drawn once, Shared/
+-- Weapons/WeaponIcons), rocking gently; or, for one without an icon yet, the 3D model in a
+-- ViewportFrame, turning slowly, blade tilted like an item icon. Flat, like the held ones
+-- (QM, Oct 25): full ambient and no light, so every face shows its colour as it is, and no
+-- stud texture (Weapons.flatten)
 local function viewport(parent, props)
 	local vp = Instance.new("ViewportFrame")
 	vp.BackgroundTransparency = 1
@@ -123,12 +126,27 @@ local function viewport(parent, props)
 	cam.Parent = vp
 	vp.CurrentCamera = cam
 	vp.Parent = parent
+	local icon = Instance.new("ImageLabel")
+	icon.Name = "Icon"
+	icon.BackgroundTransparency = 1
+	icon.ScaleType = Enum.ScaleType.Fit
+	icon.AnchorPoint = Vector2.new(0.5, 0.5)
+	icon.Position = UDim2.fromScale(0.5, 0.5)
+	icon.Size = UDim2.fromScale(1, 1)
+	icon.Visible = false
+	icon.Parent = vp
 	local models = {} -- [id] = model (made once each)
 	local shown, centre = nil, Vector3.zero
 	local view = { frame = vp }
 	function view.show(id)
 		if shown then
 			shown.Parent = nil
+			shown = nil
+		end
+		icon.Visible = WeaponIcons[id] ~= nil
+		if WeaponIcons[id] then
+			icon.Image = WeaponIcons[id]
+			return
 		end
 		local m = models[id]
 		if not m then
@@ -155,6 +173,7 @@ local function viewport(parent, props)
 		cam.CFrame = CFrame.lookAt(Vector3.new(0, 0, d), Vector3.zero)
 	end
 	function view.turn(t)
+		icon.Rotation = math.sin(t * 0.8) * 6
 		if shown then
 			shown:PivotTo(CFrame.Angles(0, 0, math.rad(-40)) * CFrame.Angles(0, t, 0) * CFrame.new(-centre))
 		end
