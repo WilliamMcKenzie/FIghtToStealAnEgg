@@ -1,7 +1,7 @@
--- The red fight barriers' look in game (QM, Oct 25): Shared/FightSwirl's quasicrystal (his
+-- The red fight barriers' look in game (QM, Oct 25): Shared/BarrierSwirl's quasicrystal (his
 -- LassoAPet portal swirl) on each barrier you're locked in by, or on all of them with
--- PreviewAll ticked. Its knobs are attributes on ReplicatedStorage.FightBarrierStyle
--- (listed in Shared/FightSwirl); change them in Studio's Properties, in Edit or while
+-- PreviewAll ticked. Its knobs are attributes on workspace.FightBarrierStyle
+-- (listed in Shared/BarrierSwirl); change them in Studio's Properties, in Edit or while
 -- playing, and the barriers follow at once. (client/Barriers makes the same barriers
 -- solid for you; in Edit mode the Map Baker plugin draws them.)
 
@@ -9,19 +9,30 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local FightSwirl = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("FightSwirl"))
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local BarrierSwirl = require(Shared:WaitForChild("BarrierSwirl"))
+local Config = require(Shared:WaitForChild("Config"))
 
 local NEAR = 400 -- studs: no drawing further off
 
 local player = Players.LocalPlayer
 local map = workspace:WaitForChild("Map")
-local style = ReplicatedStorage:WaitForChild("FightBarrierStyle", 10)
+local style = workspace:WaitForChild("FightBarrierStyle", 10)
 
-local swirls = {} -- [wall] = FightSwirl
+local swirls = {} -- [wall] = BarrierSwirl
+
+-- (not where that region's buy wall is still up for you: one wall's enough, QM)
+local function locked(region)
+	local cost = Config.Regions.Cost[region]
+	return cost ~= nil and cost > 0 and player:GetAttribute("Region" .. region) ~= true
+end
 
 local function shownFor(wall)
+	if locked(wall:GetAttribute("North")) or locked(wall:GetAttribute("South")) then
+		return false
+	end
 	local biome = player:GetAttribute("LockedIn")
-	return FightSwirl.knob(style, "PreviewAll")
+	return BarrierSwirl.knob(style, "PreviewAll")
 		or (biome ~= nil and (wall:GetAttribute("South") == biome or wall:GetAttribute("North") == biome))
 end
 
@@ -36,18 +47,18 @@ local offset = 0
 local last = 0
 local camera = workspace.CurrentCamera
 RunService.RenderStepped:Connect(function(dt)
-	offset += FightSwirl.step(style, dt)
+	offset += BarrierSwirl.step(style, dt)
 	local markers = map:FindFirstChild("Biomes") and map.Biomes:FindFirstChild("Barriers")
 	for _, wall in if markers then markers:GetChildren() else {} do
 		local want = shownFor(wall)
 		if want and not swirls[wall] then
-			swirls[wall] = FightSwirl.new(wall)
+			swirls[wall] = BarrierSwirl.new(wall)
 		elseif not want and swirls[wall] then
 			drop(wall)
 		end
 	end
 	local now = os.clock()
-	if now - last < 1 / math.max(FightSwirl.knob(style, "FPS"), 1) then
+	if now - last < 1 / math.max(BarrierSwirl.knob(style, "FPS"), 1) then
 		return
 	end
 	last = now

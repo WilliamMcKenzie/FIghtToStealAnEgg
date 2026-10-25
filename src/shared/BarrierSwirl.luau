@@ -5,7 +5,7 @@
 -- Angles directions, drifting with time, which sets how much of the fill colour shows over
 -- the backdrop, fading out toward the top.
 --
--- Its knobs are attributes on ReplicatedStorage.FightBarrierStyle (DEFAULTS; a missing one
+-- Its knobs are attributes on workspace.FightBarrierStyle (DEFAULTS; a missing one
 -- takes its default):
 --   Angles      how many wave directions (2 to 12 or so; fractions twist it)
 --   Speed       how fast it drifts
@@ -22,17 +22,17 @@
 --   FPS         redraws a second
 --   PreviewAll  (in game) tick it to see every barrier drawn, fight or not
 --
---   local swirl = FightSwirl.new(wall, guiParent)   -- guiParent: where its SurfaceGuis live
---   swirl:draw(offset, style)                        -- offset: time drift (FightSwirl.step)
+--   local swirl = BarrierSwirl.new(wall, guiParent)   -- guiParent: where its SurfaceGuis live
+--   swirl:draw(offset, style)                        -- offset: time drift (BarrierSwirl.step)
 --   swirl:destroy()
---   FightSwirl.knob(style, name)
+--   BarrierSwirl.knob(style, name)
 
 local AssetService = game:GetService("AssetService")
 
-local FightSwirl = {}
-FightSwirl.__index = FightSwirl
+local BarrierSwirl = {}
+BarrierSwirl.__index = BarrierSwirl
 
-FightSwirl.DEFAULTS = {
+BarrierSwirl.DEFAULTS = {
 	Angles = 7,
 	Speed = 1,
 	Scale = 0.35,
@@ -50,24 +50,24 @@ FightSwirl.DEFAULTS = {
 	FPS = 30,
 	PreviewAll = false,
 }
-local DEFAULTS = FightSwirl.DEFAULTS
+local DEFAULTS = BarrierSwirl.DEFAULTS
 
-function FightSwirl.knob(style, name)
+function BarrierSwirl.knob(style, name)
 	local v = style and style:GetAttribute(name)
 	return if typeof(v) == typeof(DEFAULTS[name]) then v else DEFAULTS[name]
 end
-local knob = FightSwirl.knob
+local knob = BarrierSwirl.knob
 
 -- how far the pattern drifts in dt seconds
-function FightSwirl.step(style, dt)
+function BarrierSwirl.step(style, dt)
 	return knob(style, "Speed") / 16 * dt * 60
 end
 
-function FightSwirl.new(wall, guiParent)
-	local self = setmetatable({ wall = wall, surfaces = {}, labels = {} }, FightSwirl)
+function BarrierSwirl.new(wall, guiParent)
+	local self = setmetatable({ wall = wall, surfaces = {}, labels = {} }, BarrierSwirl)
 	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
 		local surface = Instance.new("SurfaceGui")
-		surface.Name = "FightSwirl"
+		surface.Name = "BarrierSwirl"
 		surface.Adornee = wall
 		surface.Face = face
 		surface.CanvasSize = Vector2.new(wall.Size.X * 8, wall.Size.Y * 8)
@@ -84,7 +84,7 @@ function FightSwirl.new(wall, guiParent)
 	return self
 end
 
-function FightSwirl:destroy()
+function BarrierSwirl:destroy()
 	for _, surface in self.surfaces do
 		surface:Destroy()
 	end
@@ -94,7 +94,7 @@ function FightSwirl:destroy()
 	self.image = nil
 end
 
-function FightSwirl:build(perStud)
+function BarrierSwirl:build(perStud)
 	perStud = math.clamp(math.floor(perStud + 0.5), 1, 6)
 	local size = self.wall.Size
 	if self.builtFor == perStud and self.builtSize == size and self.image then
@@ -137,7 +137,7 @@ local function waves(style)
 	return list, angles
 end
 
-function FightSwirl:draw(offset, style)
+function BarrierSwirl:draw(offset, style)
 	if not self:build(knob(style, "PixelsPerStud")) then
 		return
 	end
@@ -185,4 +185,4 @@ function FightSwirl:draw(offset, style)
 	self.image:WritePixelsBuffer(Vector2.zero, Vector2.new(W, H), pixels)
 end
 
-return FightSwirl
+return BarrierSwirl
