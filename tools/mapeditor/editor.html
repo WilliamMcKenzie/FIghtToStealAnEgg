@@ -431,12 +431,17 @@ function drawSprite(g, s, x, z, yaw, scale, alpha = 1) {
 // a ruined brick wall from above: a row of bricks along its length, its top course's colours
 // a region's barrier (QM, Oct 25): where its locked blocker stands, a navy bar its width
 const REGIONS = BUNDLE.styles.filter((st) => st !== "Base" && st !== "Meadow");
+// and a fight barrier: the red wall across a gate for whoever's locked into a fight either
+// side of it (south and north areas)
+const AREAS = BUNDLE.styles;
+const isBar = (o) => o.type === "Barrier" || o.type === "FightBarrier";
 function drawBarrier(g, o, alpha = 1) {
   g.save(); g.globalAlpha = alpha;
   g.translate(o.x, o.z); g.rotate(-(o.yaw || 0) * Math.PI / 180);
-  g.fillStyle = css(rgb("RegionBarrier")); g.fillRect(-o.width / 2, -1.5, o.width, 3);
-  g.fillStyle = "#fff"; g.font = "bold 6px Montserrat, sans-serif"; g.textAlign = "center"; g.textBaseline = "bottom";
-  g.fillText(o.region, 0, -2.5);
+  const fight = o.type === "FightBarrier";
+  g.fillStyle = fight ? "rgba(255,70,60,0.85)" : css(rgb("RegionBarrier")); g.fillRect(-o.width / 2, fight ? 1.6 : -1.5, o.width, fight ? 2 : 3);
+  g.fillStyle = "#fff"; g.font = "bold 6px Montserrat, sans-serif"; g.textAlign = "center"; g.textBaseline = fight ? "top" : "bottom";
+  g.fillText(fight ? `${o.south} | ${o.north}` : o.region, 0, fight ? 4 : -2.5);
   g.restore();
 }
 function drawRuin(g, o, alpha = 1) {
@@ -595,13 +600,13 @@ function draw() {
   }
   if (view.furniture) drawFurniture(ctx);
   // objects: ruins, nests, props, bosses
-  const order = { Ruin: 0, Nest: 1, Prop: 2, Pillar: 3, Boss: 4, Arch: 5, Barrier: 6 };
+  const order = { Ruin: 0, Nest: 1, Prop: 2, Pillar: 3, Boss: 4, Arch: 5, Barrier: 6, FightBarrier: 7 };
   const shown = (o) => o.type === "Pillar" ? view.fixed : o.type === "Arch" ? view.arches : o.type === "Prop" || o.type === "Ruin" ? view.props : true;
   const objs = M.objects.filter(shown).sort((a, b) => order[a.type] - order[b.type]);
   for (const o of objs) {
     if (o.x < v.x0 - 80 || o.x > v.x1 + 80 || o.z < v.z0 - 80 || o.z > v.z1 + 80) continue;
     if (o.type === "Ruin") drawRuin(ctx, o);
-    else if (o.type === "Barrier") drawBarrier(ctx, o);
+    else if (isBar(o)) drawBarrier(ctx, o);
     else drawSprite(ctx, spriteFor(o), o.x, o.z, o.yaw, o.scale, o.type === "Arch" ? 0.85 : 1);
   }
   if (view.barriers) {
@@ -617,7 +622,7 @@ function draw() {
   }
   if (hover && (tool === "place") && placing) {
     const o = newObject(hover.x, hover.z, true);
-    if (o) { if (o.type === "Ruin") drawRuin(ctx, o, 0.6); else if (o.type === "Barrier") drawBarrier(ctx, o, 0.6); else drawSprite(ctx, spriteFor(o), o.x, o.z, o.yaw, o.scale, 0.6); }
+    if (o) { if (o.type === "Ruin") drawRuin(ctx, o, 0.6); else if (isBar(o)) drawBarrier(ctx, o, 0.6); else drawSprite(ctx, spriteFor(o), o.x, o.z, o.yaw, o.scale, 0.6); }
   }
   if (hover && (tool === "paint" || tool === "rect" || tool === "fill" || tool === "pick")) {
     ctx.strokeStyle = "rgba(255,255,255,0.9)"; ctx.lineWidth = Math.max(0.3, 1.5 / cam.zoom);
@@ -723,7 +728,7 @@ function editTiles(f) { const before = JSON.stringify(M.tiles); f(); const after
 const snap = (v, free) => (free ? Math.round(v * 10) / 10 : Math.round(v));
 function hitRadius(o) {
   if (o.type === "Ruin") return o.length / 2;
-  if (o.type === "Barrier") return o.width / 2;
+  if (isBar(o)) return o.width / 2;
   const s = spriteFor(o);
   if (!s) return 4;
   const [x0, z0, x1, z1] = s.b;
@@ -733,7 +738,7 @@ function hitObject(x, z) {
   let best = null, bestD = 1e9;
   for (const o of M.objects) {
     let d;
-    if (o.type === "Ruin" || o.type === "Barrier") {
+    if (o.type === "Ruin" || isBar(o)) {
       const a = -(o.yaw || 0) * Math.PI / 180, ux = Math.cos(a), uz = Math.sin(a), half = (o.length || o.width) / 2;
       const t = Math.max(-half, Math.min(half, (x - o.x) * ux + (z - o.z) * uz));
       d = Math.hypot(x - (o.x + ux * t), z - (o.z + uz * t)) - 2;
@@ -750,6 +755,7 @@ function newObject(x, z, ghost) {
   if (placing.type === "Pillar") return { type: "Pillar", style, kind: placing.kind, x, z, size: placing.size, height: placing.height };
   if (placing.type === "Arch") return { type: "Arch", style, x, z };
   if (placing.type === "Ruin") return { type: "Ruin", style, x, z, length: 24, yaw: 0, height: 7.5, seed: Math.floor(Math.random() * 1e6) };
+  if (placing.type === "FightBarrier") { const b = biomeAt(z); return { type: "FightBarrier", south: "Base", north: b === "Base" ? "Meadow" : b, x, z, yaw: 0, width: 48 }; }
   if (placing.type === "Barrier") { const b = biomeAt(z); return { type: "Barrier", region: REGIONS.includes(b) ? b : REGIONS[0], x, z, yaw: 0, width: 48, height: 40 }; }
   const biome = biomeAt(z);
   if (biome === "Base") return ghost ? null : { error: "Nests and bosses go in a biome, not the base." };
@@ -876,7 +882,7 @@ window.addEventListener("keydown", (e) => {
   if (k === "delete" || k === "backspace") return deleteSelected();
   if (k === "escape") { selected = null; inspect(); setTool(tool === "place" ? "select" : tool); return; }
   if (k === "q" || k === "e") return nudgeSelected((o) => (o.yaw = (((o.yaw || 0) + (k === "q" ? 1 : -1) * (e.shiftKey ? 90 : 15)) % 360 + 360) % 360));
-  if (k === "[" || k === "]") return nudgeSelected((o) => { if (o.type === "Barrier") o.width = Math.max(8, o.width + (k === "]" ? 4 : -4)); if (o.type === "Prop") o.scale = Math.max(0.2, Math.round(((o.scale || 1) + (k === "]" ? 0.1 : -0.1)) * 100) / 100); });
+  if (k === "[" || k === "]") return nudgeSelected((o) => { if (isBar(o)) o.width = Math.max(8, o.width + (k === "]" ? 4 : -4)); if (o.type === "Prop") o.scale = Math.max(0.2, Math.round(((o.scale || 1) + (k === "]" ? 0.1 : -0.1)) * 100) / 100); });
   if (k.startsWith("arrow") && selected) { e.preventDefault(); const d = e.shiftKey ? 4 : 1; return nudgeSelected((o) => { if (k === "arrowleft") o.x -= d; if (k === "arrowright") o.x += d; if (k === "arrowup") o.z -= d; if (k === "arrowdown") o.z += d; }); }
 });
 window.addEventListener("keyup", (e) => { if (e.key === " ") { space = false; setTool(tool); } });
@@ -948,7 +954,7 @@ function buildTray() {
     const items = BUNDLE.items.map((it) => ({ type: "Prop", item: it, label: it.replace(/([a-z])([A-Z])/g, "$1 $2") }));
     const stone = BUNDLE.pillars.map(([kind, size, height]) => ({ type: "Pillar", kind, size, height, label: pillarLabel({ kind }) }));
     stone.push({ type: "Arch", label: "Arch" });
-    const sets = [["Props", items], ["Stone", stone], ["Ruins", [{ type: "Ruin", label: "Brick wall" }]], ["Fight", [{ type: "Nest", label: "Nest" }, { type: "Boss", label: "Boss" }, { type: "Barrier", label: "Region barrier" }]]];
+    const sets = [["Props", items], ["Stone", stone], ["Ruins", [{ type: "Ruin", label: "Brick wall" }]], ["Fight", [{ type: "Nest", label: "Nest" }, { type: "Boss", label: "Boss" }, { type: "Barrier", label: "Region barrier" }, { type: "FightBarrier", label: "Fight barrier" }]]];
     for (const [name, list] of sets) {
       const g = document.createElement("div"); g.className = "group";
       g.innerHTML = `<div class="label">${name}</div><div class="items"></div>`;
@@ -958,7 +964,7 @@ function buildTray() {
         const img = document.createElement("img");
         const spr = it.type === "Prop" ? (sprites[it.item] || sprites[it.item + "_Base"]) : it.type === "Pillar" || it.type === "Arch" ? spriteFor({ ...it, style: "Base" }) : it.type === "Nest" ? sprites.Nest_Meadow : it.type === "Boss" ? sprites.Boss_Meadow : null;
         if (spr) img.src = spriteUrl(spr) || "";
-        else if (it.type === "Barrier") { const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); x.fillStyle = css(rgb("RegionBarrier")); x.fillRect(2, 12, 28, 8); img.src = c.toDataURL(); }
+        else if (isBar(it)) { const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); x.fillStyle = it.type === "FightBarrier" ? "rgb(255,70,60)" : css(rgb("RegionBarrier")); x.fillRect(2, 12, 28, 8); img.src = c.toDataURL(); }
         else { const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); x.translate(16, 16); x.scale(1.1, 1.1); drawRuin(x, { x: 0, z: 0, length: 24, yaw: 30, style: "Base", seed: 7 }); img.src = c.toDataURL(); }
         b.appendChild(img);
         const s = document.createElement("span"); s.textContent = it.label; b.appendChild(s);
@@ -1049,7 +1055,7 @@ function inspect() {
   const h = document.createElement("h2"); h.className = "title"; box.appendChild(h);
   if (selected) {
     const o = selected;
-    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : o.type === "Pillar" ? pillarLabel(o) : o.type === "Arch" ? "Arch" : o.type === "Barrier" ? `${o.region} barrier` : `${o.area} ${o.type.toLowerCase()}`;
+    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : o.type === "Pillar" ? pillarLabel(o) : o.type === "Arch" ? "Arch" : o.type === "Barrier" ? `${o.region} barrier` : o.type === "FightBarrier" ? "Fight barrier" : `${o.area} ${o.type.toLowerCase()}`;
     const set = (k) => (v) => nudgeSelected((x) => { if (v === null) delete x[k]; else x[k] = v; });
     box.appendChild(field("X", o.x, set("x")));
     box.appendChild(field("Z", o.z, set("z")));
@@ -1077,6 +1083,14 @@ function inspect() {
       box.appendChild(field("Length", o.length, set("length")));
       box.appendChild(field("Height", o.height, set("height")));
       box.appendChild(field("Seed", o.seed || 1, set("seed")));
+    } else if (o.type === "FightBarrier") {
+      box.appendChild(field("South", o.south, set("south"), AREAS));
+      box.appendChild(field("North", o.north, set("north"), AREAS));
+      box.appendChild(field("Yaw", o.yaw || 0, set("yaw")));
+      box.appendChild(field("Width", o.width, set("width")));
+      const n = document.createElement("div"); n.className = "note";
+      n.textContent = "Red wall across a gate, solid only for players locked into the boss fight in the area either side. [ ] make it narrower or wider.";
+      box.appendChild(n);
     } else if (o.type === "Barrier") {
       box.appendChild(field("Region", o.region, set("region"), REGIONS));
       box.appendChild(field("Yaw", o.yaw || 0, set("yaw")));

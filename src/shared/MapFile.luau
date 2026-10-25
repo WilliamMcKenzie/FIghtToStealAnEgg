@@ -5,7 +5,7 @@
 -- A .map is JSON: a grid of 4-stud cells (one checker square each), `rows` north to
 -- south, one character a cell ("." is no floor: under the walls), each character a tile
 -- from `tiles` ({ id, area, key (ColorKey), top, liquid? }); the areas' settings; the
--- objects placed on it (Prop, Ruin, Pillar, Arch, Barrier, Nest, Boss); `colours`, the ColorKeys QM changed from
+-- objects placed on it (Prop, Ruin, Pillar, Arch, Barrier, FightBarrier, Nest, Boss); `colours`, the ColorKeys QM changed from
 -- Config.WorldColors ({ key: [r, g, b] }: they win over Config's); and `fixed`: walls, pillars, arches and
 -- barriers, shown in the editor but laid out by tools/map_gen.py.
 --
@@ -98,7 +98,7 @@ function MapFile.decode(text)
 		Pillars = table.clone(fixed.pillars or {}),
 		Arches = table.clone(fixed.arches or {}),
 		RegionGates = {},
-		Barriers = fixed.barriers,
+		Barriers = table.clone(fixed.barriers or {}),
 		Areas = {},
 		Props = {},
 		Ruins = {},
@@ -175,6 +175,9 @@ function MapFile.decode(text)
 			)
 		elseif o.type == "Arch" then
 			table.insert(data.Arches, { o.style, o.x, o.z, o.yaw or 0, o.scale or 1, o.y or 0 })
+		elseif o.type == "FightBarrier" then
+			-- the red wall across a gate for those locked into a fight either side of it
+			table.insert(data.Barriers, { o.south, o.north, o.x, o.z, o.width or 48, o.yaw or 0 })
 		elseif o.type == "Barrier" then
 			-- a region's gate, where its blocker stands (Server/Map, Shared/RegionBlocker)
 			table.insert(data.RegionGates, { o.region, o.x, o.z, o.yaw or 0, o.width or 48, o.height or 40 })

@@ -409,7 +409,15 @@
   {"type":"Nest","area":"Dungeon","x":58,"z":-1183},
   {"type":"Nest","area":"Dungeon","x":221,"z":-1117},
   {"type":"Nest","area":"Dungeon","x":173,"z":-1265},
-  {"type":"Nest","area":"Dungeon","x":-102,"z":-1213}
+  {"type":"Nest","area":"Dungeon","x":-102,"z":-1213},
+  {"type":"FightBarrier","south":"Base","north":"Meadow","x":0,"z":-172,"yaw":0,"width":132},
+  {"type":"FightBarrier","south":"Meadow","north":"Desert","x":-1,"z":-370,"yaw":0,"width":145},
+  {"type":"FightBarrier","south":"Desert","north":"Ice","x":0,"z":-571,"yaw":0,"width":147},
+  {"type":"FightBarrier","south":"Ice","north":"Lava","x":-2,"z":-800,"yaw":0,"width":178},
+  {"type":"FightBarrier","south":"Lava","north":"Dungeon","x":-88,"z":-1041,"yaw":0,"width":79},
+  {"type":"FightBarrier","south":"Lava","north":"Forest","x":94,"z":-1041,"yaw":0,"width":85},
+  {"type":"FightBarrier","south":"Dungeon","north":"Castle","x":-181,"z":-1344,"yaw":0,"width":74},
+  {"type":"FightBarrier","south":"Forest","north":"Ocean","x":178,"z":-1282,"yaw":0,"width":79}
 ],
 "fixed": {
   "wallHeight": 30,
@@ -418,10 +426,7 @@
 
   ],
   "barriers": [
-    ["Base","Meadow",0,-164,48],
-    ["Meadow","Desert",0,-352,224],
-    ["Desert","Ice",0,-552,248],
-    ["Ice","Lava",0,-776,280]
+
   ]
 },
 "rows": [
