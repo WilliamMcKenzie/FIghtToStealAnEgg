@@ -299,7 +299,7 @@ RunService.RenderStepped:Connect(function(dt)
 			end
 			-- a run of Zs as each breath goes out, while it's properly asleep
 			local run = math.floor(clock + 0.5)
-			if run ~= view.zzzRun then
+			if pose.Zzz and run ~= view.zzzRun then
 				if view.zzzRun and want == 1 and s > 0.5 then
 					for i = 1, ZZZ.Count do
 						task.delay((i - 1) * ZZZ.Gap, function()

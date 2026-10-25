@@ -381,7 +381,7 @@ return {
 		--   Breathe = { bone = { x, y, z, rx, ry, rz } } -- added at the top of each breath
 		--   Shut    = { part names } -- eyes, squashed into a dark line
 		--   Hide    = { part names } -- pupils, gone while its eyes are shut
-		--   Zzz     = Vector3 -- where its Zzz start (drawing studs, from the neck bone)
+		--   Zzz     = Vector3 -- where its Zzz start (drawing studs, from the neck bone); none without it
 		Poses = {
 			Chicken = {
 				Bones = {
@@ -402,7 +402,7 @@ return {
 				},
 				Shut = { "EyeL" },
 				Hide = { "PupilL" },
-				Zzz = Vector3.new(1.2, 4.5, -1.2),
+				-- Zzz = Vector3.new(1.2, 4.5, -1.2), -- (no Zs on the hen: QM, Oct 25)
 			},
 		},
 		Zzz = {

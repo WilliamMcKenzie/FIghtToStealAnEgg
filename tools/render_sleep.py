@@ -79,7 +79,7 @@ def sleep_settings(model):
     num = lambda text, key: float(re.search(key + r" = (" + NUM + ")", text).group(1))
     return {
         "bones": bones("Bones"), "breathe": bones("Breathe"), "shut": names("Shut"), "hide": names("Hide"),
-        "zzzAt": nums(re.search(r"Zzz = Vector3\.new\(([^)]*)\)", pose).group(1)),
+        "zzzAt": (lambda m: nums(m.group(1)) if m else None)(re.search(r"\n\t*Zzz = Vector3\.new\(([^)]*)\)", pose)),
         "breath": num(sleep, "Breath"), "settle": num(sleep, "Settle"),
         "zzz": {k: num(zzz, k) for k in ("Count", "Gap", "Size", "Rise", "Life")},
     }
@@ -232,7 +232,7 @@ def frames(sleep, fps=15):
         breath = 0.5 - 0.5 * math.cos(t / B * 2 * math.pi)
         # a run of Zs as each breath goes out (the top of the breath), while it's asleep
         prev = (t - 1 / fps) / B
-        if want and math.floor(prev + 0.5) != math.floor(t / B + 0.5) and s > 0.5:
+        if sleep["zzzAt"] and want and math.floor(prev + 0.5) != math.floor(t / B + 0.5) and s > 0.5:
             runs.append(t)
         zs = []
         for r in runs:
@@ -253,7 +253,7 @@ def main():
     fs = frames(sleep)
     stills = [
         {"name": "awake.png", "s": 0, "breath": 0, "zs": [], "eye": (13, 9, -17), "at": (0, 3.4, 0)},
-        {"name": "asleep.png", "s": 1, "breath": 0.4, "zs": [{"age": 0.5, "i": 0}, {"age": 0.15, "i": 1}],
+        {"name": "asleep.png", "s": 1, "breath": 0.4, "zs": [{"age": 0.5, "i": 0}, {"age": 0.15, "i": 1}] if sleep["zzzAt"] else [],
          "eye": (13, 9, -17), "at": (0, 3.4, 0)},
     ]
     tmp = tempfile.mkdtemp()
