@@ -786,10 +786,11 @@ local function biomeFurniture(parent)
 	for _, b in MapData.Barriers do
 		local p = Instance.new("Part")
 		p.Name = "Barrier"
-		-- (shown here so it's there to see in Studio, QM Oct 25; client/Barriers hides it for
-		-- everyone and shows it, solid, only to the players locked into either side's fight)
+		-- (invisible itself: Shared/FightSwirl draws it, in Studio by the Map Baker plugin and
+		-- in game by client/FightBarrierFx for those locked into either side's fight, who
+		-- client/Barriers makes it solid for)
 		p.Anchored = true
-		p.Transparency = 0.1
+		p.Transparency = 1
 		p.CanCollide = false
 		p.CanQuery = false
 		p.CanTouch = false

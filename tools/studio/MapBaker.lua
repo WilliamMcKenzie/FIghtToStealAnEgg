@@ -98,3 +98,81 @@ import.Click:Connect(function()
 	bake("Import " .. file.Name, file:GetBinaryContents())
 	print("[Map Baker] to keep it in the game, send " .. file.Name .. " over to go in the repo (maps/world.map)")
 end)
+
+-- ---- the fight barriers' quasicrystal, in Edit mode ----------------------------------------
+-- (QM, Oct 25: to see the red barriers as they'll look without pressing Play) Shared/
+-- FightSwirl drawn on every barrier in workspace.Map, its knobs live from
+-- ReplicatedStorage.FightBarrierStyle. Its SurfaceGuis live in CoreGui, so nothing is
+-- added to the place. A fresh copy of FightSwirl is required whenever the synced one
+-- changes, so an update shows without restarting Studio.
+local CoreGui = game:GetService("CoreGui")
+local preview = Instance.new("Folder")
+preview.Name = "FightSwirlPreview"
+preview.Parent = CoreGui
+
+local swirlModule, FightSwirl, swirlSource = nil, nil, nil
+local function swirlCode()
+	local shared = ReplicatedStorage:FindFirstChild("Shared")
+	local module = shared and shared:FindFirstChild("FightSwirl")
+	if not (module and module:IsA("ModuleScript")) then
+		return nil
+	end
+	if module ~= swirlModule or module.Source ~= swirlSource then
+		local ok, loaded = pcall(require, module:Clone())
+		swirlModule, swirlSource = module, module.Source
+		FightSwirl = if ok then loaded else nil
+		return FightSwirl, true
+	end
+	return FightSwirl, false
+end
+
+local swirls = {} -- [wall] = FightSwirl
+local function clear()
+	for wall, swirl in swirls do
+		swirl:destroy()
+		swirls[wall] = nil
+	end
+end
+
+local offset, last = 0, 0
+RunService.Heartbeat:Connect(function(dt)
+	if RunService:IsRunning() then
+		clear()
+		return
+	end
+	local code, changed = swirlCode()
+	if changed then
+		clear()
+	end
+	if not code then
+		return
+	end
+	local style = ReplicatedStorage:FindFirstChild("FightBarrierStyle")
+	offset += code.step(style, dt)
+	local now = os.clock()
+	if now - last < 1 / math.max(code.knob(style, "FPS"), 1) then
+		return
+	end
+	last = now
+	local map = workspace:FindFirstChild("Map")
+	local markers = map and map:FindFirstChild("Biomes") and map.Biomes:FindFirstChild("Barriers")
+	local seen = {}
+	for _, wall in if markers then markers:GetChildren() else {} do
+		if wall:IsA("BasePart") then
+			seen[wall] = true
+			swirls[wall] = swirls[wall] or code.new(wall, preview)
+			local ok, err = pcall(swirls[wall].draw, swirls[wall], offset, style)
+			if not ok then
+				warn("[Map Baker] fight barrier preview: " .. tostring(err))
+				clear()
+				return
+			end
+		end
+	end
+	for wall, swirl in swirls do
+		if not seen[wall] then
+			swirl:destroy()
+			swirls[wall] = nil
+		end
+	end
+end)
