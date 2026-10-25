@@ -239,14 +239,14 @@ return {
 			Turn = 4, -- how fast it turns to face its target
 			Strength = 1,
 		},
-		Meadow = {
+		MotherHen = {
 			Name = "Mother Hen",
 			Model = "Chicken",
-			Size = 2.4, -- (about 25 studs tall)
+			Size = 3.84, -- (about 40 studs tall: QM, Oct 25, 1.6x)
 			Health = 800,
 			Speed = 10,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
-			Radius = 7,
+			Radius = 11,
 			Turn = 4,
 			Strength = 2,
 			Respawn = 20, -- seconds after it dies before it's back asleep on its dais
@@ -256,7 +256,22 @@ return {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
 			},
 		},
-		Desert = {
+		GiantRafflesia = {
+			Name = "Giant Rafflesia",
+			Model = "GiantRafflesia", -- (LassoAPet's, QM Oct 25: its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
+			Size = 0.6, -- (about 30 studs tall)
+			Health = 800,
+			Speed = 9,
+			StopAt = 1,
+			Radius = 9,
+			Turn = 3.5,
+			Strength = 2,
+			Respawn = 20,
+			Attacks = {
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+			},
+		},
+		CactusBoss = {
 			Name = "Cactus Boss",
 			Model = "CactusBoss", -- (LassoAPet's, QM Oct 24)
 			Size = 2.4, -- (about 29 studs tall)
@@ -273,7 +288,7 @@ return {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 20 },
 			},
 		},
-		Ice = {
+		ElderBoar = {
 			Name = "Elder Boar",
 			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
 			Size = 2, -- (about 27 studs tall, 40 long)
@@ -290,7 +305,7 @@ return {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 35 },
 			},
 		},
-		Lava = {
+		LavaWyrm = {
 			Name = "Lava Wyrm",
 			Model = "LavaWyrm", -- (LassoAPet's, QM Oct 24)
 			Size = 1.4, -- (about 16 studs tall, 60 long)
@@ -307,6 +322,14 @@ return {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 60 },
 			},
 		},
+	},
+	-- each biome's boss: one of these at random every time it (re)spawns (QM, Oct 25; /reboss
+	-- re-rolls them all)
+	BossPools = {
+		Meadow = { "MotherHen", "GiantRafflesia" },
+		Desert = { "CactusBoss" },
+		Ice = { "ElderBoar" },
+		Lava = { "LavaWyrm" },
 	},
 	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home, heals and sleeps
 

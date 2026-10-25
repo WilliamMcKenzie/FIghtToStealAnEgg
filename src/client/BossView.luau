@@ -5,7 +5,8 @@
 -- stood on the ground under the body and facing its way. When its Health drops it
 -- flashes white and the damage pops up over its head; at 0 it sinks and shrinks. A
 -- sleeping boss (Asleep) has Zzz floating over it.
--- Also hands the /boss chat command to the server (BossRequest), and B does the same
+-- Also hands the /boss chat command to the server (BossRequest), and B does the same;
+-- /reboss goes as RebossRequest
 -- (a key that works whatever chat the place uses).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -230,6 +231,14 @@ task.spawn(function()
 	if command then
 		command.Triggered:Connect(function()
 			request:FireServer()
+		end)
+	end
+	-- /reboss (the game's owner, or a Studio playtest: the server checks)
+	local reboss = (commands or TextChatService):WaitForChild("RebossCommand", 10)
+	local rebossRequest = ReplicatedStorage:WaitForChild("RebossRequest", 10)
+	if reboss and rebossRequest then
+		reboss.Triggered:Connect(function()
+			rebossRequest:FireServer()
 		end)
 	end
 end)

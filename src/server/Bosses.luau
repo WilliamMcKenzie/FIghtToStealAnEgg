@@ -13,7 +13,9 @@
 -- Respawn seconds later.
 --
 --   Bosses.spawn(kind, player)       -- a boss in front of the player (the /boss command)
---   Bosses.arena(biome, spot, bounds) -- a biome's sleeping boss on its spot
+--   Bosses.arena(biome, spot, bounds) -- a biome's sleeping boss on its spot (one of its
+--                                        Config.BossPools at random)
+--   Bosses.reroll()                  -- every biome's boss swapped for a fresh random one
 --   Bosses.wake(biome)
 --   Bosses.alive(biome) -> its boss is up (not dead, waiting to respawn)
 --   Bosses.defeated                  -- BindableEvent: Event(biome)
@@ -125,18 +127,42 @@ function Bosses.spawn(kind, player)
 	return body
 end
 
--- bounds = { x0, z0 (south), x1, z1 (north) }: the arena it never leaves
+-- bounds = { x0, z0 (south), x1, z1 (north) }: the arena it never leaves. Which boss: one
+-- of Config.BossPools[biome] at random, each time.
 function Bosses.arena(biome, spot, bounds)
-	if not Config.Bosses[biome] then
+	local pool = Config.BossPools[biome]
+	local list = {}
+	for _, kind in pool or {} do
+		if Config.Bosses[kind] then
+			table.insert(list, kind)
+		end
+	end
+	if #list == 0 then
 		return nil
 	end
 	arenas[biome] = { spot = spot, bounds = bounds }
-	local body, b = make(biome, spot * Vector3.new(1, 0, 1), 0)
+	local body, b = make(list[math.random(#list)], spot * Vector3.new(1, 0, 1), 0)
 	b.biome, b.bounds = biome, bounds
 	body:SetAttribute("Biome", biome)
 	body:SetAttribute("Asleep", true)
 	body.Parent = folder
 	return body
+end
+
+-- every arena's boss gone and a fresh one rolled in its place, asleep (the /reboss
+-- command); anyone in a fight goes free
+function Bosses.reroll()
+	for body, b in live do
+		if b.biome then
+			live[body] = nil
+			Combat.remove(body)
+			body:Destroy()
+			Bosses.defeated:Fire(b.biome)
+		end
+	end
+	for biome, arena in arenas do
+		Bosses.arena(biome, arena.spot, arena.bounds)
+	end
 end
 
 -- is this biome's boss there to fight (not dead and waiting to come back)?

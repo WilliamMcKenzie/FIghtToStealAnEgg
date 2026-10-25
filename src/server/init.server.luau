@@ -61,7 +61,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss -- (below)
+local requestBoss, reboss -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your slash's damage (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -69,7 +69,9 @@ local function joined(player)
 	player.CharacterAdded:Connect(ride)
 	-- (/boss typed in chat also works when the place uses the legacy chat)
 	player.Chatted:Connect(function(message)
-		if message:lower():match("^/boss") then
+		if message:lower():match("^/reboss") then
+			reboss(player)
+		elseif message:lower():match("^/boss") then
 			requestBoss(player)
 		end
 	end)
@@ -131,6 +133,42 @@ command.Triggered:Connect(function(source)
 		requestBoss(player)
 	end
 end)
+-- /reboss: every biome's boss re-rolled from its pool (QM, Oct 25). The game's owner, or
+-- anyone in a Studio playtest.
+local RunService = game:GetService("RunService")
+local function mayReboss(player)
+	if RunService:IsStudio() or player.UserId == game.CreatorId then
+		return true
+	end
+	if game.CreatorType == Enum.CreatorType.Group then
+		local ok, rank = pcall(player.GetRankInGroup, player, game.CreatorId)
+		return ok and rank == 255
+	end
+	return false
+end
+local lastReboss = 0
+function reboss(player)
+	if not mayReboss(player) or os.clock() - lastReboss < 2 then
+		return
+	end
+	lastReboss = os.clock()
+	Bosses.reroll()
+end
+local rebossCommand = Instance.new("TextChatCommand")
+rebossCommand.Name = "RebossCommand"
+rebossCommand.TriggerText = "/reboss"
+rebossCommand.Parent = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
+rebossCommand.Triggered:Connect(function(source)
+	local player = source and Players:GetPlayerByUserId(source.UserId)
+	if player then
+		reboss(player)
+	end
+end)
+local rebossRequest = Instance.new("RemoteEvent")
+rebossRequest.Name = "RebossRequest"
+rebossRequest.Parent = ReplicatedStorage
+rebossRequest.OnServerEvent:Connect(reboss)
+
 Players.PlayerRemoving:Connect(function(player)
 	last[player] = nil
 	lastBoss[player] = nil
