@@ -25,6 +25,7 @@ local Hatchery = require(script.Hatchery)
 local Map = require(script.Map)
 local Pens = require(script.Pens)
 local PetInventory = require(script.PetInventory)
+local Regen = require(script.Regen)
 local Regions = require(script.Regions)
 local Training = require(script.Training)
 
@@ -45,6 +46,7 @@ Hatchery.start() -- (stolen eggs in your hotbar, put down in your pen and hatche
 Eggs.start(map)
 Training.start(map)
 Regions.start()
+Regen.start() -- (healing after Config.Regen.Delay seconds without being hit)
 Data.start() -- (after Training: it loads over the grounds' defaults)
 Arsenal.start() -- (each player's weapon tool, and the spin when a boss dies)
 

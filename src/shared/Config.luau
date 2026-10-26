@@ -367,6 +367,13 @@ return {
 		Ice = { "ElderBoar" },
 		Lava = { "LavaWyrm" },
 	},
+	-- healing out of a fight (QM, Oct 26; Server/Regen): once you go Delay seconds without
+	-- taking damage you heal Rate of your max health a second until full; any hit restarts
+	-- the wait. (Replaces Roblox's default slow regen.)
+	Regen = {
+		Delay = 10,
+		Rate = 0.1, -- 10% of max health a second
+	},
 	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home and leaves
 	-- a boss arriving (QM, Oct 25: they only appear once you steal an egg): the camera of
 	-- everyone locked into its fight pans over to its dais, it pops up there while the screen's
