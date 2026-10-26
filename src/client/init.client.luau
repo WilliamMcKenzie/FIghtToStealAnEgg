@@ -1,7 +1,7 @@
 -- Your weapon (the sword to start; bosses drop more: client/WeaponSpin): it's always
 -- out, and it attacks by itself (QM, Oct 24, Archero-style). Melee weapons slash as
 -- below; Ranged and Magic ones shoot at the nearest target in their Range (client/Shots
--- draws the shots, the server runs them for the damage).
+-- draws the shots, the server runs them for the damage), but only while you stand still.
 -- While a boss (or a training mob or dummy) is within AimRange the torso turns toward it, eased (not snapped), and
 -- whenever one is within AttackRange and the cooldown allows, it slashes along that aim:
 -- the upper body swings the held sword (SwingPose) along the arc (SlashFx). It plays
@@ -17,6 +17,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared.Config)
 local Power = require(Shared.Power)
 local SlashFx = require(Shared.SlashFx)
 local SlashTuning = require(Shared.SlashTuning)
@@ -198,6 +199,11 @@ RunService.Heartbeat:Connect(function(dt)
 		return
 	end
 	if Weapons.get(id).Shot then
+		-- (Archero: bows and staffs hold fire while you're moving, and shoot as soon as you stop)
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if Config.Shots.StillOnly and humanoid and humanoid.MoveDirection.Magnitude > 0.1 then
+			return
+		end
 		-- (shots go straight at it, not along the eased aim)
 		local yaw = yawOf((inRange.Position - root.Position) * Vector3.new(1, 0, 1))
 		local interval = Weapons.cooldown(id, c) / Power.speed(player:GetAttribute("Strength"))
