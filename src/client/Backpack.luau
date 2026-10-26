@@ -3,13 +3,14 @@
 -- else you own in a grid below, duplicates stacked into one tile with "x5" top right and
 -- the odds of getting it ("1/57", in its rarity's colour) bottom right. Equipping one
 -- moves it up into the row (so its tile's count drops by one, and goes once none are
--- left). SORT switches between rarity and name; EQUIP BEST fills the row with the best.
+-- left). Sorted rarest first. (QM, Oct 26: on QM's plain tiled panel for now, no title,
+-- X, SORT or EQUIP BEST; Escape or the Backpack button closes it.)
 --
 --   Pets: the ones in the row wander in your pen (Config.Backpack.PenSlots of them).
 --         Click a pet below to put it in, one in the row to take it out (PetEquip,
---         Server/PetInventory). Best = the most cash a second.
+--         Server/PetInventory).
 --   Weapons: the row is the one you hold. Click another to hold it instead (EquipWeapon,
---         Server/Arsenal). Best = the rarest, then the most damage.
+--         Server/Arsenal).
 --
 -- Hovering a tile shows its name and details over the row.
 --
@@ -447,70 +448,6 @@ function Backpack.init()
 		[grid] = Ui.template(grid, "TileTemplate", tileTemplate(CELL.X)),
 	}
 	local emptyOne = Ui.template(row, "EmptyTemplate", emptyTemplate)
-
-	-- SORT and EQUIP BEST, on the panel's top edge beside the X
-	local function smallText(button, size)
-		local label = button:FindFirstChildOfClass("TextLabel")
-		label.TextSize = size
-		label:FindFirstChildOfClass("UIStroke").Thickness = 3
-	end
-	local sortButton, bestButton
-	sortButton, fresh = Popups.button(
-		holder,
-		{
-			Name = "Sort",
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -370, 0, 6),
-			Size = UDim2.fromOffset(250, 66),
-			ZIndex = 5,
-		},
-		"SORT: RARITY",
-		Popups.GREEN,
-		function()
-			sortBy = if sortBy == "Rarity" then "Name" else "Rarity"
-			sortButton:FindFirstChildOfClass("TextLabel").Text = "SORT: " .. string.upper(sortBy)
-			rebuild()
-		end
-	)
-	if fresh then
-		smallText(sortButton, 32)
-	end
-	bestButton, fresh = Popups.button(
-		holder,
-		{
-			Name = "EquipBest",
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -100, 0, 6),
-			Size = UDim2.fromOffset(250, 66),
-			ZIndex = 5,
-		},
-		"EQUIP BEST",
-		BLUE,
-		function()
-			if tab == "Pets" then
-				if petRemote then
-					petRemote:FireServer("best")
-				end
-			elseif weaponRemote then
-				-- (rarest first, then the most damage, whatever the grid's sorted by)
-				local list = TABS.Weapons.owned()
-				local t = TABS.Weapons
-				table.sort(list, function(a, b)
-					local ra, rb = RANK[t.rarity(a.id)] or 0, RANK[t.rarity(b.id)] or 0
-					if ra ~= rb then
-						return ra > rb
-					end
-					return t.score(a.id) > t.score(b.id)
-				end)
-				if list[1] then
-					weaponRemote:FireServer(list[1].id)
-				end
-			end
-		end
-	)
-	if fresh then
-		smallText(bestButton, 32)
-	end
 
 	-- the tabs, down the panel's left side
 	local tabButtons = {}

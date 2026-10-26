@@ -15,7 +15,7 @@
 --   Popups.toggle(name)                     -- "Shop", "Index", "Rebirth", "Backpack"
 --   Popups.frame(name, title, size, tiled) -> body, holder  -- another popup (client/Backpack),
 --                                  -- after init: its content goes in body; `tiled` gives it
---                                  -- QM's tiled beige panel instead of the dark one
+--                                  -- QM's plain tiled beige panel (no title or X) instead
 --
 -- They're real objects QM edits in Studio (StarterGui > Hud > Root > ShopPopup ...: see
 -- client/Ui). Every piece is made with a Name and only when it isn't there yet, and its
@@ -348,36 +348,39 @@ local function frame(name, title, size, tiled)
 		darkPanel(holder, { Name = "Panel", Size = UDim2.fromScale(1, 1) }, 0.8)
 	end
 
-	Popups.text(holder, {
-		Name = "Title",
-		Text = title,
-		TextSize = 76,
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.fromOffset(-24, 30),
-		Size = UDim2.fromOffset(700, 90),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		ZIndex = 3,
-	})
+	-- (QM's tiled panel is plain for now, Oct 26: no title or X; Escape still closes it)
+	if not tiled then
+		Popups.text(holder, {
+			Name = "Title",
+			Text = title,
+			TextSize = 76,
+			AnchorPoint = Vector2.new(0, 1),
+			Position = UDim2.fromOffset(-24, 30),
+			Size = UDim2.fromOffset(700, 90),
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 3,
+		})
 
-	local close
-	close, fresh = Ui.make(holder, "Close", "TextButton")
-	if fresh then
-		close.Text = ""
-		close.AutoButtonColor = false
-		close.BackgroundColor3 = WHITE
-		close.AnchorPoint = Vector2.new(0.5, 0.5)
-		close.Position = UDim2.new(1, -6, 0, 6)
-		close.Size = UDim2.fromOffset(84, 84)
-		close.ZIndex = 5
-		corner(close, 12)
-		outline(close, 6)
-		gradient(close, RED)
-	end
-	Popups.text(close, { Name = "X", Text = "X", TextSize = 64, Size = UDim2.fromScale(1, 1), ZIndex = 6 })
-	if Ui.live then
-		close.Activated:Connect(function()
-			Popups.close()
-		end)
+		local close
+		close, fresh = Ui.make(holder, "Close", "TextButton")
+		if fresh then
+			close.Text = ""
+			close.AutoButtonColor = false
+			close.BackgroundColor3 = WHITE
+			close.AnchorPoint = Vector2.new(0.5, 0.5)
+			close.Position = UDim2.new(1, -6, 0, 6)
+			close.Size = UDim2.fromOffset(84, 84)
+			close.ZIndex = 5
+			corner(close, 12)
+			outline(close, 6)
+			gradient(close, RED)
+		end
+		Popups.text(close, { Name = "X", Text = "X", TextSize = 64, Size = UDim2.fromScale(1, 1), ZIndex = 6 })
+		if Ui.live then
+			close.Activated:Connect(function()
+				Popups.close()
+			end)
+		end
 	end
 
 	-- (content goes in here, inset from the outline)

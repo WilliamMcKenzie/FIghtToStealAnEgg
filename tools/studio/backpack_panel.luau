@@ -1,10 +1,18 @@
--- One-off (QM, Oct 26): swaps the baked Backpack popup's dark Panel in StarterGui for the new
--- tiled one. Removes the old Panel; run uibake.luau after it to make the new one, then save.
-local popup = game:GetService("StarterGui"):FindFirstChild("Hud")
-popup = popup and popup:FindFirstChild("Root") and popup.Root:FindFirstChild("BackpackPopup")
-local panel = popup and popup:FindFirstChild("Panel")
-if not panel then
-	return "no StarterGui.Hud.Root.BackpackPopup.Panel"
+-- One-off (QM, Oct 26): makes the baked Backpack popup in StarterGui QM's plain tiled panel:
+-- removes its dark Panel, title, X, SORT and EQUIP BEST. Run uibake.luau after it to make
+-- the tiled Panel, then save the place.
+local root = game:GetService("StarterGui"):FindFirstChild("Hud")
+root = root and root:FindFirstChild("Root")
+local popup = root and root:FindFirstChild("BackpackPopup")
+if not popup then
+	return "no StarterGui.Hud.Root.BackpackPopup"
 end
-panel:Destroy()
-return "removed the old Backpack panel: now run uibake.luau"
+local gone = {}
+for _, name in { "Panel", "Title", "Close", "Sort", "EquipBest" } do
+	local child = popup:FindFirstChild(name)
+	if child then
+		child:Destroy()
+		table.insert(gone, name)
+	end
+end
+return "removed " .. table.concat(gone, ", ") .. ": now run uibake.luau"
