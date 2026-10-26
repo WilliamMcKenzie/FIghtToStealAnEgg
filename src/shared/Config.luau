@@ -627,7 +627,7 @@ return {
 	-- and the weapons bosses dropped you, duplicates stacked ("x5"). Pets you equip wander
 	-- in your pen, up to PenSlots of them; the weapon you equip is the one you hold.
 	Backpack = {
-		PenSlots = 4,
+		PenSlots = 5, -- (QM, Oct 26: the Backpack's Pets tab has five)
 	},
 
 	-- hatching (QM, Oct 25, LassoAPet's): a stolen egg is yours at once, in the hotbar right

@@ -74,6 +74,10 @@ local RADIAL = "rbxassetid://106131181340173" -- (rbxassetid of assets/ui/Radial
 local UNKNOWN = Color3.fromHex("C1A283")
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local TYPE_ORDER = { Melee = 1, Ranged = 2, Magic = 3 }
+-- the Pets tab (QM's mockup, Oct 26): your pen's slots along the top, a gap, then a row per
+-- rarity like the Items tab
+local PEN_GAP = 56 -- design px between the pen's slots and the rows
+local LAST_ONE = 0.5 -- how see-through a pet's square goes once your last one's in the pen
 
 local function rarityColors(rarity)
 	return Config.Rarities[rarity] or Config.Rarities.Common
@@ -485,6 +489,48 @@ local function weaponsByRarity()
 	return lists
 end
 
+-- every pet, by rarity: cheapest first, then by name
+local function petsByRarity()
+	local lists = {}
+	for kind, p in Config.Pets do
+		if type(p) == "table" and p.Rarity then
+			lists[p.Rarity] = lists[p.Rarity] or {}
+			table.insert(lists[p.Rarity], kind)
+		end
+	end
+	for _, list in lists do
+		table.sort(list, function(a, b)
+			local ca, cb = Config.Pets[a].Cash or 0, Config.Pets[b].Cash or 0
+			if ca ~= cb then
+				return ca < cb
+			end
+			return a < b
+		end)
+	end
+	return lists
+end
+
+-- a square (and everything on it) made `k` more see-through: a pet whose last one's in the pen
+local function fade(b, k)
+	for _, d in b:GetDescendants() do
+		if d:IsA("ImageLabel") or d:IsA("ImageButton") then
+			d.ImageTransparency = 1 - (1 - d.ImageTransparency) * (1 - k)
+		end
+		if d:IsA("TextLabel") then
+			d.TextTransparency = 1 - (1 - d.TextTransparency) * (1 - k)
+		end
+		if d:IsA("GuiObject") and d.BackgroundTransparency < 1 then
+			d.BackgroundTransparency = 1 - (1 - d.BackgroundTransparency) * (1 - k)
+		end
+		if d:IsA("UIStroke") then
+			d.Transparency = 1 - (1 - d.Transparency) * (1 - k)
+		end
+		if d:IsA("CanvasGroup") then
+			d.GroupTransparency = 1 - (1 - d.GroupTransparency) * (1 - k)
+		end
+	end
+end
+
 -- ---- the popup ------------------------------------------------------------------------
 
 function Backpack.init()
@@ -669,6 +715,78 @@ function Backpack.init()
 	end
 	local unknownOne = Ui.template(items, "UnknownTemplate", unknownTemplate)
 
+	-- the Pets tab: your pen's slots along the top (a "?" where one's empty), then a row per
+	-- rarity of every pet, owned ones filled in. (In Studio: Body > Pets > Rows > <rarity> >
+	-- OwnedTemplate and Rows > UnknownTemplate; the pen's slots are copied from those too.)
+	local pets
+	pets, fresh = Ui.make(body, "Pets", "Frame")
+	if fresh then
+		pets.BackgroundTransparency = 1
+		pets.Position = UDim2.fromOffset(0, -20)
+		pets.Size = UDim2.new(1, 0, 1, 10)
+	end
+	local pen
+	pen, fresh = Ui.make(pets, "Pen", "Frame")
+	if fresh then
+		pen.BackgroundTransparency = 1
+		pen.Position = UDim2.fromOffset(0, 16)
+		pen.Size = UDim2.new(1, 0, 0, ITEM)
+		local layout = Instance.new("UIListLayout")
+		layout.Name = "Layout"
+		layout.FillDirection = Enum.FillDirection.Horizontal
+		layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		layout.Padding = UDim.new(0, ITEM_GAP)
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Parent = pen
+	end
+	local petRowsFrame
+	petRowsFrame, fresh = Ui.make(pets, "Rows", "ScrollingFrame")
+	if fresh then
+		local top = 16 + ITEM + PEN_GAP - 16
+		petRowsFrame.BackgroundTransparency = 1
+		petRowsFrame.BorderSizePixel = 0
+		petRowsFrame.Position = UDim2.fromOffset(0, top)
+		petRowsFrame.Size = UDim2.new(1, 0, 1, -top)
+		petRowsFrame.CanvasSize = UDim2.new()
+		petRowsFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		petRowsFrame.ScrollingDirection = Enum.ScrollingDirection.Y
+		petRowsFrame.ScrollBarThickness = 8
+		petRowsFrame.ScrollBarImageColor3 = UNKNOWN
+		local pad = Instance.new("UIPadding")
+		pad.PaddingTop = UDim.new(0, 16)
+		pad.PaddingLeft = UDim.new(0, 16)
+		pad.PaddingBottom = UDim.new(0, 16)
+		pad.Parent = petRowsFrame
+		local layout = Instance.new("UIListLayout")
+		layout.Name = "Layout"
+		layout.Padding = UDim.new(0, ITEM_GAP)
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Parent = petRowsFrame
+	end
+	local petsBy = petsByRarity()
+	local petRows = {} -- { { rarity, row, template }, ... }
+	local petTemplates = {} -- [rarity] = its OwnedTemplate (the pen's slots use them too)
+	for i, rarity in RARITIES do
+		if petsBy[rarity] then
+			local r
+			r, fresh = Ui.make(petRowsFrame, rarity, "Frame")
+			if fresh then
+				r.BackgroundTransparency = 1
+				r.LayoutOrder = i
+				r.Size = UDim2.new(1, -24, 0, ITEM)
+				local layout = Instance.new("UIListLayout")
+				layout.Name = "Layout"
+				layout.FillDirection = Enum.FillDirection.Horizontal
+				layout.Padding = UDim.new(0, ITEM_GAP)
+				layout.SortOrder = Enum.SortOrder.LayoutOrder
+				layout.Parent = r
+			end
+			petTemplates[rarity] = Ui.template(r, "OwnedTemplate", ownedTemplate(rarity))
+			table.insert(petRows, { rarity, r, petTemplates[rarity] })
+		end
+	end
+	local petUnknown = Ui.template(petRowsFrame, "UnknownTemplate", unknownTemplate)
+
 	-- the selector, down the outside of the panel's left edge: the open one on a 20% black
 	-- square with rounded corners, the other faded to half
 	local tabButtons = {}
@@ -703,6 +821,7 @@ function Backpack.init()
 	if not Ui.live then
 		-- (in Studio: show the Items tab, as it opens)
 		items.Visible = true
+		pets.Visible = false
 		for _, part in petParts do
 			part.Visible = false
 		end
@@ -855,13 +974,128 @@ function Backpack.init()
 		end
 	end
 
+	-- a pet's square, wired up: grows a little on hover, squashes on press
+	local function pressable(b, onClick)
+		local scale = b:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", b)
+		b.MouseEnter:Connect(function()
+			tween(scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
+		end)
+		b.MouseLeave:Connect(function()
+			tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
+		end)
+		b.MouseButton1Down:Connect(function()
+			tween(scale, 0.06, { Scale = 0.92 })
+		end)
+		b.Activated:Connect(function()
+			tween(scale, 0.15, { Scale = 1.06 }, Enum.EasingStyle.Back)
+			onClick()
+		end)
+	end
+
+	local function petSquare(template, kind, parent, order, count, ring)
+		local b = Ui.copy(template, kind, parent)
+		b.LayoutOrder = order
+		local img = b:FindFirstChild("Icon")
+		if img then
+			icon(img, "Pets", kind)
+		end
+		local r = b:FindFirstChild("Ring")
+		if r then
+			r.Visible = ring
+		end
+		local c = b:FindFirstChild("Count")
+		if c then
+			c.Visible = count > 1
+			for _, label in c:GetDescendants() do
+				if label:IsA("TextLabel") then
+					label.Text = "x" .. count
+				end
+			end
+		end
+		return b
+	end
+
+	-- the Pets tab: click a pet below to put one in your pen, one in the pen to take it out
+	local function rebuildPets()
+		local holders = { pen }
+		for _, entry in petRows do
+			table.insert(holders, entry[2])
+		end
+		for _, f in holders do
+			for _, child in f:GetChildren() do
+				if child:IsA("GuiObject") and not Ui.isTemplate(child) then
+					child:Destroy()
+				end
+			end
+		end
+		local owned = {}
+		for _, s in TABS.Pets.owned() do
+			owned[s.id] = s.n
+		end
+		local equipped = TABS.Pets.equipped()
+		local inPen = {}
+		for _, kind in equipped do
+			inPen[kind] = (inPen[kind] or 0) + 1
+		end
+		-- the pen's slots
+		for i = 1, TABS.Pets.slots() do
+			local kind = equipped[i]
+			if kind then
+				local template = petTemplates[TABS.Pets.rarity(kind)] or petRows[1][3]
+				local b = petSquare(template, kind, pen, i, 1, true)
+				pressable(b, function()
+					if petRemote then
+						petRemote:FireServer("unequip", i)
+					end
+				end)
+			else
+				Ui.copy(petUnknown, "Empty" .. i, pen).LayoutOrder = i
+			end
+		end
+		-- the rows: what's left of each once the pen's are taken out; your last one in the pen
+		-- just goes see-through (not a "?": you have it)
+		for _, entry in petRows do
+			local rarity, r, template = entry[1], entry[2], entry[3]
+			for i, kind in petsBy[rarity] do
+				local have = owned[kind] or 0
+				if have == 0 then
+					Ui.copy(petUnknown, kind, r).LayoutOrder = i
+					continue
+				end
+				local left = have - (inPen[kind] or 0)
+				local b = petSquare(template, kind, r, i, left, false)
+				if left <= 0 then
+					fade(b, LAST_ONE)
+					pressable(b, function()
+						-- (takes it back out of the pen)
+						local at = table.find(TABS.Pets.equipped(), kind)
+						if at and petRemote then
+							petRemote:FireServer("unequip", at)
+						end
+					end)
+				else
+					pressable(b, function()
+						if #TABS.Pets.equipped() < TABS.Pets.slots() and petRemote then
+							petRemote:FireServer("equip", kind)
+						end
+					end)
+				end
+			end
+		end
+	end
+
 	function rebuild()
 		items.Visible = tab == "Weapons"
+		pets.Visible = tab == "Pets"
 		for _, part in petParts do
-			part.Visible = tab == "Pets"
+			part.Visible = false -- (the old Pets tab, before QM's rows)
 		end
 		if tab == "Weapons" then
 			rebuildItems()
+			return
+		end
+		if tab == "Pets" then
+			rebuildPets()
 			return
 		end
 		local t = TABS[tab]
@@ -930,6 +1164,7 @@ function Backpack.init()
 		end
 		grid.CanvasPosition = Vector2.zero
 		items.CanvasPosition = Vector2.zero
+		petRowsFrame.CanvasPosition = Vector2.zero
 		rebuild()
 	end
 	for name, b in tabButtons do
