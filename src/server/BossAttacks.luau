@@ -2,8 +2,9 @@
 -- RotMG-style "bombs" with floor indicators, then all of it). Each boss's Attacks in
 -- Config.Bosses is a list of these, each on its own timer:
 --
---   Contact { Every, Reach, Damage }: everyone in the fight within Reach studs of its edge
---         takes Damage, at most every Every seconds (QM, Oct 24: all bosses, for now).
+--   Contact { Every, Reach, Damage, Gentle }: everyone in the fight within Reach studs of
+--         its edge takes Damage, at most every Every seconds (QM, Oct 24: all bosses, for
+--         now). Gentle ones never take anyone below 1 health (the training mobs).
 --   Slam  { Every, Range, Radius, Windup, Damage }: when a fighter is within Range, it
 --         stops, a red circle grows in front of it for Windup seconds, then everything
 --         inside takes Damage. Step out of the circle.
@@ -19,6 +20,8 @@
 -- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
+--         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too)
+--   BossAttacks.fighter(player) -> { root, humanoid, extra } or nil, if they're alive
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -40,18 +43,28 @@ local FLOOR_Y = 0.15
 
 local shots = {} -- [part] = { dir, speed, travelled, range, damage, radius, biome }
 
+-- a living player's root, humanoid and extra: how much further their pet's hitbox reaches
+-- than the Horse's
+local function fighter(player)
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if root and humanoid and humanoid.Health > 0 then
+		local extra = Pets.stats(player:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
+		return { root = root, humanoid = humanoid, extra = extra }
+	end
+	return nil
+end
+BossAttacks.fighter = fighter
+
 -- every living root of a player in this biome's fight
 local function fighters(biome)
 	local out = {}
 	for _, player in Players:GetPlayers() do
 		if player:GetAttribute("LockedIn") == biome then
-			local character = player.Character
-			local root = character and character:FindFirstChild("HumanoidRootPart")
-			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-			if root and humanoid and humanoid.Health > 0 then
-				-- extra: how much further its pet's hitbox reaches than the Horse's
-				local extra = Pets.stats(player:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
-				table.insert(out, { root = root, humanoid = humanoid, extra = extra })
+			local f = fighter(player)
+			if f then
+				table.insert(out, f)
 			end
 		end
 	end
@@ -176,7 +189,10 @@ function BossAttacks.update(body, b, dt, list)
 			local hit = false
 			for _, f in list do
 				if flat(f.root.Position - pos).Magnitude - b.c.Radius - f.extra <= a.Reach then
-					f.humanoid:TakeDamage(a.Damage)
+					local damage = if a.Gentle then math.min(a.Damage, f.humanoid.Health - 1) else a.Damage
+					if damage > 0 then
+						f.humanoid:TakeDamage(damage)
+					end
 					hit = true
 				end
 			end

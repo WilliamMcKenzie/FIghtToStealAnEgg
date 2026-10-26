@@ -9,7 +9,11 @@
 --
 -- Mobs are invisible bodies in workspace.Mobs (attributes Model, ModelSize, Tint, Name,
 -- Health, MaxHealth, Radius, Ground), drawn by client/BossView.luau like the bosses.
--- They amble about their yard; one that falls is back Respawn seconds later.
+-- They amble about their yard; one that falls is back Respawn seconds later. Hit one and
+-- it fights back (QM, Oct 26): it follows whoever last hit it round its yard and bites
+-- with its Attacks (Config.Training.Grounds, run by Server/BossAttacks like a boss's),
+-- gently, so it never kills you, until you leave the yard, die, or stop hitting it for
+-- Config.Training.Calm seconds.
 --
 --   Training.start(map)   -- once, after Map.ensure()
 
@@ -20,6 +24,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local MapData = require(ReplicatedStorage.Shared.MapData)
 local Combat = require(script.Parent.Combat)
+local BossAttacks = require(script.Parent.BossAttacks)
 
 local Training = {}
 
@@ -27,7 +32,7 @@ local folder = Instance.new("Folder")
 folder.Name = "Mobs"
 folder.Parent = workspace
 
-local mobs = {} -- [body] = { ground, x, z, half, goal, wait, yaw, settings }
+local mobs = {} -- [body] = { ground, x, z, half, goal, wait, yaw, g, rng, radius, target, angry, b }
 
 function Training.unlocked(player, name)
 	local g = Config.Training.Grounds[name]
@@ -54,12 +59,28 @@ local function spawnMob(name, x, z, half)
 	body:SetAttribute("MaxHealth", g.Health)
 	body:SetAttribute("Radius", radius)
 	body:SetAttribute("Ground", name)
-	mobs[body] = { ground = name, x = x, z = z, half = half, wait = rng:NextNumber(0, 2), yaw = yaw, g = g, rng = rng }
+	local m = {
+		ground = name,
+		x = x,
+		z = z,
+		half = half,
+		wait = rng:NextNumber(0, 2),
+		yaw = yaw,
+		g = g,
+		rng = rng,
+		radius = radius,
+		b = { c = { Attacks = g.Attacks, Radius = radius } }, -- (for BossAttacks.update)
+	}
+	mobs[body] = m
 	Combat.add(body, function(player, damage)
 		if not mobs[body] or not Training.unlocked(player, name) then
 			return
 		end
 		Combat.train(player, damage, g.Strength)
+		-- (it turns on whoever hit it last)
+		if g.Attacks then
+			m.target, m.angry = player, Config.Training.Calm
+		end
 		local health = math.max(0, body:GetAttribute("Health") - damage)
 		body:SetAttribute("Health", health)
 		if health <= 0 then
@@ -154,6 +175,34 @@ function Training.start(map)
 
 	RunService.Heartbeat:Connect(function(dt)
 		for body, m in mobs do
+			-- angry: after whoever hit it, while they're alive, near its yard and still hitting
+			if m.target then
+				m.angry -= dt
+				local f = m.target.Parent and BossAttacks.fighter(m.target)
+				local away = f and math.max(math.abs(f.root.Position.X - m.x), math.abs(f.root.Position.Z - m.z))
+				if not f or m.angry <= 0 or away > m.half + 12 then
+					m.target, m.goal, m.wait = nil, nil, m.rng:NextNumber(1, 3)
+					m.b.timers, m.b.still = nil, nil
+				else
+					local hold = BossAttacks.update(body, m.b, dt, { f })
+					local pos = body.Position
+					local offset = (f.root.Position - pos) * Vector3.new(1, 0, 1)
+					local gap = offset.Magnitude - m.radius - f.extra - 1
+					local want = math.atan2(-offset.X, -offset.Z)
+					m.yaw += ((want - m.yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * 6))
+					if not hold and gap > 0 then
+						pos += offset.Unit * math.min(m.g.Speed * Config.Training.Chase * dt, gap)
+					end
+					-- (it stays in its yard)
+					pos = Vector3.new(
+						math.clamp(pos.X, m.x - m.half, m.x + m.half),
+						pos.Y,
+						math.clamp(pos.Z, m.z - m.half, m.z + m.half)
+					)
+					body.CFrame = CFrame.new(pos) * CFrame.Angles(0, m.yaw, 0)
+					continue
+				end
+			end
 			if m.wait > 0 then
 				m.wait -= dt
 				continue

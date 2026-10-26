@@ -742,11 +742,26 @@ return {
 	--   Tundra   0.1       0.5      4        28 min
 	--   Lava     -         0.2      1.2      9 min
 	-- A mob's Health is about 6 Kendo Stick hits for the Strength you'd have arriving there.
+	-- Mobs fight back (QM, Oct 26): hit one and it turns on you, follows you round its yard
+	-- at Chase x its Speed and bites with its Attacks (Server/BossAttacks' Contact, like
+	-- the bosses), until you've left its yard, died, or not hit it for Calm seconds. Gentle
+	-- hits never take you below 1 health, so standing AFK is safe (set Gentle = false on an
+	-- attack to let it kill); Roblox's regen (1% of your health a second) wins against one
+	-- mob, not a crowd.
 	Training = {
 		PerDamage = 0.1, -- (at 0 Strength a Kendo Stick hit deals 10: Strength 2 trains 2, as before)
 		Grounds = {
 			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
-			Meadow = { Cost = 300, Mob = "Pig", Size = 0.55, Health = 180, Count = 4, Strength = 2, Speed = 4 },
+			Meadow = {
+				Cost = 300,
+				Mob = "Pig",
+				Size = 0.55,
+				Health = 180,
+				Count = 4,
+				Strength = 2,
+				Speed = 4,
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 3, Gentle = true } },
+			},
 			Desert = {
 				Cost = 4000,
 				Mob = "KingCrab",
@@ -757,11 +772,32 @@ return {
 				Count = 5,
 				Strength = 5,
 				Speed = 2.5,
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 5, Gentle = true } },
 			},
-			Ice = { Cost = 40000, Mob = "Penguin", Size = 0.6, Health = 350, Count = 4, Strength = 15, Speed = 3 },
-			Lava = { Cost = 400000, Mob = "RockHog", Size = 0.5, Health = 430, Count = 4, Strength = 45, Speed = 3.5 },
+			Ice = {
+				Cost = 40000,
+				Mob = "Penguin",
+				Size = 0.6,
+				Health = 350,
+				Count = 4,
+				Strength = 15,
+				Speed = 3,
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 8, Gentle = true } },
+			},
+			Lava = {
+				Cost = 400000,
+				Mob = "RockHog",
+				Size = 0.5,
+				Health = 430,
+				Count = 4,
+				Strength = 45,
+				Speed = 3.5,
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 12, Gentle = true } },
+			},
 		},
 		Respawn = 4,
+		Chase = 2.5, -- an angry mob moves this many times its Speed
+		Calm = 8, -- seconds without being hit before it forgets you
 		MobRadius = 2.5, -- a mob's body half-width (hits and reach)
 	},
 
