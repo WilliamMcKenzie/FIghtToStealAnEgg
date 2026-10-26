@@ -28,6 +28,7 @@ local Hotbar = {}
 
 local player = Players.LocalPlayer
 local SLOT = 96
+local EGG_FILL = 0.95 -- of the slot the egg fills (QM, Oct 26: as big as LassoAPet's; was 0.72)
 local PANEL = "rbxassetid://118593193834683" -- LassoAPet's InventoryBG (assets/ui/InventoryBG.png: grey, dark border)
 local PANEL_SIZE = 96
 local PANEL_CORNER = 18 / 96 -- (its corners' radius, of its width)
@@ -115,8 +116,8 @@ local function slotTemplate()
 	img.Image = PetIcons.Eggs.Bunny or ""
 	img.ScaleType = Enum.ScaleType.Fit
 	img.AnchorPoint = Vector2.new(0.5, 0.5)
-	img.Position = UDim2.fromScale(0.5, 0.54)
-	img.Size = UDim2.fromScale(0.72, 0.72)
+	img.Position = UDim2.fromScale(0.5, 0.5)
+	img.Size = UDim2.fromScale(EGG_FILL, EGG_FILL)
 	img.ZIndex = 2
 	img.Parent = b
 	local number = Popups.text(b, {
