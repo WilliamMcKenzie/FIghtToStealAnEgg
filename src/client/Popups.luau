@@ -16,7 +16,7 @@
 --   Popups.frame(name, title, size, tiled) -> body, holder  -- another popup (client/Backpack),
 --                                  -- after init: its content goes in body; `tiled` gives it
 --                                  -- QM's plain tiled beige panel (no title or X) instead
---   Popups.fitScreen(name, left)          -- that popup fills the screen's height as it opens
+--   Popups.grow(name, scale, left)        -- that popup opens `scale` times its size
 --
 -- They're real objects QM edits in Studio (StarterGui > Hud > Root > ShopPopup ...: see
 -- client/Ui). Every piece is made with a Name and only when it isn't there yet, and its
@@ -54,8 +54,6 @@ local BLUR = 14
 -- it (the game fades to what they're set to as a popup opens)
 local HAZE = { Brightness = 0.06, Contrast = -0.15, Saturation = -0.35 }
 local NO_HAZE = { Brightness = 0, Contrast = 0, Saturation = 0 }
-local DESIGN_HEIGHT = 1080 -- (Hud's: the root's design pixels)
-local FIT_MARGIN = 16 -- screen px a screen-filling popup keeps clear top and bottom (1rem)
 local ICONS = { -- (the HUD counters' art, cropped to the icon)
 	Power = "rbxassetid://108359754385647",
 	Cash = "rbxassetid://83332868999001",
@@ -413,22 +411,14 @@ Popups.frame = function(name, title, size, tiled)
 end
 Popups.darkPanel = darkPanel
 
--- makes a popup grow, as it opens, to fill the screen's height bar FIT_MARGIN top and bottom
--- (QM: the Backpack), or its width if that runs out first; `left` is how many design px of it
--- stick out past the panel's left edge (the Backpack's Items / Pets buttons), so the lot is
--- centred
-function Popups.fitScreen(name, left)
+-- makes a popup open `scale` times its size (QM: the Backpack, 1.3x); `left` is how many design
+-- px of it stick out past the panel's left edge (the Backpack's Items / Pets buttons), so the
+-- lot stays centred
+function Popups.grow(name, scale, left)
 	local p = popups[name]
 	p.fit = function()
-		local view = workspace.CurrentCamera.ViewportSize
-		local margin = FIT_MARGIN * DESIGN_HEIGHT / view.Y
-		local width = view.X * DESIGN_HEIGHT / view.Y
-		local size = p.holder.Size
-		local outline = 12 -- (the panel's outline, outside it)
-		local w, h = size.X.Offset + left + outline, size.Y.Offset + outline
-		local k = math.min((DESIGN_HEIGHT - 2 * margin) / h, (width - 2 * margin) / w)
-		p.holder.Position = UDim2.new(0.5, left / 2 * k, 0.5, 0)
-		return k
+		p.holder.Position = UDim2.new(0.5, left / 2 * scale, 0.5, 0)
+		return scale
 	end
 end
 
