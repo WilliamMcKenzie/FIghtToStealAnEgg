@@ -299,7 +299,7 @@ end
 -- QM's tiled panel (Oct 26, for the Backpack): the beige checker texture (assets/ui/TileBG.png,
 -- two squares a side) repeated over it, rounded, with a C1A283 outline. Until the texture's
 -- uploaded it's plain beige.
-local TILE_PANEL = "" -- (rbxassetid of assets/ui/TileBG.png)
+local TILE_PANEL = "rbxassetid://82411896099201" -- (rbxassetid of assets/ui/TileBG.png)
 local TILE = 80 -- design px of one repeat (two checker squares)
 local function tiledPanel(parent, props)
 	local img, fresh = make(parent, "ImageLabel", props)
