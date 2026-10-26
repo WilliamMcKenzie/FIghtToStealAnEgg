@@ -213,6 +213,7 @@ function reboss(player)
 	end
 	lastReboss = os.clock()
 	Bosses.reroll()
+	Eggs.refill()
 end
 local rebossCommand = Instance.new("TextChatCommand")
 rebossCommand.Name = "RebossCommand"
