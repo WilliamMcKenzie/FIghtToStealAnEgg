@@ -26,6 +26,7 @@ local Riding = require(script.Riding)
 local Shots = require(script.Shots)
 local SlashCam = require(script.SlashCam)
 local SwingPose = require(script.SwingPose)
+local TargetRing = require(script.TargetRing)
 require(script.BossView)
 require(script.BossIntro)
 require(script.EggView)
@@ -175,6 +176,7 @@ RunService.Heartbeat:Connect(function(dt)
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	if not root then
+		TargetRing.set(nil)
 		return
 	end
 	local tool = character:FindFirstChildOfClass("Tool")
@@ -183,6 +185,7 @@ RunService.Heartbeat:Connect(function(dt)
 	local range = if id then Weapons.range(id, c) else c.AttackRange
 	local facing = yawOf(root.CFrame.LookVector)
 	local target = nearestBoss(root, math.max(c.AimRange, range + 8))
+	TargetRing.set(target) -- (the red ring under what you're aiming at)
 	local want = if target then yawOf((target.Position - root.Position) * Vector3.new(1, 0, 1)) else facing
 	aimYaw = want
 	SwingPose.aim(character, math.clamp(wrap(aimYaw - facing), -math.rad(c.AimTwist), math.rad(c.AimTwist)))
