@@ -39,7 +39,6 @@ local Backpack = {}
 local player = Players.LocalPlayer
 local WHITE = Color3.new(1, 1, 1)
 local SOFT = Color3.fromRGB(200, 200, 212)
-local BLUE = Color3.fromRGB(64, 150, 255)
 local RED_TEXT = Color3.fromRGB(255, 110, 110)
 local RANK = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5, Mythic = 6 }
 local SIZE = Vector2.new(1180, 780)
@@ -51,6 +50,25 @@ local ROW_Y = 84
 local LINE_Y = ROW_Y + SLOT + 26
 local GRID_Y = LINE_Y + 18
 local SIDE = 28 -- (margin either side of the row's line and the grid)
+-- the Items tab (QM's mockup, Oct 26): a row per rarity holding every weapon of it
+local ITEM = 118 -- design px of an item's square
+local ITEM_GAP = 26
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic" }
+-- each rarity's square: a radial gradient (lighter middle, darker edge) with a lighter outline.
+-- (These only colour the templates when they're first made: after that, StarterGui > Hud >
+-- Root > BackpackPopup > Body > Items > <rarity> > OwnedTemplate is what to edit.)
+local ITEM_COLORS = {
+	Common = Color3.fromRGB(150, 156, 168),
+	Uncommon = Color3.fromRGB(70, 180, 60),
+	Rare = Color3.fromRGB(36, 104, 214),
+	Epic = Color3.fromRGB(128, 38, 220),
+	Legendary = Color3.fromRGB(232, 176, 44),
+	Mythic = Color3.fromRGB(226, 48, 92),
+}
+local RADIAL = "" -- (rbxassetid of assets/ui/RadialGlow.png: white in the middle fading out)
+local UNKNOWN = Color3.fromHex("C1A283")
+local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local TYPE_ORDER = { Melee = 1, Ranged = 2, Magic = 3 }
 
 local function rarityColors(rarity)
 	return Config.Rarities[rarity] or Config.Rarities.Common
@@ -314,11 +332,159 @@ local function emptyTemplate()
 	return s
 end
 
+-- ---- the Items tab's squares ----------------------------------------------------------
+
+local function rounded(parent, r)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, r)
+	c.Parent = parent
+end
+
+-- a weapon you own: its rarity's radial square, its icon, "x5" when there's more than one,
+-- and a white ring round the one you hold (Ring, shown by the game)
+local function ownedTemplate(rarity)
+	return function()
+		local base = ITEM_COLORS[rarity] or ITEM_COLORS.Common
+		local b = Instance.new("TextButton")
+		b.Text = ""
+		b.AutoButtonColor = false
+		b.BackgroundTransparency = 1
+		b.Size = UDim2.fromOffset(ITEM, ITEM)
+		local scale = Instance.new("UIScale")
+		scale.Name = "Hover"
+		scale.Parent = b
+		-- (the white ring: a wider stroke under the square's own, so it shows just outside it)
+		local ring = Instance.new("Frame")
+		ring.Name = "Ring"
+		ring.BackgroundTransparency = 1
+		ring.Size = UDim2.fromScale(1, 1)
+		ring.ZIndex = 1
+		rounded(ring, 8)
+		local white = Instance.new("UIStroke")
+		white.Color = WHITE
+		white.Thickness = 8
+		white.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		white.Parent = ring
+		ring.Parent = b
+		local panel = Instance.new("Frame")
+		panel.Name = "Panel"
+		panel.BackgroundColor3 = if RADIAL ~= "" then base:Lerp(Color3.new(0, 0, 0), 0.3) else base
+		panel.BorderSizePixel = 0
+		panel.Size = UDim2.fromScale(1, 1)
+		panel.ZIndex = 2
+		rounded(panel, 6)
+		local outline = Instance.new("UIStroke")
+		outline.Name = "Outline"
+		outline.Color = base:Lerp(WHITE, 0.45)
+		outline.Thickness = 3
+		outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		outline.Parent = panel
+		local glow = Instance.new("ImageLabel")
+		glow.Name = "Glow"
+		glow.BackgroundTransparency = 1
+		glow.Image = RADIAL
+		glow.ImageColor3 = base:Lerp(WHITE, 0.3)
+		glow.Size = UDim2.fromScale(1, 1)
+		glow.ZIndex = 2
+		rounded(glow, 6)
+		glow.Parent = panel
+		panel.Parent = b
+		iconLabel(b, {
+			Image = WeaponIcons.Shortsword or "",
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(0.82, 0.82),
+			ZIndex = 3,
+		})
+		-- "x5" over the top right corner: white, black outline, a hard 25% black shadow
+		local count = Instance.new("Frame")
+		count.Name = "Count"
+		count.BackgroundTransparency = 1
+		count.AnchorPoint = Vector2.new(1, 0)
+		count.Position = UDim2.new(1, 10, 0, -12)
+		count.Size = UDim2.fromOffset(80, 40)
+		count.ZIndex = 4
+		local function label(parent, color, z)
+			local t = Instance.new("TextLabel")
+			t.Name = "Label"
+			t.BackgroundTransparency = 1
+			t.FontFace = FONT
+			t.Text = "x5"
+			t.TextSize = 32
+			t.TextColor3 = color
+			t.TextXAlignment = Enum.TextXAlignment.Right
+			t.Size = UDim2.fromScale(1, 1)
+			t.ZIndex = z
+			local stroke = Instance.new("UIStroke")
+			stroke.Color = Color3.new(0, 0, 0)
+			stroke.Thickness = 3
+			stroke.LineJoinMode = Enum.LineJoinMode.Round
+			stroke.Parent = t
+			t.Parent = parent
+			return t
+		end
+		local shadow = Instance.new("CanvasGroup") -- (one see-through layer, so it's an even 25%)
+		shadow.Name = "Shadow"
+		shadow.BackgroundTransparency = 1
+		shadow.GroupTransparency = 0.75
+		shadow.Position = UDim2.fromOffset(3, 3)
+		shadow.Size = UDim2.fromScale(1, 1)
+		shadow.ZIndex = 4
+		label(shadow, Color3.new(0, 0, 0), 4)
+		shadow.Parent = count
+		label(count, WHITE, 5)
+		count.Parent = b
+		return b
+	end
+end
+
+-- a weapon you haven't found yet: a see-through C1A283 square with a faint "?"
+local function unknownTemplate()
+	local f = Instance.new("Frame")
+	f.BackgroundColor3 = UNKNOWN
+	f.BackgroundTransparency = 0.5
+	f.BorderSizePixel = 0
+	f.Size = UDim2.fromOffset(ITEM, ITEM)
+	rounded(f, 6)
+	local mark = Instance.new("TextLabel")
+	mark.Name = "Mark"
+	mark.BackgroundTransparency = 1
+	mark.FontFace = FONT
+	mark.Text = "?"
+	mark.TextSize = 64
+	mark.TextColor3 = WHITE
+	mark.TextTransparency = 0.5
+	mark.Size = UDim2.fromScale(1, 1)
+	mark.Parent = f
+	return f
+end
+
+-- every weapon, by rarity: melee, then ranged, then magic, each by name
+local function weaponsByRarity()
+	local lists = {}
+	for id, w in Config.Weapons do
+		if type(w) == "table" and w.Rarity and Weapons.exists(id) then
+			lists[w.Rarity] = lists[w.Rarity] or {}
+			table.insert(lists[w.Rarity], id)
+		end
+	end
+	for _, list in lists do
+		table.sort(list, function(a, b)
+			local wa, wb = Config.Weapons[a], Config.Weapons[b]
+			local ta, tb = TYPE_ORDER[wa.Type] or 9, TYPE_ORDER[wb.Type] or 9
+			if ta ~= tb then
+				return ta < tb
+			end
+			return (wa.Name or a) < (wb.Name or b)
+		end)
+	end
+	return lists
+end
+
 -- ---- the popup ------------------------------------------------------------------------
 
 function Backpack.init()
 	local body, holder = Popups.frame("Backpack", "Backpack", SIZE, true) -- (QM's tiled panel, Oct 26)
-	local tab = "Pets"
+	local tab = "Weapons" -- (Items first, QM's mockup)
 	local sortBy = "Rarity"
 	local flashUntil = 0
 	local rebuild -- (below)
@@ -449,53 +615,90 @@ function Backpack.init()
 	}
 	local emptyOne = Ui.template(row, "EmptyTemplate", emptyTemplate)
 
-	-- the tabs, down the panel's left side
+	local petParts = { header, dashes[-1], dashes[1], row, line, grid, emptyNote } -- (the Pets tab's)
+
+	-- the Items tab: a row per rarity, every weapon in it, owned ones filled in
+	local items
+	items, fresh = Ui.make(body, "Items", "ScrollingFrame")
+	if fresh then
+		items.BackgroundTransparency = 1
+		items.BorderSizePixel = 0
+		items.Position = UDim2.fromOffset(0, -20)
+		items.Size = UDim2.new(1, 0, 1, 10)
+		items.CanvasSize = UDim2.new()
+		items.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		items.ScrollingDirection = Enum.ScrollingDirection.Y
+		items.ScrollBarThickness = 8
+		items.ScrollBarImageColor3 = UNKNOWN
+		local pad = Instance.new("UIPadding")
+		pad.PaddingTop = UDim.new(0, 16)
+		pad.PaddingLeft = UDim.new(0, 16)
+		pad.PaddingBottom = UDim.new(0, 16)
+		pad.Parent = items
+		local layout = Instance.new("UIListLayout")
+		layout.Name = "Layout"
+		layout.Padding = UDim.new(0, ITEM_GAP)
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Parent = items
+	end
+	local byRarity = weaponsByRarity()
+	local itemRows = {} -- { { rarity, row, template }, ... }
+	for i, rarity in RARITIES do
+		if byRarity[rarity] then
+			local r
+			r, fresh = Ui.make(items, rarity, "Frame")
+			if fresh then
+				r.BackgroundTransparency = 1
+				r.LayoutOrder = i
+				r.Size = UDim2.new(1, -24, 0, ITEM)
+				local layout = Instance.new("UIListLayout")
+				layout.Name = "Layout"
+				layout.FillDirection = Enum.FillDirection.Horizontal
+				layout.Padding = UDim.new(0, ITEM_GAP)
+				layout.SortOrder = Enum.SortOrder.LayoutOrder
+				layout.Parent = r
+			end
+			table.insert(itemRows, { rarity, r, Ui.template(r, "OwnedTemplate", ownedTemplate(rarity)) })
+		end
+	end
+	local unknownOne = Ui.template(items, "UnknownTemplate", unknownTemplate)
+
+	-- the selector, down the outside of the panel's left edge: the open one on a 20% black
+	-- square with rounded corners, the other faded to half
 	local tabButtons = {}
-	for i, name in { "Pets", "Weapons" } do
+	for i, name in { "Weapons", "Pets" } do
 		local b
-		b, fresh = Ui.make(holder, name .. "Tab", "TextButton")
+		b, fresh = Ui.make(holder, if name == "Weapons" then "ItemsTab" else "PetsTab", "TextButton")
 		if fresh then
 			b.Text = ""
 			b.AutoButtonColor = false
-			b.BackgroundTransparency = 1
+			b.BackgroundColor3 = Color3.new(0, 0, 0)
+			b.BackgroundTransparency = if i == 1 then 0.8 else 1
+			b.BorderSizePixel = 0
 			b.AnchorPoint = Vector2.new(1, 0)
-			b.Position = UDim2.new(0, -14, 0, 130 + (i - 1) * 160)
-			b.Size = UDim2.fromOffset(140, 140)
+			b.Position = UDim2.new(0, -24, 0, 150 + (i - 1) * 176)
+			b.Size = UDim2.fromOffset(160, 160)
 			b.ZIndex = 4
+			rounded(b, 10)
 		end
 		local scale = Ui.make(b, "Hover", "UIScale")
-		local card = Popups.card(b, { Name = "Card", Size = UDim2.fromScale(1, 1), Active = false })
-		local ring -- (the selected tab's white outline)
-		ring, fresh = Ui.make(b, "Ring", "Frame")
-		if fresh then
-			ring.BackgroundTransparency = 1
-			ring.Size = UDim2.fromScale(1, 1)
-			local rc = Instance.new("UICorner")
-			rc.CornerRadius = UDim.new(0, 14)
-			rc.Parent = ring
-		end
-		local stroke
-		stroke, fresh = Ui.make(ring, "Selected", "UIStroke")
-		if fresh then
-			stroke.Color = WHITE
-			stroke.Thickness = 4
-		end
-		local art = iconLabel(b, { Position = UDim2.fromScale(0.5, 0.42), Size = UDim2.fromScale(0.72, 0.72) })
-		if art.Image == "" then
-			icon(art, name, if name == "Pets" then "Horse" else "Shortsword")
-		end
-		local label = Popups.text(b, {
-			Name = "Label",
-			Text = name,
-			TextSize = 28,
-			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(0.5, 0, 1, -4),
-			Size = UDim2.new(1, 0, 0, 34),
-			ZIndex = 3,
+		local art = iconLabel(b, {
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(0.8, 0.8),
+			ZIndex = 5,
+			ImageTransparency = if i == 1 then 0 else 0.5,
 		})
-		tabButtons[name] = { button = b, scale = scale, card = card, stroke = stroke, label = label }
+		if art.Image == "" then
+			icon(art, name, if name == "Pets" then "Horse" else "Club")
+		end
+		tabButtons[name] = { button = b, scale = scale, art = art }
 	end
 	if not Ui.live then
+		-- (in Studio: show the Items tab, as it opens)
+		items.Visible = true
+		for _, part in petParts do
+			part.Visible = false
+		end
 		return
 	end
 
@@ -588,7 +791,72 @@ function Backpack.init()
 		return list
 	end
 
+	local function rebuildItems()
+		local owned = {}
+		for _, s in TABS.Weapons.owned() do
+			owned[s.id] = s.n
+		end
+		local held = TABS.Weapons.equipped()[1]
+		for _, entry in itemRows do
+			local rarity, r, template = entry[1], entry[2], entry[3]
+			for _, child in r:GetChildren() do
+				if child:IsA("GuiObject") and not Ui.isTemplate(child) then
+					child:Destroy()
+				end
+			end
+			for i, id in byRarity[rarity] do
+				if not owned[id] then
+					Ui.copy(unknownOne, id, r).LayoutOrder = i
+					continue
+				end
+				local b = Ui.copy(template, id, r)
+				b.LayoutOrder = i
+				local img = b:FindFirstChild("Icon")
+				if img then
+					icon(img, "Weapons", id)
+				end
+				local ring = b:FindFirstChild("Ring")
+				if ring then
+					ring.Visible = id == held
+				end
+				local count = b:FindFirstChild("Count")
+				if count then
+					count.Visible = owned[id] > 1
+					for _, label in count:GetDescendants() do
+						if label:IsA("TextLabel") then
+							label.Text = "x" .. owned[id]
+						end
+					end
+				end
+				local scale = b:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", b)
+				b.MouseEnter:Connect(function()
+					tween(scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
+				end)
+				b.MouseLeave:Connect(function()
+					tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
+				end)
+				b.MouseButton1Down:Connect(function()
+					tween(scale, 0.06, { Scale = 0.92 })
+				end)
+				b.Activated:Connect(function()
+					tween(scale, 0.15, { Scale = 1.06 }, Enum.EasingStyle.Back)
+					if weaponRemote and id ~= held then
+						weaponRemote:FireServer(id)
+					end
+				end)
+			end
+		end
+	end
+
 	function rebuild()
+		items.Visible = tab == "Weapons"
+		for _, part in petParts do
+			part.Visible = tab == "Pets"
+		end
+		if tab == "Weapons" then
+			rebuildItems()
+			return
+		end
 		local t = TABS[tab]
 		for _, holderFrame in { row, grid } do
 			for _, child in holderFrame:GetChildren() do
@@ -650,11 +918,11 @@ function Backpack.init()
 		tab = name
 		for n, b in tabButtons do
 			local on = n == name
-			b.stroke.Enabled = on
-			b.card.ImageTransparency = if on then 0 else 0.25
-			b.label.TextColor3 = if on then WHITE else SOFT
+			b.button.BackgroundTransparency = if on then 0.8 else 1
+			b.art.ImageTransparency = if on then 0 else 0.5
 		end
 		grid.CanvasPosition = Vector2.zero
+		items.CanvasPosition = Vector2.zero
 		rebuild()
 	end
 	for name, b in tabButtons do
@@ -685,22 +953,13 @@ function Backpack.init()
 			player:GetAttributeChangedSignal(attr):Connect(changed)
 		end
 	end
-	-- (the held weapon's DPS goes up with your Strength)
-	player:GetAttributeChangedSignal("Strength"):Connect(function()
-		if tab == "Weapons" then
-			headerText = TABS.Weapons.header(TABS.Weapons.equipped())
-			if os.clock() > flashUntil then
-				setHeader(headerText)
-			end
-		end
-	end)
 	holder:GetPropertyChangedSignal("Visible"):Connect(function()
 		if holder.Visible and dirty then
 			dirty = false
 			rebuild()
 		end
 	end)
-	selectTab("Pets")
+	selectTab("Weapons")
 end
 
 return Backpack

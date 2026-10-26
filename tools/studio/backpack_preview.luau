@@ -1,83 +1,54 @@
--- Studio preview (QM, Oct 26): opens StarterGui's Backpack popup and fills it with dummy tiles
--- (weapons and pets, copied from its templates) so you can see how it looks while editing.
--- Harmless in Play: the game clears these and fills it with what you own. Untick
+-- Studio preview (QM, Oct 26): opens StarterGui's Backpack popup on its Items tab and fills it
+-- with every weapon, a few owned (copied from each row's OwnedTemplate, one with "x5" and one
+-- held) and the rest undiscovered (UnknownTemplate), so you can see how it looks while
+-- editing. Harmless in Play: the game clears these and fills it with what you own. Untick
 -- BackpackPopup > Visible to hide it again.
 local RS = game:GetService("ReplicatedStorage")
-local Config = require(RS.Shared.Config)
 local WeaponIcons = require(RS.Shared.Weapons.WeaponIcons)
-local PetIcons = require(RS.Shared.PetIcons)
 local hud = game:GetService("StarterGui"):FindFirstChild("Hud")
 local popup = hud and hud.Root:FindFirstChild("BackpackPopup")
-if not popup then
-	return "no BackpackPopup"
+local items = popup and popup:FindFirstChild("Items", true)
+if not items then
+	return "no BackpackPopup > Body > Items: run uibake.luau first"
 end
-local body = popup:FindFirstChild("Body") or popup
-local row, grid = body:FindFirstChild("Equipped", true), body:FindFirstChild("Grid", true)
-for _, f in { row, grid } do
-	for _, c in f:GetChildren() do
-		if c:IsA("GuiObject") and string.sub(c.Name, -8) ~= "Template" then
-			c:Destroy()
+local unknown = items:FindFirstChild("UnknownTemplate")
+local n = 0
+for _, row in items:GetChildren() do
+	local owned = row:FindFirstChild("OwnedTemplate")
+	if owned then
+		for _, c in row:GetChildren() do
+			if c:IsA("GuiObject") and string.sub(c.Name, -8) ~= "Template" then
+				c:Destroy()
+			end
+		end
+		-- (a few made-up squares per row: owned, owned x5, held, then unknown)
+		local ids = {}
+		for id in WeaponIcons do
+			table.insert(ids, id)
+		end
+		table.sort(ids)
+		for i = 1, 4 do
+			local b = (if i <= 2 or (row.Name == "Common" and i == 3) then owned else unknown):Clone()
+			b.Name = "Preview" .. i
+			b.Visible = true
+			b.LayoutOrder = i
+			local img = b:FindFirstChild("Icon")
+			if img then
+				img.Image = WeaponIcons[ids[(n % #ids) + 1]]
+			end
+			local ring = b:FindFirstChild("Ring")
+			if ring then
+				ring.Visible = row.Name == "Common" and i == 1
+			end
+			local count = b:FindFirstChild("Count")
+			if count then
+				count.Visible = i == 2
+			end
+			b.Parent = row
+			n += 1
 		end
 	end
 end
-local function fill(template, parent, name, image, count, odds, rarity, order)
-	local b = template:Clone()
-	b.Name = name
-	b.Visible = true
-	b.LayoutOrder = order
-	local img = b:FindFirstChild("Icon")
-	if img then
-		img.Image = image or ""
-		img.Visible = true
-	end
-	local c = b:FindFirstChild("Count")
-	if c then
-		c.Text = "x" .. count
-		c.Visible = count > 1
-	end
-	local o = b:FindFirstChild("Odds")
-	if o then
-		local col = Config.Rarities[rarity] or Config.Rarities.Common
-		o.Text = odds
-		o.TextColor3 = col.Fill
-		local s = o:FindFirstChildOfClass("UIStroke")
-		if s then
-			s.Color = col.Stroke
-		end
-	end
-	b.Parent = parent
-end
-local items = {
-	{ "Waraxe", "Rare", "1/57", 1 },
-	{ "WaterStaff", "Epic", "1/240", 1 },
-	{ "Longsword", "Legendary", "1/1.2K", 1 },
-	{ "Shortsword", "Common", "1/2", 3 },
-	{ "Axe", "Common", "1/3", 2 },
-	{ "Club", "Common", "1/4", 1 },
-	{ "KendoStick", "Uncommon", "1/12", 2 },
-	{ "Shortbow", "Uncommon", "1/15", 1 },
-	{ "Staff", "Uncommon", "1/18", 1 },
-	{ "Longbow", "Rare", "1/60", 1 },
-	{ "FireStaff", "Epic", "1/250", 1 },
-	{ "BloodBow", "Legendary", "1/1.5K", 1 },
-	{ "UnholyLance", "Mythic", "1/10K", 1 },
-}
-local eqT, tileT = row:FindFirstChild("EquippedTemplate"), grid:FindFirstChild("TileTemplate")
-for i = 1, 3 do
-	local it = items[i]
-	fill(eqT, row, "Preview" .. i, WeaponIcons[it[1]], 1, it[3], it[2], i)
-end
-for i = 4, #items do
-	local it = items[i]
-	fill(tileT, grid, "Preview" .. i, WeaponIcons[it[1]], it[4], it[3], it[2], i)
-end
-local n = #items
-for kind, image in PetIcons.Pets do
-	n += 1
-	if n > 22 then
-		break
-	end
-	fill(tileT, grid, "Preview" .. n, image, 1, "1/" .. n * 7, "Rare", n)
-end
+items.Visible = true
 popup.Visible = true
-return "backpack preview: " .. n .. " tiles"
+return "backpack preview: " .. n .. " squares"
