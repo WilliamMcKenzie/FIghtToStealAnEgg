@@ -1,6 +1,7 @@
 -- How every button feels (QM, Oct 26: "snappy and satisfying", no transitions): nothing grows
 -- or eases. Hovering one fades it 10% and, where it has one, shows its white outline;
--- pressing fades it a little more. All at once, on the frame it happens.
+-- pressing fades it a little more. All at once, on the frame it happens. An icon outlined by
+-- client/Outline has its outline turn white instead of getting a ring.
 --
 --   Snappy.hook(button, ring)   -- once per button; ring = { radius, inflate } gives it a white
 --                               -- outline on hover (a HoverRing frame, inflate px bigger all
@@ -72,12 +73,36 @@ local function makeRing(button, ring)
 	return r
 end
 
+-- the copies making up client/Outline's ring on the button's icon, if it has one
+local function outlineCopies(button)
+	local art = button:FindFirstChild("Art")
+	local ring = art and art:FindFirstChild("Outline")
+	return if ring then ring:GetChildren() else {}
+end
+
 function Snappy.hook(button, ring)
 	local base = nil -- (read the first time it's hovered: the button's settled by then)
 	local hoverRing = if ring then makeRing(button, ring) else nil
 	local over, down = false, false
+	local outlineColor = nil -- (the outline's own colour, while it's white)
+	local function whiten(on)
+		local copies = outlineCopies(button)
+		if on and not outlineColor and copies[1] then
+			outlineColor = copies[1].ImageColor3
+		end
+		if not outlineColor then
+			return
+		end
+		for _, copy in copies do
+			copy.ImageColor3 = if on then WHITE else outlineColor
+		end
+		if not on then
+			outlineColor = nil
+		end
+	end
 	local function apply()
 		base = base or fadeable(button)
+		whiten(over)
 		local k = if down then PRESS_FADE elseif over then HOVER_FADE else 0
 		for _, entry in base do
 			local obj, prop, v = entry[1], entry[2], entry[3]
@@ -117,6 +142,7 @@ function Snappy.hook(button, ring)
 		end
 		base = nil
 		over, down = false, false
+		whiten(false)
 		if hoverRing then
 			hoverRing.Visible = false
 		end

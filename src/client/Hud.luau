@@ -9,7 +9,9 @@
 -- Under the red sits QM's trail bar, cut to wherever the red was TRAIL_LAG seconds ago,
 -- so a hit drops the red and exposes the trail, which follows it down half a second on. The buttons don't open anything yet.
 --
--- Images were uploaded from assets/ui (ids in assets/ui/ids.json).
+-- Images were uploaded from assets/ui (ids in assets/ui/ids.json). The button and counter icons
+-- (client/HudIcons) have no outline of their own: client/Outline gives them all the same one,
+-- tuned by the OutlineColor / OutlineThickness / TextOutlineThickness attributes on the Hud.
 --
 -- It's all real objects in StarterGui > Hud for QM to edit in Studio (client/Ui): Root holds
 -- the BossBar, the ShopButton / IndexButton / RebirthButton / BackpackButton, the Power and
@@ -22,6 +24,8 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 
+local HudIcons = require(script.Parent.HudIcons)
+local Outline = require(script.Parent.Outline)
 local Popups = require(script.Parent.Popups)
 local Ui = require(script.Parent.Ui)
 local Snappy = require(script.Parent.Snappy)
@@ -29,15 +33,9 @@ local Snappy = require(script.Parent.Snappy)
 local Hud = {}
 
 local IMAGES = {
-	Shop = "rbxassetid://72208658536040",
-	Index = "rbxassetid://129626627303335",
-	Rebirth = "rbxassetid://88567858926697",
-	Cash = "rbxassetid://83332868999001",
-	Power = "rbxassetid://108359754385647",
 	BossBarFill = "rbxassetid://139297500668654",
 	BossBarBack = "rbxassetid://88593547866423",
 	BossBarTrail = "rbxassetid://110382419429261", -- QM's TRAIL 1
-	Backpack = "rbxassetid://120170272419141", -- QM's (assets/ui/Backpack.png)
 }
 local DESIGN_HEIGHT = 1080
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -50,6 +48,7 @@ local player = Players.LocalPlayer
 
 local function text(parent, name, props)
 	local label, fresh = Ui.make(parent, name, "TextLabel")
+	Outline.text(label) -- (QM's one outline: client/Outline)
 	if not fresh then
 		return label
 	end
@@ -60,18 +59,12 @@ local function text(parent, name, props)
 	for k, v in props do
 		label[k] = v
 	end
-	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 4
-	stroke.Color = Color3.fromRGB(20, 12, 16)
-	stroke.LineJoinMode = Enum.LineJoinMode.Round
-	stroke.Parent = label
 	return label
 end
 
--- IMAGES[art] as `name` (an ImageButton with props.button)
+-- IMAGES[art] as `name`
 local function image(parent, name, art, props)
-	local img, fresh = Ui.make(parent, name, props.button and "ImageButton" or "ImageLabel")
-	props.button = nil
+	local img, fresh = Ui.make(parent, name, "ImageLabel")
 	if fresh then
 		img.BackgroundTransparency = 1
 		img.Image = IMAGES[art]
@@ -111,6 +104,7 @@ function Hud.start()
 		ResetOnSpawn = false,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 	})
+	Outline.settings(gui) -- (the outline's colour and widths, as attributes on the Hud)
 
 	-- everything inside `root` is in design pixels; the UIScale fits it to the screen
 	-- (set here in Play: in Studio it's left at the size of the window it was baked in)
@@ -166,60 +160,105 @@ function Hud.start()
 		ZIndex = 3,
 	})
 
-	-- buttons: stacked down the right edge, centred on the screen's middle (QM's mockup, Oct 26).
-	-- They stay up during fights now, beside the boss bar, as in the mockup.
+	-- buttons: QM's icons with no outline of their own, Outline putting the same one on all of
+	-- them, and the name under each as a label (Oct 26: the outlines had all been different).
+	-- Each is a see-through ImageButton holding Art (Outline.icon: the ring, then the icon) and
+	-- Label, laid out as in QM's Figma: a 128 icon with its 30px name `labelTop` px down it.
 	local hudFrames = {} -- (hidden while a popup is open)
-	local SIDE_SCALE = 0.75 -- times each button's art size (QM, Oct 26: they were too big)
-	local SIDE_MARGIN = 30 -- design px from the right edge
-	local SIDE_GAP = math.round(165 * SIDE_SCALE) -- design px between the buttons' centres
-	for i, b in { { "Shop", 128, 140 }, { "Index", 128, 137 }, { "Rebirth", 132, 146 } } do
-		local img = image(root, b[1] .. "Button", b[1], {
-			button = true,
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -SIDE_MARGIN - (132 - b[2]) / 2 * SIDE_SCALE, 0.5, (i - 2) * SIDE_GAP),
-			Size = UDim2.fromOffset(math.round(b[2] * SIDE_SCALE), math.round(b[3] * SIDE_SCALE)),
+	local LABEL_TEXT = 30 -- (at the 128 icon size; scaled with the button)
+	local function iconButton(name, art, labelTop, scale, props)
+		local size = 128 * scale
+		local button, fresh = Ui.make(root, name, "ImageButton")
+		if fresh then
+			button.BackgroundTransparency = 1
+			button.Image = ""
+			button.Size = UDim2.fromOffset(math.round(size), math.round((labelTop + 37) * scale))
+			for k, v in props do
+				button[k] = v
+			end
+		end
+		Outline.icon(button, "Art", HudIcons[art], HudIcons[art .. "Mask"], {
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0),
+			Size = UDim2.fromOffset(math.round(size), math.round(size)),
 		})
-		bouncy(img)
+		text(button, "Label", {
+			Text = art,
+			TextSize = math.round(LABEL_TEXT * scale),
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.new(0.5, 0, 0, math.round(labelTop * scale)),
+			Size = UDim2.fromOffset(math.round(200 * scale), math.round(37 * scale)),
+			ZIndex = 3,
+		})
+		bouncy(button)
 		if Ui.live then
-			img.Activated:Connect(function()
-				Popups.toggle(b[1])
+			button.Activated:Connect(function()
+				Popups.toggle(art)
 			end)
 		end
-		table.insert(hudFrames, img)
+		table.insert(hudFrames, button)
+		return button
+	end
+
+	-- stacked down the right edge, centred on the screen's middle (QM's mockup, Oct 26).
+	-- They stay up during fights now, beside the boss bar, as in the mockup.
+	local SIDE_SCALE = 0.75 -- times the 128 icon (QM, Oct 26: they were too big)
+	local SIDE_MARGIN = 30 -- design px from the right edge
+	local SIDE_GAP = math.round(165 * SIDE_SCALE) -- design px between the buttons' centres
+	for i, b in { { "Shop", 100 }, { "Index", 99 }, { "Rebirth", 109 } } do
+		iconButton(b[1] .. "Button", b[1], b[2], SIDE_SCALE, {
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.new(1, -SIDE_MARGIN, 0.5, (i - 2) * SIDE_GAP),
+		})
 	end
 
 	-- the Backpack button (QM, Oct 25), bottom centre: opens client/Backpack
-	do
-		local img = image(root, "BackpackButton", "Backpack", {
-			button = true,
-			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(0.5, 0, 1, -10),
-			Size = UDim2.fromOffset(173, 149),
-		})
-		bouncy(img)
-		if Ui.live then
-			img.Activated:Connect(function()
-				Popups.toggle("Backpack")
-			end)
-		end
-		table.insert(hudFrames, img)
-	end
+	iconButton("BackpackButton", "Backpack", 109, 1, {
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -10),
+	})
 
-	-- counters
+	-- counters: the icon (outlined like the buttons) on a dark band that fades out to the right
 	local counters = {}
 	for i, name in { "Power", "Cash" } do
-		local row = image(root, name, name, {
-			AnchorPoint = Vector2.new(0, 1),
-			Position = UDim2.new(0, 0, 1, -8 - (2 - i) * 103),
-			Size = UDim2.fromOffset(411, 103),
-		})
+		local row
+		row, fresh = Ui.make(root, name, "Frame")
+		if fresh then
+			row.BackgroundTransparency = 1
+			row.AnchorPoint = Vector2.new(0, 1)
+			row.Position = UDim2.new(0, 0, 1, -8 - (2 - i) * 103)
+			row.Size = UDim2.fromOffset(411, 103)
+		end
 		table.insert(hudFrames, row)
+		local band
+		band, fresh = Ui.make(row, "Band", "Frame")
+		if fresh then
+			-- (QM's Figma band: black at 30% to about halfway, then fading to nothing)
+			band.BackgroundColor3 = Color3.new(0, 0, 0)
+			band.BorderSizePixel = 0
+			band.Position = UDim2.fromOffset(0, 19)
+			band.Size = UDim2.new(1, 0, 0, 72)
+			local fade = Instance.new("UIGradient")
+			fade.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.7),
+				NumberSequenceKeypoint.new(0.52, 0.7),
+				NumberSequenceKeypoint.new(1, 1),
+			})
+			fade.Parent = band
+		end
+		Outline.icon(row, "Art", HudIcons[name], HudIcons[name .. "Mask"], {
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(0, 16, 0.5, 0),
+			Size = UDim2.fromOffset(96, 96),
+			ZIndex = 2,
+		})
 		counters[name] = text(row, "Value", {
 			AnchorPoint = Vector2.new(0, 0.5),
 			Position = UDim2.new(0, 136, 0.5, 0),
 			Size = UDim2.fromOffset(270, 60),
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Text = "0",
+			ZIndex = 3,
 		})
 	end
 
