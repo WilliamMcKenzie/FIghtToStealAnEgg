@@ -21958,13 +21958,6 @@
           },
           "BackgroundTransparency": 1,
           "BorderSizePixel": 0,
-          "CanvasPosition": {
-           "t": "Vector2",
-           "v": [
-            0,
-            9.0999755859375
-           ]
-          },
           "CanvasSize": {
            "t": "UDim2",
            "v": [
@@ -30355,6 +30348,346 @@
           300,
           0,
           99
+         ]
+        },
+        "Text": "",
+        "Transparency": 1,
+        "ZIndex": 6
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIScale",
+           "name": "UIScale",
+           "props": []
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UICorner",
+             "name": "UICorner",
+             "props": {
+              "CornerRadius": {
+               "t": "UDim",
+               "v": [
+                0,
+                9
+               ]
+              }
+             }
+            }
+           ],
+           "class": "Frame",
+           "name": "Shadow",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              0.4470588266849518,
+              0,
+              0.0235294122248888
+             ]
+            },
+            "BorderSizePixel": 0,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              7
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "ZIndex": 6
+           }
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UICorner",
+             "name": "UICorner",
+             "props": {
+              "CornerRadius": {
+               "t": "UDim",
+               "v": [
+                0,
+                9
+               ]
+              }
+             }
+            },
+            {
+             "children": [],
+             "class": "UIStroke",
+             "name": "UIStroke",
+             "props": {
+              "ApplyStrokeMode": {
+               "e": "ApplyStrokeMode",
+               "t": "EnumItem",
+               "v": "Border"
+              },
+              "Color": {
+               "t": "Color3",
+               "v": [
+                0.4470588266849518,
+                0,
+                0.0235294122248888
+               ]
+              },
+              "Thickness": 4
+             }
+            },
+            {
+             "children": [
+              {
+               "children": [],
+               "class": "UICorner",
+               "name": "UICorner",
+               "props": {
+                "CornerRadius": {
+                 "t": "UDim",
+                 "v": [
+                  0,
+                  9
+                 ]
+                }
+               }
+              }
+             ],
+             "class": "ImageLabel",
+             "name": "Glow",
+             "props": {
+              "BackgroundTransparency": 1,
+              "Image": "rbxassetid://106131181340173",
+              "ImageColor3": {
+               "t": "Color3",
+               "v": [
+                1,
+                0.33725491166114807,
+                0.33725491166114807
+               ]
+              },
+              "Size": {
+               "t": "UDim2",
+               "v": [
+                1,
+                0,
+                1,
+                0
+               ]
+              },
+              "Transparency": 1,
+              "ZIndex": 7
+             }
+            }
+           ],
+           "class": "Frame",
+           "name": "Body",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              0.9529411792755127,
+              0.125490203499794,
+              0.125490203499794
+             ]
+            },
+            "BorderSizePixel": 0,
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "ZIndex": 7
+           }
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UIStroke",
+             "name": "UIStroke",
+             "props": {
+              "Thickness": 3,
+              "Transparency": 0.75
+             }
+            }
+           ],
+           "class": "TextLabel",
+           "name": "XShadow",
+           "props": {
+            "BackgroundTransparency": 1,
+            "FontFace": {
+             "t": "Font",
+             "v": [
+              "rbxasset://fonts/families/FredokaOne.json",
+              "Regular",
+              "Normal"
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Text": "x",
+            "TextColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "TextSize": 57,
+            "TextTransparency": 0.75,
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UIStroke",
+             "name": "UIStroke",
+             "props": {
+              "Thickness": 3
+             }
+            }
+           ],
+           "class": "TextLabel",
+           "name": "X",
+           "props": {
+            "BackgroundTransparency": 1,
+            "FontFace": {
+             "t": "Font",
+             "v": [
+              "rbxasset://fonts/families/FredokaOne.json",
+              "Regular",
+              "Normal"
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Text": "x",
+            "TextColor3": {
+             "t": "Color3",
+             "v": [
+              1,
+              1,
+              1
+             ]
+            },
+            "TextSize": 57,
+            "Transparency": 1,
+            "ZIndex": 9
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Plate",
+         "props": {
+          "AnchorPoint": {
+           "t": "Vector2",
+           "v": [
+            0.5,
+            0.5
+           ]
+          },
+          "BackgroundTransparency": 1,
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0.5,
+            0,
+            0.5,
+            0
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 6
+         }
+        }
+       ],
+       "class": "TextButton",
+       "name": "Close",
+       "props": {
+        "AutoButtonColor": false,
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          1117,
+          0,
+          -24
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          84,
+          0,
+          84
          ]
         },
         "Text": "",
