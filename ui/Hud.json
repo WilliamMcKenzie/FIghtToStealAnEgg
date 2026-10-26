@@ -22821,13 +22821,6 @@
           },
           "BackgroundTransparency": 1,
           "BorderSizePixel": 0,
-          "CanvasPosition": {
-           "t": "Vector2",
-           "v": [
-            0,
-            5.83331298828125
-           ]
-          },
           "CanvasSize": {
            "t": "UDim2",
            "v": [
@@ -23046,7 +23039,7 @@
          "t": "Vector2",
          "v": [
           1,
-          0
+          0.5
          ]
         },
         "AutoButtonColor": false,
@@ -23065,8 +23058,8 @@
          "v": [
           0,
           -24,
-          0,
-          150
+          0.5,
+          -88
          ]
         },
         "Size": {
@@ -23155,7 +23148,7 @@
          "t": "Vector2",
          "v": [
           1,
-          0
+          0.5
          ]
         },
         "AutoButtonColor": false,
@@ -23174,8 +23167,8 @@
          "v": [
           0,
           -24,
-          0,
-          326
+          0.5,
+          88
          ]
         },
         "Size": {

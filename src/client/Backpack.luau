@@ -675,8 +675,9 @@ function Backpack.init()
 			b.BackgroundColor3 = Color3.new(0, 0, 0)
 			b.BackgroundTransparency = if i == 1 then 0.8 else 1
 			b.BorderSizePixel = 0
-			b.AnchorPoint = Vector2.new(1, 0)
-			b.Position = UDim2.new(0, -24, 0, 150 + (i - 1) * 176)
+			-- (the pair centred on the panel's height, QM)
+			b.AnchorPoint = Vector2.new(1, 0.5)
+			b.Position = UDim2.new(0, -24, 0.5, (i - 1.5) * 176)
 			b.Size = UDim2.fromOffset(160, 160)
 			b.ZIndex = 4
 			rounded(b, 10)
