@@ -13,7 +13,6 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -23,6 +22,7 @@ local PetIcons = require(Shared.PetIcons)
 local Stacks = require(Shared.Stacks)
 local Popups = require(script.Parent.Popups)
 local Ui = require(script.Parent.Ui)
+local Snappy = require(script.Parent.Snappy)
 
 local Hotbar = {}
 
@@ -203,17 +203,7 @@ function Hotbar.init(root, hudFrames)
 				count.Text = "x" .. s.n
 				count.Visible = s.n > 1
 			end
-			local scale = b:FindFirstChildOfClass("UIScale")
-			if scale then
-				local rest = scale.Scale
-				b.MouseEnter:Connect(function()
-					TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = rest + 0.06 })
-						:Play()
-				end)
-				b.MouseLeave:Connect(function()
-					TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = rest }):Play()
-				end)
-			end
+			Snappy.hook(b, { 8, 4 })
 			b.Activated:Connect(function()
 				hold(s.id)
 			end)

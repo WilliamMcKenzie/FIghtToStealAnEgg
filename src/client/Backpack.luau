@@ -33,6 +33,7 @@ local Power = require(Shared.Power)
 local Weapons = require(Shared.Weapons.Weapons)
 local WeaponIcons = require(Shared.Weapons.WeaponIcons)
 local Popups = require(script.Parent.Popups)
+local Snappy = require(script.Parent.Snappy)
 local Ui = require(script.Parent.Ui)
 
 local Backpack = {}
@@ -77,6 +78,7 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 local MERGE_TEXTURE = "rbxassetid://87121220953662" -- (assets/ui/merge_button_texture.png: QM's green checker)
 local MERGE_DARK = Color3.fromHex("00A529") -- the MERGE button's outline and shadow
 local CLOSE_DARK = Color3.fromHex("720006") -- the X's outline and shadow
+local SQUARE_RING = { 6, 6 } -- a square's white hover outline: its corners, and px out past it (its own outline's 4)
 local MERGE_PULSE = 0.05 -- how much bigger it swells at the top of each pulse
 local MERGE_PULSE_TIME = 1.1 -- seconds a pulse takes
 local MERGE_SPIN = 40 -- degrees a second the sunburst behind it turns
@@ -908,7 +910,7 @@ function Backpack.init()
 			t.TextSize = math.round(130 * k)
 			t.TextColor3 = color
 			t.TextTransparency = transparency
-			t.Position = UDim2.fromOffset(0, dy - 2)
+			t.Position = UDim2.fromOffset(0, dy - 4) -- (a lowercase x sits low in its line: up to centre it)
 			t.Size = UDim2.fromScale(1, 1)
 			t.ZIndex = z
 			local o = Instance.new("UIStroke")
@@ -923,18 +925,8 @@ function Backpack.init()
 		glyph("X", WHITE, 0, 9, 0)
 	end
 	if Ui.live then
-		local scale = close.Plate:FindFirstChildOfClass("UIScale")
-		close.MouseEnter:Connect(function()
-			tween(scale, 0.12, { Scale = 1.08 }, Enum.EasingStyle.Back)
-		end)
-		close.MouseLeave:Connect(function()
-			tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
-		end)
-		close.MouseButton1Down:Connect(function()
-			tween(scale, 0.06, { Scale = 0.9 })
-		end)
+		Snappy.hook(close, { 9, 6 })
 		close.Activated:Connect(function()
-			tween(scale, 0.15, { Scale = 1 }, Enum.EasingStyle.Back)
 			Popups.close()
 		end)
 	end
@@ -1026,18 +1018,7 @@ function Backpack.init()
 	if Ui.live then
 		local plate = mergeButton:FindFirstChild("Plate") or mergeButton
 		local scale = plate:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", plate)
-		-- (hover and press tween this; it's multiplied by the pulse each frame)
-		local press = Instance.new("NumberValue")
-		press.Value = 1
-		mergeButton.MouseEnter:Connect(function()
-			tween(press, 0.12, { Value = 1.05 }, Enum.EasingStyle.Back)
-		end)
-		mergeButton.MouseLeave:Connect(function()
-			tween(press, 0.12, { Value = 1 }, Enum.EasingStyle.Back)
-		end)
-		mergeButton.MouseButton1Down:Connect(function()
-			tween(press, 0.06, { Value = 0.92 })
-		end)
+		Snappy.hook(mergeButton, { 9, 6 })
 		-- while it's up: a gentle pulse, and the sunburst behind it turning (QM)
 		local rays = mergeButton:FindFirstChild("Rays")
 		local t = 0
@@ -1046,13 +1027,12 @@ function Backpack.init()
 				return
 			end
 			t += dt
-			scale.Scale = press.Value * (1 + MERGE_PULSE * math.sin(t * math.pi * 2 / MERGE_PULSE_TIME))
+			scale.Scale = 1 + MERGE_PULSE * math.sin(t * math.pi * 2 / MERGE_PULSE_TIME)
 			if rays then
 				rays.Rotation = (rays.Rotation + dt * MERGE_SPIN) % 360
 			end
 		end)
 		mergeButton.Activated:Connect(function()
-			tween(press, 0.15, { Value = 1.05 }, Enum.EasingStyle.Back)
 			if mergeButton:GetAttribute("Merges") and mergeRemote and playMerge then
 				playMerge()
 			end
@@ -1125,25 +1105,18 @@ function Backpack.init()
 				end
 			end
 		end
+		Snappy.hook(b, { 14, 4 })
 		b.MouseEnter:Connect(function()
-			tween(scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
 			if os.clock() > flashUntil then
 				setHeader(t.detail(id), rarityColors(t.rarity(id)).Fill)
 			end
 		end)
 		b.MouseLeave:Connect(function()
-			tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
 			if os.clock() > flashUntil then
 				setHeader(headerText)
 			end
 		end)
-		b.MouseButton1Down:Connect(function()
-			tween(scale, 0.06, { Scale = 0.92 })
-		end)
-		b.Activated:Connect(function()
-			tween(scale, 0.15, { Scale = 1.06 }, Enum.EasingStyle.Back)
-			onClick()
-		end)
+		b.Activated:Connect(onClick)
 		return b
 	end
 
@@ -1219,18 +1192,8 @@ function Backpack.init()
 						end
 					end
 				end
-				local scale = b:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", b)
-				b.MouseEnter:Connect(function()
-					tween(scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
-				end)
-				b.MouseLeave:Connect(function()
-					tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
-				end)
-				b.MouseButton1Down:Connect(function()
-					tween(scale, 0.06, { Scale = 0.92 })
-				end)
+				Snappy.hook(b, SQUARE_RING)
 				b.Activated:Connect(function()
-					tween(scale, 0.15, { Scale = 1.06 }, Enum.EasingStyle.Back)
 					if weaponRemote and id ~= held then
 						weaponRemote:FireServer(id)
 					end
@@ -1239,22 +1202,10 @@ function Backpack.init()
 		end
 	end
 
-	-- a pet's square, wired up: grows a little on hover, squashes on press
+	-- a pet's square, wired up (Snappy: outlined and a touch faded on hover)
 	local function pressable(b, onClick)
-		local scale = b:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", b)
-		b.MouseEnter:Connect(function()
-			tween(scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
-		end)
-		b.MouseLeave:Connect(function()
-			tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
-		end)
-		b.MouseButton1Down:Connect(function()
-			tween(scale, 0.06, { Scale = 0.92 })
-		end)
-		b.Activated:Connect(function()
-			tween(scale, 0.15, { Scale = 1.06 }, Enum.EasingStyle.Back)
-			onClick()
-		end)
+		Snappy.hook(b, SQUARE_RING)
+		b.Activated:Connect(onClick)
 	end
 
 	local function petSquare(template, kind, parent, order, count, ring)
@@ -1601,14 +1552,10 @@ function Backpack.init()
 		rebuild()
 	end
 	for name, b in tabButtons do
-		b.button.MouseEnter:Connect(function()
-			tween(b.scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
-		end)
-		b.button.MouseLeave:Connect(function()
-			tween(b.scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
-		end)
+		local reset = Snappy.hook(b.button, { 10, 0 })
 		b.button.Activated:Connect(function()
 			if tab ~= name then
+				reset() -- (its look's about to change: let go of the faded one first)
 				selectTab(name)
 			end
 		end)

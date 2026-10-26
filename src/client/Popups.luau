@@ -6,7 +6,7 @@
 -- .button, .bar), ready to be filled in.
 --
 -- Behaviour (QM's rule from Lasso For Eggs): opening one hides the rest of the HUD and
--- blurs the world behind it; it pops in with a Back ease and out with a little swell
+-- blurs the world behind it; it opens and closes at once (QM: snappy, no transitions)
 -- before it shrinks away. One at a time: opening another swaps them. The X, Escape, or
 -- clicking the same HUD button again closes it.
 --
@@ -32,6 +32,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Ui = require(script.Parent.Ui)
+local Snappy = require(script.Parent.Snappy)
 
 local Popups = {}
 Popups.abbreviate = tostring -- (Hud hands its own over before init: 1.5K, 12M...)
@@ -240,21 +241,7 @@ function Popups.button(parent, props, label, colors, onClick)
 	if not Ui.live then
 		return b, fresh
 	end
-	local function to(s, t)
-		TweenService:Create(scale, TweenInfo.new(t, Enum.EasingStyle.Back), { Scale = s }):Play()
-	end
-	b.MouseEnter:Connect(function()
-		to(1.05, 0.12)
-	end)
-	b.MouseLeave:Connect(function()
-		to(1, 0.12)
-	end)
-	b.MouseButton1Down:Connect(function()
-		to(0.92, 0.06)
-	end)
-	b.MouseButton1Up:Connect(function()
-		to(1.05, 0.15)
-	end)
+	Snappy.hook(b, { 12, 6 })
 	if onClick then
 		b.Activated:Connect(onClick)
 	end
@@ -688,13 +675,13 @@ local function show(name)
 	local p = popups[name]
 	open = name
 	p.holder.Visible = true
+	-- (all at once, no easing: QM wants it snappy)
 	p.full = if p.fit then p.fit() else 1
-	p.scale.Scale = 0.6 * p.full
-	TweenService:Create(p.scale, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-		Scale = p.full,
-	}):Play()
-	TweenService:Create(blur, TweenInfo.new(0.25), { Size = blurOn }):Play()
-	TweenService:Create(tint, TweenInfo.new(0.25), hazeOn):Play()
+	p.scale.Scale = p.full
+	blur.Size = blurOn
+	for k, v in hazeOn do
+		tint[k] = v
+	end
 	setHud(false)
 end
 
@@ -704,28 +691,11 @@ function Popups.close()
 	end
 	local p = popups[open]
 	open = nil
-	-- a little swell first (anticipation), then shrink away
-	local swell = TweenService:Create(
-		p.scale,
-		TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{ Scale = 1.06 * (p.full or 1) }
-	)
-	swell.Completed:Once(function()
-		local shrink = TweenService:Create(
-			p.scale,
-			TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-			{ Scale = 0.3 * (p.full or 1) }
-		)
-		shrink.Completed:Once(function()
-			if popups[open or ""] ~= p then
-				p.holder.Visible = false
-			end
-		end)
-		shrink:Play()
-	end)
-	swell:Play()
-	TweenService:Create(blur, TweenInfo.new(0.2), { Size = 0 }):Play()
-	TweenService:Create(tint, TweenInfo.new(0.2), NO_HAZE):Play()
+	p.holder.Visible = false
+	blur.Size = 0
+	for k, v in NO_HAZE do
+		tint[k] = v
+	end
 	setHud(true)
 end
 

@@ -21,10 +21,10 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
-local TweenService = game:GetService("TweenService")
 
 local Popups = require(script.Parent.Popups)
 local Ui = require(script.Parent.Ui)
+local Snappy = require(script.Parent.Snappy)
 
 local Hud = {}
 
@@ -98,28 +98,11 @@ function Hud.abbreviate(n)
 	return (s:gsub("%.0$", "")) .. SUFFIXES[i]
 end
 
--- a little bounce on hover and press, so the buttons feel alive before they do anything
+-- hover and press (client/Snappy: a touch faded, no easing; QM wants it snappy)
 local function bouncy(button)
-	local scale = Ui.make(button, "Bounce", "UIScale")
-	if not Ui.live then
-		return
+	if Ui.live then
+		Snappy.hook(button)
 	end
-	local function to(s, t)
-		TweenService:Create(scale, TweenInfo.new(t, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = s })
-			:Play()
-	end
-	button.MouseEnter:Connect(function()
-		to(1.08, 0.15)
-	end)
-	button.MouseLeave:Connect(function()
-		to(1, 0.15)
-	end)
-	button.MouseButton1Down:Connect(function()
-		to(0.92, 0.08)
-	end)
-	button.MouseButton1Up:Connect(function()
-		to(1.08, 0.2)
-	end)
 end
 
 function Hud.start()
