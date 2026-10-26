@@ -30017,75 +30017,136 @@
        "children": [
         {
          "children": [],
-         "class": "UICorner",
-         "name": "UICorner",
-         "props": {
-          "CornerRadius": {
-           "t": "UDim",
-           "v": [
-            0,
-            12
-           ]
-          }
-         }
+         "class": "UIScale",
+         "name": "UIScale",
+         "props": []
         },
         {
-         "children": [],
-         "class": "UIStroke",
-         "name": "UIStroke",
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              9
+             ]
+            }
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Shadow",
          "props": {
-          "ApplyStrokeMode": {
-           "e": "ApplyStrokeMode",
-           "t": "EnumItem",
-           "v": "Border"
-          },
-          "Color": {
+          "BackgroundColor3": {
            "t": "Color3",
            "v": [
-            0.054901961237192154,
-            0.0470588244497776,
-            0.062745101749897
+            0,
+            0.6470588445663452,
+            0.16078431904315948
            ]
           },
-          "Thickness": 4
-         }
-        },
-        {
-         "children": [],
-         "class": "UIGradient",
-         "name": "UIGradient",
-         "props": {
-          "Color": {
-           "t": "ColorSequence",
+          "BorderSizePixel": 0,
+          "Position": {
+           "t": "UDim2",
            "v": [
-            [
-             0,
-             0.7864355444908142,
-             0.999717652797699,
-             0.37196698784828186
-            ],
-            [
-             0.44999998807907104,
-             0.47843137383461,
-             0.8705882430076599,
-             0.22745098173618317
-            ],
-            [
-             1,
-             0.16713443398475647,
-             0.6616470813751221,
-             0.09954507648944855
-            ]
+            0,
+            0,
+            0,
+            7
            ]
           },
-          "Rotation": 90
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "ZIndex": 6
          }
         },
         {
-         "children": [],
-         "class": "UIScale",
-         "name": "Press",
-         "props": []
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              9
+             ]
+            }
+           }
+          },
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "UIStroke",
+           "props": {
+            "ApplyStrokeMode": {
+             "e": "ApplyStrokeMode",
+             "t": "EnumItem",
+             "v": "Border"
+            },
+            "Color": {
+             "t": "Color3",
+             "v": [
+              0,
+              0.6470588445663452,
+              0.16078431904315948
+             ]
+            },
+            "Thickness": 4
+           }
+          }
+         ],
+         "class": "ImageLabel",
+         "name": "Body",
+         "props": {
+          "BackgroundColor3": {
+           "t": "Color3",
+           "v": [
+            0.5333333611488342,
+            0.95686274766922,
+            0.12941177189350128
+           ]
+          },
+          "BorderSizePixel": 0,
+          "Image": "rbxassetid://87121220953662",
+          "ScaleType": {
+           "e": "ScaleType",
+           "t": "EnumItem",
+           "v": "Tile"
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "TileSize": {
+           "t": "UDim2",
+           "v": [
+            0,
+            78,
+            0,
+            78
+           ]
+          },
+          "ZIndex": 7
+         }
         },
         {
          "children": [
@@ -30094,15 +30155,64 @@
            "class": "UIStroke",
            "name": "UIStroke",
            "props": {
-            "Color": {
-             "t": "Color3",
-             "v": [
-              0.054901961237192154,
-              0.0470588244497776,
-              0.062745101749897
-             ]
-            },
-            "Thickness": 3.6666667461395264
+            "Thickness": 3,
+            "Transparency": 0.75
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "LabelShadow",
+         "props": {
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Normal"
+           ]
+          },
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0,
+            0,
+            0,
+            3
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Text": "MERGE",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            0,
+            0,
+            0
+           ]
+          },
+          "TextSize": 44,
+          "TextTransparency": 0.75,
+          "Transparency": 1,
+          "ZIndex": 8
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "UIStroke",
+           "props": {
+            "Thickness": 3
            }
           }
          ],
@@ -30137,7 +30247,8 @@
            ]
           },
           "TextSize": 44,
-          "Transparency": 1
+          "Transparency": 1,
+          "ZIndex": 9
          }
         }
        ],
@@ -30148,38 +30259,31 @@
          "t": "Vector2",
          "v": [
           0.5,
-          0.5
+          0
          ]
         },
         "AutoButtonColor": false,
-        "BackgroundColor3": {
-         "t": "Color3",
-         "v": [
-          1,
-          1,
-          1
-         ]
-        },
-        "BorderSizePixel": 0,
+        "BackgroundTransparency": 1,
         "Position": {
          "t": "UDim2",
          "v": [
           0.5,
           0,
           1,
-          0
+          -50
          ]
         },
         "Size": {
          "t": "UDim2",
          "v": [
           0,
-          240,
+          300,
           0,
-          80
+          99
          ]
         },
         "Text": "",
+        "Transparency": 1,
         "ZIndex": 6
        }
       }
