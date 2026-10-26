@@ -6,10 +6,12 @@
 import json,os,subprocess,sys
 D=os.path.dirname(os.path.abspath(__file__)); P=os.path.normpath(os.path.join(D,'..','..'))
 CHUNK=60000
-def run(code):
+def run(code,whole=False):
     tmp=os.path.join(D,'_uisave.luau'); open(tmp,'w').write(code)
-    out=subprocess.run([sys.executable,os.path.join(D,'lu.py'),tmp,'Edit'],capture_output=True,text=True).stdout.strip().splitlines()
+    out=subprocess.run([sys.executable,os.path.join(D,'lu.py'),tmp,'Edit'],capture_output=True,text=True).stdout
     os.remove(tmp)
+    if whole: return out # (a chunk can hold a newline, from text with one in it)
+    out=out.strip().splitlines()
     return out[-1] if out else ''
 n=run(open(os.path.join(D,'uicodec.luau')).read()+f'''
 local s=UiCodec.save()
@@ -22,7 +24,8 @@ return "chunks "..n
 if not n.startswith('chunks '): sys.exit('Studio said: '+n)
 parts=[]
 for i in range(1,int(n.split()[1])+1):
-    parts.append(run(f'return "<<"..game.ServerStorage.UiSave["{i:05d}"].Value..">>"').strip()[2:-2])
+    out=run(f'return "<<"..game.ServerStorage.UiSave["{i:05d}"].Value..">>"',True)
+    parts.append(out[out.index('<<')+2:out.rindex('>>')])
 run('local f=game.ServerStorage:FindFirstChild("UiSave") if f then f:Destroy() end return "ok"')
 guis=json.loads(''.join(parts))
 os.makedirs(os.path.join(P,'ui'),exist_ok=True)

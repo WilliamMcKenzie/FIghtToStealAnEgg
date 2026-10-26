@@ -1,4 +1,16 @@
 {
+ "attributes": {
+  "OutlineColor": {
+   "t": "Color3",
+   "v": [
+    0.01568627543747425,
+    0.01568627543747425,
+    0.2078431397676468
+   ]
+  },
+  "OutlineThickness": 5,
+  "TextOutlineThickness": 4
+ },
  "children": [
   {
    "children": [
@@ -114,14 +126,14 @@
         {
          "children": [],
          "class": "UIStroke",
-         "name": "UIStroke",
+         "name": "Outline",
          "props": {
           "Color": {
            "t": "Color3",
            "v": [
-            0.0784313753247261,
-            0.0470588244497776,
-            0.062745101749897
+            0.01568627543747425,
+            0.01568627543747425,
+            0.2078431397676468
            ]
           },
           "Thickness": 4
@@ -211,394 +223,6 @@
       },
       "Transparency": 1,
       "Visible": false
-     }
-    },
-    {
-     "children": [
-      {
-       "children": [],
-       "class": "UIScale",
-       "name": "Bounce",
-       "props": []
-      }
-     ],
-     "class": "ImageButton",
-     "name": "ShopButton",
-     "props": {
-      "AnchorPoint": {
-       "t": "Vector2",
-       "v": [
-        1,
-        0.5
-       ]
-      },
-      "BackgroundTransparency": 1,
-      "Image": "rbxassetid://72208658536040",
-      "Position": {
-       "t": "UDim2",
-       "v": [
-        1,
-        -31,
-        0.5,
-        -124
-       ]
-      },
-      "Size": {
-       "t": "UDim2",
-       "v": [
-        0,
-        96,
-        0,
-        105
-       ]
-      },
-      "Transparency": 1
-     }
-    },
-    {
-     "children": [
-      {
-       "children": [],
-       "class": "UIScale",
-       "name": "Bounce",
-       "props": []
-      }
-     ],
-     "class": "ImageButton",
-     "name": "IndexButton",
-     "props": {
-      "AnchorPoint": {
-       "t": "Vector2",
-       "v": [
-        1,
-        0.5
-       ]
-      },
-      "BackgroundTransparency": 1,
-      "Image": "rbxassetid://129626627303335",
-      "Position": {
-       "t": "UDim2",
-       "v": [
-        1,
-        -31,
-        0.5,
-        0
-       ]
-      },
-      "Size": {
-       "t": "UDim2",
-       "v": [
-        0,
-        96,
-        0,
-        103
-       ]
-      },
-      "Transparency": 1
-     }
-    },
-    {
-     "children": [
-      {
-       "children": [],
-       "class": "UIScale",
-       "name": "Bounce",
-       "props": []
-      }
-     ],
-     "class": "ImageButton",
-     "name": "RebirthButton",
-     "props": {
-      "AnchorPoint": {
-       "t": "Vector2",
-       "v": [
-        1,
-        0.5
-       ]
-      },
-      "BackgroundTransparency": 1,
-      "Image": "rbxassetid://88567858926697",
-      "Position": {
-       "t": "UDim2",
-       "v": [
-        1,
-        -30,
-        0.5,
-        124
-       ]
-      },
-      "Size": {
-       "t": "UDim2",
-       "v": [
-        0,
-        99,
-        0,
-        110
-       ]
-      },
-      "Transparency": 1
-     }
-    },
-    {
-     "children": [
-      {
-       "children": [],
-       "class": "UIScale",
-       "name": "Bounce",
-       "props": []
-      }
-     ],
-     "class": "ImageButton",
-     "name": "BackpackButton",
-     "props": {
-      "AnchorPoint": {
-       "t": "Vector2",
-       "v": [
-        0.5,
-        1
-       ]
-      },
-      "BackgroundTransparency": 1,
-      "Image": "rbxassetid://120170272419141",
-      "Position": {
-       "t": "UDim2",
-       "v": [
-        0.5,
-        0,
-        1,
-        -10
-       ]
-      },
-      "Size": {
-       "t": "UDim2",
-       "v": [
-        0,
-        173,
-        0,
-        149
-       ]
-      },
-      "Transparency": 1
-     }
-    },
-    {
-     "children": [
-      {
-       "children": [
-        {
-         "children": [],
-         "class": "UIStroke",
-         "name": "UIStroke",
-         "props": {
-          "Color": {
-           "t": "Color3",
-           "v": [
-            0.0784313753247261,
-            0.0470588244497776,
-            0.062745101749897
-           ]
-          },
-          "Thickness": 4
-         }
-        }
-       ],
-       "class": "TextLabel",
-       "name": "Value",
-       "props": {
-        "AnchorPoint": {
-         "t": "Vector2",
-         "v": [
-          0,
-          0.5
-         ]
-        },
-        "BackgroundTransparency": 1,
-        "FontFace": {
-         "t": "Font",
-         "v": [
-          "rbxasset://fonts/families/Montserrat.json",
-          "ExtraBold",
-          "Normal"
-         ]
-        },
-        "Position": {
-         "t": "UDim2",
-         "v": [
-          0,
-          136,
-          0.5,
-          0
-         ]
-        },
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          0,
-          270,
-          0,
-          60
-         ]
-        },
-        "Text": "0",
-        "TextColor3": {
-         "t": "Color3",
-         "v": [
-          1,
-          1,
-          1
-         ]
-        },
-        "TextSize": 45,
-        "TextXAlignment": {
-         "e": "TextXAlignment",
-         "t": "EnumItem",
-         "v": "Left"
-        },
-        "Transparency": 1
-       }
-      }
-     ],
-     "class": "ImageLabel",
-     "name": "Power",
-     "props": {
-      "AnchorPoint": {
-       "t": "Vector2",
-       "v": [
-        0,
-        1
-       ]
-      },
-      "BackgroundTransparency": 1,
-      "Image": "rbxassetid://108359754385647",
-      "Position": {
-       "t": "UDim2",
-       "v": [
-        0,
-        0,
-        1,
-        -111
-       ]
-      },
-      "Size": {
-       "t": "UDim2",
-       "v": [
-        0,
-        411,
-        0,
-        103
-       ]
-      },
-      "Transparency": 1
-     }
-    },
-    {
-     "children": [
-      {
-       "children": [
-        {
-         "children": [],
-         "class": "UIStroke",
-         "name": "UIStroke",
-         "props": {
-          "Color": {
-           "t": "Color3",
-           "v": [
-            0.0784313753247261,
-            0.0470588244497776,
-            0.062745101749897
-           ]
-          },
-          "Thickness": 4
-         }
-        }
-       ],
-       "class": "TextLabel",
-       "name": "Value",
-       "props": {
-        "AnchorPoint": {
-         "t": "Vector2",
-         "v": [
-          0,
-          0.5
-         ]
-        },
-        "BackgroundTransparency": 1,
-        "FontFace": {
-         "t": "Font",
-         "v": [
-          "rbxasset://fonts/families/Montserrat.json",
-          "ExtraBold",
-          "Normal"
-         ]
-        },
-        "Position": {
-         "t": "UDim2",
-         "v": [
-          0,
-          136,
-          0.5,
-          0
-         ]
-        },
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          0,
-          270,
-          0,
-          60
-         ]
-        },
-        "Text": "0",
-        "TextColor3": {
-         "t": "Color3",
-         "v": [
-          1,
-          1,
-          1
-         ]
-        },
-        "TextSize": 45,
-        "TextXAlignment": {
-         "e": "TextXAlignment",
-         "t": "EnumItem",
-         "v": "Left"
-        },
-        "Transparency": 1
-       }
-      }
-     ],
-     "class": "ImageLabel",
-     "name": "Cash",
-     "props": {
-      "AnchorPoint": {
-       "t": "Vector2",
-       "v": [
-        0,
-        1
-       ]
-      },
-      "BackgroundTransparency": 1,
-      "Image": "rbxassetid://83332868999001",
-      "Position": {
-       "t": "UDim2",
-       "v": [
-        0,
-        0,
-        1,
-        -8
-       ]
-      },
-      "Size": {
-       "t": "UDim2",
-       "v": [
-        0,
-        411,
-        0,
-        103
-       ]
-      },
-      "Transparency": 1
      }
     },
     {
@@ -31044,6 +30668,6562 @@
         972,
         0,
         96
+       ]
+      },
+      "Transparency": 1
+     }
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "0",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "1",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "2",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "3",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "4",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "5",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "6",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "7",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "8",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "9",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "10",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "11",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "12",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "13",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "14",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "15",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "16",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "17",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "18",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "19",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "20",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "21",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "22",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "23",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "24",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://80031493937651",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Outline",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "ImageLabel",
+         "name": "Icon",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://78177113998591",
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 2
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Art",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          96,
+          0,
+          96
+         ]
+        },
+        "Transparency": 1
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "Color": {
+           "t": "Color3",
+           "v": [
+            0.01568627543747425,
+            0.01568627543747425,
+            0.2078431397676468
+           ]
+          },
+          "Thickness": 4
+         }
+        }
+       ],
+       "class": "TextLabel",
+       "name": "Label",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "FontFace": {
+         "t": "Font",
+         "v": [
+          "rbxasset://fonts/families/Montserrat.json",
+          "ExtraBold",
+          "Normal"
+         ]
+        },
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          75
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          150,
+          0,
+          28
+         ]
+        },
+        "Text": "Shop",
+        "TextColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "TextSize": 23,
+        "Transparency": 1,
+        "ZIndex": 3
+       }
+      }
+     ],
+     "class": "ImageButton",
+     "name": "ShopButton",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        1,
+        0.5
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        1,
+        -30,
+        0.5,
+        -124
+       ]
+      },
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        96,
+        0,
+        103
+       ]
+      },
+      "Transparency": 1
+     }
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "0",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "1",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "2",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "3",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "4",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "5",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "6",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "7",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "8",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "9",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "10",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "11",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "12",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "13",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "14",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "15",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "16",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "17",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "18",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "19",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "20",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "21",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "22",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "23",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "24",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://135220260162973",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Outline",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "ImageLabel",
+         "name": "Icon",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://135414431922346",
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 2
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Art",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          96,
+          0,
+          96
+         ]
+        },
+        "Transparency": 1
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "Color": {
+           "t": "Color3",
+           "v": [
+            0.01568627543747425,
+            0.01568627543747425,
+            0.2078431397676468
+           ]
+          },
+          "Thickness": 4
+         }
+        }
+       ],
+       "class": "TextLabel",
+       "name": "Label",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "FontFace": {
+         "t": "Font",
+         "v": [
+          "rbxasset://fonts/families/Montserrat.json",
+          "ExtraBold",
+          "Normal"
+         ]
+        },
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          74
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          150,
+          0,
+          28
+         ]
+        },
+        "Text": "Index",
+        "TextColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "TextSize": 23,
+        "Transparency": 1,
+        "ZIndex": 3
+       }
+      }
+     ],
+     "class": "ImageButton",
+     "name": "IndexButton",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        1,
+        0.5
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        1,
+        -30,
+        0.5,
+        0
+       ]
+      },
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        96,
+        0,
+        102
+       ]
+      },
+      "Transparency": 1
+     }
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "0",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "1",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "2",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "3",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "4",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "5",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "6",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "7",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "8",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "9",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "10",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "11",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "12",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "13",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "14",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "15",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "16",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "17",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "18",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "19",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "20",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "21",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "22",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "23",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "24",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://130239585218876",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Outline",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "ImageLabel",
+         "name": "Icon",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://111625281134332",
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 2
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Art",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          96,
+          0,
+          96
+         ]
+        },
+        "Transparency": 1
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "Color": {
+           "t": "Color3",
+           "v": [
+            0.01568627543747425,
+            0.01568627543747425,
+            0.2078431397676468
+           ]
+          },
+          "Thickness": 4
+         }
+        }
+       ],
+       "class": "TextLabel",
+       "name": "Label",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "FontFace": {
+         "t": "Font",
+         "v": [
+          "rbxasset://fonts/families/Montserrat.json",
+          "ExtraBold",
+          "Normal"
+         ]
+        },
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          82
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          150,
+          0,
+          28
+         ]
+        },
+        "Text": "Rebirth",
+        "TextColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "TextSize": 23,
+        "Transparency": 1,
+        "ZIndex": 3
+       }
+      }
+     ],
+     "class": "ImageButton",
+     "name": "RebirthButton",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        1,
+        0.5
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        1,
+        -30,
+        0.5,
+        124
+       ]
+      },
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        96,
+        0,
+        110
+       ]
+      },
+      "Transparency": 1
+     }
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "0",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "1",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "2",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "3",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "4",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "5",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "6",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "7",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "8",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "9",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "10",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "11",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "12",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "13",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "14",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "15",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "16",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "17",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "18",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "19",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "20",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "21",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "22",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "23",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "24",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://92023031757269",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Outline",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "ImageLabel",
+         "name": "Icon",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://74898267844348",
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 2
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Art",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          128,
+          0,
+          128
+         ]
+        },
+        "Transparency": 1
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "Color": {
+           "t": "Color3",
+           "v": [
+            0.01568627543747425,
+            0.01568627543747425,
+            0.2078431397676468
+           ]
+          },
+          "Thickness": 4
+         }
+        }
+       ],
+       "class": "TextLabel",
+       "name": "Label",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "FontFace": {
+         "t": "Font",
+         "v": [
+          "rbxasset://fonts/families/Montserrat.json",
+          "ExtraBold",
+          "Normal"
+         ]
+        },
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          109
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          200,
+          0,
+          37
+         ]
+        },
+        "Text": "Backpack",
+        "TextColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "TextSize": 30,
+        "Transparency": 1,
+        "ZIndex": 3
+       }
+      }
+     ],
+     "class": "ImageButton",
+     "name": "BackpackButton",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        0.5,
+        1
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        0.5,
+        0,
+        1,
+        -10
+       ]
+      },
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        128,
+        0,
+        146
+       ]
+      },
+      "Transparency": 1
+     }
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIGradient",
+         "name": "UIGradient",
+         "props": {
+          "Transparency": {
+           "t": "NumberSequence",
+           "v": [
+            [
+             0,
+             0.699999988079071,
+             0
+            ],
+            [
+             0.5199999809265137,
+             0.699999988079071,
+             0
+            ],
+            [
+             1,
+             1,
+             0
+            ]
+           ]
+          }
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Band",
+       "props": {
+        "BackgroundColor3": {
+         "t": "Color3",
+         "v": [
+          0,
+          0,
+          0
+         ]
+        },
+        "BorderSizePixel": 0,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          0,
+          0,
+          19
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          1,
+          0,
+          0,
+          72
+         ]
+        }
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "0",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "1",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "2",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "3",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "4",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "5",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "6",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "7",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "8",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "9",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "10",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "11",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "12",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "13",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "14",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "15",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "16",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "17",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "18",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "19",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "20",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "21",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "22",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "23",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "24",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://102958481124343",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Outline",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "ImageLabel",
+         "name": "Icon",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://130900093336093",
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 2
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Art",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0,
+          0.5
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          16,
+          0.5,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          96,
+          0,
+          96
+         ]
+        },
+        "Transparency": 1,
+        "ZIndex": 2
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "Color": {
+           "t": "Color3",
+           "v": [
+            0.01568627543747425,
+            0.01568627543747425,
+            0.2078431397676468
+           ]
+          },
+          "Thickness": 4
+         }
+        }
+       ],
+       "class": "TextLabel",
+       "name": "Value",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0,
+          0.5
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "FontFace": {
+         "t": "Font",
+         "v": [
+          "rbxasset://fonts/families/Montserrat.json",
+          "ExtraBold",
+          "Normal"
+         ]
+        },
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          136,
+          0.5,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          270,
+          0,
+          60
+         ]
+        },
+        "Text": "0",
+        "TextColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "TextSize": 45,
+        "TextXAlignment": {
+         "e": "TextXAlignment",
+         "t": "EnumItem",
+         "v": "Left"
+        },
+        "Transparency": 1,
+        "ZIndex": 3
+       }
+      }
+     ],
+     "class": "Frame",
+     "name": "Power",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        0,
+        1
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        0,
+        0,
+        1,
+        -111
+       ]
+      },
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        411,
+        0,
+        103
+       ]
+      },
+      "Transparency": 1
+     }
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIGradient",
+         "name": "UIGradient",
+         "props": {
+          "Transparency": {
+           "t": "NumberSequence",
+           "v": [
+            [
+             0,
+             0.699999988079071,
+             0
+            ],
+            [
+             0.5199999809265137,
+             0.699999988079071,
+             0
+            ],
+            [
+             1,
+             1,
+             0
+            ]
+           ]
+          }
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Band",
+       "props": {
+        "BackgroundColor3": {
+         "t": "Color3",
+         "v": [
+          0,
+          0,
+          0
+         ]
+        },
+        "BorderSizePixel": 0,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          0,
+          0,
+          19
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          1,
+          0,
+          0,
+          72
+         ]
+        }
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "0",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "1",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "2",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "3",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "4",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "5",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "6",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "7",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "8",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "9",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -5,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "10",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "11",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "12",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "13",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -5
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "14",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "15",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              -3
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "16",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "17",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "18",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "19",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "20",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "21",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -2,
+              0,
+              0
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "22",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "23",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -2
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "24",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://115888248582099",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0.01568627543747425,
+              0.01568627543747425,
+              0.2078431397676468
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              1,
+              0,
+              -1
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Outline",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "ImageLabel",
+         "name": "Icon",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://77205932787831",
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 2
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Art",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0,
+          0.5
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          16,
+          0.5,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          96,
+          0,
+          96
+         ]
+        },
+        "Transparency": 1,
+        "ZIndex": 2
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "Color": {
+           "t": "Color3",
+           "v": [
+            0.01568627543747425,
+            0.01568627543747425,
+            0.2078431397676468
+           ]
+          },
+          "Thickness": 4
+         }
+        }
+       ],
+       "class": "TextLabel",
+       "name": "Value",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0,
+          0.5
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "FontFace": {
+         "t": "Font",
+         "v": [
+          "rbxasset://fonts/families/Montserrat.json",
+          "ExtraBold",
+          "Normal"
+         ]
+        },
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          136,
+          0.5,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          270,
+          0,
+          60
+         ]
+        },
+        "Text": "0",
+        "TextColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "TextSize": 45,
+        "TextXAlignment": {
+         "e": "TextXAlignment",
+         "t": "EnumItem",
+         "v": "Left"
+        },
+        "Transparency": 1,
+        "ZIndex": 3
+       }
+      }
+     ],
+     "class": "Frame",
+     "name": "Cash",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        0,
+        1
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        0,
+        0,
+        1,
+        -8
+       ]
+      },
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        411,
+        0,
+        103
        ]
       },
       "Transparency": 1
