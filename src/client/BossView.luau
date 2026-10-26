@@ -66,8 +66,9 @@ local NUMBER_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.F
 local NUMBER_SIZE = 20
 local NUMBER_SHADOW = 1 -- px the shadow sits down and right
 local NUMBER_SHADOW_ALPHA = 0.75 -- shadow transparency
-local NUMBER_RISE = 3 -- studs it floats up
-local NUMBER_LIFE = 0.7 -- seconds on screen
+local NUMBER_RISE = 3.5 -- studs it floats up
+local NUMBER_LIFE = 0.45 -- seconds on screen
+local NUMBER_POP = 1.4 -- how big it overshoots as it pops in, before settling to full size
 local DEATH = 0.5 -- seconds it takes to shrink away
 local SLEEP = Config.BossSleep
 local INTRO = Config.BossIntro
@@ -79,7 +80,8 @@ local SHUT_COLOUR = Color3.fromRGB(30, 23, 40) -- a shut eye's line
 
 local views = {} -- [body] = { animal, last position, colours, hitAt, diedAt }
 
--- "-10" over the boss's head: pops in, floats up a little off to one side, fades
+-- "-10" over the boss's head: pops in past full size and settles, shoots up a little off to
+-- one side easing to a stop, then fades and shrinks away (QM: quicker, with a pop)
 local function damageNumber(body, amount)
 	local gui = Instance.new("BillboardGui")
 	gui.Adornee = body
@@ -107,19 +109,33 @@ local function damageNumber(body, amount)
 	shadow.TextTransparency = NUMBER_SHADOW_ALPHA
 	local label = text(Color3.new(1, 1, 1), 0, 2)
 	local scale = Instance.new("UIScale")
-	scale.Scale = 0.4
+	scale.Scale = 0
 	scale.Parent = holder
 	holder.Parent = gui
 	gui.Parent = body
-	TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
-		:Play()
-	TweenService:Create(gui, TweenInfo.new(NUMBER_LIFE, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+	-- pops in: bursts past full size, then settles back (overshoot and settle)
+	local grow = TweenService:Create(scale, TweenInfo.new(0.06, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Scale = NUMBER_POP,
+	})
+	grow.Completed:Connect(function()
+		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+			:Play()
+	end)
+	grow:Play()
+	-- shoots up fast and eases to a stop (slow out)
+	TweenService:Create(gui, TweenInfo.new(NUMBER_LIFE, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
 		StudsOffset = gui.StudsOffset + Vector3.new(x * 0.3, NUMBER_RISE, 0),
 	}):Play()
+	-- then fades and shrinks away over its last half
 	local fade =
-		TweenInfo.new(NUMBER_LIFE * 0.4, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, NUMBER_LIFE * 0.6)
+		TweenInfo.new(NUMBER_LIFE * 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, NUMBER_LIFE * 0.5)
 	TweenService:Create(label, fade, { TextTransparency = 1 }):Play()
 	TweenService:Create(shadow, fade, { TextTransparency = 1 }):Play()
+	task.delay(NUMBER_LIFE * 0.5, function()
+		TweenService:Create(scale, TweenInfo.new(NUMBER_LIFE * 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Scale = 0.6,
+		}):Play()
+	end)
 	task.delay(NUMBER_LIFE, gui.Destroy, gui)
 end
 
