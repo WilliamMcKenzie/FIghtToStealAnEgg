@@ -663,27 +663,27 @@ return {
 	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
 	--           (a guess from how fast each ran in LassoAPet)
 	Pets = {
-		Horse = { Rarity = "Common", Cash = 3, Tier = 1, Lean = 0 },
+		Horse = { Rarity = "Common", Cash = 3, Tier = 1, Lean = 0, Speed = 1 },
 		-- Meadow
-		Pig = { Rarity = "Uncommon", Cash = 9, Tier = 1, Lean = 0.5 },
-		Bunny = { Rarity = "Uncommon", Cash = 12, Tier = 1, Lean = -0.6 },
-		Pinto = { Rarity = "Uncommon", Cash = 15, Tier = 1, Lean = -0.2 },
-		Fish = { Rarity = "Rare", Cash = 24, Tier = 1, Lean = 0.6 },
-		Rhino = { Rarity = "Epic", Cash = 90, Tier = 2, Lean = 0.6 },
-		Unicorn = { Rarity = "Legendary", Cash = 450, Tier = 2, Lean = -0.4 },
+		Pig = { Rarity = "Uncommon", Cash = 9, Tier = 1, Lean = 0.5, Speed = 0.8 },
+		Bunny = { Rarity = "Uncommon", Cash = 12, Tier = 1, Lean = -0.6, Speed = 1.2 },
+		Pinto = { Rarity = "Uncommon", Cash = 15, Tier = 1, Lean = -0.2, Speed = 1.1 },
+		Fish = { Rarity = "Rare", Cash = 24, Tier = 1, Lean = 0.6, Speed = 0.6 },
+		Rhino = { Rarity = "Epic", Cash = 90, Tier = 2, Lean = 0.6, Speed = 1.35 },
+		Unicorn = { Rarity = "Legendary", Cash = 450, Tier = 2, Lean = -0.4, Speed = 1.8 },
 		-- Desert
-		Cactus = { Rarity = "Uncommon", Cash = 18, Tier = 1, Lean = 0.2 },
-		Scorpion = { Rarity = "Rare", Cash = 60, Tier = 1, Lean = 0 },
-		Sandworm = { Rarity = "Epic", Cash = 180, Tier = 2, Lean = 0.5 },
-		SpineLizard = { Rarity = "Epic", Cash = 240, Tier = 2, Lean = -0.5 },
-		Snake = { Rarity = "Legendary", Cash = 750, Tier = 3, Lean = -0.3 },
+		Cactus = { Rarity = "Uncommon", Cash = 18, Tier = 1, Lean = 0.2, Speed = 1.31 },
+		Scorpion = { Rarity = "Rare", Cash = 60, Tier = 1, Lean = 0, Speed = 1.77 },
+		Sandworm = { Rarity = "Epic", Cash = 180, Tier = 2, Lean = 0.5, Speed = 1.7 },
+		SpineLizard = { Rarity = "Epic", Cash = 240, Tier = 2, Lean = -0.5, Speed = 1.97 },
+		Snake = { Rarity = "Legendary", Cash = 750, Tier = 3, Lean = -0.3, Speed = 2.8 },
 		-- Tundra
-		Penguin = { Rarity = "Uncommon", Cash = 45, Tier = 1, Lean = 0.3 },
-		Boar = { Rarity = "Uncommon", Cash = 91, Tier = 1, Lean = -0.2 },
-		Snowman = { Rarity = "Rare", Cash = 180, Tier = 1, Lean = 0.4 },
-		IceGolem = { Rarity = "Epic", Cash = 760, Tier = 2, Lean = 0.4 },
-		SnackYak = { Rarity = "Epic", Cash = 9000, Tier = 2, Lean = 0.5 }, -- (a Robux pet in LassoAPet: in no egg)
-		Icebringer = { Rarity = "Legendary", Cash = 2000, Tier = 3, Lean = 0.2 },
+		Penguin = { Rarity = "Uncommon", Cash = 45, Tier = 1, Lean = 0.3, Speed = 2.355 },
+		Boar = { Rarity = "Uncommon", Cash = 91, Tier = 1, Lean = -0.2, Speed = 2.517 },
+		Snowman = { Rarity = "Rare", Cash = 180, Tier = 1, Lean = 0.4, Speed = 2.678 },
+		IceGolem = { Rarity = "Epic", Cash = 760, Tier = 2, Lean = 0.4, Speed = 2.86 },
+		SnackYak = { Rarity = "Epic", Cash = 9000, Tier = 2, Lean = 0.5, Speed = 3 }, -- (a Robux pet in LassoAPet: in no egg)
+		Icebringer = { Rarity = "Legendary", Cash = 2000, Tier = 3, Lean = 0.2, Speed = 3.8 },
 	},
 	-- a pet's health and speed (Shared/Pets): set by its rarity, not its biome (QM, Oct 25:
 	-- they're mostly a status signal; later biomes' pets earn more, not fight better).
@@ -700,6 +700,10 @@ return {
 			Mythic = { Health = 200, Speed = 32.5 },
 		},
 		Lean = 0.25, -- Lean 1: +25% health, -25% speed (Lean -1 the other way)
+		-- Speed (QM, Oct 26): each pet's own, LassoAPet's: MountSpeed studs/s x its Speed in
+		-- Config.Pets (Lasso's AnimalStats Speed; its horse rides at 44). This replaces the
+		-- rarity's Speed and the Lean's speed half; a pet without a Speed keeps those.
+		MountSpeed = 44,
 		Hitbox = 0.5, -- 0: size doesn't matter; 1: twice the hitbox, twice the health
 		TierGrowth = 1.6, -- each size tier reads this much bigger than the one below (LassoAPet's)
 	},
