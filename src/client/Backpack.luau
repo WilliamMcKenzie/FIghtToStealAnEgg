@@ -57,14 +57,19 @@ local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic" }
 -- each rarity's square: a radial gradient (lighter middle, darker edge) with a lighter outline.
 -- (These only colour the templates when they're first made: after that, StarterGui > Hud >
 -- Root > BackpackPopup > Body > Items > <rarity> > OwnedTemplate is what to edit.)
+-- each rarity's square (QM, Oct 26): { dark (its edges), light (the glow in the middle), outline }
+local function hexes(dark, light, outline)
+	return { Dark = Color3.fromHex(dark), Light = Color3.fromHex(light), Outline = Color3.fromHex(outline) }
+end
 local ITEM_COLORS = {
-	Common = Color3.fromRGB(150, 156, 168),
-	Uncommon = Color3.fromRGB(70, 180, 60),
-	Rare = Color3.fromRGB(36, 104, 214),
-	Epic = Color3.fromRGB(128, 38, 220),
-	Legendary = Color3.fromRGB(232, 176, 44),
-	Mythic = Color3.fromRGB(226, 48, 92),
+	Common = hexes("6E7385", "C6C6C6", "B1B1B1"),
+	Uncommon = hexes("009356", "08E600", "29E200"),
+	Rare = hexes("004699", "0097E6", "00C5EE"),
+	Epic = hexes("7710CC", "B246DE", "D567FF"),
+	Legendary = hexes("BE8800", "EEC315", "FFE985"),
+	Mythic = hexes("A0103C", "E8305C", "FF7A9A"), -- (not QM's yet)
 }
+local ITEM_OUTLINE = 4 -- px
 local RADIAL = "rbxassetid://106131181340173" -- (rbxassetid of assets/ui/RadialGlow.png: white in the middle fading out)
 local UNKNOWN = Color3.fromHex("C1A283")
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -344,7 +349,7 @@ end
 -- and a white ring round the one you hold (Ring, shown by the game)
 local function ownedTemplate(rarity)
 	return function()
-		local base = ITEM_COLORS[rarity] or ITEM_COLORS.Common
+		local colors = ITEM_COLORS[rarity] or ITEM_COLORS.Common
 		local b = Instance.new("TextButton")
 		b.Text = ""
 		b.AutoButtonColor = false
@@ -368,22 +373,22 @@ local function ownedTemplate(rarity)
 		ring.Parent = b
 		local panel = Instance.new("Frame")
 		panel.Name = "Panel"
-		panel.BackgroundColor3 = if RADIAL ~= "" then base:Lerp(Color3.new(0, 0, 0), 0.3) else base
+		panel.BackgroundColor3 = if RADIAL ~= "" then colors.Dark else colors.Light
 		panel.BorderSizePixel = 0
 		panel.Size = UDim2.fromScale(1, 1)
 		panel.ZIndex = 2
 		rounded(panel, 6)
 		local outline = Instance.new("UIStroke")
 		outline.Name = "Outline"
-		outline.Color = base:Lerp(WHITE, 0.45)
-		outline.Thickness = 3
+		outline.Color = colors.Outline
+		outline.Thickness = ITEM_OUTLINE
 		outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 		outline.Parent = panel
 		local glow = Instance.new("ImageLabel")
 		glow.Name = "Glow"
 		glow.BackgroundTransparency = 1
 		glow.Image = RADIAL
-		glow.ImageColor3 = base:Lerp(WHITE, 0.3)
+		glow.ImageColor3 = colors.Light
 		glow.Size = UDim2.fromScale(1, 1)
 		glow.ZIndex = 2
 		rounded(glow, 6)
