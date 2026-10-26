@@ -23,6 +23,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
+local TweenService = game:GetService("TweenService")
 
 local HudIcons = require(script.Parent.HudIcons)
 local Outline = require(script.Parent.Outline)
@@ -218,6 +219,44 @@ function Hud.start()
 			AnchorPoint = Vector2.new(1, 0.5),
 			Position = UDim2.new(1, -SIDE_MARGIN, 0.5, (i - 2) * SIDE_GAP),
 		})
+	end
+
+	-- the Shop button rustles every RUSTLE_EVERY seconds (QM): its icon swells a touch and
+	-- shakes, then settles (not while you're hovering it). A UIScale on the icon, so it doesn't
+	-- fight the hover's own grow (client/Snappy, which sizes it).
+	local RUSTLE_EVERY = 3
+	local RUSTLE_GROW = 1.1
+	local RUSTLE_SHAKE = { -10, 9, -7, 5, -3, 0 } -- degrees, 0.05s each
+	local shop = root:FindFirstChild("ShopButton")
+	local shopArt = shop and shop:FindFirstChild("Art")
+	if Ui.live and shopArt then
+		local hovered = false
+		shop.MouseEnter:Connect(function()
+			hovered = true
+		end)
+		shop.MouseLeave:Connect(function()
+			hovered = false
+		end)
+		local swell = shopArt:FindFirstChild("Rustle") or Instance.new("UIScale")
+		swell.Name = "Rustle"
+		swell.Parent = shopArt
+		task.spawn(function()
+			while true do
+				task.wait(RUSTLE_EVERY)
+				if hovered or not shop.Visible then
+					continue
+				end
+				TweenService:Create(swell, TweenInfo.new(0.08, Enum.EasingStyle.Quad), { Scale = RUSTLE_GROW }):Play()
+				for _, r in RUSTLE_SHAKE do
+					if hovered then
+						break
+					end
+					TweenService:Create(shopArt, TweenInfo.new(0.05, Enum.EasingStyle.Sine), { Rotation = r }):Play()
+					task.wait(0.05)
+				end
+				TweenService:Create(swell, TweenInfo.new(0.12, Enum.EasingStyle.Quad), { Scale = 1 }):Play()
+			end
+		end)
 	end
 
 	-- the Backpack button (QM, Oct 25), bottom centre: opens client/Backpack
