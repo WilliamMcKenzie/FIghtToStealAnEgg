@@ -3,7 +3,9 @@
 -- (assets/ui/icons, made by tools/ui_icons.py) and the outline is put back on here, the same
 -- for all of them. Roblox can't stroke the shape inside an image (a UIStroke only follows the
 -- frame), so the icon's white silhouette is laid behind it a few times, nudged out in a ring
--- and tinted: that ring is the outline. Labels get a UIStroke of the same colour.
+-- and tinted: that ring is the outline. The nudges are in px, not a share of the icon, so a
+-- bigger icon gets the same width of outline as a small one. Labels get a UIStroke of the same
+-- colour.
 --
 -- Tuned in one place, as attributes on StarterGui > Hud (they take effect in Play, and live
 -- while playing):

@@ -167,26 +167,29 @@ function Hud.start()
 	local hudFrames = {} -- (hidden while a popup is open)
 	local LABEL_TEXT = 30 -- (at the 128 icon size; scaled with the button)
 	local function iconButton(name, art, labelTop, scale, props)
-		local size = 128 * scale
 		local button, fresh = Ui.make(root, name, "ImageButton")
 		if fresh then
 			button.BackgroundTransparency = 1
 			button.Image = ""
-			button.Size = UDim2.fromOffset(math.round(size), math.round((labelTop + 37) * scale))
+			button.Size = UDim2.fromOffset(math.round(128 * scale), math.round((labelTop + 37) * scale))
 			for k, v in props do
 				button[k] = v
 			end
 		end
-		Outline.icon(button, "Art", HudIcons[art], HudIcons[art .. "Mask"], {
+		-- (the icon and label follow the button's size: resize the button and the icon grows with
+		-- it, while its outline stays OutlineThickness wide)
+		local height = labelTop + 37
+		local holder = Outline.icon(button, "Art", HudIcons[art], HudIcons[art .. "Mask"], {
 			AnchorPoint = Vector2.new(0.5, 0),
 			Position = UDim2.fromScale(0.5, 0),
-			Size = UDim2.fromOffset(math.round(size), math.round(size)),
+			Size = UDim2.fromScale(1, 128 / height),
 		})
+		Ui.make(holder, "Square", "UIAspectRatioConstraint")
 		text(button, "Label", {
 			Text = art,
 			TextSize = math.round(LABEL_TEXT * scale),
 			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.new(0.5, 0, 0, math.round(labelTop * scale)),
+			Position = UDim2.fromScale(0.5, labelTop / height),
 			Size = UDim2.fromOffset(math.round(200 * scale), math.round(37 * scale)),
 			ZIndex = 3,
 		})
