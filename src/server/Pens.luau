@@ -82,7 +82,7 @@ end
 
 -- Pets in your pen (QM, Oct 25: the ones equipped in your Backpack), wandering about
 -- inside it: each an invisible body in workspace.PenPets that client/BossView draws (Model is the
--- pet's kind, ModelSize its size), like the training mobs.
+-- pet's kind, ModelSize its size), like the biomes' mobs.
 local petFolder = Instance.new("Folder")
 petFolder.Name = "PenPets"
 petFolder.Parent = workspace

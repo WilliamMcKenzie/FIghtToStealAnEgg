@@ -1,7 +1,7 @@
 -- Readies the map (Server/Map: the one baked into the place) and starts what runs on
--- it: pens, eggs and the bosses' fights, the training grounds, and the weapons bosses
+-- it: pens, eggs and the bosses' fights, the biomes' mobs, and the weapons bosses
 -- drop (Server/Arsenal: everyone starts with the sword). Relays slashes and shots so
--- other players see them (and lets them hit bosses, mobs and dummies: Server/Combat),
+-- other players see them (and lets them hit bosses and mobs: Server/Combat),
 -- and spawns a boss on /boss. Your pet (player attribute Pet,
 -- the Horse to start) is all your health and speed (Shared/Pets); /ride <pet> swaps it.
 
@@ -25,9 +25,9 @@ local Hatchery = require(script.Hatchery)
 local Map = require(script.Map)
 local Pens = require(script.Pens)
 local PetInventory = require(script.PetInventory)
+local Mobs = require(script.Mobs)
 local Regen = require(script.Regen)
 local Regions = require(script.Regions)
-local Training = require(script.Training)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
 -- workspace.FightBarrierStyle: the red fight barriers' quasicrystal knobs (beside
@@ -44,10 +44,10 @@ Pens.start(map)
 PetInventory.start() -- (the pets you own and keep in your pen: the Backpack)
 Hatchery.start() -- (stolen eggs in your hotbar, put down in your pen and hatched)
 Eggs.start(map)
-Training.start(map)
+Mobs.start(map) -- (the enemies out in the biomes, to farm Strength off)
 Regions.start()
 Regen.start() -- (healing after Config.Regen.Delay seconds without being hit)
-Data.start() -- (after Training: it loads over the grounds' defaults)
+Data.start()
 Arsenal.start() -- (each player's weapon tool, and the spin when a boss dies)
 
 local remote = Instance.new("RemoteEvent")

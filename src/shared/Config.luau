@@ -604,7 +604,7 @@ return {
 	},
 
 	-- rebirth (Server/Data, the Rebirth popup): cash needed is Cost x Growth ^ rebirths so far;
-	-- it resets your cash, Strength and training grounds, and each rebirth makes every hit
+	-- it resets your cash, Strength and regions, and each rebirth makes every hit
 	-- train StrengthBonus more (0.5: 1.5x after one, 2x after two)
 	Rebirth = {
 		Cost = 25000,
@@ -703,8 +703,8 @@ return {
 	-- regions (QM, Oct 25): each biome past the Meadow is bought with cash. Until you own
 	-- it, its gate shows a blocker only you see (client/Regions: a navy wall with its name,
 	-- price and a Buy button, and its shadow on the floor); Server/Regions sells it and
-	-- Server/Data saves it (Region<Name>). A rebirth locks them again, like the training
-	-- grounds. Prices are placeholders.
+	-- Server/Data saves it (Region<Name>). A rebirth locks them
+	-- again. Prices are placeholders.
 	Regions = {
 		Cost = {
 			Meadow = 0,
@@ -735,76 +735,72 @@ return {
 		MaxSpeed = 2,
 	},
 
-	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
-	-- trains the damage it dealt x the enemy's Strength x PerDamage (QM, Oct 25), so it
-	-- grows with your damage, and your damage grows with it on Config.Power's log curve.
-	-- The training grounds at the south of the base, one per biome, are fenced off until
-	-- bought with cash (a rebirth will lock them again); their mobs wander and come back
-	-- Respawn seconds after they fall, for AFK training (RuneScape's sand crabs).
-	-- Rough AFK times from 0 Strength with the Kendo Stick, swinging non-stop on one ground:
-	--             to 1K     10K     100K     1M
-	--   Dummies  1.3 min   8 min    56 min   7 h
-	--   Meadow   0.7       4        28       3.5 h
-	--   Desert   0.3       1.6      11       83 min
-	--   Tundra   0.1       0.5      4        28 min
-	--   Lava     -         0.2      1.2      9 min
-	-- A mob's Health is about 6 Kendo Stick hits for the Strength you'd have arriving there.
-	-- Mobs fight back (QM, Oct 26): hit one and it turns on you, follows you round its yard
-	-- at Chase x its Speed and bites with its Attacks (Server/BossAttacks' Contact, like
-	-- the bosses), until you've left its yard, died, or not hit it for Calm seconds. Gentle
-	-- hits never take you below 1 health, so standing AFK is safe (set Gentle = false on an
-	-- attack to let it kill); Roblox's regen (1% of your health a second) wins against one
-	-- mob, not a crowd.
+	-- training (Server/Combat): Strength comes from attacking. Every hit trains the damage
+	-- it dealt x the enemy's Strength x PerDamage (QM, Oct 25), so it grows with your
+	-- damage, and your damage grows with it on Config.Power's log curve.
 	Training = {
 		PerDamage = 0.1, -- (at 0 Strength a Kendo Stick hit deals 10: Strength 2 trains 2, as before)
-		Grounds = {
-			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
+	},
+
+	-- the enemies out in the biomes (Server/Mobs; QM, Oct 26: they replace the training
+	-- grounds). Each biome keeps Count of its mob wandering its floor, back Respawn seconds
+	-- after one falls, so you farm Strength where you fight. While a boss is out in a
+	-- biome (someone stole one of its eggs) it stops sending new ones; those already there
+	-- stay, and it fills up again once that boss is dead or gone home.
+	-- They're a real threat (QM, Oct 26), well under a boss: each one bites for about 40%
+	-- of its biome boss's damage a second, and can kill you. Walk within Aggro studs of one,
+	-- or hit it, and it comes for you at Chase x its Speed (you still outrun it on any pet),
+	-- until you're dead, Leash studs from where it spawned, or you've neither hit it nor
+	-- stood within Aggro of it for Calm seconds.
+	-- A mob's Health is about 6 Kendo Stick hits for the Strength you'd have arriving there.
+	Mobs = {
+		Biomes = {
 			Meadow = {
-				Cost = 300,
 				Mob = "Pig",
 				Size = 0.55,
 				Health = 180,
-				Count = 4,
+				Count = 6,
 				Strength = 2,
 				Speed = 4,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 3, Gentle = true } },
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 6 } }, -- (boss: 10 a second)
 			},
 			Desert = {
-				Cost = 4000,
 				Mob = "KingCrab",
 				Name = "Sand Crab",
 				Tint = "Sand",
 				Size = 1,
 				Health = 270,
-				Count = 5,
+				Count = 7,
 				Strength = 5,
 				Speed = 2.5,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 5, Gentle = true } },
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 12 } }, -- (boss: 20)
 			},
 			Ice = {
-				Cost = 40000,
 				Mob = "Penguin",
 				Size = 0.6,
 				Health = 350,
-				Count = 4,
+				Count = 7,
 				Strength = 15,
 				Speed = 3,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 8, Gentle = true } },
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 20 } }, -- (boss: 35)
 			},
 			Lava = {
-				Cost = 400000,
 				Mob = "RockHog",
 				Size = 0.5,
 				Health = 430,
-				Count = 4,
+				Count = 8,
 				Strength = 45,
 				Speed = 3.5,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 12, Gentle = true } },
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 35 } }, -- (boss: 60)
 			},
 		},
-		Respawn = 4,
+		Respawn = 6, -- seconds after one falls before its biome sends another
+		Aggro = 16, -- studs: come this close (from its edge) and it notices you
 		Chase = 2.5, -- an angry mob moves this many times its Speed
-		Calm = 8, -- seconds without being hit before it forgets you
+		Leash = 60, -- studs from where it spawned: it won't follow you further
+		Calm = 6, -- seconds you're out of its Aggro and not hitting it before it forgets you
+		Edge = 16, -- studs: none spawn this close to a biome's edges (its gateways)
+		Clear = 24, -- studs: none spawn this close to a player
 		MobRadius = 2.5, -- a mob's body half-width (hits and reach)
 	},
 

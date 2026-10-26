@@ -1,5 +1,5 @@
--- Draws every boss and training mob: the server only has an invisible body in
--- workspace.Bosses (server/Bosses.luau) or workspace.Mobs (server/Training.luau); here
+-- Draws every boss and biome mob: the server only has an invisible body in
+-- workspace.Bosses (server/Bosses.luau) or workspace.Mobs (server/Mobs.luau); here
 -- each gets its model (the Horse driver with the animal's own data from Shared/Animals,
 -- by its Model, ModelSize and Tint attributes, so idle, walk and gallop blend by its speed),
 -- stood on the ground under the body and facing its way. When its Health drops it

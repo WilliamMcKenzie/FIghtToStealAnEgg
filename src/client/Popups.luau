@@ -561,7 +561,7 @@ local function buildRebirth()
 		Size = UDim2.fromOffset(700, 40),
 	})
 	-- each stat: what you have -> what you'll have (QM, Oct 24: a rebirth resets your cash,
-	-- Strength and training grounds; every hit trains more for each one: Config.Rebirth)
+	-- Strength and regions; every hit trains more for each one: Config.Rebirth)
 	local rows = {
 		{ "Cash", Color3.fromRGB(255, 120, 110) },
 		{ "Power", Color3.fromRGB(150, 245, 90) },
