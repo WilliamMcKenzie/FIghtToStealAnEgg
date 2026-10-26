@@ -61,7 +61,7 @@ end
 -- QM's kingdom game (its colour multiplied by #FFB3B3, easing back to its own over 300 ms)
 local FLASH = 0.3 -- seconds a hit's tint takes to fade
 local FLASH_TINT = Color3.fromRGB(255, 179, 179)
--- damage numbers: red Montserrat with a black outline, popping up over its head (QM)
+-- damage numbers: plain red Montserrat (no outline, QM), popping up over its head
 local NUMBER_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local NUMBER_SIZE = 20
 local NUMBER_RISE = 3 -- studs it floats up
@@ -92,10 +92,6 @@ local function damageNumber(body, amount)
 	label.TextSize = NUMBER_SIZE
 	label.TextColor3 = Color3.fromRGB(255, 50, 50)
 	label.Text = "-" .. tostring(math.round(amount))
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = Color3.new(0, 0, 0)
-	stroke.Thickness = 2
-	stroke.Parent = label
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0.4
 	scale.Parent = label
@@ -109,7 +105,6 @@ local function damageNumber(body, amount)
 	local fade =
 		TweenInfo.new(NUMBER_LIFE * 0.4, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, NUMBER_LIFE * 0.6)
 	TweenService:Create(label, fade, { TextTransparency = 1 }):Play()
-	TweenService:Create(stroke, fade, { Transparency = 1 }):Play()
 	task.delay(NUMBER_LIFE, gui.Destroy, gui)
 end
 
