@@ -21,6 +21,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -75,6 +76,9 @@ local UNKNOWN = Color3.fromHex("C1A283")
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local MERGE_TEXTURE = "rbxassetid://87121220953662" -- (assets/ui/merge_button_texture.png: QM's green checker)
 local MERGE_DARK = Color3.fromHex("00A529") -- the MERGE button's outline and shadow
+local MERGE_PULSE = 0.05 -- how much bigger it swells at the top of each pulse
+local MERGE_PULSE_TIME = 1.1 -- seconds a pulse takes
+local MERGE_SPIN = 40 -- degrees a second the sunburst behind it turns
 local TYPE_ORDER = { Melee = 1, Ranged = 2, Magic = 3 }
 -- the Pets tab (QM's mockup, Oct 26): your pen's slots along the top, a gap, then a row per
 -- rarity like the Items tab
@@ -856,6 +860,18 @@ function Backpack.init()
 		mergeButton.Size = UDim2.fromOffset(math.round(690 * k), math.round(228 * k))
 		mergeButton.ZIndex = 6
 		Instance.new("UIScale").Parent = mergeButton
+		-- (a sunburst turning behind it while it's up: QM's spin screen rays)
+		local rays = Instance.new("ImageLabel")
+		rays.Name = "Rays"
+		rays.BackgroundTransparency = 1
+		rays.Image = Config.WeaponDrops.RaysImage
+		rays.ImageColor3 = Color3.fromHex("C8FF8A")
+		rays.ImageTransparency = 0.35
+		rays.AnchorPoint = Vector2.new(0.5, 0.5)
+		rays.Position = UDim2.fromScale(0.5, 0.5)
+		rays.Size = UDim2.fromOffset(math.round(690 * k * 1.25), math.round(690 * k * 1.25))
+		rays.ZIndex = 5
+		rays.Parent = mergeButton
 		local shadow = Instance.new("Frame")
 		shadow.Name = "Shadow"
 		shadow.BackgroundColor3 = MERGE_DARK
@@ -906,17 +922,33 @@ function Backpack.init()
 	end
 	if Ui.live then
 		local scale = mergeButton:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", mergeButton)
+		-- (hover and press tween this; it's multiplied by the pulse each frame)
+		local press = Instance.new("NumberValue")
+		press.Value = 1
 		mergeButton.MouseEnter:Connect(function()
-			tween(scale, 0.12, { Scale = 1.05 }, Enum.EasingStyle.Back)
+			tween(press, 0.12, { Value = 1.05 }, Enum.EasingStyle.Back)
 		end)
 		mergeButton.MouseLeave:Connect(function()
-			tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
+			tween(press, 0.12, { Value = 1 }, Enum.EasingStyle.Back)
 		end)
 		mergeButton.MouseButton1Down:Connect(function()
-			tween(scale, 0.06, { Scale = 0.92 })
+			tween(press, 0.06, { Value = 0.92 })
+		end)
+		-- while it's up: a gentle pulse, and the sunburst behind it turning (QM)
+		local rays = mergeButton:FindFirstChild("Rays")
+		local t = 0
+		RunService.RenderStepped:Connect(function(dt)
+			if not (mergeButton.Visible and holder.Visible) then
+				return
+			end
+			t += dt
+			scale.Scale = press.Value * (1 + MERGE_PULSE * math.sin(t * math.pi * 2 / MERGE_PULSE_TIME))
+			if rays then
+				rays.Rotation = (rays.Rotation + dt * MERGE_SPIN) % 360
+			end
 		end)
 		mergeButton.Activated:Connect(function()
-			tween(scale, 0.15, { Scale = 1.05 }, Enum.EasingStyle.Back)
+			tween(press, 0.15, { Value = 1.05 }, Enum.EasingStyle.Back)
 			local id = mergeButton:GetAttribute("Merges")
 			if id and mergeRemote then
 				mergeRemote:FireServer(id)
