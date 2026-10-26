@@ -704,6 +704,38 @@ return {
 		TierGrowth = 1.6, -- each size tier reads this much bigger than the one below (LassoAPet's)
 	},
 
+	-- Sprint (QM, Oct 26; client/Sprint): ride Delay seconds without stopping and your pet
+	-- builds up to a sprint, Speed x its speed, over Ramp seconds. Stopping (letting go of
+	-- the controls, or held up against something: under StopAt of your speed) drops you
+	-- straight back. LassoAPet's sprint is 2x; this game's is 1.3x (QM).
+	Sprint = { On = true, Speed = 1.3, Delay = 1.5, Ramp = 1.2, StopAt = 0.4 },
+	-- The rest is LassoAPet's riding feel, ported as it is (its own Config values). Where it
+	-- measured speeds in studs/s against "a horse's sprint", here that's the Horse's speed
+	-- x Sprint.Speed (worked out in code), and the tiers are multiples of it.
+	-- Speed lines while you sprint (client/SpeedLines): Rate a second at Speed studs/s (a
+	-- sprint), more or fewer with your speed up to MaxScale x, none otherwise. Each starts
+	-- From of the way from the middle to a corner and shoots Travel further out over Life
+	-- seconds, Length by Thickness pixels (on a 1000 px tall screen), white at Opacity at
+	-- its most solid. Zoom: the whole effect's size on the screen. In a Studio playtest the
+	-- camera gets SpeedLines<Key> attributes to tune them live.
+	SpeedLines = { On = true, Zoom = 1.2, Rate = 200, Speed = 88, MaxScale = 2, From = 0.5, Travel = 0.8, Life = 0.32, Length = 200, Thickness = 9, Opacity = 0.6 },
+	-- The sprint camera (client/SprintCam): sprinting, the view widens to Fov degrees (a
+	-- fisheye-like stretch at the edges) and the camera comes in to Zoom x its usual
+	-- distance, easing in over InTime seconds and back over OutTime; x your speed over a
+	-- horse's sprint, between MinScale and MaxScale. Breaking into a higher sprint tier
+	-- bounces the camera's distance: in to Bounce.In x, out to Bounce.Out x, then settling.
+	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5, MinScale = 0.5, MaxScale = 1.8, Bounce = { In = 0.7, InTime = 0.1, Out = 1.2, OutTime = 0.15, SettleTime = 0.4 } },
+	-- Sprint tiers, in horse's sprints (LassoAPet's 180, 360 and 440 studs/s over its horse's
+	-- 88): breaking into one replays the whoosh, bounces the camera, flashes the sky and
+	-- steps the wind louder (up to 2x).
+	SprintTiers = { 2.05, 4.1, 5 },
+	-- A white trail off you while you sprint (client/SprintTrail): Life seconds long at a
+	-- horse's sprint, longer the faster you go, up to MaxLife.
+	SprintTrail = { On = true, Life = 0.12, MaxLife = 0.6, Transparency = 0.55 },
+	-- The sky flashes white on each sprint tier-up, fading back over Time seconds
+	-- (client/SkyFlash). Start: its see-through at the flash. Distance: studs round the camera.
+	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
+
 	-- regions (QM, Oct 25): each biome past the Meadow is bought with cash. Until you own
 	-- it, its gate shows a blocker only you see (client/Regions: a navy wall with its name,
 	-- price and a Buy button, and its shadow on the floor); Server/Regions sells it and
