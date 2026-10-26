@@ -111,7 +111,6 @@ function MapFile.decode(text)
 		local area = { Name = a.name, Tiles = {}, Floor = {} }
 		if a.spawn then
 			area.Spawn, area.Pens, area.PenSize = a.spawn, a.pens, a.penSize
-			area.Training, area.TrainSize = a.training, a.trainSize
 		end
 		if a.bounds then
 			area.Bounds, area.DaisRadius, area.Nests = a.bounds, a.daisRadius, {}

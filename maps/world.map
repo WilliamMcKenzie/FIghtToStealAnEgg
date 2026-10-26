@@ -66,7 +66,7 @@
   "Stone": [162,169,163]
 },
 "areas": [
-  {"name":"Base","spawn":[0,-72],"pens":[[-136,32],[-68,32],[0,32],[68,32],[136,32]],"penSize":56,"training":[["Ice",-140,-112],["Meadow",-140,-52],["Lava",140,-112],["Desert",140,-52]],"trainSize":48},
+  {"name":"Base","spawn":[0,-72],"pens":[[-136,32],[-68,32],[0,32],[68,32],[136,32]],"penSize":56},
   {"name":"Meadow","bounds":[-112,-176,112,-352],"daisRadius":32},
   {"name":"Desert","bounds":[-124,-352,124,-552],"daisRadius":36},
   {"name":"Ice","bounds":[-140,-552,140,-776],"daisRadius":40},

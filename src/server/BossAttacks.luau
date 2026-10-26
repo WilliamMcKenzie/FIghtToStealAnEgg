@@ -4,7 +4,8 @@
 --
 --   Contact { Every, Reach, Damage, Gentle }: everyone in the fight within Reach studs of
 --         its edge takes Damage, at most every Every seconds (QM, Oct 24: all bosses, for
---         now). Gentle ones never take anyone below 1 health (the training mobs).
+--         now). Gentle ones never take anyone below 1 health (unused: QM, Oct 26 wants the
+--         biomes' mobs to be able to kill you).
 --   Slam  { Every, Range, Radius, Windup, Damage }: when a fighter is within Range, it
 --         stops, a red circle grows in front of it for Windup seconds, then everything
 --         inside takes Damage. Step out of the circle.
@@ -20,7 +21,7 @@
 -- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
---         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too)
+--         (b: { c = { Attacks, Radius }, biome }; Server/Mobs' mobs use it too)
 --   BossAttacks.fighter(player) -> { root, humanoid, extra } or nil, if they're alive
 
 local Players = game:GetService("Players")

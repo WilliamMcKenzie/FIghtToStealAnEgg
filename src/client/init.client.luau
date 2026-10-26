@@ -2,7 +2,7 @@
 -- out, and it attacks by itself (QM, Oct 24, Archero-style). Melee weapons slash as
 -- below; Ranged and Magic ones shoot at the nearest target in their Range (client/Shots
 -- draws the shots, the server runs them for the damage), but only while you stand still.
--- While a boss (or a training mob or dummy) is within AimRange the torso turns toward it, eased (not snapped), and
+-- While a boss (or a biome's mob) is within AimRange the torso turns toward it, eased (not snapped), and
 -- whenever one is within AttackRange and the cooldown allows, it slashes along that aim:
 -- the upper body swings the held sword (SwingPose) along the arc (SlashFx). It plays
 -- here at once and is relayed through the server, which also deals the damage.
@@ -130,20 +130,17 @@ local function wrap(a)
 end
 
 -- the nearest thing to hit within `range` of the character (flat distance to its edge):
--- a boss (workspace.Bosses), or a training mob or dummy (workspace.Mobs) in a ground
--- you've unlocked
+-- a boss (workspace.Bosses), or a biome's mob (workspace.Mobs)
 local function nearestBoss(root, range)
 	local best, bestDist = nil, range
 	for _, name in { "Bosses", "Mobs" } do
 		local folder = workspace:FindFirstChild(name)
 		for _, body in if folder then folder:GetChildren() else {} do
-			local ground = body:GetAttribute("Ground")
 			if
 				body:IsA("BasePart")
 				and (body:GetAttribute("Health") or 0) > 0
 				and not body:GetAttribute("Asleep") -- (arriving, or asleep, it can't be hit)
 				and not body:GetAttribute("Intro")
-				and (ground == nil or player:GetAttribute("Train" .. ground) ~= false)
 			then
 				local d = ((body.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude
 					- (body:GetAttribute("Radius") or 0)
