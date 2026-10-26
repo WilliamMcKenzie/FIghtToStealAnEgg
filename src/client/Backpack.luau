@@ -739,6 +739,26 @@ function Backpack.init()
 		layout.SortOrder = Enum.SortOrder.LayoutOrder
 		layout.Parent = pen
 	end
+	-- a soft line between the pen and the rows, fading out at both ends (QM)
+	local separator
+	separator, fresh = Ui.make(pets, "Separator", "Frame")
+	if fresh then
+		separator.BackgroundColor3 = UNKNOWN
+		separator.BackgroundTransparency = 0.4
+		separator.BorderSizePixel = 0
+		separator.AnchorPoint = Vector2.new(0.5, 0.5)
+		separator.Position = UDim2.new(0.5, 0, 0, 16 + ITEM + PEN_GAP / 2)
+		separator.Size = UDim2.new(1, -60, 0, 6)
+		rounded(separator, 3)
+		local fadeEnds = Instance.new("UIGradient")
+		fadeEnds.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.12, 0),
+			NumberSequenceKeypoint.new(0.88, 0),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		fadeEnds.Parent = separator
+	end
 	local petRowsFrame
 	petRowsFrame, fresh = Ui.make(pets, "Rows", "ScrollingFrame")
 	if fresh then
@@ -1042,7 +1062,7 @@ function Backpack.init()
 			local kind = equipped[i]
 			if kind then
 				local template = petTemplates[TABS.Pets.rarity(kind)] or petRows[1][3]
-				local b = petSquare(template, kind, pen, i, 1, true)
+				local b = petSquare(template, kind, pen, i, 1, false) -- (no white ring in the pen, QM)
 				pressable(b, function()
 					if petRemote then
 						petRemote:FireServer("unequip", i)

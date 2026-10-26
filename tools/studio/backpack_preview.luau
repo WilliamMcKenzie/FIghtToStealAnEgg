@@ -184,7 +184,7 @@ if pets then
 		local kind = inPen[i]
 		if kind then
 			local row = rows:FindFirstChild(Config.Pets[kind].Rarity)
-			square(row.OwnedTemplate, kind, pen, i, 1, true, false)
+			square(row.OwnedTemplate, kind, pen, i, 1, false, false)
 		else
 			local e = petUnknown:Clone()
 			e.Name = "Empty" .. i
