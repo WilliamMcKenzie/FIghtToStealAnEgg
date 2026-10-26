@@ -13,6 +13,9 @@
 --
 -- Hovering a tile shows its name and details over the row.
 --
+-- In Studio it's StarterGui > Hud > Root > BackpackPopup (client/Ui): the tiles are copied
+-- from Grid > TileTemplate and Equipped > EquippedTemplate / EmptyTemplate, so edit those.
+--
 --   Backpack.init()   -- once, from Hud, after Popups.init (Popups.toggle("Backpack") opens it)
 
 local Players = game:GetService("Players")
@@ -28,6 +31,7 @@ local Power = require(Shared.Power)
 local Weapons = require(Shared.Weapons.Weapons)
 local WeaponIcons = require(Shared.Weapons.WeaponIcons)
 local Popups = require(script.Parent.Popups)
+local Ui = require(script.Parent.Ui)
 
 local Backpack = {}
 
@@ -197,24 +201,26 @@ local function petModel(kind)
 	return petModels[kind] and petModels[kind]:Clone()
 end
 
-local function icon(parent, tab, id)
+-- the item's picture in `img` (a tile's Icon): its icon, or (when there's none yet) its
+-- model in a viewport over where the Icon is
+local function icon(img, tab, id)
 	local image = if tab == "Weapons" then WeaponIcons[id] else PetIcons.Pets[id]
 	if image then
-		local img = Instance.new("ImageLabel")
-		img.BackgroundTransparency = 1
 		img.Image = image
-		img.ScaleType = Enum.ScaleType.Fit
-		img.AnchorPoint = Vector2.new(0.5, 0.5)
-		img.Position = UDim2.fromScale(0.5, 0.52)
-		img.Size = UDim2.fromScale(0.78, 0.78)
-		img.Parent = parent
-		return img
+		img.Visible = true
+		return
+	end
+	img.Visible = false
+	if not Ui.live then
+		return
 	end
 	local vp = Instance.new("ViewportFrame")
+	vp.Name = "Model"
 	vp.BackgroundTransparency = 1
-	vp.AnchorPoint = Vector2.new(0.5, 0.5)
-	vp.Position = UDim2.fromScale(0.5, 0.54)
-	vp.Size = UDim2.fromScale(0.86, 0.86)
+	vp.AnchorPoint = img.AnchorPoint
+	vp.Position = img.Position
+	vp.Size = UDim2.new(img.Size.X.Scale * 1.1, img.Size.X.Offset, img.Size.Y.Scale * 1.1, img.Size.Y.Offset)
+	vp.ZIndex = img.ZIndex
 	vp.Ambient = Color3.fromRGB(190, 190, 200)
 	vp.LightColor = WHITE
 	vp.LightDirection = Vector3.new(-0.4, -1, -0.6)
@@ -232,8 +238,79 @@ local function icon(parent, tab, id)
 		local from = Vector3.new(0.75, 0.45, -1).Unit
 		cam.CFrame = CFrame.lookAt(box.Position + from * d, box.Position)
 	end
-	vp.Parent = parent
-	return vp
+	vp.Parent = img.Parent
+end
+
+local function iconLabel(parent, props)
+	local img, fresh = Ui.make(parent, "Icon", "ImageLabel")
+	if fresh then
+		img.BackgroundTransparency = 1
+		img.ScaleType = Enum.ScaleType.Fit
+		img.AnchorPoint = Vector2.new(0.5, 0.5)
+		for k, v in props do
+			img[k] = v
+		end
+	end
+	return img
+end
+
+-- a tile: the item on a dark card, "x5" top right, its odds bottom right (the template the
+-- grid's tiles, and the equipped row's, are copied from)
+local function tileTemplate(size)
+	return function()
+		local b = Instance.new("TextButton")
+		b.Text = ""
+		b.AutoButtonColor = false
+		b.BackgroundTransparency = 1
+		b.Size = UDim2.fromOffset(size, size)
+		local scale = Instance.new("UIScale")
+		scale.Name = "Hover"
+		scale.Parent = b
+		Popups.card(b, { Name = "Card", Size = UDim2.fromScale(1, 1), Active = false })
+		iconLabel(b, {
+			Image = PetIcons.Pets.Horse or "",
+			Position = UDim2.fromScale(0.5, 0.52),
+			Size = UDim2.fromScale(0.78, 0.78),
+		})
+		Popups.text(b, {
+			Name = "Count",
+			Text = "x2",
+			TextSize = 30,
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.new(1, -10, 0, 6),
+			Size = UDim2.new(1, -20, 0, 34),
+			TextXAlignment = Enum.TextXAlignment.Right,
+			ZIndex = 3,
+		})
+		local c = rarityColors("Common")
+		local odds = Popups.text(b, {
+			Name = "Odds",
+			Text = "1/57",
+			TextSize = 30,
+			TextColor3 = c.Fill,
+			AnchorPoint = Vector2.new(1, 1),
+			Position = UDim2.new(1, -10, 1, -4),
+			Size = UDim2.new(1, -20, 0, 34),
+			TextXAlignment = Enum.TextXAlignment.Right,
+			ZIndex = 3,
+		})
+		odds:FindFirstChildOfClass("UIStroke").Color = c.Stroke
+		return b
+	end
+end
+
+-- an empty slot in the row: a faded card
+local function emptyTemplate()
+	local s = Popups.darkPanel(nil, { Size = UDim2.fromOffset(SLOT, SLOT), ImageTransparency = 0.55 }, 0.5)
+	Popups.text(s, {
+		Name = "Label",
+		Text = "Empty",
+		TextSize = 26,
+		TextColor3 = SOFT,
+		TextTransparency = 0.4,
+		Size = UDim2.fromScale(1, 1),
+	})
+	return s
 end
 
 -- ---- the popup ------------------------------------------------------------------------
@@ -244,9 +321,8 @@ function Backpack.init()
 	local sortBy = "Rarity"
 	local flashUntil = 0
 	local rebuild -- (below)
-
-	local petRemote = ReplicatedStorage:WaitForChild("PetEquip", 10)
-	local weaponRemote = ReplicatedStorage:WaitForChild("EquipWeapon", 10)
+	local fresh
+	local petRemote, weaponRemote -- (in Play)
 
 	-- the header: how many are equipped (or the hovered tile's details)
 	local header = Popups.text(body, {
@@ -259,28 +335,30 @@ function Backpack.init()
 	-- (short soft lines either side of it, like QM's reference)
 	local dashes = {}
 	for side = -1, 1, 2 do
-		local d = Instance.new("Frame")
-		d.BackgroundColor3 = WHITE
-		d.BorderSizePixel = 0
-		d.AnchorPoint = Vector2.new(0.5, 0.5)
-		d.Size = UDim2.fromOffset(110, 4)
-		local g = Instance.new("UIGradient")
-		g.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 1),
-			NumberSequenceKeypoint.new(0.5, 0.45),
-			NumberSequenceKeypoint.new(1, 1),
-		})
-		g.Parent = d
-		d.Parent = body
+		local d
+		d, fresh = Ui.make(body, if side < 0 then "DashLeft" else "DashRight", "Frame")
+		if fresh then
+			d.BackgroundColor3 = WHITE
+			d.BorderSizePixel = 0
+			d.AnchorPoint = Vector2.new(0.5, 0.5)
+			d.Position = UDim2.new(0.5, side * 150, 0, HEADER_Y + 20)
+			d.Size = UDim2.fromOffset(110, 4)
+			local g = Instance.new("UIGradient")
+			g.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.5, 0.45),
+				NumberSequenceKeypoint.new(1, 1),
+			})
+			g.Parent = d
+		end
 		dashes[side] = d
 	end
 	local function placeDashes()
 		local half = header.TextBounds.X / 2 + 90
 		for side, d in dashes do
-			d.Position = UDim2.new(0.5, side * half, 0, HEADER_Y + 20)
+			d.Position = UDim2.new(0.5, side * half, d.Position.Y.Scale, d.Position.Y.Offset)
 		end
 	end
-	header:GetPropertyChangedSignal("TextBounds"):Connect(placeDashes)
 	local headerText = ""
 	local function setHeader(text, color)
 		header.Text = text
@@ -289,65 +367,73 @@ function Backpack.init()
 	end
 
 	-- the equipped row
-	local row = Instance.new("Frame")
-	row.Name = "Equipped"
-	row.BackgroundTransparency = 1
-	row.Position = UDim2.fromOffset(0, ROW_Y)
-	row.Size = UDim2.new(1, 0, 0, SLOT)
-	row.Parent = body
-	local rowLayout = Instance.new("UIListLayout")
-	rowLayout.FillDirection = Enum.FillDirection.Horizontal
-	rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	rowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	rowLayout.Padding = UDim.new(0, 30)
-	rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	rowLayout.Parent = row
+	local row
+	row, fresh = Ui.make(body, "Equipped", "Frame")
+	if fresh then
+		row.BackgroundTransparency = 1
+		row.Position = UDim2.fromOffset(0, ROW_Y)
+		row.Size = UDim2.new(1, 0, 0, SLOT)
+	end
+	local rowLayout
+	rowLayout, fresh = Ui.make(row, "Layout", "UIListLayout")
+	if fresh then
+		rowLayout.FillDirection = Enum.FillDirection.Horizontal
+		rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		rowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+		rowLayout.Padding = UDim.new(0, 30)
+		rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	end
 
 	-- a soft white line between the row and the grid, fading out at both ends
-	local line = Instance.new("Frame")
-	line.BackgroundColor3 = WHITE
-	line.BorderSizePixel = 0
-	line.AnchorPoint = Vector2.new(0.5, 0)
-	line.Position = UDim2.new(0.5, 0, 0, LINE_Y)
-	line.Size = UDim2.new(1, -2 * SIDE, 0, 3)
-	line.Parent = body
-	local fade = Instance.new("UIGradient")
-	fade.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(0.2, 0.35),
-		NumberSequenceKeypoint.new(0.8, 0.35),
-		NumberSequenceKeypoint.new(1, 1),
-	})
-	fade.Parent = line
+	local line
+	line, fresh = Ui.make(body, "Line", "Frame")
+	if fresh then
+		line.BackgroundColor3 = WHITE
+		line.BorderSizePixel = 0
+		line.AnchorPoint = Vector2.new(0.5, 0)
+		line.Position = UDim2.new(0.5, 0, 0, LINE_Y)
+		line.Size = UDim2.new(1, -2 * SIDE, 0, 3)
+		local fade = Instance.new("UIGradient")
+		fade.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.2, 0.35),
+			NumberSequenceKeypoint.new(0.8, 0.35),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		fade.Parent = line
+	end
 
 	-- the grid of everything else owned
 	local gridTop = GRID_Y
-	local grid = Instance.new("ScrollingFrame")
-	grid.Name = "Grid"
-	grid.BackgroundTransparency = 1
-	grid.BorderSizePixel = 0
-	grid.Position = UDim2.fromOffset(SIDE, gridTop)
-	grid.Size = UDim2.new(1, -2 * SIDE, 1, -gridTop - 6)
-	grid.CanvasSize = UDim2.new()
-	grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	grid.ScrollingDirection = Enum.ScrollingDirection.Y
-	grid.ScrollBarThickness = 8
-	grid.ScrollBarImageColor3 = WHITE
-	grid.ScrollBarImageTransparency = 0.5
-	grid.Parent = body
-	local pad = Instance.new("UIPadding")
-	pad.PaddingTop = UDim.new(0, 14)
-	pad.PaddingBottom = UDim.new(0, 14)
-	pad.PaddingLeft = UDim.new(0, 6)
-	pad.PaddingRight = UDim.new(0, 6)
-	pad.Parent = grid
-	local gridLayout = Instance.new("UIGridLayout")
-	gridLayout.CellSize = UDim2.fromOffset(CELL.X, CELL.Y)
-	gridLayout.CellPadding = UDim2.fromOffset(18, 16)
-	gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	gridLayout.Parent = grid
+	local grid
+	grid, fresh = Ui.make(body, "Grid", "ScrollingFrame")
+	if fresh then
+		grid.BackgroundTransparency = 1
+		grid.BorderSizePixel = 0
+		grid.Position = UDim2.fromOffset(SIDE, gridTop)
+		grid.Size = UDim2.new(1, -2 * SIDE, 1, -gridTop - 6)
+		grid.CanvasSize = UDim2.new()
+		grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		grid.ScrollingDirection = Enum.ScrollingDirection.Y
+		grid.ScrollBarThickness = 8
+		grid.ScrollBarImageColor3 = WHITE
+		grid.ScrollBarImageTransparency = 0.5
+		local pad = Instance.new("UIPadding")
+		pad.PaddingTop = UDim.new(0, 14)
+		pad.PaddingBottom = UDim.new(0, 14)
+		pad.PaddingLeft = UDim.new(0, 6)
+		pad.PaddingRight = UDim.new(0, 6)
+		pad.Parent = grid
+		local gridLayout = Instance.new("UIGridLayout")
+		gridLayout.Name = "Layout"
+		gridLayout.CellSize = UDim2.fromOffset(CELL.X, CELL.Y)
+		gridLayout.CellPadding = UDim2.fromOffset(18, 16)
+		gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		gridLayout.Parent = grid
+	end
 	local emptyNote = Popups.text(body, {
+		Name = "EmptyNote",
 		Text = "",
 		TextSize = 34,
 		TextColor3 = SOFT,
@@ -355,46 +441,158 @@ function Backpack.init()
 		Size = UDim2.new(1, 0, 0, 50),
 		Visible = false,
 	})
+	-- (in Studio: Equipped > EquippedTemplate / EmptyTemplate and Grid > TileTemplate)
+	local templates = {
+		[row] = Ui.template(row, "EquippedTemplate", tileTemplate(SLOT)),
+		[grid] = Ui.template(grid, "TileTemplate", tileTemplate(CELL.X)),
+	}
+	local emptyOne = Ui.template(row, "EmptyTemplate", emptyTemplate)
 
-	-- a tile: the item on a dark card, "x5" top right, its odds bottom right
+	-- SORT and EQUIP BEST, on the panel's top edge beside the X
+	local function smallText(button, size)
+		local label = button:FindFirstChildOfClass("TextLabel")
+		label.TextSize = size
+		label:FindFirstChildOfClass("UIStroke").Thickness = 3
+	end
+	local sortButton, bestButton
+	sortButton, fresh = Popups.button(
+		holder,
+		{
+			Name = "Sort",
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.new(1, -370, 0, 6),
+			Size = UDim2.fromOffset(250, 66),
+			ZIndex = 5,
+		},
+		"SORT: RARITY",
+		Popups.GREEN,
+		function()
+			sortBy = if sortBy == "Rarity" then "Name" else "Rarity"
+			sortButton:FindFirstChildOfClass("TextLabel").Text = "SORT: " .. string.upper(sortBy)
+			rebuild()
+		end
+	)
+	if fresh then
+		smallText(sortButton, 32)
+	end
+	bestButton, fresh = Popups.button(
+		holder,
+		{
+			Name = "EquipBest",
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.new(1, -100, 0, 6),
+			Size = UDim2.fromOffset(250, 66),
+			ZIndex = 5,
+		},
+		"EQUIP BEST",
+		BLUE,
+		function()
+			if tab == "Pets" then
+				if petRemote then
+					petRemote:FireServer("best")
+				end
+			elseif weaponRemote then
+				-- (rarest first, then the most damage, whatever the grid's sorted by)
+				local list = TABS.Weapons.owned()
+				local t = TABS.Weapons
+				table.sort(list, function(a, b)
+					local ra, rb = RANK[t.rarity(a.id)] or 0, RANK[t.rarity(b.id)] or 0
+					if ra ~= rb then
+						return ra > rb
+					end
+					return t.score(a.id) > t.score(b.id)
+				end)
+				if list[1] then
+					weaponRemote:FireServer(list[1].id)
+				end
+			end
+		end
+	)
+	if fresh then
+		smallText(bestButton, 32)
+	end
+
+	-- the tabs, down the panel's left side
+	local tabButtons = {}
+	for i, name in { "Pets", "Weapons" } do
+		local b
+		b, fresh = Ui.make(holder, name .. "Tab", "TextButton")
+		if fresh then
+			b.Text = ""
+			b.AutoButtonColor = false
+			b.BackgroundTransparency = 1
+			b.AnchorPoint = Vector2.new(1, 0)
+			b.Position = UDim2.new(0, -14, 0, 130 + (i - 1) * 160)
+			b.Size = UDim2.fromOffset(140, 140)
+			b.ZIndex = 4
+		end
+		local scale = Ui.make(b, "Hover", "UIScale")
+		local card = Popups.card(b, { Name = "Card", Size = UDim2.fromScale(1, 1), Active = false })
+		local ring -- (the selected tab's white outline)
+		ring, fresh = Ui.make(b, "Ring", "Frame")
+		if fresh then
+			ring.BackgroundTransparency = 1
+			ring.Size = UDim2.fromScale(1, 1)
+			local rc = Instance.new("UICorner")
+			rc.CornerRadius = UDim.new(0, 14)
+			rc.Parent = ring
+		end
+		local stroke
+		stroke, fresh = Ui.make(ring, "Selected", "UIStroke")
+		if fresh then
+			stroke.Color = WHITE
+			stroke.Thickness = 4
+		end
+		local art = iconLabel(b, { Position = UDim2.fromScale(0.5, 0.42), Size = UDim2.fromScale(0.72, 0.72) })
+		if art.Image == "" then
+			icon(art, name, if name == "Pets" then "Horse" else "Shortsword")
+		end
+		local label = Popups.text(b, {
+			Name = "Label",
+			Text = name,
+			TextSize = 28,
+			AnchorPoint = Vector2.new(0.5, 1),
+			Position = UDim2.new(0.5, 0, 1, -4),
+			Size = UDim2.new(1, 0, 0, 34),
+			ZIndex = 3,
+		})
+		tabButtons[name] = { button = b, scale = scale, card = card, stroke = stroke, label = label }
+	end
+	if not Ui.live then
+		return
+	end
+
+	petRemote = ReplicatedStorage:WaitForChild("PetEquip", 10)
+	weaponRemote = ReplicatedStorage:WaitForChild("EquipWeapon", 10)
+	header:GetPropertyChangedSignal("TextBounds"):Connect(placeDashes)
+
 	local function tile(parent, id, count, order, onClick)
 		local t = TABS[tab]
-		local b = Instance.new("TextButton")
-		b.Name = id
-		b.Text = ""
-		b.AutoButtonColor = false
-		b.BackgroundTransparency = 1
+		local b = Ui.copy(templates[parent], id, parent)
 		b.LayoutOrder = order
-		b.Size = UDim2.fromOffset(if parent == row then SLOT else CELL.X, if parent == row then SLOT else CELL.Y)
-		local scale = Instance.new("UIScale")
-		scale.Parent = b
-		Popups.card(b, { Size = UDim2.fromScale(1, 1), Active = false })
-		icon(b, tab, id)
-		if count and count > 1 then
-			Popups.text(b, {
-				Text = "x" .. count,
-				TextSize = 30,
-				AnchorPoint = Vector2.new(1, 0),
-				Position = UDim2.new(1, -10, 0, 6),
-				Size = UDim2.new(1, -20, 0, 34),
-				TextXAlignment = Enum.TextXAlignment.Right,
-				ZIndex = 3,
-			})
+		local scale = b:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", b)
+		local img = b:FindFirstChild("Icon")
+		if img then
+			icon(img, tab, id)
 		end
-		local odds = t.odds(id)
-		if odds then
-			local c = rarityColors(t.rarity(id))
-			local label = Popups.text(b, {
-				Text = "1/" .. Popups.abbreviate(odds),
-				TextSize = 30,
-				TextColor3 = c.Fill,
-				AnchorPoint = Vector2.new(1, 1),
-				Position = UDim2.new(1, -10, 1, -4),
-				Size = UDim2.new(1, -20, 0, 34),
-				TextXAlignment = Enum.TextXAlignment.Right,
-				ZIndex = 3,
-			})
-			label:FindFirstChildOfClass("UIStroke").Color = c.Stroke
+		local countLabel = b:FindFirstChild("Count")
+		if countLabel then
+			countLabel.Text = "x" .. (count or 1)
+			countLabel.Visible = count ~= nil and count > 1
+		end
+		local oddsLabel = b:FindFirstChild("Odds")
+		if oddsLabel then
+			local odds = t.odds(id)
+			oddsLabel.Visible = odds ~= nil
+			if odds then
+				local c = rarityColors(t.rarity(id))
+				oddsLabel.Text = "1/" .. Popups.abbreviate(odds)
+				oddsLabel.TextColor3 = c.Fill
+				local stroke = oddsLabel:FindFirstChildOfClass("UIStroke")
+				if stroke then
+					stroke.Color = c.Stroke
+				end
+			end
 		end
 		b.MouseEnter:Connect(function()
 			tween(scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
@@ -415,24 +613,12 @@ function Backpack.init()
 			tween(scale, 0.15, { Scale = 1.06 }, Enum.EasingStyle.Back)
 			onClick()
 		end)
-		b.Parent = parent
 		return b
 	end
 
-	-- an empty slot in the row: a faded card
 	local function emptySlot(order)
-		local s = Popups.card(row, {
-			Size = UDim2.fromOffset(SLOT, SLOT),
-			LayoutOrder = order,
-			ImageTransparency = 0.55,
-		})
-		Popups.text(s, {
-			Text = "Empty",
-			TextSize = 26,
-			TextColor3 = SOFT,
-			TextTransparency = 0.4,
-			Size = UDim2.fromScale(1, 1),
-		})
+		local s = Ui.copy(emptyOne, "Empty" .. order, row)
+		s.LayoutOrder = order
 	end
 
 	local function flash(text)
@@ -469,7 +655,7 @@ function Backpack.init()
 		local t = TABS[tab]
 		for _, holderFrame in { row, grid } do
 			for _, child in holderFrame:GetChildren() do
-				if child:IsA("GuiObject") then
+				if child:IsA("GuiObject") and not Ui.isTemplate(child) then
 					child:Destroy()
 				end
 			end
@@ -523,68 +709,6 @@ function Backpack.init()
 		end
 	end
 
-	-- SORT and EQUIP BEST, on the panel's top edge beside the X
-	local function smallText(button, size)
-		local label = button:FindFirstChildOfClass("TextLabel")
-		label.TextSize = size
-		label:FindFirstChildOfClass("UIStroke").Thickness = 3
-	end
-	local sortButton
-	sortButton = Popups.button(
-		holder,
-		{
-			Name = "Sort",
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -370, 0, 6),
-			Size = UDim2.fromOffset(250, 66),
-			ZIndex = 5,
-		},
-		"SORT: RARITY",
-		Popups.GREEN,
-		function()
-			sortBy = if sortBy == "Rarity" then "Name" else "Rarity"
-			sortButton:FindFirstChildOfClass("TextLabel").Text = "SORT: " .. string.upper(sortBy)
-			rebuild()
-		end
-	)
-	smallText(sortButton, 32)
-	local bestButton = Popups.button(
-		holder,
-		{
-			Name = "EquipBest",
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -100, 0, 6),
-			Size = UDim2.fromOffset(250, 66),
-			ZIndex = 5,
-		},
-		"EQUIP BEST",
-		BLUE,
-		function()
-			if tab == "Pets" then
-				if petRemote then
-					petRemote:FireServer("best")
-				end
-			elseif weaponRemote then
-				-- (rarest first, then the most damage, whatever the grid's sorted by)
-				local list = TABS.Weapons.owned()
-				local t = TABS.Weapons
-				table.sort(list, function(a, b)
-					local ra, rb = RANK[t.rarity(a.id)] or 0, RANK[t.rarity(b.id)] or 0
-					if ra ~= rb then
-						return ra > rb
-					end
-					return t.score(a.id) > t.score(b.id)
-				end)
-				if list[1] then
-					weaponRemote:FireServer(list[1].id)
-				end
-			end
-		end
-	)
-	smallText(bestButton, 32)
-
-	-- the tabs, down the panel's left side
-	local tabButtons = {}
 	local function selectTab(name)
 		tab = name
 		for n, b in tabButtons do
@@ -596,54 +720,18 @@ function Backpack.init()
 		grid.CanvasPosition = Vector2.zero
 		rebuild()
 	end
-	for i, name in { "Pets", "Weapons" } do
-		local b = Instance.new("TextButton")
-		b.Name = name .. "Tab"
-		b.Text = ""
-		b.AutoButtonColor = false
-		b.BackgroundTransparency = 1
-		b.AnchorPoint = Vector2.new(1, 0)
-		b.Position = UDim2.new(0, -14, 0, 130 + (i - 1) * 160)
-		b.Size = UDim2.fromOffset(140, 140)
-		b.ZIndex = 4
-		local scale = Instance.new("UIScale")
-		scale.Parent = b
-		local card = Popups.card(b, { Size = UDim2.fromScale(1, 1), Active = false })
-		local ring = Instance.new("Frame") -- (the selected tab's white outline)
-		ring.BackgroundTransparency = 1
-		ring.Size = UDim2.fromScale(1, 1)
-		ring.Parent = b
-		local rc = Instance.new("UICorner")
-		rc.CornerRadius = UDim.new(0, 14)
-		rc.Parent = ring
-		local stroke = Instance.new("UIStroke")
-		stroke.Color = WHITE
-		stroke.Thickness = 4
-		stroke.Parent = ring
-		local art = icon(b, name, if name == "Pets" then "Horse" else "Shortsword")
-		art.Position = UDim2.fromScale(0.5, 0.42)
-		art.Size = UDim2.fromScale(0.72, 0.72)
-		local label = Popups.text(b, {
-			Text = name,
-			TextSize = 28,
-			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(0.5, 0, 1, -4),
-			Size = UDim2.new(1, 0, 0, 34),
-			ZIndex = 3,
-		})
-		tabButtons[name] = { card = card, stroke = stroke, label = label }
-		b.MouseEnter:Connect(function()
-			tween(scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
+	for name, b in tabButtons do
+		b.button.MouseEnter:Connect(function()
+			tween(b.scale, 0.12, { Scale = 1.06 }, Enum.EasingStyle.Back)
 		end)
-		b.MouseLeave:Connect(function()
-			tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
+		b.button.MouseLeave:Connect(function()
+			tween(b.scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
 		end)
-		b.Activated:Connect(function()
+		b.button.Activated:Connect(function()
 			if tab ~= name then
 				selectTab(name)
 			end
 		end)
-		b.Parent = holder
 	end
 
 	-- kept up to date while it's open (and fresh each time it opens)

@@ -10,6 +10,13 @@
 -- so a hit drops the red and exposes the trail, which follows it down half a second on. The buttons don't open anything yet.
 --
 -- Images were uploaded from assets/ui (ids in assets/ui/ids.json).
+--
+-- It's all real objects in StarterGui > Hud for QM to edit in Studio (client/Ui): Root holds
+-- the BossBar, the ShopButton / IndexButton / RebirthButton / BackpackButton, the Power and
+-- Cash counters, the EggHotbar and the popups. tools/studio/uibake.luau puts them there;
+-- in Play this only fills in what's missing and wires them up.
+--
+--   Hud.start()  -- in Play (on require); tools/studio/uibake.luau calls it in Edit mode
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -17,6 +24,7 @@ local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 
 local Popups = require(script.Parent.Popups)
+local Ui = require(script.Parent.Ui)
 
 local Hud = {}
 
@@ -40,8 +48,11 @@ local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight sta
 
 local player = Players.LocalPlayer
 
-local function text(parent, props)
-	local label = Instance.new("TextLabel")
+local function text(parent, name, props)
+	local label, fresh = Ui.make(parent, name, "TextLabel")
+	if not fresh then
+		return label
+	end
 	label.BackgroundTransparency = 1
 	label.FontFace = FONT
 	label.TextSize = TEXT
@@ -54,20 +65,20 @@ local function text(parent, props)
 	stroke.Color = Color3.fromRGB(20, 12, 16)
 	stroke.LineJoinMode = Enum.LineJoinMode.Round
 	stroke.Parent = label
-	label.Parent = parent
 	return label
 end
 
-local function image(parent, name, props)
-	local img = Instance.new(props.button and "ImageButton" or "ImageLabel")
+-- IMAGES[art] as `name` (an ImageButton with props.button)
+local function image(parent, name, art, props)
+	local img, fresh = Ui.make(parent, name, props.button and "ImageButton" or "ImageLabel")
 	props.button = nil
-	img.Name = name
-	img.BackgroundTransparency = 1
-	img.Image = IMAGES[name]
-	for k, v in props do
-		img[k] = v
+	if fresh then
+		img.BackgroundTransparency = 1
+		img.Image = IMAGES[art]
+		for k, v in props do
+			img[k] = v
+		end
 	end
-	img.Parent = parent
 	return img
 end
 
@@ -89,8 +100,10 @@ end
 
 -- a little bounce on hover and press, so the buttons feel alive before they do anything
 local function bouncy(button)
-	local scale = Instance.new("UIScale")
-	scale.Parent = button
+	local scale = Ui.make(button, "Bounce", "UIScale")
+	if not Ui.live then
+		return
+	end
 	local function to(s, t)
 		TweenService:Create(scale, TweenInfo.new(t, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = s })
 			:Play()
@@ -109,205 +122,220 @@ local function bouncy(button)
 	end)
 end
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "Hud"
-gui.IgnoreGuiInset = true
-gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
--- everything inside `root` is in design pixels; the UIScale fits it to the screen
-local root = Instance.new("Frame")
-root.Name = "Root"
-root.BackgroundTransparency = 1
-root.Size = UDim2.fromScale(1, 1)
-root.Parent = gui
-local uiScale = Instance.new("UIScale")
-uiScale.Parent = root
-local function fit()
-	local h = workspace.CurrentCamera.ViewportSize.Y
-	uiScale.Scale = h / DESIGN_HEIGHT
-	-- (the root is scaled down, so it's made bigger by the same factor to fill the screen)
-	root.Size = UDim2.fromScale(1 / uiScale.Scale, 1 / uiScale.Scale)
-end
-fit()
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
-
--- boss bar
-local bar = Instance.new("Frame")
-bar.Name = "BossBar"
-bar.BackgroundTransparency = 1
-bar.AnchorPoint = Vector2.new(0.5, 0)
-bar.Position = UDim2.new(0.5, 0, 0, 44)
-bar.Size = UDim2.fromOffset(646, 91)
-bar.Visible = false
-bar.Parent = root
-image(bar, "BossBarBack", { Size = UDim2.fromScale(1, 1) })
-local trailClip = Instance.new("Frame")
-trailClip.Name = "TrailClip"
-trailClip.BackgroundTransparency = 1
-trailClip.ClipsDescendants = true
-trailClip.Size = UDim2.fromScale(1, 1)
-trailClip.Parent = bar
-local trailImage = image(trailClip, "BossBarTrail", { Size = UDim2.fromOffset(646, 91) })
-local clip = Instance.new("Frame")
-clip.Name = "Clip"
-clip.BackgroundTransparency = 1
-clip.ClipsDescendants = true
-clip.Size = UDim2.fromScale(1, 1)
-clip.Parent = bar
-image(clip, "BossBarFill", { Size = UDim2.fromOffset(646, 91) })
-local bossName = text(bar, {
-	Name = "BossName",
-	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.new(0.5, 0, 0, -6),
-	Size = UDim2.fromOffset(600, 50),
-	ZIndex = 3,
-})
-
--- buttons: stacked down the right edge, centred on the screen's middle (QM's mockup, Oct 26).
--- They stay up during fights now, beside the boss bar, as in the mockup.
-local hudFrames = {} -- (hidden while a popup is open)
-local SIDE_MARGIN = 30 -- design px from the right edge
-local SIDE_GAP = 165 -- design px between the buttons' centres
-for i, b in { { "Shop", 128, 140 }, { "Index", 128, 137 }, { "Rebirth", 132, 146 } } do
-	local img = image(root, b[1], {
-		button = true,
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -SIDE_MARGIN - (132 - b[2]) / 2, 0.5, (i - 2) * SIDE_GAP),
-		Size = UDim2.fromOffset(b[2], b[3]),
+function Hud.start()
+	local gui = Ui.screen("Hud", {
+		IgnoreGuiInset = true,
+		ResetOnSpawn = false,
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 	})
-	bouncy(img)
-	img.Activated:Connect(function()
-		Popups.toggle(b[1])
-	end)
-	table.insert(hudFrames, img)
-end
 
--- the Backpack button (QM, Oct 25), bottom centre: opens client/Backpack
-do
-	local img = image(root, "Backpack", {
-		button = true,
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -10),
-		Size = UDim2.fromOffset(173, 149),
+	-- everything inside `root` is in design pixels; the UIScale fits it to the screen
+	-- (set here in Play: in Studio it's left at the size of the window it was baked in)
+	local root, fresh = Ui.make(gui, "Root", "Frame")
+	if fresh then
+		root.BackgroundTransparency = 1
+		root.Size = UDim2.fromScale(1, 1)
+	end
+	local uiScale = Ui.make(root, "Fit", "UIScale")
+	local function fit()
+		local h = workspace.CurrentCamera.ViewportSize.Y
+		uiScale.Scale = h / DESIGN_HEIGHT
+		-- (the root is scaled down, so it's made bigger by the same factor to fill the screen)
+		root.Size = UDim2.fromScale(1 / uiScale.Scale, 1 / uiScale.Scale)
+	end
+	fit()
+	if Ui.live then
+		workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
+	end
+
+	-- boss bar
+	local bar
+	bar, fresh = Ui.make(root, "BossBar", "Frame")
+	if fresh then
+		bar.BackgroundTransparency = 1
+		bar.AnchorPoint = Vector2.new(0.5, 0)
+		bar.Position = UDim2.new(0.5, 0, 0, 44)
+		bar.Size = UDim2.fromOffset(646, 91)
+		bar.Visible = not Ui.live -- (shown in Studio to edit; in Play only in a fight)
+	end
+	image(bar, "BossBarBack", "BossBarBack", { Size = UDim2.fromScale(1, 1) })
+	local trailClip
+	trailClip, fresh = Ui.make(bar, "TrailClip", "Frame")
+	if fresh then
+		trailClip.BackgroundTransparency = 1
+		trailClip.ClipsDescendants = true
+		trailClip.Size = UDim2.fromScale(1, 1)
+	end
+	local trailImage = image(trailClip, "BossBarTrail", "BossBarTrail", { Size = UDim2.fromOffset(646, 91) })
+	local clip
+	clip, fresh = Ui.make(bar, "Clip", "Frame")
+	if fresh then
+		clip.BackgroundTransparency = 1
+		clip.ClipsDescendants = true
+		clip.Size = UDim2.fromScale(1, 1)
+	end
+	image(clip, "BossBarFill", "BossBarFill", { Size = UDim2.fromOffset(646, 91) })
+	local bossName = text(bar, "BossName", {
+		Text = "BOSS",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0, -6),
+		Size = UDim2.fromOffset(600, 50),
+		ZIndex = 3,
 	})
-	if img.Image == "" then
-		text(img, {
-			Text = "Backpack",
-			TextSize = 40,
+
+	-- buttons: stacked down the right edge, centred on the screen's middle (QM's mockup, Oct 26).
+	-- They stay up during fights now, beside the boss bar, as in the mockup.
+	local hudFrames = {} -- (hidden while a popup is open)
+	local SIDE_MARGIN = 30 -- design px from the right edge
+	local SIDE_GAP = 165 -- design px between the buttons' centres
+	for i, b in { { "Shop", 128, 140 }, { "Index", 128, 137 }, { "Rebirth", 132, 146 } } do
+		local img = image(root, b[1] .. "Button", b[1], {
+			button = true,
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.new(1, -SIDE_MARGIN - (132 - b[2]) / 2, 0.5, (i - 2) * SIDE_GAP),
+			Size = UDim2.fromOffset(b[2], b[3]),
+		})
+		bouncy(img)
+		if Ui.live then
+			img.Activated:Connect(function()
+				Popups.toggle(b[1])
+			end)
+		end
+		table.insert(hudFrames, img)
+	end
+
+	-- the Backpack button (QM, Oct 25), bottom centre: opens client/Backpack
+	do
+		local img = image(root, "BackpackButton", "Backpack", {
+			button = true,
 			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.fromScale(0.5, 1),
-			Size = UDim2.new(1, 0, 0, 50),
+			Position = UDim2.new(0.5, 0, 1, -10),
+			Size = UDim2.fromOffset(173, 149),
+		})
+		bouncy(img)
+		if Ui.live then
+			img.Activated:Connect(function()
+				Popups.toggle("Backpack")
+			end)
+		end
+		table.insert(hudFrames, img)
+	end
+
+	-- counters
+	local counters = {}
+	for i, name in { "Power", "Cash" } do
+		local row = image(root, name, name, {
+			AnchorPoint = Vector2.new(0, 1),
+			Position = UDim2.new(0, 0, 1, -8 - (2 - i) * 103),
+			Size = UDim2.fromOffset(411, 103),
+		})
+		table.insert(hudFrames, row)
+		counters[name] = text(row, "Value", {
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(0, 136, 0.5, 0),
+			Size = UDim2.fromOffset(270, 60),
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = "0",
 		})
 	end
-	bouncy(img)
-	img.Activated:Connect(function()
-		Popups.toggle("Backpack")
-	end)
-	table.insert(hudFrames, img)
-end
 
--- counters
-local counters = {}
-for i, name in { "Power", "Cash" } do
-	local row = image(root, name, {
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, -8 - (2 - i) * 103),
-		Size = UDim2.fromOffset(411, 103),
-	})
-	table.insert(hudFrames, row)
-	counters[name] = text(row, {
-		Name = "Value",
-		AnchorPoint = Vector2.new(0, 0.5),
-		Position = UDim2.new(0, 136, 0.5, 0),
-		Size = UDim2.fromOffset(270, 60),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Text = "0",
-	})
-end
-local function count(name)
-	counters[name].Text = Hud.abbreviate(player:GetAttribute(name))
-	player:GetAttributeChangedSignal(name):Connect(function()
-		counters[name].Text = Hud.abbreviate(player:GetAttribute(name))
-	end)
-end
-count("Power")
-count("Cash")
-
-Popups.abbreviate = Hud.abbreviate
-Popups.init(root, hudFrames)
-require(script.Parent.Backpack).init()
-require(script.Parent.Hotbar).init(root, hudFrames) -- (stolen eggs, right of the Backpack button)
-gui.Parent = player:WaitForChild("PlayerGui")
--- (no Roblox health bar in the top right: QM, Oct 25)
-task.spawn(function()
-	for _ = 1, 10 do
-		if pcall(StarterGui.SetCoreGuiEnabled, StarterGui, Enum.CoreGuiType.Health, false) then
-			return
-		end
-		task.wait(1)
+	Popups.abbreviate = Hud.abbreviate
+	Popups.init(root, hudFrames)
+	require(script.Parent.Backpack).init()
+	require(script.Parent.Hotbar).init(root, hudFrames) -- (stolen eggs, right of the Backpack button)
+	if not Ui.live then
+		return gui
 	end
-end)
 
--- the boss bar follows the nearest living, awake boss within BAR_RANGE
-local BAR_RANGE = 260
-local shown = 1 -- the red's width
-local history = {} -- { { os.clock(), red width }, ... } over the last TRAIL_LAG seconds
-local following = nil
-local filling = 0 -- (os.clock() the bar started filling up from empty)
-RunService.RenderStepped:Connect(function(dt)
-	local folder = workspace:FindFirstChild("Bosses")
-	local character = player.Character
-	local me = character and character:FindFirstChild("HumanoidRootPart")
-	local best, bestDist = nil, math.huge
-	if folder and me then
-		for _, body in folder:GetChildren() do
-			-- (awake ones close enough to matter: the arenas' sleeping bosses don't count)
-			if body:IsA("BasePart") and (body:GetAttribute("Health") or 0) > 0 and not body:GetAttribute("Asleep") then
-				local d = (body.Position - me.Position).Magnitude
-				if d < bestDist and d < BAR_RANGE then
-					best, bestDist = body, d
+	local function count(name)
+		counters[name].Text = Hud.abbreviate(player:GetAttribute(name))
+		player:GetAttributeChangedSignal(name):Connect(function()
+			counters[name].Text = Hud.abbreviate(player:GetAttribute(name))
+		end)
+	end
+	count("Power")
+	count("Cash")
+
+	-- (no Roblox health bar in the top right: QM, Oct 25)
+	task.spawn(function()
+		for _ = 1, 10 do
+			if pcall(StarterGui.SetCoreGuiEnabled, StarterGui, Enum.CoreGuiType.Health, false) then
+				return
+			end
+			task.wait(1)
+		end
+	end)
+
+	-- the boss bar follows the nearest living, awake boss within BAR_RANGE
+	bar.Visible = false
+	local BAR_RANGE = 260
+	local shown = 1 -- the red's width
+	local history = {} -- { { os.clock(), red width }, ... } over the last TRAIL_LAG seconds
+	local following = nil
+	local filling = 0 -- (os.clock() the bar started filling up from empty)
+	RunService.RenderStepped:Connect(function(dt)
+		local folder = workspace:FindFirstChild("Bosses")
+		local character = player.Character
+		local me = character and character:FindFirstChild("HumanoidRootPart")
+		local best, bestDist = nil, math.huge
+		if folder and me then
+			for _, body in folder:GetChildren() do
+				-- (awake ones close enough to matter: the arenas' sleeping bosses don't count)
+				if
+					body:IsA("BasePart")
+					and (body:GetAttribute("Health") or 0) > 0
+					and not body:GetAttribute("Asleep")
+				then
+					local d = (body.Position - me.Position).Magnitude
+					if d < bestDist and d < BAR_RANGE then
+						best, bestDist = body, d
+					end
 				end
 			end
 		end
-	end
-	bar.Visible = best ~= nil and not Popups.isOpen()
-	if not best then
-		following = nil
-		return
-	end
-	local fraction = math.clamp(best:GetAttribute("Health") / best:GetAttribute("MaxHealth"), 0, 1)
-	local now = os.clock()
-	if best ~= following then
-		following = best
-		shown = 0
-		filling = now
-		table.clear(history)
-		bossName.Text = string.upper(best:GetAttribute("Name") or best:GetAttribute("Kind") or "Boss")
-	end
-	if now - filling < FILL_IN then
-		-- (a new fight: up from empty, easing out, to its health)
-		local t = (now - filling) / FILL_IN
-		shown = fraction * (1 - (1 - t) ^ 3)
-		table.clear(history)
-	else
-		shown += (fraction - shown) * (1 - math.exp(-dt * BAR_EASE))
-	end
-	clip.Size = UDim2.fromScale(shown, 1)
+		bar.Visible = best ~= nil and not Popups.isOpen()
+		if not best then
+			following = nil
+			return
+		end
+		local fraction = math.clamp(best:GetAttribute("Health") / best:GetAttribute("MaxHealth"), 0, 1)
+		local now = os.clock()
+		if best ~= following then
+			following = best
+			shown = 0
+			filling = now
+			table.clear(history)
+			bossName.Text = string.upper(best:GetAttribute("Name") or best:GetAttribute("Kind") or "Boss")
+		end
+		if now - filling < FILL_IN then
+			-- (a new fight: up from empty, easing out, to its health)
+			local t = (now - filling) / FILL_IN
+			shown = fraction * (1 - (1 - t) ^ 3)
+			table.clear(history)
+		else
+			shown += (fraction - shown) * (1 - math.exp(-dt * BAR_EASE))
+		end
+		clip.Size = UDim2.fromScale(shown, 1)
 
-	-- the trail: the red's width TRAIL_LAG seconds ago (the oldest sample not newer)
-	table.insert(history, { now, shown })
-	local lagged = history[1][2]
-	while #history > 1 and history[2][1] <= now - TRAIL_LAG do
-		table.remove(history, 1)
-		lagged = history[1][2]
-	end
-	-- (only the stretch the red has left behind: cropped from the left at the red's edge, so
-	-- it never sits under the red, and it's gone when they meet; QM, Oct 25)
-	local from, to = shown, math.max(lagged, shown)
-	trailClip.Position = UDim2.fromScale(from, 0)
-	trailClip.Size = UDim2.fromScale(to - from, 1)
-	trailImage.Position = UDim2.fromOffset(-from * 646, 0)
-end)
+		-- the trail: the red's width TRAIL_LAG seconds ago (the oldest sample not newer)
+		table.insert(history, { now, shown })
+		local lagged = history[1][2]
+		while #history > 1 and history[2][1] <= now - TRAIL_LAG do
+			table.remove(history, 1)
+			lagged = history[1][2]
+		end
+		-- (only the stretch the red has left behind: cropped from the left at the red's edge, so
+		-- it never sits under the red, and it's gone when they meet; QM, Oct 25)
+		local from, to = shown, math.max(lagged, shown)
+		trailClip.Position = UDim2.fromScale(from, 0)
+		trailClip.Size = UDim2.fromScale(to - from, 1)
+		trailImage.Position = UDim2.fromOffset(-from * trailImage.Size.X.Offset, 0)
+	end)
+	return gui
+end
+
+if Ui.live then
+	task.spawn(Hud.start) -- (it waits for StarterGui's copy, which comes with the character)
+end
 
 return Hud

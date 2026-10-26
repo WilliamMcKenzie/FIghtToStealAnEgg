@@ -15,6 +15,12 @@
 --   Popups.toggle(name)                     -- "Shop", "Index", "Rebirth", "Backpack"
 --   Popups.frame(name, title, size) -> body, holder  -- another popup (client/Backpack),
 --                                  -- after init: its content goes in body
+--
+-- They're real objects QM edits in Studio (StarterGui > Hud > Root > ShopPopup ...: see
+-- client/Ui). Every piece is made with a Name and only when it isn't there yet, and its
+-- strokes, corners and gradients only when it's new, so QM's edits are what shows in Play.
+-- The helpers below (text, card, slot, button, bar) take that name as props.Name; without
+-- one they always make a new piece (WeaponSpin's, built fresh each time).
 
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
@@ -23,6 +29,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Ui = require(script.Parent.Ui)
 
 local Popups = {}
 Popups.abbreviate = tostring -- (Hud hands its own over before init: 1.5K, 12M...)
@@ -47,6 +54,25 @@ local ICONS = { -- (the HUD counters' art, cropped to the icon)
 local player = Players.LocalPlayer
 
 -- ---- pieces -------------------------------------------------------------------------
+
+-- props.Name's child of parent if it's there already, otherwise a new `class` (fresh = true:
+-- the caller sets it up). props.Name is taken out of props.
+local function make(parent, class, props)
+	local name = props.Name
+	props.Name = nil
+	if name then
+		return Ui.make(parent, name, class)
+	end
+	local inst = Instance.new(class)
+	inst.Parent = parent
+	return inst, true
+end
+
+local function apply(inst, props)
+	for k, v in props do
+		inst[k] = v
+	end
+end
 
 local function corner(parent, r)
 	local c = Instance.new("UICorner")
@@ -97,22 +123,23 @@ local function gradient(parent, base)
 end
 
 function Popups.text(parent, props)
-	local label = Instance.new("TextLabel")
-	label.BackgroundTransparency = 1
-	label.FontFace = props.bold and BOLD or FONT
+	local bold = props.bold
 	props.bold = nil
+	local label, fresh = make(parent, "TextLabel", props)
+	if not fresh then
+		return label, false
+	end
+	label.BackgroundTransparency = 1
+	label.FontFace = bold and BOLD or FONT
 	label.TextColor3 = WHITE
 	label.TextSize = 36
-	for k, v in props do
-		label[k] = v
-	end
+	apply(label, props)
 	local s = Instance.new("UIStroke")
 	s.Thickness = math.max(2, label.TextSize / 12)
 	s.Color = INK
 	s.LineJoinMode = Enum.LineJoinMode.Round
 	s.Parent = label
-	label.Parent = parent
-	return label
+	return label, true
 end
 
 -- a card: a darker rounded panel (or a coloured one) inside a popup
@@ -120,60 +147,62 @@ end
 -- outline), 9-sliced so it stretches to any size with its corners and outline intact
 local DARK_PANEL = "rbxassetid://76862497378032"
 local DARK_SLICE = Rect.new(26, 26, 490, 492)
-local function darkPanel(props, sliceScale)
-	local img = Instance.new("ImageLabel")
-	img.BackgroundTransparency = 1
-	img.Image = DARK_PANEL
-	img.ScaleType = Enum.ScaleType.Slice
-	img.SliceCenter = DARK_SLICE
-	img.SliceScale = sliceScale
-	for k, v in props do
-		img[k] = v
+local function darkPanel(parent, props, sliceScale)
+	local img, fresh = make(parent, "ImageLabel", props)
+	if fresh then
+		img.BackgroundTransparency = 1
+		img.Image = DARK_PANEL
+		img.ScaleType = Enum.ScaleType.Slice
+		img.SliceCenter = DARK_SLICE
+		img.SliceScale = sliceScale
+		apply(img, props)
 	end
-	return img
+	return img, fresh
 end
 
 -- a card inside a popup: QM's dark panel, or with `colors` a coloured one (hue-shifted)
 function Popups.card(parent, props, colors)
 	if not colors then
-		local img = darkPanel(props, 0.5)
-		img.Parent = parent
-		return img
+		return darkPanel(parent, props, 0.5)
 	end
-	local f = Instance.new("Frame")
-	f.BackgroundColor3 = WHITE
-	f.BorderSizePixel = 0
-	for k, v in props do
-		f[k] = v
+	local f, fresh = make(parent, "Frame", props)
+	if fresh then
+		f.BackgroundColor3 = WHITE
+		f.BorderSizePixel = 0
+		apply(f, props)
+		corner(f, 14)
+		outline(f, 4)
+		gradient(f, colors)
 	end
-	corner(f, 14)
-	outline(f, 4)
-	gradient(f, colors)
-	f.Parent = parent
-	return f
+	return f, fresh
 end
 
 -- an item slot: a square card with a name on top and an amount bottom-right
 function Popups.slot(parent, props, name, amount, icon)
 	local s = Popups.card(parent, props)
 	if icon then
-		local img = Instance.new("ImageLabel")
-		img.BackgroundTransparency = 1
-		img.AnchorPoint = Vector2.new(0.5, 0.5)
-		img.Position = UDim2.fromScale(0.5, 0.55)
-		img.Size = UDim2.fromScale(0.62, 0.62)
-		img.Image = ICONS[icon] or icon
-		if ICONS[icon] then
-			img.ImageRectSize = Vector2.new(103, 103)
+		local img, fresh = Ui.make(s, "Icon", "ImageLabel")
+		if fresh then
+			img.BackgroundTransparency = 1
+			img.AnchorPoint = Vector2.new(0.5, 0.5)
+			img.Position = UDim2.fromScale(0.5, 0.55)
+			img.Size = UDim2.fromScale(0.62, 0.62)
+			img.Image = ICONS[icon] or icon
+			if ICONS[icon] then
+				img.ImageRectSize = Vector2.new(103, 103)
+			end
 		end
-		img.Parent = s
 	end
-	Popups.text(
-		s,
-		{ Text = name or "???", TextSize = 22, Size = UDim2.new(1, 0, 0, 30), Position = UDim2.fromOffset(0, 4) }
-	)
+	Popups.text(s, {
+		Name = "ItemName",
+		Text = name or "???",
+		TextSize = 22,
+		Size = UDim2.new(1, 0, 0, 30),
+		Position = UDim2.fromOffset(0, 4),
+	})
 	if amount then
 		Popups.text(s, {
+			Name = "Amount",
 			Text = amount,
 			TextSize = 28,
 			AnchorPoint = Vector2.new(1, 1),
@@ -187,20 +216,22 @@ end
 
 -- a chunky button: green to buy, grey for actions; it squashes when pressed
 function Popups.button(parent, props, label, colors, onClick)
-	local b = Instance.new("TextButton")
-	b.Text = ""
-	b.AutoButtonColor = false
-	b.BackgroundColor3 = WHITE
-	b.BorderSizePixel = 0
-	for k, v in props do
-		b[k] = v
+	local b, fresh = make(parent, "TextButton", props)
+	if fresh then
+		b.Text = ""
+		b.AutoButtonColor = false
+		b.BackgroundColor3 = WHITE
+		b.BorderSizePixel = 0
+		apply(b, props)
+		corner(b, 12)
+		outline(b, 4)
+		gradient(b, colors or GREEN)
 	end
-	corner(b, 12)
-	outline(b, 4)
-	gradient(b, colors or GREEN)
-	local scale = Instance.new("UIScale")
-	scale.Parent = b
-	Popups.text(b, { Text = label, TextSize = 44, Size = UDim2.fromScale(1, 1) })
+	local scale = Ui.make(b, "Press", "UIScale")
+	Popups.text(b, { Name = "Label", Text = label, TextSize = 44, Size = UDim2.fromScale(1, 1) })
+	if not Ui.live then
+		return b, fresh
+	end
 	local function to(s, t)
 		TweenService:Create(scale, TweenInfo.new(t, Enum.EasingStyle.Back), { Scale = s }):Play()
 	end
@@ -219,29 +250,35 @@ function Popups.button(parent, props, label, colors, onClick)
 	if onClick then
 		b.Activated:Connect(onClick)
 	end
-	b.Parent = parent
-	return b
+	return b, fresh
 end
 Popups.GREEN, Popups.GREY, Popups.GOLD, Popups.MINT = GREEN, GREY, GOLD, MINT
 
 -- a progress bar with an icon on its left end and "have/need" on it; returns a setter
 function Popups.bar(parent, props, icon, colors)
 	local back = Popups.card(parent, props)
-	local track = Instance.new("Frame") -- (inside the card's outline)
-	track.BackgroundTransparency = 1
-	track.Position = UDim2.fromOffset(5, 5)
-	track.Size = UDim2.new(1, -10, 1, -10)
-	track.Parent = back
-	local fill = Instance.new("Frame")
-	fill.BackgroundColor3 = WHITE
-	fill.BorderSizePixel = 0
-	fill.Size = UDim2.fromScale(0, 1)
-	corner(fill, 30)
-	gradient(fill, colors or TEAL)
-	fill.Parent = track
-	local label = Popups.text(back, { Text = "0/0", TextSize = 38, Size = UDim2.fromScale(1, 1), ZIndex = 3 })
+	local track, fresh = Ui.make(back, "Track", "Frame") -- (inside the card's outline)
+	if fresh then
+		track.BackgroundTransparency = 1
+		track.Position = UDim2.fromOffset(5, 5)
+		track.Size = UDim2.new(1, -10, 1, -10)
+	end
+	local fill
+	fill, fresh = Ui.make(track, "Fill", "Frame")
+	if fresh then
+		fill.BackgroundColor3 = WHITE
+		fill.BorderSizePixel = 0
+		fill.Size = UDim2.fromScale(0, 1)
+		corner(fill, 30)
+		gradient(fill, colors or TEAL)
+	end
+	local label =
+		Popups.text(back, { Name = "Label", Text = "0/0", TextSize = 38, Size = UDim2.fromScale(1, 1), ZIndex = 3 })
+	local img
 	if icon then
-		local img = Instance.new("ImageLabel")
+		img, fresh = Ui.make(back, "Icon", "ImageLabel")
+	end
+	if img and fresh then
 		img.BackgroundTransparency = 1
 		img.AnchorPoint = Vector2.new(0.5, 0.5)
 		img.Position = UDim2.new(0, 0, 0.5, 0)
@@ -251,7 +288,6 @@ function Popups.bar(parent, props, icon, colors)
 			img.ImageRectSize = Vector2.new(103, 103)
 		end
 		img.ZIndex = 4
-		img.Parent = back
 	end
 	return function(have, need, text)
 		fill.Size = UDim2.fromScale(math.clamp(have / math.max(need, 1), 0, 1), 1)
@@ -267,19 +303,21 @@ local open = nil
 local blur = nil
 
 local function frame(name, title, size)
-	local holder = Instance.new("Frame")
-	holder.Name = name
-	holder.BackgroundTransparency = 1
-	holder.AnchorPoint = Vector2.new(0.5, 0.5)
-	holder.Position = UDim2.new(0.5, 0, 0.5, 20)
-	holder.Size = UDim2.fromOffset(size.X, size.Y)
+	-- (StarterGui > Hud > Root > ShopPopup: in Studio, tick its Visible to see it while editing;
+	-- the game hides it again until it's opened)
+	local holder, fresh = Ui.make(scaled, name .. "Popup", "Frame")
+	if fresh then
+		holder.BackgroundTransparency = 1
+		holder.AnchorPoint = Vector2.new(0.5, 0.5)
+		holder.Position = UDim2.new(0.5, 0, 0.5, 20)
+		holder.Size = UDim2.fromOffset(size.X, size.Y)
+		holder.ZIndex = 10
+	end
 	holder.Visible = false
-	holder.ZIndex = 10
-	local scale = Instance.new("UIScale")
-	scale.Parent = holder
+	local scale = Ui.make(holder, "Pop", "UIScale")
+	scale.Scale = 1
 
-	local panel = darkPanel({ Name = "Panel", Size = UDim2.fromScale(1, 1) }, 0.8)
-	panel.Parent = holder
+	darkPanel(holder, { Name = "Panel", Size = UDim2.fromScale(1, 1) }, 0.8)
 
 	Popups.text(holder, {
 		Name = "Title",
@@ -292,34 +330,37 @@ local function frame(name, title, size)
 		ZIndex = 3,
 	})
 
-	local close = Instance.new("TextButton")
-	close.Name = "Close"
-	close.Text = ""
-	close.AutoButtonColor = false
-	close.BackgroundColor3 = WHITE
-	close.AnchorPoint = Vector2.new(0.5, 0.5)
-	close.Position = UDim2.new(1, -6, 0, 6)
-	close.Size = UDim2.fromOffset(84, 84)
-	close.ZIndex = 5
-	corner(close, 12)
-	outline(close, 6)
-	gradient(close, RED)
-	Popups.text(close, { Text = "X", TextSize = 64, Size = UDim2.fromScale(1, 1), ZIndex = 6 })
-	close.Activated:Connect(function()
-		Popups.close()
-	end)
-	close.Parent = holder
+	local close
+	close, fresh = Ui.make(holder, "Close", "TextButton")
+	if fresh then
+		close.Text = ""
+		close.AutoButtonColor = false
+		close.BackgroundColor3 = WHITE
+		close.AnchorPoint = Vector2.new(0.5, 0.5)
+		close.Position = UDim2.new(1, -6, 0, 6)
+		close.Size = UDim2.fromOffset(84, 84)
+		close.ZIndex = 5
+		corner(close, 12)
+		outline(close, 6)
+		gradient(close, RED)
+	end
+	Popups.text(close, { Name = "X", Text = "X", TextSize = 64, Size = UDim2.fromScale(1, 1), ZIndex = 6 })
+	if Ui.live then
+		close.Activated:Connect(function()
+			Popups.close()
+		end)
+	end
 
 	-- (content goes in here, inset from the outline)
-	local body = Instance.new("Frame")
-	body.Name = "Body"
-	body.BackgroundTransparency = 1
-	body.Position = UDim2.fromOffset(28, 50)
-	body.Size = UDim2.new(1, -56, 1, -78)
-	body.ZIndex = 2
-	body.Parent = holder
+	local body
+	body, fresh = Ui.make(holder, "Body", "Frame")
+	if fresh then
+		body.BackgroundTransparency = 1
+		body.Position = UDim2.fromOffset(28, 50)
+		body.Size = UDim2.new(1, -56, 1, -78)
+		body.ZIndex = 2
+	end
 
-	holder.Parent = scaled
 	popups[name] = { holder = holder, scale = scale, body = body }
 	return body
 end
@@ -335,23 +376,29 @@ Popups.darkPanel = darkPanel
 local function buildShop()
 	local body = frame("Shop", "SHOP", Vector2.new(1120, 650))
 	-- an offer: a gold card with its name, the items in it, the old and new price
-	local pack = Popups.card(body, { Size = UDim2.new(1, 0, 0, 270) }, GOLD)
-	Popups.text(
-		pack,
-		{ Text = "Starter Pack", TextSize = 64, Size = UDim2.new(1, 0, 0, 80), Position = UDim2.fromOffset(0, 10) }
-	)
+	local pack = Popups.card(body, { Name = "StarterPack", Size = UDim2.new(1, 0, 0, 270) }, GOLD)
+	Popups.text(pack, {
+		Name = "PackName",
+		Text = "Starter Pack",
+		TextSize = 64,
+		Size = UDim2.new(1, 0, 0, 80),
+		Position = UDim2.fromOffset(0, 10),
+	})
 	for i = 1, 5 do
 		Popups.slot(pack, {
+			Name = "Item" .. i,
 			Position = UDim2.fromOffset(20 + (i - 1) * 152, 105),
 			Size = UDim2.fromOffset(138, 138),
 		}, "Item", "x1")
 	end
 	Popups.button(pack, {
+		Name = "Buy",
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.new(1, -24, 0, 170),
 		Size = UDim2.fromOffset(222, 72),
 	}, "R$ --", GREEN)
 	Popups.text(pack, {
+		Name = "OldPrice",
 		Text = "R$ --",
 		TextSize = 40,
 		AnchorPoint = Vector2.new(1, 0),
@@ -360,22 +407,31 @@ local function buildShop()
 		TextColor3 = Color3.fromRGB(230, 230, 230),
 	})
 	-- a boost: a green card with a headline and a price
-	local boost = Popups.card(body, { Position = UDim2.fromOffset(0, 300), Size = UDim2.new(1, 0, 0, 220) }, MINT)
+	local boost =
+		Popups.card(body, { Name = "Boost", Position = UDim2.fromOffset(0, 300), Size = UDim2.new(1, 0, 0, 220) }, MINT)
 	Popups.text(boost, {
+		Name = "Headline",
 		Text = "BOOST Coming Soon!",
 		TextSize = 58,
 		Position = UDim2.fromOffset(220, 20),
 		Size = UDim2.new(1, -240, 0, 80),
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
-	Popups.slot(boost, { Position = UDim2.fromOffset(24, 24), Size = UDim2.fromOffset(170, 170) }, "Boost", "x2")
+	Popups.slot(
+		boost,
+		{ Name = "Item", Position = UDim2.fromOffset(24, 24), Size = UDim2.fromOffset(170, 170) },
+		"Boost",
+		"x2"
+	)
 	Popups.text(boost, {
+		Name = "Multiplier",
 		Text = "x1  ->  x2",
 		TextSize = 64,
 		Position = UDim2.fromOffset(220, 110),
 		Size = UDim2.fromOffset(420, 90),
 	})
 	Popups.button(boost, {
+		Name = "Buy",
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1, -24, 1, -24),
 		Size = UDim2.fromOffset(222, 72),
@@ -385,22 +441,28 @@ end
 local function buildIndex()
 	local body = frame("Index", "Pet Index", Vector2.new(1180, 680))
 	-- the grid of pets: ??? until discovered
-	local grid = Popups.card(body, { Size = UDim2.fromOffset(760, 470) })
+	local grid = Popups.card(body, { Name = "Grid", Size = UDim2.fromOffset(760, 470) })
 	for row = 0, 2 do
 		for col = 0, 4 do
 			Popups.slot(grid, {
+				Name = "Pet" .. (row * 5 + col + 1),
 				Position = UDim2.fromOffset(20 + col * 146, 18 + row * 150),
 				Size = UDim2.fromOffset(132, 136),
 			}, "???", "1/?")
 		end
 	end
 	-- the picked pet's details
-	local detail = Popups.card(body, { Position = UDim2.fromOffset(790, 0), Size = UDim2.fromOffset(334, 310) })
-	Popups.text(
-		detail,
-		{ Text = "???", TextSize = 46, Position = UDim2.fromOffset(0, 150), Size = UDim2.new(1, 0, 0, 50) }
-	)
+	local detail =
+		Popups.card(body, { Name = "Detail", Position = UDim2.fromOffset(790, 0), Size = UDim2.fromOffset(334, 310) })
 	Popups.text(detail, {
+		Name = "PetName",
+		Text = "???",
+		TextSize = 46,
+		Position = UDim2.fromOffset(0, 150),
+		Size = UDim2.new(1, 0, 0, 50),
+	})
+	Popups.text(detail, {
+		Name = "Hint",
 		Text = "Pick a pet",
 		TextSize = 30,
 		bold = true,
@@ -409,8 +471,12 @@ local function buildIndex()
 		TextColor3 = Color3.fromRGB(200, 200, 210),
 	})
 	-- rewards for unlocking enough of them
-	local rewards = Popups.card(body, { Position = UDim2.fromOffset(790, 330), Size = UDim2.fromOffset(334, 230) })
+	local rewards = Popups.card(
+		body,
+		{ Name = "Rewards", Position = UDim2.fromOffset(790, 330), Size = UDim2.fromOffset(334, 230) }
+	)
 	Popups.text(rewards, {
+		Name = "Heading",
 		Text = "Rewards:",
 		TextSize = 28,
 		bold = true,
@@ -419,17 +485,21 @@ local function buildIndex()
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
 	for i = 0, 2 do
-		Popups.slot(
-			rewards,
-			{ Position = UDim2.fromOffset(20 + i * 102, 48), Size = UDim2.fromOffset(92, 92) },
-			"",
-			"x1",
-			if i == 1 then "Cash" else nil
-		)
+		Popups.slot(rewards, {
+			Name = "Reward" .. (i + 1),
+			Position = UDim2.fromOffset(20 + i * 102, 48),
+			Size = UDim2.fromOffset(92, 92),
+		}, "", "x1", if i == 1 then "Cash" else nil)
 	end
-	Popups.button(rewards, { Position = UDim2.fromOffset(40, 152), Size = UDim2.fromOffset(254, 64) }, "CLAIM", GREY)
+	Popups.button(
+		rewards,
+		{ Name = "Claim", Position = UDim2.fromOffset(40, 152), Size = UDim2.fromOffset(254, 64) },
+		"CLAIM",
+		GREY
+	)
 	-- progress to the next reward
 	Popups.text(body, {
+		Name = "UnlocksNeeded",
 		Text = "Unlocks Needed:",
 		TextSize = 28,
 		bold = true,
@@ -437,13 +507,15 @@ local function buildIndex()
 		Size = UDim2.fromOffset(300, 36),
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
-	local set = Popups.bar(body, { Position = UDim2.fromOffset(40, 524), Size = UDim2.fromOffset(720, 66) })
+	local set =
+		Popups.bar(body, { Name = "Progress", Position = UDim2.fromOffset(40, 524), Size = UDim2.fromOffset(720, 66) })
 	set(0, 10)
 end
 
 local function buildRebirth()
 	local body = frame("Rebirth", "REBIRTH", Vector2.new(1100, 640))
 	Popups.text(body, {
+		Name = "Kept",
 		Text = "Your pets and items are all kept!",
 		TextSize = 32,
 		TextColor3 = Color3.fromRGB(150, 245, 90),
@@ -462,17 +534,23 @@ local function buildRebirth()
 		labels[row[1]] = {}
 		for side = 0, 1 do
 			local x = 110 + side * 520
-			local pill =
-				Popups.card(body, { Position = UDim2.fromOffset(x + 50, y + 10), Size = UDim2.fromOffset(310, 78) })
-			local img = Instance.new("ImageLabel")
-			img.BackgroundTransparency = 1
-			img.Image = ICONS[row[1]]
-			img.ImageRectSize = Vector2.new(103, 103)
-			img.Position = UDim2.fromOffset(x, y)
-			img.Size = UDim2.fromOffset(100, 100)
-			img.ZIndex = 3
-			img.Parent = body
+			local which = row[1] .. (if side == 0 then "Now" else "After")
+			local pill = Popups.card(body, {
+				Name = which,
+				Position = UDim2.fromOffset(x + 50, y + 10),
+				Size = UDim2.fromOffset(310, 78),
+			})
+			local img, fresh = Ui.make(body, which .. "Icon", "ImageLabel")
+			if fresh then
+				img.BackgroundTransparency = 1
+				img.Image = ICONS[row[1]]
+				img.ImageRectSize = Vector2.new(103, 103)
+				img.Position = UDim2.fromOffset(x, y)
+				img.Size = UDim2.fromOffset(100, 100)
+				img.ZIndex = 3
+			end
 			labels[row[1]][side] = Popups.text(pill, {
+				Name = "Value",
 				Text = "",
 				TextSize = 52,
 				TextColor3 = if side == 0 then WHITE else row[2],
@@ -481,12 +559,16 @@ local function buildRebirth()
 				TextXAlignment = Enum.TextXAlignment.Left,
 			})
 		end
-		Popups.text(
-			body,
-			{ Text = "->", TextSize = 60, Position = UDim2.fromOffset(470, y + 10), Size = UDim2.fromOffset(150, 78) }
-		)
+		Popups.text(body, {
+			Name = row[1] .. "Arrow",
+			Text = "->",
+			TextSize = 60,
+			Position = UDim2.fromOffset(470, y + 10),
+			Size = UDim2.fromOffset(150, 78),
+		})
 	end
 	Popups.text(body, {
+		Name = "CashNeeded",
 		Text = "Cash Needed:",
 		TextSize = 28,
 		bold = true,
@@ -494,20 +576,25 @@ local function buildRebirth()
 		Size = UDim2.fromOffset(300, 36),
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
-	local set =
-		Popups.bar(body, { Position = UDim2.fromOffset(90, 440), Size = UDim2.fromOffset(470, 70) }, "Cash", GREEN)
+	local set = Popups.bar(
+		body,
+		{ Name = "Progress", Position = UDim2.fromOffset(90, 440), Size = UDim2.fromOffset(470, 70) },
+		"Cash",
+		GREEN
+	)
 	local rebirths = Popups.text(body, {
+		Name = "Rebirths",
 		Text = "You have 0 rebirths",
 		TextSize = 28,
 		bold = true,
 		Position = UDim2.fromOffset(700, 400),
 		Size = UDim2.fromOffset(300, 36),
 	})
-	local remote = ReplicatedStorage:WaitForChild("Rebirth", 10)
+	local remote = Ui.live and ReplicatedStorage:WaitForChild("Rebirth", 10)
 	local busy = false
 	Popups.button(
 		body,
-		{ Position = UDim2.fromOffset(700, 440), Size = UDim2.fromOffset(300, 80) },
+		{ Name = "RebirthButton", Position = UDim2.fromOffset(700, 440), Size = UDim2.fromOffset(300, 80) },
 		"REBIRTH",
 		GREY,
 		function()
@@ -519,6 +606,9 @@ local function buildRebirth()
 			busy = false
 		end
 	)
+	if not Ui.live then
+		return
+	end
 	local function count()
 		local r = player:GetAttribute("Rebirths") or 0
 		local c = Config.Rebirth
@@ -602,13 +692,16 @@ end
 
 function Popups.init(root, hudFrames)
 	scaled, hud = root, hudFrames
+	buildShop()
+	buildIndex()
+	buildRebirth()
+	if not Ui.live then
+		return
+	end
 	blur = Instance.new("BlurEffect")
 	blur.Name = "PopupBlur"
 	blur.Size = 0
 	blur.Parent = Lighting
-	buildShop()
-	buildIndex()
-	buildRebirth()
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if input.KeyCode == Enum.KeyCode.Escape and open and not processed then
 			Popups.close()

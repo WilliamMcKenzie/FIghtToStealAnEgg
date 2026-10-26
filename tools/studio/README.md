@@ -14,3 +14,17 @@ don't rebuild the place from Rojo over it.
 - `MapBaker.lua` is a Studio plugin (copy it into the Plugins folder): **Map > Rebuild** bakes
   Shared/MapData into `workspace.Map` in Edit mode, **Map > Import .map** bakes a file from the map
   editor (tools/mapeditor) straight from disk. Save the place after.
+
+## The UI in StarterGui (QM edits it in Studio)
+
+The HUD, the Shop / Index / Rebirth / Backpack popups and the egg hotbar are real objects in
+`StarterGui > Hud` (see `src/client/Ui.luau`). StarterGui isn't in the Rojo tree, so syncing
+`src/` never touches it: QM's edits there are kept in the place.
+- `python3 lu.py uibake.luau` (Edit, after syncing `src/`): adds whatever UI is missing to
+  StarterGui. It never changes what's there, so run it whenever the UI code gains new pieces.
+  Save the place after.
+- `python3 uisave.py`: saves StarterGui's UI into the repo as `ui/<ScreenGui>.json`; commit
+  `ui/` so QM's edits are in git too. `python3 uiload.py [Hud]` puts them back into a place
+  (replacing those ScreenGuis), e.g. a fresh one.
+In Play the scripts find the objects by name and only wire them up, so renaming or deleting
+one makes the game build a default one in its place.
