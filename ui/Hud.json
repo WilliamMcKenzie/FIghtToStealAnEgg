@@ -22093,7 +22093,8 @@
                   0
                  ]
                 },
-                "Transparency": 1
+                "Transparency": 1,
+                "Visible": false
                }
               },
               {
@@ -22481,7 +22482,8 @@
                   0
                  ]
                 },
-                "Transparency": 1
+                "Transparency": 1,
+                "Visible": false
                }
               },
               {
@@ -22869,7 +22871,8 @@
                   0
                  ]
                 },
-                "Transparency": 1
+                "Transparency": 1,
+                "Visible": false
                }
               },
               {
@@ -29565,6 +29568,96 @@
              ]
             },
             "Transparency": 1
+           }
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UICorner",
+             "name": "UICorner",
+             "props": {
+              "CornerRadius": {
+               "t": "UDim",
+               "v": [
+                0,
+                3
+               ]
+              }
+             }
+            },
+            {
+             "children": [],
+             "class": "UIGradient",
+             "name": "UIGradient",
+             "props": {
+              "Transparency": {
+               "t": "NumberSequence",
+               "v": [
+                [
+                 0,
+                 1,
+                 0
+                ],
+                [
+                 0.11999999731779099,
+                 0,
+                 0
+                ],
+                [
+                 0.8799999952316284,
+                 0,
+                 0
+                ],
+                [
+                 1,
+                 1,
+                 0
+                ]
+               ]
+              }
+             }
+            }
+           ],
+           "class": "Frame",
+           "name": "Separator",
+           "props": {
+            "AnchorPoint": {
+             "t": "Vector2",
+             "v": [
+              0.5,
+              0.5
+             ]
+            },
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              0.7568627595901489,
+              0.6352941393852234,
+              0.5137255191802979
+             ]
+            },
+            "BackgroundTransparency": 0.4000000059604645,
+            "BorderSizePixel": 0,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0.5,
+              0,
+              0,
+              162
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              -60,
+              0,
+              6
+             ]
+            },
+            "Transparency": 0.4000000059604645
            }
           }
          ],
