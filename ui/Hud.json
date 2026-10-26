@@ -21964,6 +21964,13 @@
           },
           "BackgroundTransparency": 1,
           "BorderSizePixel": 0,
+          "CanvasPosition": {
+           "t": "Vector2",
+           "v": [
+            0,
+            9.0999755859375
+           ]
+          },
           "CanvasSize": {
            "t": "UDim2",
            "v": [
@@ -22005,8 +22012,7 @@
             10
            ]
           },
-          "Transparency": 1,
-          "Visible": false
+          "Transparency": 1
          }
         },
         {
@@ -29683,7 +29689,8 @@
             10
            ]
           },
-          "Transparency": 1
+          "Transparency": 1,
+          "Visible": false
          }
         }
        ],
@@ -29825,7 +29832,6 @@
           },
           "BackgroundTransparency": 1,
           "Image": "rbxassetid://84190249344843",
-          "ImageTransparency": 0.5,
           "Position": {
            "t": "UDim2",
            "v": [
@@ -29873,7 +29879,7 @@
           0
          ]
         },
-        "BackgroundTransparency": 1,
+        "BackgroundTransparency": 0.800000011920929,
         "BorderSizePixel": 0,
         "Position": {
          "t": "UDim2",
@@ -29894,7 +29900,7 @@
          ]
         },
         "Text": "",
-        "Transparency": 1,
+        "Transparency": 0.800000011920929,
         "ZIndex": 4
        }
       },
@@ -29934,6 +29940,7 @@
           },
           "BackgroundTransparency": 1,
           "Image": "rbxassetid://118491017701421",
+          "ImageTransparency": 0.5,
           "Position": {
            "t": "UDim2",
            "v": [
@@ -29981,7 +29988,7 @@
           0
          ]
         },
-        "BackgroundTransparency": 0.800000011920929,
+        "BackgroundTransparency": 1,
         "BorderSizePixel": 0,
         "Position": {
          "t": "UDim2",
@@ -30002,8 +30009,178 @@
          ]
         },
         "Text": "",
-        "Transparency": 0.800000011920929,
+        "Transparency": 1,
         "ZIndex": 4
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UICorner",
+         "name": "UICorner",
+         "props": {
+          "CornerRadius": {
+           "t": "UDim",
+           "v": [
+            0,
+            12
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "UIStroke",
+         "props": {
+          "ApplyStrokeMode": {
+           "e": "ApplyStrokeMode",
+           "t": "EnumItem",
+           "v": "Border"
+          },
+          "Color": {
+           "t": "Color3",
+           "v": [
+            0.054901961237192154,
+            0.0470588244497776,
+            0.062745101749897
+           ]
+          },
+          "Thickness": 4
+         }
+        },
+        {
+         "children": [],
+         "class": "UIGradient",
+         "name": "UIGradient",
+         "props": {
+          "Color": {
+           "t": "ColorSequence",
+           "v": [
+            [
+             0,
+             0.7864355444908142,
+             0.999717652797699,
+             0.37196698784828186
+            ],
+            [
+             0.44999998807907104,
+             0.47843137383461,
+             0.8705882430076599,
+             0.22745098173618317
+            ],
+            [
+             1,
+             0.16713443398475647,
+             0.6616470813751221,
+             0.09954507648944855
+            ]
+           ]
+          },
+          "Rotation": 90
+         }
+        },
+        {
+         "children": [],
+         "class": "UIScale",
+         "name": "Press",
+         "props": []
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "UIStroke",
+           "props": {
+            "Color": {
+             "t": "Color3",
+             "v": [
+              0.054901961237192154,
+              0.0470588244497776,
+              0.062745101749897
+             ]
+            },
+            "Thickness": 3.6666667461395264
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "Label",
+         "props": {
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Normal"
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Text": "MERGE",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "TextSize": 44,
+          "Transparency": 1
+         }
+        }
+       ],
+       "class": "TextButton",
+       "name": "Merge",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0.5
+         ]
+        },
+        "AutoButtonColor": false,
+        "BackgroundColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "BorderSizePixel": 0,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          1,
+          0
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          240,
+          0,
+          80
+         ]
+        },
+        "Text": "",
+        "ZIndex": 6
        }
       }
      ],
@@ -30037,6 +30214,7 @@
        ]
       },
       "Transparency": 1,
+      "Visible": false,
       "ZIndex": 10
      }
     },
