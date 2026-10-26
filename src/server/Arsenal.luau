@@ -14,7 +14,8 @@
 --   Arsenal.start()                  -- once
 --   Arsenal.spin(player, bossKind)   -- a spin (also /spin [boss], owner only)
 --   Arsenal.give(player, id, equip)  -- owns it (and equips it); /weapon <id>, owner only
---   Arsenal.merge(player, id)        -- Config.Merge.Cost of it into the next one up (MergeWeapon)
+--   Arsenal.merge(player, id)        -- Config.Merge.Cost of it into the next one up
+--   Arsenal.mergeAll(player)         -- every merge they can do now, at once (MergeWeapon)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -87,6 +88,36 @@ function Arsenal.merge(player, id)
 	player:SetAttribute("Weapons", Stacks.format(list))
 	if player:GetAttribute("Weapon") == id and Stacks.count(list, id) <= 0 then
 		Arsenal.equip(player, into)
+	end
+	return true
+end
+
+-- every merge they can do with what they have now (QM: MERGE does them all at once): each
+-- weapon Config.Merge.Cost or more of goes up its ladder as many times as it can. Counted
+-- from what they had before, so what the merges make waits for the next press.
+function Arsenal.mergeAll(player)
+	local list = Arsenal.stacks(player)
+	local held = player:GetAttribute("Weapon")
+	local cost = Config.Merge.Cost
+	local merges = {}
+	for _, s in list do
+		local into = Config.Merge.Into[s.id]
+		if into and Weapons.exists(into) and s.id ~= START and s.n >= cost then
+			table.insert(merges, { id = s.id, into = into, times = s.n // cost })
+		end
+	end
+	for _, m in merges do
+		Stacks.add(list, m.id, -m.times * cost)
+		Stacks.add(list, m.into, m.times)
+	end
+	if #merges == 0 then
+		return false
+	end
+	player:SetAttribute("Weapons", Stacks.format(list))
+	for _, m in merges do
+		if held == m.id and Stacks.count(list, m.id) <= 0 then
+			Arsenal.equip(player, m.into)
+		end
 	end
 	return true
 end
@@ -213,6 +244,8 @@ function Arsenal.start()
 	mergeRemote.OnServerEvent:Connect(function(player, id)
 		if type(id) == "string" then
 			Arsenal.merge(player, id)
+		else
+			Arsenal.mergeAll(player)
 		end
 	end)
 

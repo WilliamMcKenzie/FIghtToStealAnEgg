@@ -1053,9 +1053,8 @@ function Backpack.init()
 		end)
 		mergeButton.Activated:Connect(function()
 			tween(press, 0.15, { Value = 1.05 }, Enum.EasingStyle.Back)
-			local id = mergeButton:GetAttribute("Merges")
-			if id and mergeRemote and playMerge then
-				playMerge(id)
+			if mergeButton:GetAttribute("Merges") and mergeRemote and playMerge then
+				playMerge()
 			end
 		end)
 	end
@@ -1469,33 +1468,16 @@ function Backpack.init()
 		end
 		return nil, nil
 	end
-	function playMerge(id)
-		local into = Config.Merge.Into[id]
-		local from, _ = squareOf(id)
-		local to, _ = squareOf(into or "")
-		local templateFor = nil
-		for _, entry in itemRows do
-			if table.find(byRarity[entry[1]], into) then
-				templateFor = entry[3]
-			end
-		end
-		if merging or not (into and from and to and templateFor) then
-			mergeRemote:FireServer(id)
-			return
-		end
-		merging = true
-		mergeButton.Visible = false
-		local before = player:GetAttribute("Weapons")
-		mergeRemote:FireServer(id)
-		-- 1: the merged ones flash white and squash
+	-- one merge's flight: id's square flashes and squashes, what it makes pops up out of it and
+	-- drifts over to its own square (yields until it's there)
+	local function flight(id, into, from, to, template)
 		whiteFlash(from, 0.05)
 		local fromScale = from:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", from)
 		tween(fromScale, 0.08, { Scale = 0.82 })
 		task.delay(0.1, function()
 			tween(fromScale, 0.3, { Scale = 1 }, Enum.EasingStyle.Back)
 		end)
-		-- 2: the new one pops up out of it...
-		local fly = templateFor:Clone()
+		local fly = template:Clone()
 		fly.Name = "Merging"
 		fly.Visible = true
 		fly.Active = false
@@ -1516,18 +1498,17 @@ function Backpack.init()
 		flyScale.Scale = 0
 		fly.Parent = holder
 		task.wait(0.12)
+		-- pops up out of it...
 		tween(flyScale, 0.22, { Scale = 1.35 }, Enum.EasingStyle.Back)
 		local lift = a - Vector2.new(0, 70)
 		local t = Instance.new("NumberValue")
-		tween(t, 0.22, { Value = 0.25 })
 		t.Changed:Connect(function(v)
-			if v <= 0.25 then
-				local p = a:Lerp(lift, v / 0.25)
-				fly.Position = UDim2.fromOffset(p.X, p.Y)
-			end
+			local p = a:Lerp(lift, v)
+			fly.Position = UDim2.fromOffset(p.X, p.Y)
 		end)
+		tween(t, 0.22, { Value = 1 })
 		task.wait(0.3)
-		-- 3: ...and drifts over to its square on a gentle arc, settling to its size
+		-- ...and drifts over to its square on a gentle arc, settling to its size
 		local start = Vector2.new(fly.Position.X.Offset, fly.Position.Y.Offset)
 		local control = (start + b) / 2 - Vector2.new(0, 90)
 		local drift = Instance.new("NumberValue")
@@ -1540,21 +1521,69 @@ function Backpack.init()
 			:Play()
 		tween(flyScale, 0.6, { Scale = 1 })
 		task.wait(0.6)
-		-- 4: it lands: (once the server's caught up) the square fills in or counts up
+		fly:Destroy()
+	end
+
+	-- MERGE does every merge you can at once (QM): each weapon you've Config.Merge.Cost or more
+	-- of goes up its ladder as many times as it can, counted from what you have now (what the
+	-- merges make doesn't merge again till the next press). Each one flies, a beat apart; only
+	-- when they've all landed do their squares fill in or count up.
+	function playMerge()
+		if merging then
+			return
+		end
+		local owned = {}
+		for _, s in TABS.Weapons.owned() do
+			owned[s.id] = s.n
+		end
+		local flights = {}
+		for _, rarity in RARITIES do
+			for _, id in byRarity[rarity] or {} do
+				local into = Config.Merge.Into[id]
+				if into and (owned[id] or 0) >= Config.Merge.Cost then
+					local from, to = squareOf(id), squareOf(into)
+					local template = nil
+					for _, entry in itemRows do
+						if table.find(byRarity[entry[1]], into) then
+							template = entry[3]
+						end
+					end
+					if from and to and template then
+						table.insert(flights, { id, into, from, to, template })
+					end
+				end
+			end
+		end
+		merging = true
+		mergeButton.Visible = false
+		local before = player:GetAttribute("Weapons")
+		mergeRemote:FireServer()
+		local flying = #flights
+		for i, f in flights do
+			task.delay((i - 1) * 0.12, function()
+				flight(table.unpack(f))
+				flying -= 1
+			end)
+		end
+		while flying > 0 do
+			task.wait()
+		end
+		-- they've landed: (once the server's caught up) the squares fill in or count up
 		local waited = 0
 		while player:GetAttribute("Weapons") == before and waited < 2 do
 			waited += task.wait()
 		end
-		fly:Destroy()
 		merging = false
 		rebuild()
-		local landed = squareOf(into)
-		if landed then
-			whiteFlash(landed, 0.15)
-			bounce(landed, 1.3)
-			local count = landed:FindFirstChild("Count")
-			if count and count.Visible then
-				bounce(count, 1.6)
+		for _, f in flights do
+			local landed = squareOf(f[2])
+			if landed then
+				whiteFlash(landed, 0.15)
+				bounce(landed, 1.3)
+				local count = landed:FindFirstChild("Count")
+				if count and count.Visible then
+					bounce(count, 1.6)
+				end
 			end
 		end
 	end
