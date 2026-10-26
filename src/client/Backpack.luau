@@ -847,7 +847,7 @@ function Backpack.init()
 	-- MERGE (QM, Oct 26): under the Items tab, sat on the panel's bottom edge, only while
 	-- you've Config.Merge.Cost of a weapon that merges into another (Config.Merge.Into)
 	local mergeButton = Ui.make(holder, "Merge", "TextButton")
-	if not mergeButton:FindFirstChild("Body") then
+	if not mergeButton:FindFirstChild("Plate") then
 		-- QM's Figma (designs/figma/merge_button.md, scaled from its 2710-wide panel to ours):
 		-- a green checker with a darker green outline and a solid shadow under it, "MERGE"
 		-- in white with a black outline and a soft shadow
@@ -859,7 +859,16 @@ function Backpack.init()
 		mergeButton.Position = UDim2.new(0.5, 0, 1, -math.round(114 * k))
 		mergeButton.Size = UDim2.fromOffset(math.round(690 * k), math.round(228 * k))
 		mergeButton.ZIndex = 6
-		Instance.new("UIScale").Parent = mergeButton
+		-- (the green plate pulses and squashes; the word stays put, at one size, QM)
+		local plate = Instance.new("Frame")
+		plate.Name = "Plate"
+		plate.BackgroundTransparency = 1
+		plate.AnchorPoint = Vector2.new(0.5, 0.5)
+		plate.Position = UDim2.fromScale(0.5, 0.5)
+		plate.Size = UDim2.fromScale(1, 1)
+		plate.ZIndex = 6
+		Instance.new("UIScale").Parent = plate
+		plate.Parent = mergeButton
 		-- (a sunburst turning behind it while it's up: QM's spin screen rays)
 		local rays = Instance.new("ImageLabel")
 		rays.Name = "Rays"
@@ -880,7 +889,7 @@ function Backpack.init()
 		shadow.Size = UDim2.fromScale(1, 1)
 		shadow.ZIndex = 6
 		rounded(shadow, math.round(20 * k))
-		shadow.Parent = mergeButton
+		shadow.Parent = plate
 		local bodyImg = Instance.new("ImageLabel")
 		bodyImg.Name = "Body"
 		bodyImg.BackgroundColor3 = Color3.fromHex("88F421")
@@ -896,7 +905,7 @@ function Backpack.init()
 		stroke.Thickness = math.round(10 * k)
 		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 		stroke.Parent = bodyImg
-		bodyImg.Parent = mergeButton
+		bodyImg.Parent = plate
 		local function word(name, color, dy, z, transparency)
 			local t = Instance.new("TextLabel")
 			t.Name = name
@@ -921,7 +930,8 @@ function Backpack.init()
 		word("Label", WHITE, 0, 9, 0)
 	end
 	if Ui.live then
-		local scale = mergeButton:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", mergeButton)
+		local plate = mergeButton:FindFirstChild("Plate") or mergeButton
+		local scale = plate:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", plate)
 		-- (hover and press tween this; it's multiplied by the pulse each frame)
 		local press = Instance.new("NumberValue")
 		press.Value = 1
