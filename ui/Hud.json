@@ -238,22 +238,21 @@
        "t": "UDim2",
        "v": [
         1,
-        -32,
+        -31,
         0.5,
-        -165
+        -124
        ]
       },
       "Size": {
        "t": "UDim2",
        "v": [
         0,
-        128,
+        96,
         0,
-        140
+        105
        ]
       },
-      "Transparency": 1,
-      "Visible": false
+      "Transparency": 1
      }
     },
     {
@@ -281,7 +280,7 @@
        "t": "UDim2",
        "v": [
         1,
-        -32,
+        -31,
         0.5,
         0
        ]
@@ -290,13 +289,12 @@
        "t": "UDim2",
        "v": [
         0,
-        128,
+        96,
         0,
-        137
+        103
        ]
       },
-      "Transparency": 1,
-      "Visible": false
+      "Transparency": 1
      }
     },
     {
@@ -326,20 +324,19 @@
         1,
         -30,
         0.5,
-        165
+        124
        ]
       },
       "Size": {
        "t": "UDim2",
        "v": [
         0,
-        132,
+        99,
         0,
-        146
+        110
        ]
       },
-      "Transparency": 1,
-      "Visible": false
+      "Transparency": 1
      }
     },
     {
@@ -381,8 +378,7 @@
         149
        ]
       },
-      "Transparency": 1,
-      "Visible": false
+      "Transparency": 1
      }
     },
     {
@@ -492,8 +488,7 @@
         103
        ]
       },
-      "Transparency": 1,
-      "Visible": false
+      "Transparency": 1
      }
     },
     {
@@ -603,8 +598,7 @@
         103
        ]
       },
-      "Transparency": 1,
-      "Visible": false
+      "Transparency": 1
      }
     },
     {
