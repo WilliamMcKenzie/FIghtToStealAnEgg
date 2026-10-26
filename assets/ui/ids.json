@@ -17,5 +17,17 @@
   "InventoryBG": "rbxassetid://118593193834683",
   "TileBG": "rbxassetid://82411896099201",
   "RadialGlow": "rbxassetid://106131181340173",
-  "merge_button_texture": "rbxassetid://87121220953662"
+  "merge_button_texture": "rbxassetid://87121220953662",
+  "HudBackpack": "rbxassetid://74898267844348",
+  "HudBackpackMask": "rbxassetid://92023031757269",
+  "HudCash": "rbxassetid://77205932787831",
+  "HudCashMask": "rbxassetid://115888248582099",
+  "HudIndex": "rbxassetid://135414431922346",
+  "HudIndexMask": "rbxassetid://135220260162973",
+  "HudPower": "rbxassetid://130900093336093",
+  "HudPowerMask": "rbxassetid://102958481124343",
+  "HudRebirth": "rbxassetid://111625281134332",
+  "HudRebirthMask": "rbxassetid://130239585218876",
+  "HudShop": "rbxassetid://78177113998591",
+  "HudShopMask": "rbxassetid://80031493937651"
 }
