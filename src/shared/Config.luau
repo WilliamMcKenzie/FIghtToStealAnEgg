@@ -1267,6 +1267,18 @@ return {
 			},
 		},
 	},
+	-- merging (QM, Oct 26): Cost of one weapon make the next one up its ladder (the Backpack's
+	-- MERGE button, Server/Arsenal). Into = [weapon] = what it merges into; one not here
+	-- doesn't merge.
+	Merge = {
+		Cost = 2,
+		Into = {
+			Shortsword = "Longsword",
+			Shortbow = "Longbow",
+			Longbow = "NatureBow",
+			Axe = "Waraxe",
+		},
+	},
 	-- the spin when a boss dies (client/WeaponSpin, Server/Arsenal)
 	WeaponDrops = {
 		Start = "KendoStick", -- everyone owns this one (QM, Oct 25: the Sword's gone)

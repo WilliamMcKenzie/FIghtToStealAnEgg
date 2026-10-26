@@ -541,7 +541,7 @@ function Backpack.init()
 	local flashUntil = 0
 	local rebuild -- (below)
 	local fresh
-	local petRemote, weaponRemote -- (in Play)
+	local petRemote, weaponRemote, mergeRemote -- (in Play)
 
 	-- the header: how many are equipped (or the hovered tile's details)
 	local header = Popups.text(body, {
@@ -838,6 +838,51 @@ function Backpack.init()
 		end
 		tabButtons[name] = { button = b, scale = scale, art = art }
 	end
+	-- MERGE (QM, Oct 26): under the Items tab, sat on the panel's bottom edge, only while
+	-- you've Config.Merge.Cost of a weapon that merges into another (Config.Merge.Into)
+	local mergeButton
+	mergeButton = Popups.button(
+		holder,
+		{
+			Name = "Merge",
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.new(0.5, 0, 1, 0),
+			Size = UDim2.fromOffset(240, 80),
+			ZIndex = 6,
+		},
+		"MERGE",
+		Popups.GREEN,
+		function()
+			local id = mergeButton:GetAttribute("Merges")
+			if id and mergeRemote then
+				mergeRemote:FireServer(id)
+			end
+		end
+	)
+	-- what MERGE would merge: the weapon you hold if it can, else the first one that can
+	-- (commons first, as the rows run)
+	local function toMerge()
+		local owned = {}
+		for _, s in TABS.Weapons.owned() do
+			owned[s.id] = s.n
+		end
+		local function can(id)
+			return Config.Merge.Into[id] ~= nil and (owned[id] or 0) >= Config.Merge.Cost
+		end
+		local held = TABS.Weapons.equipped()[1]
+		if held and can(held) then
+			return held
+		end
+		for _, rarity in RARITIES do
+			for _, id in byRarity[rarity] or {} do
+				if can(id) then
+					return id
+				end
+			end
+		end
+		return nil
+	end
+
 	if not Ui.live then
 		-- (in Studio: show the Items tab, as it opens)
 		items.Visible = true
@@ -850,6 +895,7 @@ function Backpack.init()
 
 	petRemote = ReplicatedStorage:WaitForChild("PetEquip", 10)
 	weaponRemote = ReplicatedStorage:WaitForChild("EquipWeapon", 10)
+	mergeRemote = ReplicatedStorage:WaitForChild("MergeWeapon", 10)
 	header:GetPropertyChangedSignal("TextBounds"):Connect(placeDashes)
 
 	local function tile(parent, id, count, order, onClick)
@@ -1107,6 +1153,9 @@ function Backpack.init()
 	function rebuild()
 		items.Visible = tab == "Weapons"
 		pets.Visible = tab == "Pets"
+		local merges = if tab == "Weapons" then toMerge() else nil
+		mergeButton:SetAttribute("Merges", merges)
+		mergeButton.Visible = merges ~= nil
 		for _, part in petParts do
 			part.Visible = false -- (the old Pets tab, before QM's rows)
 		end

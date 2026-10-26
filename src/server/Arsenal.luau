@@ -14,6 +14,7 @@
 --   Arsenal.start()                  -- once
 --   Arsenal.spin(player, bossKind)   -- a spin (also /spin [boss], owner only)
 --   Arsenal.give(player, id, equip)  -- owns it (and equips it); /weapon <id>, owner only
+--   Arsenal.merge(player, id)        -- Config.Merge.Cost of it into the next one up (MergeWeapon)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -68,6 +69,26 @@ function Arsenal.give(player, id, equip)
 	if equip then
 		Arsenal.equip(player, id)
 	end
+end
+
+-- Config.Merge.Cost of `id` traded for one of what it merges into (Config.Merge.Into); if
+-- that was the last of the one they hold, they hold the new one
+function Arsenal.merge(player, id)
+	local into = Config.Merge.Into[id]
+	if not (into and Weapons.exists(into)) or id == START then
+		return false
+	end
+	local list = Arsenal.stacks(player)
+	if Stacks.count(list, id) < Config.Merge.Cost then
+		return false
+	end
+	Stacks.add(list, id, -Config.Merge.Cost)
+	Stacks.add(list, into, 1)
+	player:SetAttribute("Weapons", Stacks.format(list))
+	if player:GetAttribute("Weapon") == id and Stacks.count(list, id) <= 0 then
+		Arsenal.equip(player, into)
+	end
+	return true
 end
 
 -- an egg in your hands (QM, Oct 25: Server/Hatchery): an invisible handle the arm holds,
@@ -184,6 +205,14 @@ function Arsenal.start()
 	equipRemote.OnServerEvent:Connect(function(player, id)
 		if type(id) == "string" then
 			Arsenal.equip(player, id)
+		end
+	end)
+	local mergeRemote = Instance.new("RemoteEvent")
+	mergeRemote.Name = "MergeWeapon"
+	mergeRemote.Parent = ReplicatedStorage
+	mergeRemote.OnServerEvent:Connect(function(player, id)
+		if type(id) == "string" then
+			Arsenal.merge(player, id)
 		end
 	end)
 
