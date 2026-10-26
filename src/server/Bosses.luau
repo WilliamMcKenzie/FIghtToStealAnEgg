@@ -11,8 +11,9 @@
 -- player locked into its fight (Server/Eggs locks them in), never leaving its arena, and
 -- attacks (Config.Bosses[biome].Attacks, Server/BossAttacks). With nobody left in the
 -- fight for Config.BossCalmDown seconds it walks home and leaves. At 0 health it dies
--- (Bosses.defeated fires: the fight's players go free) and can't be called up again for
--- Respawn seconds.
+-- (Bosses.defeated fires: the fight's players go free). Either way Bosses.ended fires and
+-- Server/Eggs starts the biome's nest cooldown: it's called up again by the next egg
+-- taken once the nests refill (QM, Oct 26).
 -- (The old sleeping bosses, QM Oct 25: Asleep bodies can't be hit and stand still, and
 -- client/BossView still draws them sleeping; nothing sets Asleep now.)
 --
@@ -24,6 +25,8 @@
 --   Bosses.wake(biome)
 --   Bosses.alive(biome) -> its boss is up or can be summoned (not dead, waiting)
 --   Bosses.defeated                  -- BindableEvent: Event(biome)
+--   Bosses.ended                     -- BindableEvent: Event(biome), when its fight's over:
+--                                       the boss died, went home, or was rerolled
 --   Bosses.engaged                   -- BindableEvent: Event(player, biome), on a hit
 --   Bosses.killed                    -- BindableEvent: Event(kind, players), when one is
 --                                       beaten (not on /reboss): everyone in its fight and
@@ -42,6 +45,7 @@ local Bosses = {}
 Bosses.defeated = Instance.new("BindableEvent")
 Bosses.engaged = Instance.new("BindableEvent")
 Bosses.killed = Instance.new("BindableEvent")
+Bosses.ended = Instance.new("BindableEvent")
 
 local folder = Instance.new("Folder")
 folder.Name = "Bosses"
@@ -89,12 +93,11 @@ local function hurt(body, amount)
 		end)
 		if b and b.biome then
 			Bosses.defeated:Fire(b.biome)
-			local arena = arenas[b.biome]
-			task.delay(b.c.Respawn or 20, function()
-				if arenas[b.biome] == arena then
-					arena.ready = true
-				end
-			end)
+			-- (summonable again at once: the nests' cooldown keeps it away till they refill)
+			if arenas[b.biome] then
+				arenas[b.biome].ready = true
+			end
+			Bosses.ended:Fire(b.biome)
 		end
 	end
 end
@@ -212,6 +215,7 @@ function Bosses.reroll()
 			Combat.remove(body)
 			body:Destroy()
 			Bosses.defeated:Fire(b.biome)
+			Bosses.ended:Fire(b.biome)
 		end
 	end
 	for _, arena in arenas do
@@ -295,6 +299,7 @@ RunService.Heartbeat:Connect(function(dt)
 					if arenas[b.biome] then
 						arenas[b.biome].ready = true
 					end
+					Bosses.ended:Fire(b.biome)
 					continue
 				else
 					turnToward(b, offset, dt)

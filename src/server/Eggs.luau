@@ -6,7 +6,14 @@
 -- boss is dead. Anyone who hits the boss is locked in too, so a group fights it together.
 -- With the boss dead everyone in its fight goes free; carry the egg into your pen for
 -- its reward (Config.Eggs.Reward). Die holding an egg and it's lost (and you're out of
--- the fight). A nest lays again Config.Eggs.Respawn seconds after it's robbed.
+-- the fight).
+-- Nests run on their biome's cooldown (QM, Oct 26): when it's up every nest pops an egg
+-- (client/EggView plays the pop-in) and the boss can be called up again. Take one and the
+-- boss comes as usual; anyone can take the rest mid-fight. When the fight's over (boss
+-- dead, or gone home with nobody left fighting) the eggs left vanish and the cooldown
+-- (Config.Eggs.Cooldown) starts again; its end is each nest's CooldownEnds attribute
+-- (server time), shown over the nests to anyone close (client/NestTimers). A biome with
+-- nests but no boss starts its cooldown once its nests are empty.
 -- With Config.Eggs.Carry off (for now: QM, Oct 25) there's no egg to carry: stealing one
 -- only calls up the boss and locks you into its fight.
 --
@@ -14,6 +21,7 @@
 -- Eggs (eggs brought home).
 --
 --   Eggs.start(map)   -- once, after Map.ensure()
+--   Eggs.refill()     -- every nest full again now, no fight on (the /reboss command)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -30,6 +38,7 @@ local Pens = require(script.Parent.Pens)
 local Eggs = {}
 
 local carried = {} -- [player] = egg part on their back
+local biomes = {} -- [biome] = { nests, eggs = { [egg] = true }, boss, fight, round }
 
 -- An egg is an invisible box where the egg stands (tagged "Egg", its kind in EggKind and
 -- its size in EggScale): each client draws LassoAPet's egg for that animal there, AFK
@@ -105,13 +114,17 @@ local function carry(player, biome, kind)
 	return true
 end
 
--- a nest's egg and its prompt; robbed, it lays again after a while
-local function lay(nest, biome)
+local fill, cool
+
+-- a nest's egg and its prompt, popping in at server time popAt
+local function lay(nest, biome, popAt)
+	local state = biomes[biome]
 	local x, y, z = nest:GetAttribute("EggX"), nest:GetAttribute("EggY") or 1, nest:GetAttribute("EggZ")
 	local kind = Eggs.kindFor(biome)
 	local egg = Eggs.make(biome, kind, Config.Eggs.Scale.Nest)
 	egg.Anchored = true
 	egg.CFrame = CFrame.new(x, y + egg.Size.Y / 2, z) * CFrame.Angles(0, math.random() * math.pi * 2, 0)
+	egg:SetAttribute("PopAt", popAt)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Steal"
 	prompt.ObjectText = Pets.name(kind) .. " Egg"
@@ -120,8 +133,9 @@ local function lay(nest, biome)
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = egg
 	egg.Parent = nest
+	state.eggs[egg] = true
 	prompt.Triggered:Connect(function(player)
-		if not egg.Parent or player:GetAttribute("HeldEgg") then
+		if not state.eggs[egg] or player:GetAttribute("HeldEgg") then
 			return
 		end
 		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
@@ -131,15 +145,69 @@ local function lay(nest, biome)
 		if Config.Eggs.Carry and not carry(player, biome, kind) then
 			return
 		end
+		state.eggs[egg] = nil
 		egg:Destroy()
 		Hatchery.give(player, kind) -- (yours at once: in your hotbar until you die, QM Oct 25)
-		-- (with its boss dead and not yet back, there's no fight: the egg's yours)
-		if Bosses.alive(biome) then
+		if state.boss then
+			-- (the first egg calls the boss up; later ones join its fight)
 			lock(player, biome) -- (first, so their screen knows the boss that appears is theirs)
-			Bosses.summon(biome, player)
+			if Bosses.summon(biome, player) then
+				state.fight = true
+			end
 		end
-		task.delay(Config.Eggs.Respawn, lay, nest, biome)
+		if not state.fight and next(state.eggs) == nil then
+			cool(biome) -- (no boss, or none came: the nests just wait)
+		end
 	end)
+end
+
+-- the cooldown's up: every nest lays, one after another
+function fill(biome)
+	local state = biomes[biome]
+	state.round += 1
+	state.fight = false
+	for egg in state.eggs do
+		egg:Destroy()
+	end
+	table.clear(state.eggs)
+	local now = workspace:GetServerTimeNow()
+	for i, nest in state.nests do
+		nest:SetAttribute("CooldownEnds", nil)
+		lay(nest, biome, now + (i - 1) * Config.Eggs.PopStagger)
+	end
+end
+
+-- the eggs left vanish and the cooldown starts
+function cool(biome)
+	local state = biomes[biome]
+	state.round += 1
+	state.fight = false
+	for egg in state.eggs do
+		-- (clients shrink it away: client/EggView)
+		egg:SetAttribute("Vanish", true)
+		local prompt = egg:FindFirstChildOfClass("ProximityPrompt")
+		if prompt then
+			prompt.Enabled = false
+		end
+		task.delay(0.4, egg.Destroy, egg)
+	end
+	table.clear(state.eggs)
+	local ends = workspace:GetServerTimeNow() + Config.Eggs.Cooldown
+	for _, nest in state.nests do
+		nest:SetAttribute("CooldownEnds", ends)
+	end
+	local round = state.round
+	task.delay(Config.Eggs.Cooldown, function()
+		if state.round == round then
+			fill(biome)
+		end
+	end)
+end
+
+function Eggs.refill()
+	for biome in biomes do
+		fill(biome)
+	end
 end
 
 -- inside a pen's Area box (flat)
@@ -151,15 +219,29 @@ end
 function Eggs.start(map)
 	for _, biome in map.Biomes:GetChildren() do
 		local nests = biome:FindFirstChild("Nests")
-		for _, nest in if nests then nests:GetChildren() else {} do
-			lay(nest, biome.Name)
-		end
+		local list = if nests then nests:GetChildren() else {}
+		table.sort(list, function(a, b)
+			return (tonumber(string.match(a.Name, "%d+")) or 0) < (tonumber(string.match(b.Name, "%d+")) or 0)
+		end)
 		local spot = biome:FindFirstChild("BossSpot")
 		local area = Map.area(biome.Name)
-		if spot and area then
-			Bosses.arena(biome.Name, spot.Position, area.Bounds)
+		local arena = spot and area and Bosses.arena(biome.Name, spot.Position, area.Bounds)
+		if #list > 0 then
+			for _, nest in list do
+				CollectionService:AddTag(nest, "Nest")
+			end
+			biomes[biome.Name] = { nests = list, eggs = {}, boss = arena ~= nil, fight = false, round = 0 }
+			fill(biome.Name)
 		end
 	end
+
+	-- the fight's over (its boss dead or gone home): the nests' cooldown starts
+	Bosses.ended.Event:Connect(function(biome)
+		local state = biomes[biome]
+		if state and state.fight then
+			cool(biome)
+		end
+	end)
 
 	-- hitting a boss locks you into its fight; its death frees everyone in it
 	Bosses.engaged.Event:Connect(lock)
