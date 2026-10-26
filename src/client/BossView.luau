@@ -61,9 +61,11 @@ end
 -- QM's kingdom game (its colour multiplied by #FFB3B3, easing back to its own over 300 ms)
 local FLASH = 0.3 -- seconds a hit's tint takes to fade
 local FLASH_TINT = Color3.fromRGB(255, 179, 179)
--- damage numbers: plain red Montserrat (no outline, QM), popping up over its head
+-- damage numbers: white Montserrat with a soft drop shadow down-right (QM), popping up over its head
 local NUMBER_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local NUMBER_SIZE = 20
+local NUMBER_SHADOW = 2 -- px the shadow sits down and right
+local NUMBER_SHADOW_ALPHA = 0.6 -- shadow transparency
 local NUMBER_RISE = 3 -- studs it floats up
 local NUMBER_LIFE = 0.7 -- seconds on screen
 local DEATH = 0.5 -- seconds it takes to shrink away
@@ -85,17 +87,29 @@ local function damageNumber(body, amount)
 	gui.Size = UDim2.fromOffset(160, 40)
 	local x = (math.random() - 0.5) * 3
 	gui.StudsOffset = Vector3.new(x, body.Size.Y / 2 + 1, 0)
-	local label = Instance.new("TextLabel")
-	label.BackgroundTransparency = 1
-	label.Size = UDim2.fromScale(1, 1)
-	label.FontFace = NUMBER_FONT
-	label.TextSize = NUMBER_SIZE
-	label.TextColor3 = Color3.fromRGB(255, 50, 50)
-	label.Text = "-" .. tostring(math.round(amount))
+	local holder = Instance.new("Frame")
+	holder.BackgroundTransparency = 1
+	holder.Size = UDim2.fromScale(1, 1)
+	local function text(colour, offset, z)
+		local label = Instance.new("TextLabel")
+		label.BackgroundTransparency = 1
+		label.Size = UDim2.fromScale(1, 1)
+		label.Position = UDim2.fromOffset(offset, offset)
+		label.ZIndex = z
+		label.FontFace = NUMBER_FONT
+		label.TextSize = NUMBER_SIZE
+		label.TextColor3 = colour
+		label.Text = "-" .. tostring(math.round(amount))
+		label.Parent = holder
+		return label
+	end
+	local shadow = text(Color3.new(0, 0, 0), NUMBER_SHADOW, 1)
+	shadow.TextTransparency = NUMBER_SHADOW_ALPHA
+	local label = text(Color3.new(1, 1, 1), 0, 2)
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0.4
-	scale.Parent = label
-	label.Parent = gui
+	scale.Parent = holder
+	holder.Parent = gui
 	gui.Parent = body
 	TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
 		:Play()
@@ -105,6 +119,7 @@ local function damageNumber(body, amount)
 	local fade =
 		TweenInfo.new(NUMBER_LIFE * 0.4, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, NUMBER_LIFE * 0.6)
 	TweenService:Create(label, fade, { TextTransparency = 1 }):Play()
+	TweenService:Create(shadow, fade, { TextTransparency = 1 }):Play()
 	task.delay(NUMBER_LIFE, gui.Destroy, gui)
 end
 
