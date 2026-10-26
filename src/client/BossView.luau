@@ -85,15 +85,14 @@ local views = {} -- [body] = { animal, last position, colours, hitAt, diedAt }
 
 -- "-10" over the boss's head: pops in past full size and settles, shoots up a little off to
 -- one side easing to a stop, then fades and shrinks away (QM: quicker, with a pop)
-local combos = {} -- [body] = { gui, total }: the number still showing over it
+local combos = {} -- [body] = { gui, x }: the number still showing over it
 local function damageNumber(body, amount)
-	-- hit again before the last number's gone: it's replaced by one with the two added up, popping
-	-- in afresh, so a quick run of hits counts up like a combo (QM)
+	-- hit again before the last number's gone: it's replaced by the new hit's number, popping in
+	-- afresh in the same spot (QM: not added up)
 	local combo = combos[body]
 	local x = (math.random() - 0.5) * 3
 	if combo and combo.gui.Parent then
 		combo.gui:Destroy()
-		amount += combo.total
 		x = combo.x -- (in the same spot, so it pops rather than jumps)
 	end
 	local gui = Instance.new("BillboardGui")
@@ -151,7 +150,7 @@ local function damageNumber(body, amount)
 			Scale = 0.6 / SHARP,
 		}):Play()
 	end)
-	combos[body] = { gui = gui, total = amount, x = x }
+	combos[body] = { gui = gui, x = x }
 	task.delay(NUMBER_LIFE, function()
 		gui:Destroy()
 		if combos[body] and combos[body].gui == gui then
