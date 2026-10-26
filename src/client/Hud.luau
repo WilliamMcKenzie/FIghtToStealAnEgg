@@ -1,5 +1,5 @@
 -- The HUD (QM's Figma, Oct 24): the boss bar with the boss's name over it (top
--- centre), the Shop / Index / Rebirth buttons (left), and the Power and Cash counters
+-- centre), the Shop / Index / Rebirth buttons (stacked on the right edge), and the Power and Cash counters
 -- (bottom left). Laid out in pixels at QM's 1080-tall design size, each image at its own
 -- size, and scaled to the screen by a UIScale (screen height / 1080). Text is Montserrat
 -- ExtraBold 45, white with a dark outline.
@@ -164,21 +164,23 @@ local bossName = text(bar, {
 	ZIndex = 3,
 })
 
--- buttons (positions from the mockup, at the design size)
+-- buttons: stacked down the right edge, centred on the screen's middle (QM's mockup, Oct 26).
+-- They stay up during fights now, beside the boss bar, as in the mockup.
 local hudFrames = {} -- (hidden while a popup is open)
-local sideButtons = {} -- (hidden while the boss bar is up too: QM, Oct 25)
-for _, b in { { "Shop", 34, 323 }, { "Index", 177, 450 }, { "Rebirth", 23, 570 } } do
-	local img = image(root, b[1], { button = true, Position = UDim2.fromOffset(b[2], b[3]) })
-	img.Size = UDim2.fromOffset(
-		if b[1] == "Rebirth" then 132 else 128,
-		if b[1] == "Shop" then 140 elseif b[1] == "Index" then 137 else 146
-	)
+local SIDE_MARGIN = 30 -- design px from the right edge
+local SIDE_GAP = 165 -- design px between the buttons' centres
+for i, b in { { "Shop", 128, 140 }, { "Index", 128, 137 }, { "Rebirth", 132, 146 } } do
+	local img = image(root, b[1], {
+		button = true,
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -SIDE_MARGIN - (132 - b[2]) / 2, 0.5, (i - 2) * SIDE_GAP),
+		Size = UDim2.fromOffset(b[2], b[3]),
+	})
 	bouncy(img)
 	img.Activated:Connect(function()
 		Popups.toggle(b[1])
 	end)
 	table.insert(hudFrames, img)
-	table.insert(sideButtons, img)
 end
 
 -- the Backpack button (QM, Oct 25), bottom centre: opens client/Backpack
@@ -253,7 +255,6 @@ local shown = 1 -- the red's width
 local history = {} -- { { os.clock(), red width }, ... } over the last TRAIL_LAG seconds
 local following = nil
 local filling = 0 -- (os.clock() the bar started filling up from empty)
-local barWas = false
 RunService.RenderStepped:Connect(function(dt)
 	local folder = workspace:FindFirstChild("Bosses")
 	local character = player.Character
@@ -271,13 +272,6 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 	bar.Visible = best ~= nil and not Popups.isOpen()
-	-- the side buttons step aside for the boss bar (and come back after, unless a popup's open)
-	if bar.Visible ~= barWas then
-		barWas = bar.Visible
-		for _, b in sideButtons do
-			b.Visible = not bar.Visible and not Popups.isOpen()
-		end
-	end
 	if not best then
 		following = nil
 		return
