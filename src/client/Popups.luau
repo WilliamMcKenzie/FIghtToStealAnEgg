@@ -49,7 +49,9 @@ local MINT = Color3.fromRGB(160, 238, 104)
 local TEAL = Color3.fromRGB(88, 216, 192)
 local BLUR = 14
 -- the world behind an open popup goes hazy like frosted glass (QM: LassoAPet's Worlds menu):
--- blurred (BLUR), and paler and softer
+-- blurred, and paler and softer. It's Lighting > PopupBlur and PopupHaze: in Studio tick their
+-- Enabled to preview it, and change their Size / Brightness / Contrast / Saturation to change
+-- it (the game fades to what they're set to as a popup opens)
 local HAZE = { Brightness = 0.06, Contrast = -0.15, Saturation = -0.35 }
 local NO_HAZE = { Brightness = 0, Contrast = 0, Saturation = 0 }
 local DESIGN_HEIGHT = 1080 -- (Hud's: the root's design pixels)
@@ -333,6 +335,7 @@ local scaled, hud = nil, {}
 local popups = {}
 local open = nil
 local blur, tint = nil, nil
+local blurOn, hazeOn = BLUR, HAZE -- (what PopupBlur and PopupHaze are set to in the place)
 
 local function frame(name, title, size, tiled)
 	-- (StarterGui > Hud > Root > ShopPopup: in Studio, tick its Visible to see it while editing;
@@ -700,8 +703,8 @@ local function show(name)
 	TweenService:Create(p.scale, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 		Scale = p.full,
 	}):Play()
-	TweenService:Create(blur, TweenInfo.new(0.25), { Size = BLUR }):Play()
-	TweenService:Create(tint, TweenInfo.new(0.25), HAZE):Play()
+	TweenService:Create(blur, TweenInfo.new(0.25), { Size = blurOn }):Play()
+	TweenService:Create(tint, TweenInfo.new(0.25), hazeOn):Play()
 	setHud(false)
 end
 
@@ -757,16 +760,36 @@ function Popups.init(root, hudFrames)
 	buildShop()
 	buildIndex()
 	buildRebirth()
+	-- the glass: made in Lighting, switched off, the first time (so it's there in Studio)
+	blur = Lighting:FindFirstChild("PopupBlur")
+	if not blur then
+		blur = Instance.new("BlurEffect")
+		blur.Name = "PopupBlur"
+		blur.Size = BLUR
+		blur.Enabled = false
+		blur.Parent = Lighting
+	end
+	tint = Lighting:FindFirstChild("PopupHaze")
+	if not tint then
+		tint = Instance.new("ColorCorrectionEffect")
+		tint.Name = "PopupHaze"
+		for k, v in HAZE do
+			tint[k] = v
+		end
+		tint.Enabled = false
+		tint.Parent = Lighting
+	end
 	if not Ui.live then
 		return
 	end
-	blur = Instance.new("BlurEffect")
-	blur.Name = "PopupBlur"
+	-- (in game: on, but clear until a popup opens)
+	blurOn = blur.Size
+	hazeOn = { Brightness = tint.Brightness, Contrast = tint.Contrast, Saturation = tint.Saturation }
 	blur.Size = 0
-	blur.Parent = Lighting
-	tint = Instance.new("ColorCorrectionEffect")
-	tint.Name = "PopupHaze"
-	tint.Parent = Lighting
+	for k, v in NO_HAZE do
+		tint[k] = v
+	end
+	blur.Enabled, tint.Enabled = true, true
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if input.KeyCode == Enum.KeyCode.Escape and open and not processed then
 			Popups.close()
