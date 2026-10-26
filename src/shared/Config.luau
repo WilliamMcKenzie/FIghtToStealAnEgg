@@ -1239,6 +1239,7 @@ return {
 		Radius = 0.6, -- a shot's own width for hitting (studs), times its Size
 		Slack = 1.5, -- studs added to every target's width for shots (QM: more forgiving; height never counts)
 		Trust = 12, -- studs: how far the shooter's own spot may be from the server's (Server/Combat)
+		StillOnly = true, -- bows and staffs only shoot while you stand still (QM, Oct 26, Archero); melee always swings
 		-- every Ranged weapon's Shot starts from these (its own values go over them)
 		Ranged = {
 			Look = "Arrow", -- (the one arrow every Ranged weapon shoots; boss ones have their own)
