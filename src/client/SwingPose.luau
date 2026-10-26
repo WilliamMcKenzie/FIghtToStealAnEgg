@@ -1,7 +1,7 @@
 -- The upper body with a weapon out: the cavalry riding pose (Config.RidePose: the weapon
 -- trailing behind and low, bobbing with the pet's gallop) while any weapon is equipped,
 -- the swing (SwingAnim's keyframes) on each slash or staff cast, and the archer's draw
--- and release (Config.RidePose.Archer) on each bow shot.
+-- and release (Config.RidePose.Archer) on each bow shot, and the bow's pulse (BowPulse).
 --
 -- Each joint's pose is put on its Transform in PreSimulation, after the Animator has
 -- written its own: the stance blends over the Animator's pose (eased in on equip, out on
@@ -36,6 +36,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Rig = require(Shared.Rig)
 local Weapons = require(Shared.Weapons.Weapons)
+local BowPulse = require(script.Parent.BowPulse)
 local Riding = require(script.Parent.Riding)
 local SwingAnim = require(script.Parent.SwingAnim)
 
@@ -188,6 +189,7 @@ function SwingPose.shoot(character, id, yaw, interval)
 		aim = (yaw - facing + math.pi) % (2 * math.pi) - math.pi
 	end
 	s.shot = { start = now, interval = interval, aim = aim }
+	BowPulse.fire(character, interval)
 end
 
 local function release(joints)

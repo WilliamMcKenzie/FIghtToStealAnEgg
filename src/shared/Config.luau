@@ -1283,6 +1283,15 @@ return {
 		Slack = 1.5, -- studs added to every target's width for shots (QM: more forgiving; height never counts)
 		Trust = 12, -- studs: how far the shooter's own spot may be from the server's (Server/Combat)
 		StillOnly = true, -- bows and staffs only shoot while you stand still (QM, Oct 26, Archero); melee always swings
+		-- the held bow pulses on each shot, as in Kingdom Crushers' Shoot (QM, Oct 26): it snaps
+		-- small as it fires, swells big toward the next shot, and settles if none comes.
+		-- Times are in shot gaps (the Cooldown, or quicker with Strength). client/BowPulse
+		Pulse = {
+			From = 0.8, -- its size the moment it fires
+			Peak = 1.2, -- swelled to this...
+			PeakAt = 0.8, -- ...this far into the gap to the next shot
+			SettleAt = 2, -- and back to 1 by here
+		},
 		-- every Ranged weapon's Shot starts from these (its own values go over them)
 		Ranged = {
 			Look = "Arrow", -- (the one arrow every Ranged weapon shoots; boss ones have their own)
