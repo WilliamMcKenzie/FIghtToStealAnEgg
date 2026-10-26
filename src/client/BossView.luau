@@ -64,8 +64,8 @@ local FLASH_TINT = Color3.fromRGB(255, 179, 179)
 -- damage numbers: white Montserrat with a soft drop shadow down-right (QM), popping up over its head
 local NUMBER_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local NUMBER_SIZE = 20
-local NUMBER_SHADOW = 2 -- px the shadow sits down and right
-local NUMBER_SHADOW_ALPHA = 0.6 -- shadow transparency
+local NUMBER_SHADOW = 1 -- px the shadow sits down and right
+local NUMBER_SHADOW_ALPHA = 0.75 -- shadow transparency
 local NUMBER_RISE = 3 -- studs it floats up
 local NUMBER_LIFE = 0.7 -- seconds on screen
 local DEATH = 0.5 -- seconds it takes to shrink away
