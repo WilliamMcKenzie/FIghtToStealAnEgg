@@ -1,21 +1,22 @@
--- The Backpack (QM, Oct 25, in the style of QM's reference): a popup with two tabs on its
--- left, Pets and Weapons. Each shows what's equipped in a row at the top and everything
--- else you own in a grid below, duplicates stacked into one tile with "x5" top right and
--- the odds of getting it ("1/57", in its rarity's colour) bottom right. Equipping one
--- moves it up into the row (so its tile's count drops by one, and goes once none are
--- left). Sorted rarest first. (QM, Oct 26: on QM's plain tiled panel for now, no title,
--- X, SORT or EQUIP BEST; Escape or the Backpack button closes it.)
+-- The Backpack (QM, Oct 26: remade from QM's reference, designs/backpack_ref_*.png). A tiled
+-- beige panel titled "Backpack", with Weapons and Pets tabs down its left side (the open one
+-- gold), a list of every weapon or pet on the left and the one you've picked on the right.
 --
---   Pets: the ones in the row wander in your pen (Config.Backpack.PenSlots of them).
---         Click a pet below to put it in, one in the row to take it out (PetEquip,
---         Server/PetInventory).
---   Weapons: the row is the one you hold. Click another to hold it instead (EquipWeapon,
---         Server/Arsenal).
+--   The list: a section per rarity, its name in a pill of the rarity's colour (weapons with
+--   how many there are) and a line of it running off to the right; under it every weapon or
+--   pet of that rarity, the ones you have on their rarity's square ("x5" when there's more
+--   than one), the rest locked ("?" under a padlock). The Pets tab has your pen on top:
+--   "Equipped · 4/5" and its slots, an empty one dashed with a "+". What's equipped has a
+--   green tick; what you've picked has a gold ring.
+--   The right: the picked one big, its name, its rarity, how many you have (or "Equipped"),
+--   and Equip (green) or Unequip (orange). Weapons: Equip holds it (EquipWeapon,
+--   Server/Arsenal). Pets: Equip puts one in your pen, Unequip takes it out (PetEquip,
+--   Server/PetInventory).
+--   MERGE (weapons, while you can) sits on the list's bottom edge; the X on the top right.
 --
--- Hovering a tile shows its name and details over the row.
---
--- In Studio it's StarterGui > Hud > Root > BackpackPopup (client/Ui): the tiles are copied
--- from Grid > TileTemplate and Equipped > EquippedTemplate / EmptyTemplate, so edit those.
+-- In Studio it's StarterGui > Hud > Root > BackpackPopup (client/Ui). The squares are copied
+-- from each section's OwnedTemplate and the LockedTemplate, so edit those; in Studio the list
+-- is filled with a made-up mid-game player's things (PREVIEW) to see it by.
 --
 --   Backpack.init()   -- once, from Hud, after Popups.init (Popups.toggle("Backpack") opens it)
 
@@ -29,7 +30,6 @@ local Config = require(Shared.Config)
 local PetIcons = require(Shared.PetIcons)
 local Pets = require(Shared.Pets)
 local Stacks = require(Shared.Stacks)
-local Power = require(Shared.Power)
 local Weapons = require(Shared.Weapons.Weapons)
 local WeaponIcons = require(Shared.Weapons.WeaponIcons)
 local Popups = require(script.Parent.Popups)
@@ -40,25 +40,36 @@ local Backpack = {}
 
 local player = Players.LocalPlayer
 local WHITE = Color3.new(1, 1, 1)
-local SOFT = Color3.fromRGB(200, 200, 212)
-local RED_TEXT = Color3.fromRGB(255, 110, 110)
-local RANK = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5, Mythic = 6 }
-local SIZE = Vector2.new(1180, 780)
-local CELL = Vector2.new(160, 160)
-local SLOT = 140
--- (the layout inside the panel, top down: the header, the equipped row, the line, the grid)
-local HEADER_Y = 22
-local ROW_Y = 84
-local LINE_Y = ROW_Y + SLOT + 26
-local GRID_Y = LINE_Y + 18
-local SIDE = 28 -- (margin either side of the row's line and the grid)
--- the Items tab (QM's mockup, Oct 26): a row per rarity holding every weapon of it
-local ITEM = 118 -- design px of an item's square
-local ITEM_GAP = 26
 local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic" }
--- each rarity's square: a radial gradient (lighter middle, darker edge) with a lighter outline.
--- (These only colour the templates when they're first made: after that, StarterGui > Hud >
--- Root > BackpackPopup > Body > Items > <rarity> > OwnedTemplate is what to edit.)
+local TYPE_ORDER = { Melee = 1, Ranged = 2, Magic = 3 }
+
+-- the layout, in design px (the Hud's 1080-tall frame)
+local SIZE = Vector2.new(1180, 760) -- the panel
+local TAB_RAIL = 150 -- how far the tabs stick out past the panel's left edge
+local PAD = 22 -- inside the panel, round the list and the details
+local LIST_W = 740 -- the list's width (the details take the rest)
+local ITEM = 100 -- a square
+local ITEM_GAP = 14
+
+local FONT = Font.fromEnum(Enum.Font.FredokaOne)
+local MONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold) -- (MERGE)
+local INK = Color3.fromHex("3B2416") -- the dark brown outline on the white text
+local INSET = Color3.fromHex("F3E3CC") -- the list's and the details' panels
+local INSET_LINE = Color3.fromHex("DCC3A3")
+local LOCKED = Color3.fromHex("D9C3A6") -- a locked square
+local LOCK_INK = Color3.fromHex("B49C7F") -- its padlock
+local INFO = Color3.fromHex("EBD8BF") -- the details' "Owned: 9" bar
+local INFO_TEXT = Color3.fromHex("5A4330")
+local TAB_ON, TAB_ON_LINE = Color3.fromHex("F9C964"), Color3.fromHex("E79B22")
+local TAB_OFF, TAB_OFF_LINE = Color3.fromHex("D7BC98"), Color3.fromHex("B48F69")
+local TICK = Color3.fromHex("2DBE3C") -- the equipped tick's circle
+local PEN_PILL = Color3.fromHex("8A6A4C") -- "Equipped · 4/5"
+local BUTTONS = { -- the details' button: { face, outline and shadow }
+	Equip = { Color3.fromHex("3CCB3C"), Color3.fromHex("1D8B25") },
+	Unequip = { Color3.fromHex("F58F1E"), Color3.fromHex("B65A08") },
+	Equipped = { Color3.fromHex("B9A88F"), Color3.fromHex("8E7C63") },
+}
+
 -- each rarity's square (QM, Oct 26): { dark (its edges), light (the glow in the middle), outline }
 local function hexes(dark, light, outline)
 	return { Dark = Color3.fromHex(dark), Light = Color3.fromHex(light), Outline = Color3.fromHex(outline) }
@@ -71,158 +82,87 @@ local ITEM_COLORS = {
 	Legendary = hexes("BE8800", "EEC315", "FFE985"),
 	Mythic = hexes("A0103C", "E8305C", "FF7A9A"), -- (not QM's yet)
 }
+-- a rarity's pill (its section's name, the details' rarity): between its square's two colours
+local function pillColor(rarity)
+	local c = ITEM_COLORS[rarity] or ITEM_COLORS.Common
+	return c.Dark:Lerp(c.Light, 0.45)
+end
 local ITEM_OUTLINE = 4 -- px
-local RADIAL = "rbxassetid://106131181340173" -- (rbxassetid of assets/ui/RadialGlow.png: white in the middle fading out)
-local UNKNOWN = Color3.fromHex("C1A283")
-local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local RADIAL = "rbxassetid://106131181340173" -- (assets/ui/RadialGlow.png: white in the middle fading out)
+local GOLD_RING = Color3.fromHex("F5B53F") -- round the one you've picked
 local MERGE_TEXTURE = "rbxassetid://87121220953662" -- (assets/ui/merge_button_texture.png: QM's green checker)
 local MERGE_DARK = Color3.fromHex("00A529") -- the MERGE button's outline and shadow
 local CLOSE_DARK = Color3.fromHex("720006") -- the X's outline and shadow
-local SQUARE_RING = { 6, 6 } -- a square's white hover outline: its corners, and px out past it (its own outline's 4)
 local MERGE_PULSE = 0.05 -- how much bigger it swells at the top of each pulse
 local MERGE_PULSE_TIME = 1.1 -- seconds a pulse takes
 local MERGE_SPIN = 40 -- degrees a second the sunburst behind it turns
-local TYPE_ORDER = { Melee = 1, Ranged = 2, Magic = 3 }
--- the Pets tab (QM's mockup, Oct 26): your pen's slots along the top, a gap, then a row per
--- rarity like the Items tab
-local PEN_GAP = 56 -- design px between the pen's slots and the rows
-local LAST_ONE = 0.5 -- how see-through a pet's square goes once your last one's in the pen
 
-local function rarityColors(rarity)
-	return Config.Rarities[rarity] or Config.Rarities.Common
+-- in Studio (not playing) the list shows a made-up mid-game player's things to edit by
+local PREVIEW = {
+	Weapons = "KendoStick:10,Staff:7,Axe,Longsword:15,Longbow,WindStaff:6,LightningStaff:7,Club:9,Waraxe:14,WaterStaff:6,NatureBow:9,BloodBow:6,FireStaff:10,UnholyLance:6,RafflesiaBloom:6",
+	Weapon = "Club",
+	PetsOwned = "Horse,Pinto,Fish:2,Rhino,Penguin,Snowman:3",
+	PenPets = "Horse,Rhino,Pinto,Snowman",
+}
+local function attr(name)
+	if Ui.live then
+		return player:GetAttribute(name)
+	end
+	return PREVIEW[name]
 end
 
 local function tween(obj, t, goal, style)
 	TweenService:Create(obj, TweenInfo.new(t, style or Enum.EasingStyle.Quad, Enum.EasingDirection.Out), goal):Play()
 end
 
--- ---- what each tab lists ------------------------------------------------------------
+-- ---- what you have --------------------------------------------------------------------
 
--- one in 1/N: a pet's odds in the egg it hatches from (the likeliest one), a weapon's in a
--- boss's spin; nil when there's no chance to show (a starting weapon, a Robux pet)
-local function petOdds(kind)
-	local best = nil
-	for _, pool in Config.Eggs.Kinds do
-		local w = pool[kind]
-		if w and w > 0 then
-			local total = 0
-			for _, v in pool do
-				total += v
-			end
-			local n = math.max(1, math.round(total / w))
-			best = if best then math.min(best, n) else n
-		end
+-- [weapon id] = how many (everyone has the starting one)
+local function ownedWeapons()
+	local list = Stacks.parse(attr("Weapons"), Weapons.exists)
+	local map = { [Config.WeaponDrops.Start] = 1 }
+	for _, s in list do
+		map[s.id] = s.n
 	end
-	return if best and best > 1 then best else nil
+	return map
 end
 
-local function weaponOdds(id)
-	local w = Config.Weapons[id]
-	if not (w and w.Weight and w.Weight > 0) then
-		return nil
-	end
-	local total = 0
-	for _, entry in Weapons.drops(w.Boss) do
-		total += entry.weight
-	end
-	return math.max(1, math.round(total / w.Weight))
+local function heldWeapon()
+	local id = attr("Weapon")
+	return if Weapons.exists(id) then id else Config.WeaponDrops.Start
 end
 
--- a weapon's damage a second at your Strength: each hit (Server/Combat) x shots per attack,
--- over its cooldown (Strength attacks faster too: Power.speed)
-local function dps(id)
-	local w = Weapons.get(id)
-	local strength = player:GetAttribute("Strength")
-	local hit = Config.Slash.Damage * Power.damage(strength) * (w.Damage or 1)
-	local count = if w.Shot then w.Shot.Count or 1 else 1
-	return hit * count * Power.speed(strength) / math.max(Weapons.cooldown(id), 0.05)
-end
-
-local TABS = {}
-
-TABS.Pets = {
-	slots = function()
-		return Config.Backpack.PenSlots
-	end,
-	owned = function()
-		return Stacks.parse(player:GetAttribute("PetsOwned"), function(kind)
+-- [pet kind] = how many
+local function ownedPets()
+	local map = {}
+	for _, s in
+		Stacks.parse(attr("PetsOwned"), function(kind)
 			return Config.Pets[kind] ~= nil
 		end)
-	end,
-	equipped = function()
-		local list = {}
-		for kind in string.gmatch(player:GetAttribute("PenPets") or "", "[^,]+") do
-			if Config.Pets[kind] then
-				table.insert(list, kind)
-			end
-		end
-		return list
-	end,
-	rarity = function(kind)
-		return Config.Pets[kind].Rarity
-	end,
-	score = function(kind)
-		return Config.Pets[kind].Cash or 0
-	end,
-	name = Pets.name,
-	odds = petOdds,
-	detail = function(kind)
-		local p = Config.Pets[kind]
-		return string.format("%s  •  %s  •  %s Cash/s", Pets.name(kind), p.Rarity, Popups.abbreviate(p.Cash or 0))
-	end,
-	header = function(equipped)
-		local cash = 0
-		for _, kind in equipped do
-			cash += Config.Pets[kind].Cash or 0
-		end
-		return string.format(
-			"%d/%d In Your Pen  •  %s Cash/s",
-			#equipped,
-			Config.Backpack.PenSlots,
-			Popups.abbreviate(cash)
-		)
-	end,
-	empty = "No pets yet! Steal eggs to get some.",
-	attributes = { "PetsOwned", "PenPets" },
-}
+	do
+		map[s.id] = s.n
+	end
+	return map
+end
 
-TABS.Weapons = {
-	slots = function()
-		return 1
-	end,
-	owned = function()
-		local list = Stacks.parse(player:GetAttribute("Weapons"), Weapons.exists)
-		local start = Config.WeaponDrops.Start
-		if Stacks.count(list, start) == 0 then
-			table.insert(list, 1, { id = start, n = 1 })
+-- the pets in your pen, in its slots' order
+local function penPets()
+	local list = {}
+	for kind in string.gmatch(attr("PenPets") or "", "[^,]+") do
+		if Config.Pets[kind] then
+			table.insert(list, kind)
 		end
-		return list
-	end,
-	equipped = function()
-		local id = player:GetAttribute("Weapon")
-		return { if Weapons.exists(id) then id else Config.WeaponDrops.Start }
-	end,
-	rarity = function(id)
-		return Config.Weapons[id].Rarity
-	end,
-	score = function(id)
-		return Weapons.get(id).Damage or 0
-	end,
-	name = function(id)
-		return Weapons.get(id).Name
-	end,
-	odds = weaponOdds,
-	detail = function(id)
-		local w = Weapons.get(id)
-		return string.format("%s  •  %s DPS", w.Name, Popups.abbreviate(math.round(dps(id))))
-	end,
-	header = function(equipped)
-		local id = equipped[1]
-		return string.format("%s  •  %s DPS", Weapons.get(id).Name, Popups.abbreviate(math.round(dps(id))))
-	end,
-	empty = "Beat bosses to win weapons!",
-	attributes = { "Weapons", "Weapon" },
-}
+	end
+	return list
+end
+
+local function nameOf(tab, id)
+	return if tab == "Weapons" then Weapons.get(id).Name else Pets.name(id)
+end
+
+local function rarityOf(tab, id)
+	return if tab == "Weapons" then Config.Weapons[id].Rarity else Config.Pets[id].Rarity
+end
 
 -- ---- icons ----------------------------------------------------------------------------
 
@@ -278,79 +218,7 @@ local function icon(img, tab, id)
 	vp.Parent = img.Parent
 end
 
-local function iconLabel(parent, props)
-	local img, fresh = Ui.make(parent, "Icon", "ImageLabel")
-	if fresh then
-		img.BackgroundTransparency = 1
-		img.ScaleType = Enum.ScaleType.Fit
-		img.AnchorPoint = Vector2.new(0.5, 0.5)
-		for k, v in props do
-			img[k] = v
-		end
-	end
-	return img
-end
-
--- a tile: the item on a dark card, "x5" top right, its odds bottom right (the template the
--- grid's tiles, and the equipped row's, are copied from)
-local function tileTemplate(size)
-	return function()
-		local b = Instance.new("TextButton")
-		b.Text = ""
-		b.AutoButtonColor = false
-		b.BackgroundTransparency = 1
-		b.Size = UDim2.fromOffset(size, size)
-		local scale = Instance.new("UIScale")
-		scale.Name = "Hover"
-		scale.Parent = b
-		Popups.card(b, { Name = "Card", Size = UDim2.fromScale(1, 1), Active = false })
-		iconLabel(b, {
-			Image = PetIcons.Pets.Horse or "",
-			Position = UDim2.fromScale(0.5, 0.52),
-			Size = UDim2.fromScale(0.78, 0.78),
-		})
-		Popups.text(b, {
-			Name = "Count",
-			Text = "x2",
-			TextSize = 30,
-			AnchorPoint = Vector2.new(1, 0),
-			Position = UDim2.new(1, -10, 0, 6),
-			Size = UDim2.new(1, -20, 0, 34),
-			TextXAlignment = Enum.TextXAlignment.Right,
-			ZIndex = 3,
-		})
-		local c = rarityColors("Common")
-		local odds = Popups.text(b, {
-			Name = "Odds",
-			Text = "1/57",
-			TextSize = 30,
-			TextColor3 = c.Fill,
-			AnchorPoint = Vector2.new(1, 1),
-			Position = UDim2.new(1, -10, 1, -4),
-			Size = UDim2.new(1, -20, 0, 34),
-			TextXAlignment = Enum.TextXAlignment.Right,
-			ZIndex = 3,
-		})
-		odds:FindFirstChildOfClass("UIStroke").Color = c.Stroke
-		return b
-	end
-end
-
--- an empty slot in the row: a faded card
-local function emptyTemplate()
-	local s = Popups.darkPanel(nil, { Size = UDim2.fromOffset(SLOT, SLOT), ImageTransparency = 0.55 }, 0.5)
-	Popups.text(s, {
-		Name = "Label",
-		Text = "Empty",
-		TextSize = 26,
-		TextColor3 = SOFT,
-		TextTransparency = 0.4,
-		Size = UDim2.fromScale(1, 1),
-	})
-	return s
-end
-
--- ---- the Items tab's squares ----------------------------------------------------------
+-- ---- pieces ---------------------------------------------------------------------------
 
 local function rounded(parent, r)
 	local c = Instance.new("UICorner")
@@ -358,8 +226,85 @@ local function rounded(parent, r)
 	c.Parent = parent
 end
 
--- a weapon you own: its rarity's radial square, its icon, "x5" when there's more than one,
--- and a white ring round the one you hold (Ring, shown by the game)
+local function stroke(parent, color, thickness, border)
+	local s = Instance.new("UIStroke")
+	s.Color = color
+	s.Thickness = thickness
+	s.LineJoinMode = Enum.LineJoinMode.Round
+	if border then
+		s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	end
+	s.Parent = parent
+	return s
+end
+
+-- white Fredoka One text with QM's dark brown outline (`outline` px; 0 for none)
+local function label(parent, name, outline, props)
+	local t, fresh = Ui.make(parent, name, "TextLabel")
+	if fresh then
+		t.BackgroundTransparency = 1
+		t.FontFace = FONT
+		t.TextColor3 = WHITE
+		for k, v in props do
+			t[k] = v
+		end
+		if outline > 0 then
+			stroke(t, INK, outline)
+		end
+	end
+	return t
+end
+
+-- a rounded panel: `fill` with a `line` outline
+local function box(parent, name, fill, line, radius, props, class)
+	local f, fresh = Ui.make(parent, name, class or "Frame")
+	if fresh then
+		f.BackgroundColor3 = fill
+		f.BorderSizePixel = 0
+		for k, v in props do
+			f[k] = v
+		end
+		rounded(f, radius)
+		if line then
+			stroke(f, line, 3, true)
+		end
+	end
+	return f, fresh
+end
+
+-- a green tick in a white-edged circle (the equipped mark): two bars, as there's no tick glyph
+local function tick(parent, size, props)
+	local c = Instance.new("Frame")
+	c.Name = "Tick"
+	c.BackgroundColor3 = TICK
+	c.BorderSizePixel = 0
+	c.Size = UDim2.fromOffset(size, size)
+	for k, v in props do
+		c[k] = v
+	end
+	rounded(c, size // 2)
+	stroke(c, WHITE, math.max(2, size // 12), true)
+	local function bar(len, x, y, angle)
+		local b = Instance.new("Frame")
+		b.BackgroundColor3 = WHITE
+		b.BorderSizePixel = 0
+		b.AnchorPoint = Vector2.new(0.5, 0.5)
+		b.Position = UDim2.fromScale(x, y)
+		b.Size = UDim2.new(len, 0, 0.14, 0)
+		b.Rotation = angle
+		b.ZIndex = c.ZIndex + 1
+		rounded(b, 3)
+		b.Parent = c
+	end
+	bar(0.3, 0.37, 0.56, 45)
+	bar(0.52, 0.56, 0.47, -50)
+	c.Parent = parent
+	return c
+end
+
+-- the square of something you have: its rarity's radial square, its icon, "x5" top right
+-- when there's more than one, a gold Ring round it when it's picked and a Tick when it's
+-- equipped (both shown by the game)
 local function ownedTemplate(rarity)
 	return function()
 		local colors = ITEM_COLORS[rarity] or ITEM_COLORS.Common
@@ -368,35 +313,23 @@ local function ownedTemplate(rarity)
 		b.AutoButtonColor = false
 		b.BackgroundTransparency = 1
 		b.Size = UDim2.fromOffset(ITEM, ITEM)
-		local scale = Instance.new("UIScale")
-		scale.Name = "Hover"
-		scale.Parent = b
-		-- (the white ring: a wider stroke under the square's own, so it shows just outside it)
 		local ring = Instance.new("Frame")
 		ring.Name = "Ring"
 		ring.BackgroundTransparency = 1
 		ring.Size = UDim2.fromScale(1, 1)
 		ring.ZIndex = 1
-		rounded(ring, 8)
-		local white = Instance.new("UIStroke")
-		white.Color = WHITE
-		white.Thickness = 8
-		white.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		white.Parent = ring
+		ring.Visible = false
+		rounded(ring, 10)
+		stroke(ring, GOLD_RING, 9, true)
 		ring.Parent = b
 		local panel = Instance.new("Frame")
 		panel.Name = "Panel"
-		panel.BackgroundColor3 = if RADIAL ~= "" then colors.Dark else colors.Light
+		panel.BackgroundColor3 = colors.Dark
 		panel.BorderSizePixel = 0
 		panel.Size = UDim2.fromScale(1, 1)
 		panel.ZIndex = 2
-		rounded(panel, 6)
-		local outline = Instance.new("UIStroke")
-		outline.Name = "Outline"
-		outline.Color = colors.Outline
-		outline.Thickness = ITEM_OUTLINE
-		outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		outline.Parent = panel
+		rounded(panel, 8)
+		stroke(panel, colors.Outline, ITEM_OUTLINE, true).Name = "Outline"
 		local glow = Instance.new("ImageLabel")
 		glow.Name = "Glow"
 		glow.BackgroundTransparency = 1
@@ -404,75 +337,144 @@ local function ownedTemplate(rarity)
 		glow.ImageColor3 = colors.Light
 		glow.Size = UDim2.fromScale(1, 1)
 		glow.ZIndex = 2
-		rounded(glow, 6)
+		rounded(glow, 8)
 		glow.Parent = panel
 		panel.Parent = b
-		iconLabel(b, {
-			Image = WeaponIcons.Shortsword or "",
-			Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.fromScale(0.82, 0.82),
-			ZIndex = 3,
-		})
-		-- "x5" over the top right corner: white, black outline, a hard 25% black shadow
+		local img = Instance.new("ImageLabel")
+		img.Name = "Icon"
+		img.BackgroundTransparency = 1
+		img.ScaleType = Enum.ScaleType.Fit
+		img.AnchorPoint = Vector2.new(0.5, 0.5)
+		img.Position = UDim2.fromScale(0.5, 0.5)
+		img.Size = UDim2.fromScale(0.82, 0.82)
+		img.ZIndex = 3
+		img.Parent = b
+		-- "x5": white on a dark pill in the top right corner
 		local count = Instance.new("Frame")
 		count.Name = "Count"
-		count.BackgroundTransparency = 1
+		count.BackgroundColor3 = Color3.fromHex("2A1E14")
+		count.BackgroundTransparency = 0.25
+		count.BorderSizePixel = 0
 		count.AnchorPoint = Vector2.new(1, 0)
-		count.Position = UDim2.new(1, 10, 0, -12)
-		count.Size = UDim2.fromOffset(80, 40)
+		count.Position = UDim2.new(1, -4, 0, 4)
+		count.AutomaticSize = Enum.AutomaticSize.X
+		count.Size = UDim2.fromOffset(0, 26)
 		count.ZIndex = 4
-		local function label(parent, color, z)
-			local t = Instance.new("TextLabel")
-			t.Name = "Label"
-			t.BackgroundTransparency = 1
-			t.FontFace = FONT
-			t.Text = "x5"
-			t.TextSize = 32
-			t.TextColor3 = color
-			t.TextXAlignment = Enum.TextXAlignment.Right
-			t.Size = UDim2.fromScale(1, 1)
-			t.ZIndex = z
-			local stroke = Instance.new("UIStroke")
-			stroke.Color = Color3.new(0, 0, 0)
-			stroke.Thickness = 3
-			stroke.LineJoinMode = Enum.LineJoinMode.Round
-			stroke.Parent = t
-			t.Parent = parent
-			return t
-		end
-		local shadow = Instance.new("CanvasGroup") -- (one see-through layer, so it's an even 25%)
-		shadow.Name = "Shadow"
-		shadow.BackgroundTransparency = 1
-		shadow.GroupTransparency = 0.75
-		shadow.Position = UDim2.fromOffset(3, 3)
-		shadow.Size = UDim2.fromScale(1, 1)
-		shadow.ZIndex = 4
-		label(shadow, Color3.new(0, 0, 0), 4)
-		shadow.Parent = count
-		label(count, WHITE, 5)
+		rounded(count, 8)
+		local pad = Instance.new("UIPadding")
+		pad.PaddingLeft = UDim.new(0, 6)
+		pad.PaddingRight = UDim.new(0, 6)
+		pad.Parent = count
+		local n = Instance.new("TextLabel")
+		n.Name = "Label"
+		n.BackgroundTransparency = 1
+		n.FontFace = FONT
+		n.Text = "x5"
+		n.TextSize = 22
+		n.TextColor3 = WHITE
+		n.AutomaticSize = Enum.AutomaticSize.X
+		n.Size = UDim2.fromScale(0, 1)
+		n.ZIndex = 5
+		n.Parent = count
 		count.Parent = b
+		tick(b, 30, {
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.new(1, 6, 0, -6),
+			Visible = false,
+			ZIndex = 6,
+		})
 		return b
 	end
 end
 
--- a weapon you haven't found yet: a see-through C1A283 square with a faint "?"
-local function unknownTemplate()
+-- something you haven't got yet: a beige square, a padlock, a "?"
+local function lockedTemplate()
 	local f = Instance.new("Frame")
-	f.BackgroundColor3 = UNKNOWN
-	f.BackgroundTransparency = 0.5
+	f.BackgroundColor3 = LOCKED
 	f.BorderSizePixel = 0
 	f.Size = UDim2.fromOffset(ITEM, ITEM)
-	rounded(f, 6)
+	rounded(f, 8)
+	local shackle = Instance.new("Frame")
+	shackle.Name = "Shackle"
+	shackle.BackgroundTransparency = 1
+	shackle.AnchorPoint = Vector2.new(0.5, 0)
+	shackle.Position = UDim2.fromScale(0.5, 0.14)
+	shackle.Size = UDim2.fromOffset(18, 24)
+	rounded(shackle, 9)
+	stroke(shackle, LOCK_INK, 4, true)
+	shackle.Parent = f
+	local body = Instance.new("Frame")
+	body.Name = "Lock"
+	body.BackgroundColor3 = LOCK_INK
+	body.BorderSizePixel = 0
+	body.AnchorPoint = Vector2.new(0.5, 0)
+	body.Position = UDim2.fromScale(0.5, 0.3)
+	body.Size = UDim2.fromOffset(28, 20)
+	body.ZIndex = 2
+	rounded(body, 4)
+	body.Parent = f
 	local mark = Instance.new("TextLabel")
 	mark.Name = "Mark"
 	mark.BackgroundTransparency = 1
 	mark.FontFace = FONT
 	mark.Text = "?"
-	mark.TextSize = 64
+	mark.TextSize = 46
 	mark.TextColor3 = WHITE
-	mark.TextTransparency = 0.5
-	mark.Size = UDim2.fromScale(1, 1)
+	mark.TextTransparency = 0.3
+	mark.AnchorPoint = Vector2.new(0.5, 0)
+	mark.Position = UDim2.fromScale(0.5, 0.5)
+	mark.Size = UDim2.new(1, 0, 0.45, 0)
 	mark.Parent = f
+	return f
+end
+
+-- an empty pen slot: a dashed outline, a "+" and "Empty"
+local function emptySlotTemplate()
+	local f = Instance.new("Frame")
+	f.BackgroundTransparency = 1
+	f.Size = UDim2.fromOffset(ITEM, ITEM)
+	local dash, gap = 10, 7
+	for side = 1, 4 do
+		local along = 0
+		while along < ITEM do
+			local len = math.min(dash, ITEM - along)
+			local d = Instance.new("Frame")
+			d.BackgroundColor3 = LOCK_INK
+			d.BorderSizePixel = 0
+			if side == 1 then
+				d.Position, d.Size = UDim2.fromOffset(along, 0), UDim2.fromOffset(len, 3)
+			elseif side == 2 then
+				d.Position, d.Size = UDim2.fromOffset(along, ITEM - 3), UDim2.fromOffset(len, 3)
+			elseif side == 3 then
+				d.Position, d.Size = UDim2.fromOffset(0, along), UDim2.fromOffset(3, len)
+			else
+				d.Position, d.Size = UDim2.fromOffset(ITEM - 3, along), UDim2.fromOffset(3, len)
+			end
+			d.Parent = f
+			along += dash + gap
+		end
+	end
+	for _, s in { UDim2.fromOffset(30, 8), UDim2.fromOffset(8, 30) } do
+		local p = Instance.new("Frame")
+		p.BackgroundColor3 = LOCK_INK
+		p.BorderSizePixel = 0
+		p.AnchorPoint = Vector2.new(0.5, 0.5)
+		p.Position = UDim2.fromScale(0.5, 0.4)
+		p.Size = s
+		rounded(p, 3)
+		p.Parent = f
+	end
+	local t = Instance.new("TextLabel")
+	t.Name = "Label"
+	t.BackgroundTransparency = 1
+	t.FontFace = FONT
+	t.Text = "Empty"
+	t.TextSize = 20
+	t.TextColor3 = LOCK_INK
+	t.AnchorPoint = Vector2.new(0.5, 0)
+	t.Position = UDim2.fromScale(0.5, 0.66)
+	t.Size = UDim2.new(1, 0, 0, 24)
+	t.Parent = f
 	return f
 end
 
@@ -519,338 +521,362 @@ local function petsByRarity()
 	return lists
 end
 
--- a square (and everything on it) made `k` more see-through: a pet whose last one's in the pen
-local function fade(b, k)
-	for _, d in b:GetDescendants() do
-		if d:IsA("ImageLabel") or d:IsA("ImageButton") then
-			d.ImageTransparency = 1 - (1 - d.ImageTransparency) * (1 - k)
-		end
-		if d:IsA("TextLabel") then
-			d.TextTransparency = 1 - (1 - d.TextTransparency) * (1 - k)
-		end
-		if d:IsA("GuiObject") and d.BackgroundTransparency < 1 then
-			d.BackgroundTransparency = 1 - (1 - d.BackgroundTransparency) * (1 - k)
-		end
-		if d:IsA("UIStroke") then
-			d.Transparency = 1 - (1 - d.Transparency) * (1 - k)
-		end
-		if d:IsA("CanvasGroup") then
-			d.GroupTransparency = 1 - (1 - d.GroupTransparency) * (1 - k)
-		end
-	end
-end
-
 -- ---- the popup ------------------------------------------------------------------------
 
 function Backpack.init()
-	local body, holder = Popups.frame("Backpack", "Backpack", SIZE, true) -- (QM's tiled panel, Oct 26)
-	Popups.grow("Backpack", 1, 184) -- (its own size: 1.3x ran off the screen, QM; the side buttons stick out 24 + 160)
-	local tab = "Weapons" -- (Items first, QM's mockup)
-	local sortBy = "Rarity"
-	local flashUntil = 0
-	local rebuild -- (below)
-	local fresh
+	local _, holder = Popups.frame("Backpack", "Backpack", SIZE, true) -- (QM's tiled panel)
+	Popups.grow("Backpack", 1, TAB_RAIL)
+	local tab = "Weapons"
+	local picked = {} -- [tab] = the id picked in it (shown on the right)
 	local petRemote, weaponRemote, mergeRemote -- (in Play)
+	local rebuild, showDetails -- (below)
 
-	-- the header: how many are equipped (or the hovered tile's details)
-	local header = Popups.text(body, {
-		Name = "Header",
-		Text = "",
-		TextSize = 32,
-		Position = UDim2.fromOffset(0, HEADER_Y),
-		Size = UDim2.new(1, 0, 0, 40),
+	-- the title, over the panel's top edge
+	label(holder, "Title", 6, {
+		Text = "Backpack",
+		TextSize = 84,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0, -6),
+		Size = UDim2.fromOffset(500, 100),
+		ZIndex = 8,
 	})
-	-- (short soft lines either side of it, like QM's reference)
-	local dashes = {}
-	for side = -1, 1, 2 do
-		local d
-		d, fresh = Ui.make(body, if side < 0 then "DashLeft" else "DashRight", "Frame")
-		if fresh then
-			d.BackgroundColor3 = WHITE
-			d.BorderSizePixel = 0
-			d.AnchorPoint = Vector2.new(0.5, 0.5)
-			d.Position = UDim2.new(0.5, side * 150, 0, HEADER_Y + 20)
-			d.Size = UDim2.fromOffset(110, 4)
-			local g = Instance.new("UIGradient")
-			g.Transparency = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 1),
-				NumberSequenceKeypoint.new(0.5, 0.45),
-				NumberSequenceKeypoint.new(1, 1),
-			})
-			g.Parent = d
-		end
-		dashes[side] = d
-	end
-	local function placeDashes()
-		local half = header.TextBounds.X / 2 + 90
-		for side, d in dashes do
-			d.Position = UDim2.new(0.5, side * half, d.Position.Y.Scale, d.Position.Y.Offset)
-		end
-	end
-	local headerText = ""
-	local function setHeader(text, color)
-		header.Text = text
-		header.TextColor3 = color or WHITE
-		placeDashes()
-	end
 
-	-- the equipped row
-	local row
-	row, fresh = Ui.make(body, "Equipped", "Frame")
-	if fresh then
-		row.BackgroundTransparency = 1
-		row.Position = UDim2.fromOffset(0, ROW_Y)
-		row.Size = UDim2.new(1, 0, 0, SLOT)
-	end
-	local rowLayout
-	rowLayout, fresh = Ui.make(row, "Layout", "UIListLayout")
-	if fresh then
-		rowLayout.FillDirection = Enum.FillDirection.Horizontal
-		rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-		rowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-		rowLayout.Padding = UDim.new(0, 30)
-		rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	end
-
-	-- a soft white line between the row and the grid, fading out at both ends
-	local line
-	line, fresh = Ui.make(body, "Line", "Frame")
-	if fresh then
-		line.BackgroundColor3 = WHITE
-		line.BorderSizePixel = 0
-		line.AnchorPoint = Vector2.new(0.5, 0)
-		line.Position = UDim2.new(0.5, 0, 0, LINE_Y)
-		line.Size = UDim2.new(1, -2 * SIDE, 0, 3)
-		local fade = Instance.new("UIGradient")
-		fade.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 1),
-			NumberSequenceKeypoint.new(0.2, 0.35),
-			NumberSequenceKeypoint.new(0.8, 0.35),
-			NumberSequenceKeypoint.new(1, 1),
+	-- the tabs: a rail behind the panel's left edge, a square each (the open one gold)
+	local rail = box(holder, "Tabs", TAB_OFF:Lerp(WHITE, 0.45), Color3.fromHex("C1A283"), 18, {
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.fromOffset(24, 40),
+		Size = UDim2.fromOffset(TAB_RAIL + 24, 2 * 150 + 3 * 14),
+		ZIndex = 0,
+	})
+	local tabButtons = {}
+	for i, name in { "Weapons", "Pets" } do
+		local b = box(rail, name .. "Tab", TAB_OFF, TAB_OFF_LINE, 14, {
+			Position = UDim2.fromOffset(14, 14 + (i - 1) * 164),
+			Size = UDim2.fromOffset(TAB_RAIL - 22, 150),
+			ZIndex = 1,
+			Text = "",
+			AutoButtonColor = false,
+		}, "TextButton")
+		local art, artFresh = Ui.make(b, "Icon", "ImageLabel")
+		if artFresh then
+			art.BackgroundTransparency = 1
+			art.ScaleType = Enum.ScaleType.Fit
+			art.AnchorPoint = Vector2.new(0.5, 0)
+			art.Position = UDim2.fromScale(0.5, 0.06)
+			art.Size = UDim2.fromScale(0.72, 0.6)
+			art.ZIndex = 2
+			art.Image = if name == "Pets" then PetIcons.Pets.Horse or "" else WeaponIcons.Club or ""
+		end
+		label(b, "Label", 3, {
+			Text = name,
+			TextSize = 30,
+			AnchorPoint = Vector2.new(0.5, 1),
+			Position = UDim2.new(0.5, 0, 1, -8),
+			Size = UDim2.new(1, 0, 0, 34),
+			ZIndex = 3,
 		})
-		fade.Parent = line
+		tabButtons[name] = b
 	end
-
-	-- the grid of everything else owned
-	local gridTop = GRID_Y
-	local grid
-	grid, fresh = Ui.make(body, "Grid", "ScrollingFrame")
-	if fresh then
-		grid.BackgroundTransparency = 1
-		grid.BorderSizePixel = 0
-		grid.Position = UDim2.fromOffset(SIDE, gridTop)
-		grid.Size = UDim2.new(1, -2 * SIDE, 1, -gridTop - 6)
-		grid.CanvasSize = UDim2.new()
-		grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		grid.ScrollingDirection = Enum.ScrollingDirection.Y
-		grid.ScrollBarThickness = 8
-		grid.ScrollBarImageColor3 = WHITE
-		grid.ScrollBarImageTransparency = 0.5
-		local pad = Instance.new("UIPadding")
-		pad.PaddingTop = UDim.new(0, 14)
-		pad.PaddingBottom = UDim.new(0, 14)
-		pad.PaddingLeft = UDim.new(0, 6)
-		pad.PaddingRight = UDim.new(0, 6)
-		pad.Parent = grid
-		local gridLayout = Instance.new("UIGridLayout")
-		gridLayout.Name = "Layout"
-		gridLayout.CellSize = UDim2.fromOffset(CELL.X, CELL.Y)
-		gridLayout.CellPadding = UDim2.fromOffset(18, 16)
-		gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-		gridLayout.Parent = grid
-	end
-	local emptyNote = Popups.text(body, {
-		Name = "EmptyNote",
-		Text = "",
-		TextSize = 34,
-		TextColor3 = SOFT,
-		Position = UDim2.fromOffset(0, gridTop + 120),
-		Size = UDim2.new(1, 0, 0, 50),
-		Visible = false,
-	})
-	-- (in Studio: Equipped > EquippedTemplate / EmptyTemplate and Grid > TileTemplate)
-	local templates = {
-		[row] = Ui.template(row, "EquippedTemplate", tileTemplate(SLOT)),
-		[grid] = Ui.template(grid, "TileTemplate", tileTemplate(CELL.X)),
-	}
-	local emptyOne = Ui.template(row, "EmptyTemplate", emptyTemplate)
-
-	local petParts = { header, dashes[-1], dashes[1], row, line, grid, emptyNote } -- (the Pets tab's)
-
-	-- the Items tab: a row per rarity, every weapon in it, owned ones filled in
-	local items
-	items, fresh = Ui.make(body, "Items", "ScrollingFrame")
-	if fresh then
-		items.BackgroundTransparency = 1
-		items.BorderSizePixel = 0
-		items.Position = UDim2.fromOffset(0, -20)
-		items.Size = UDim2.new(1, 0, 1, 10)
-		items.CanvasSize = UDim2.new()
-		items.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		items.ScrollingDirection = Enum.ScrollingDirection.Y
-		items.ScrollBarThickness = 8
-		items.ScrollBarImageColor3 = UNKNOWN
-		local pad = Instance.new("UIPadding")
-		pad.PaddingTop = UDim.new(0, 16)
-		pad.PaddingLeft = UDim.new(0, 16)
-		pad.PaddingBottom = UDim.new(0, 16)
-		pad.Parent = items
-		local layout = Instance.new("UIListLayout")
-		layout.Name = "Layout"
-		layout.Padding = UDim.new(0, ITEM_GAP)
-		layout.SortOrder = Enum.SortOrder.LayoutOrder
-		layout.Parent = items
-	end
-	local byRarity = weaponsByRarity()
-	local itemRows = {} -- { { rarity, row, template }, ... }
-	for i, rarity in RARITIES do
-		if byRarity[rarity] then
-			local r
-			r, fresh = Ui.make(items, rarity, "Frame")
-			if fresh then
-				r.BackgroundTransparency = 1
-				r.LayoutOrder = i
-				r.Size = UDim2.new(1, -24, 0, ITEM)
-				local layout = Instance.new("UIListLayout")
-				layout.Name = "Layout"
-				layout.FillDirection = Enum.FillDirection.Horizontal
-				layout.Padding = UDim.new(0, ITEM_GAP)
-				layout.SortOrder = Enum.SortOrder.LayoutOrder
-				layout.Parent = r
+	local function paintTabs()
+		for name, b in tabButtons do
+			local on = name == tab
+			b.BackgroundColor3 = if on then TAB_ON else TAB_OFF
+			local s = b:FindFirstChildOfClass("UIStroke")
+			if s then
+				s.Color = if on then TAB_ON_LINE else TAB_OFF_LINE
+				s.Thickness = if on then 5 else 3
 			end
-			table.insert(itemRows, { rarity, r, Ui.template(r, "OwnedTemplate", ownedTemplate(rarity)) })
 		end
 	end
-	local unknownOne = Ui.template(items, "UnknownTemplate", unknownTemplate)
 
-	-- the Pets tab: your pen's slots along the top (a "?" where one's empty), then a row per
-	-- rarity of every pet, owned ones filled in. (In Studio: Body > Pets > Rows > <rarity> >
-	-- OwnedTemplate and Rows > UnknownTemplate; the pen's slots are copied from those too.)
-	local pets
-	pets, fresh = Ui.make(body, "Pets", "Frame")
-	if fresh then
-		pets.BackgroundTransparency = 1
-		pets.Position = UDim2.fromOffset(0, -20)
-		pets.Size = UDim2.new(1, 0, 1, 10)
+	-- the list (left) and the details (right), on lighter panels
+	local list = box(holder, "List", INSET, INSET_LINE, 16, {
+		Position = UDim2.fromOffset(PAD, PAD),
+		Size = UDim2.new(0, LIST_W, 1, -2 * PAD),
+		ZIndex = 2,
+	})
+	local details = box(holder, "Details", INSET, INSET_LINE, 16, {
+		Position = UDim2.fromOffset(PAD * 2 + LIST_W, PAD),
+		Size = UDim2.new(1, -(PAD * 3 + LIST_W), 1, -2 * PAD),
+		ZIndex = 2,
+	})
+
+	-- a scrolling column of rarity sections
+	local function column(parent, name, top)
+		local s, sFresh = Ui.make(parent, name, "ScrollingFrame")
+		if sFresh then
+			s.BackgroundTransparency = 1
+			s.BorderSizePixel = 0
+			s.Position = UDim2.fromOffset(0, top)
+			s.Size = UDim2.new(1, 0, 1, -top)
+			s.CanvasSize = UDim2.new()
+			s.AutomaticCanvasSize = Enum.AutomaticSize.Y
+			s.ScrollingDirection = Enum.ScrollingDirection.Y
+			s.ScrollBarThickness = 6
+			s.ScrollBarImageColor3 = INSET_LINE
+			s.ZIndex = 3
+			local pad = Instance.new("UIPadding")
+			pad.PaddingTop = UDim.new(0, 16)
+			pad.PaddingLeft = UDim.new(0, 18)
+			pad.PaddingRight = UDim.new(0, 18)
+			pad.PaddingBottom = UDim.new(0, 60) -- (room for MERGE on the bottom edge)
+			pad.Parent = s
+			local layout = Instance.new("UIListLayout")
+			layout.Name = "Layout"
+			layout.Padding = UDim.new(0, 10)
+			layout.SortOrder = Enum.SortOrder.LayoutOrder
+			layout.Parent = s
+		end
+		return s
 	end
-	local pen
-	pen, fresh = Ui.make(pets, "Pen", "Frame")
-	if fresh then
-		pen.BackgroundTransparency = 1
-		pen.Position = UDim2.fromOffset(0, 16)
-		pen.Size = UDim2.new(1, 0, 0, ITEM)
+
+	-- a section's header: its name on a pill of `color`, a line of it off to the right
+	local function header(parent, name, text, color, order)
+		local h, hFresh = Ui.make(parent, name, "Frame")
+		if hFresh then
+			h.BackgroundTransparency = 1
+			h.Size = UDim2.new(1, 0, 0, 38)
+			h.LayoutOrder = order
+			h.ZIndex = 3
+			local line = Instance.new("Frame")
+			line.Name = "Line"
+			line.BackgroundColor3 = color
+			line.BackgroundTransparency = 0.45
+			line.BorderSizePixel = 0
+			line.AnchorPoint = Vector2.new(0, 0.5)
+			line.Position = UDim2.fromScale(0, 0.5)
+			line.Size = UDim2.new(1, 0, 0, 4)
+			line.ZIndex = 3
+			rounded(line, 2)
+			line.Parent = h
+		end
+		local pill = box(h, "Pill", color, nil, 19, {
+			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromOffset(0, 38),
+			ZIndex = 4,
+		})
+		if not pill:FindFirstChildOfClass("UIPadding") then
+			local pad = Instance.new("UIPadding")
+			pad.PaddingLeft = UDim.new(0, 16)
+			pad.PaddingRight = UDim.new(0, 16)
+			pad.Parent = pill
+		end
+		local t = label(pill, "Label", 3, {
+			TextSize = 28,
+			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromScale(0, 1),
+			ZIndex = 5,
+		})
+		t.Text = text
+		return h
+	end
+
+	-- a section's squares, as many to a row as fit
+	local function grid(parent, name, order)
+		local g, gFresh = Ui.make(parent, name, "Frame")
+		if gFresh then
+			g.BackgroundTransparency = 1
+			g.AutomaticSize = Enum.AutomaticSize.Y
+			g.Size = UDim2.new(1, 0, 0, ITEM)
+			g.LayoutOrder = order
+			g.ZIndex = 3
+			local layout = Instance.new("UIGridLayout")
+			layout.Name = "Layout"
+			layout.CellSize = UDim2.fromOffset(ITEM, ITEM)
+			layout.CellPadding = UDim2.fromOffset(ITEM_GAP, ITEM_GAP)
+			layout.SortOrder = Enum.SortOrder.LayoutOrder
+			layout.Parent = g
+			local pad = Instance.new("UIPadding")
+			pad.PaddingTop = UDim.new(0, 6)
+			pad.PaddingLeft = UDim.new(0, 4)
+			pad.PaddingBottom = UDim.new(0, 6)
+			pad.Parent = g
+		end
+		return g
+	end
+
+	-- the Weapons tab's list: every rarity that has weapons
+	local weaponsBy = weaponsByRarity()
+	local weaponsPage = column(list, "WeaponsList", 0)
+	local weaponSections = {} -- { { rarity, header, grid, template } }
+	for i, rarity in RARITIES do
+		if weaponsBy[rarity] then
+			local h = header(
+				weaponsPage,
+				rarity .. "Header",
+				string.format("%s (%d)", rarity, #weaponsBy[rarity]),
+				pillColor(rarity),
+				i * 2 - 1
+			)
+			local g = grid(weaponsPage, rarity, i * 2)
+			table.insert(weaponSections, { rarity, h, g, Ui.template(g, "OwnedTemplate", ownedTemplate(rarity)) })
+		end
+	end
+	local lockedOne = Ui.template(weaponsPage, "LockedTemplate", lockedTemplate)
+
+	-- the Pets tab: your pen on top ("Equipped · 4/5", its slots), the rarities under it
+	local petsPage, petsFresh = Ui.make(list, "PetsList", "Frame")
+	if petsFresh then
+		petsPage.BackgroundTransparency = 1
+		petsPage.Size = UDim2.fromScale(1, 1)
+		petsPage.ZIndex = 3
+	end
+	local penTop, penTopFresh = Ui.make(petsPage, "Pen", "Frame")
+	if penTopFresh then
+		penTop.BackgroundTransparency = 1
+		penTop.Position = UDim2.fromOffset(18, 16)
+		penTop.Size = UDim2.new(1, -36, 0, 38 + 10 + ITEM + 24)
+		penTop.ZIndex = 3
+	end
+	local penHeader = header(penTop, "Header", "Equipped", PEN_PILL, 0)
+	local penBox = box(penTop, "Slots", INSET:Lerp(INSET_LINE, 0.35), INSET_LINE, 14, {
+		Position = UDim2.fromOffset(0, 48),
+		Size = UDim2.new(1, 0, 0, ITEM + 24),
+		ZIndex = 3,
+	})
+	if not penBox:FindFirstChild("Layout") then
 		local layout = Instance.new("UIListLayout")
 		layout.Name = "Layout"
 		layout.FillDirection = Enum.FillDirection.Horizontal
-		layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-		layout.Padding = UDim.new(0, ITEM_GAP)
+		layout.VerticalAlignment = Enum.VerticalAlignment.Center
+		layout.Padding = UDim.new(0, ITEM_GAP + 8)
 		layout.SortOrder = Enum.SortOrder.LayoutOrder
-		layout.Parent = pen
-	end
-	-- a soft line between the pen and the rows, fading out at both ends (QM)
-	local separator
-	separator, fresh = Ui.make(pets, "Separator", "Frame")
-	if fresh then
-		separator.BackgroundColor3 = UNKNOWN
-		separator.BackgroundTransparency = 0.4
-		separator.BorderSizePixel = 0
-		separator.AnchorPoint = Vector2.new(0.5, 0.5)
-		separator.Position = UDim2.new(0.5, 0, 0, 16 + ITEM + PEN_GAP / 2)
-		separator.Size = UDim2.new(1, -60, 0, 6)
-		rounded(separator, 3)
-		local fadeEnds = Instance.new("UIGradient")
-		fadeEnds.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 1),
-			NumberSequenceKeypoint.new(0.12, 0),
-			NumberSequenceKeypoint.new(0.88, 0),
-			NumberSequenceKeypoint.new(1, 1),
-		})
-		fadeEnds.Parent = separator
-	end
-	local petRowsFrame
-	petRowsFrame, fresh = Ui.make(pets, "Rows", "ScrollingFrame")
-	if fresh then
-		local top = 16 + ITEM + PEN_GAP - 16
-		petRowsFrame.BackgroundTransparency = 1
-		petRowsFrame.BorderSizePixel = 0
-		petRowsFrame.Position = UDim2.fromOffset(0, top)
-		petRowsFrame.Size = UDim2.new(1, 0, 1, -top)
-		petRowsFrame.CanvasSize = UDim2.new()
-		petRowsFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		petRowsFrame.ScrollingDirection = Enum.ScrollingDirection.Y
-		petRowsFrame.ScrollBarThickness = 8
-		petRowsFrame.ScrollBarImageColor3 = UNKNOWN
+		layout.Parent = penBox
 		local pad = Instance.new("UIPadding")
-		pad.PaddingTop = UDim.new(0, 16)
-		pad.PaddingLeft = UDim.new(0, 16)
-		pad.PaddingBottom = UDim.new(0, 16)
-		pad.Parent = petRowsFrame
-		local layout = Instance.new("UIListLayout")
-		layout.Name = "Layout"
-		layout.Padding = UDim.new(0, ITEM_GAP)
-		layout.SortOrder = Enum.SortOrder.LayoutOrder
-		layout.Parent = petRowsFrame
+		pad.PaddingLeft = UDim.new(0, 14)
+		pad.Parent = penBox
 	end
+	local emptyOne = Ui.template(penBox, "EmptyTemplate", emptySlotTemplate)
 	local petsBy = petsByRarity()
-	local petRows = {} -- { { rarity, row, template }, ... }
-	local petTemplates = {} -- [rarity] = its OwnedTemplate (the pen's slots use them too)
+	local petsColumn = column(petsPage, "Rarities", 16 + 38 + 10 + ITEM + 24 + 10)
+	local petSections = {}
 	for i, rarity in RARITIES do
 		if petsBy[rarity] then
-			local r
-			r, fresh = Ui.make(petRowsFrame, rarity, "Frame")
-			if fresh then
-				r.BackgroundTransparency = 1
-				r.LayoutOrder = i
-				r.Size = UDim2.new(1, -24, 0, ITEM)
-				local layout = Instance.new("UIListLayout")
-				layout.Name = "Layout"
-				layout.FillDirection = Enum.FillDirection.Horizontal
-				layout.Padding = UDim.new(0, ITEM_GAP)
-				layout.SortOrder = Enum.SortOrder.LayoutOrder
-				layout.Parent = r
+			local h = header(petsColumn, rarity .. "Header", rarity, pillColor(rarity), i * 2 - 1)
+			local g = grid(petsColumn, rarity, i * 2)
+			table.insert(petSections, { rarity, h, g, Ui.template(g, "OwnedTemplate", ownedTemplate(rarity)) })
+		end
+	end
+	local petLocked = Ui.template(petsColumn, "LockedTemplate", lockedTemplate)
+	local function petTemplate(rarity)
+		for _, s in petSections do
+			if s[1] == rarity then
+				return s[4]
 			end
-			petTemplates[rarity] = Ui.template(r, "OwnedTemplate", ownedTemplate(rarity))
-			table.insert(petRows, { rarity, r, petTemplates[rarity] })
 		end
+		return petSections[1][4]
 	end
-	local petUnknown = Ui.template(petRowsFrame, "UnknownTemplate", unknownTemplate)
 
-	-- the selector, down the outside of the panel's left edge: the open one on a 20% black
-	-- square with rounded corners, the other faded to half
-	local tabButtons = {}
-	for i, name in { "Weapons", "Pets" } do
-		local b
-		b, fresh = Ui.make(holder, if name == "Weapons" then "ItemsTab" else "PetsTab", "TextButton")
-		if fresh then
-			b.Text = ""
-			b.AutoButtonColor = false
-			b.BackgroundColor3 = Color3.new(0, 0, 0)
-			b.BackgroundTransparency = if i == 1 then 0.8 else 1
-			b.BorderSizePixel = 0
-			-- (the pair centred on the panel's height, QM)
-			b.AnchorPoint = Vector2.new(1, 0.5)
-			b.Position = UDim2.new(0, -24, 0.5, (i - 1.5) * 176)
-			b.Size = UDim2.fromOffset(160, 160)
-			b.ZIndex = 4
-			rounded(b, 10)
-		end
-		local scale = Ui.make(b, "Hover", "UIScale")
-		local art = iconLabel(b, {
-			Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.fromScale(0.8, 0.8),
-			ZIndex = 5,
-			ImageTransparency = if i == 1 then 0 else 0.5,
-		})
-		if art.Image == "" then
-			icon(art, name, if name == "Pets" then "Horse" else "Club")
-		end
-		tabButtons[name] = { button = b, scale = scale, art = art }
+	-- the details: the picked one big, its name, its rarity, how many, and its button
+	local big = box(details, "Big", ITEM_COLORS.Rare.Dark, nil, 16, {
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 26),
+		Size = UDim2.fromOffset(290, 290),
+		ZIndex = 3,
+	})
+	local bigOutline = big:FindFirstChild("Outline") or stroke(big, ITEM_COLORS.Rare.Outline, 6, true)
+	bigOutline.Name = "Outline"
+	local bigGlow, glowFresh = Ui.make(big, "Glow", "ImageLabel")
+	if glowFresh then
+		bigGlow.BackgroundTransparency = 1
+		bigGlow.Image = RADIAL
+		bigGlow.Size = UDim2.fromScale(1, 1)
+		bigGlow.ZIndex = 3
+		rounded(bigGlow, 16)
 	end
-	-- MERGE (QM, Oct 26): under the Items tab, sat on the panel's bottom edge, only while
-	-- you've Config.Merge.Cost of a weapon that merges into another (Config.Merge.Into)
-	-- the X (QM's Figma, designs/figma/close_button.md): a red square over the panel's top
-	-- right corner, its lowercase "x" in Fredoka One, closing the Backpack
+	local bigIcon, bigIconFresh = Ui.make(big, "Icon", "ImageLabel")
+	if bigIconFresh then
+		bigIcon.BackgroundTransparency = 1
+		bigIcon.ScaleType = Enum.ScaleType.Fit
+		bigIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+		bigIcon.Position = UDim2.fromScale(0.5, 0.5)
+		bigIcon.Size = UDim2.fromScale(0.84, 0.84)
+		bigIcon.ZIndex = 4
+	end
+	local nameLabel = label(details, "ItemName", 5, {
+		TextSize = 48,
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 330),
+		Size = UDim2.new(1, -20, 0, 56),
+		TextScaled = false,
+		ZIndex = 3,
+	})
+	local rarityPill = box(details, "Rarity", pillColor("Rare"), nil, 22, {
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 396),
+		Size = UDim2.fromOffset(220, 44),
+		ZIndex = 3,
+	})
+	local rarityLabel = label(rarityPill, "Label", 0, {
+		TextSize = 30,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 4,
+	})
+	local info = box(details, "Info", INFO, nil, 12, {
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 458),
+		Size = UDim2.new(1, -44, 0, 62),
+		ZIndex = 3,
+	})
+	local infoTick = info:FindFirstChild("Tick")
+		or tick(info, 40, {
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(0, 26, 0.5, 0),
+			ZIndex = 4,
+		})
+	local infoLabel = label(info, "Label", 0, {
+		TextSize = 32,
+		TextColor3 = INFO_TEXT,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 4,
+	})
+	-- the button: a face on a solid shadow of its outline's colour
+	local action, actionFresh = Ui.make(details, "Action", "TextButton")
+	if actionFresh then
+		action.Text = ""
+		action.AutoButtonColor = false
+		action.BackgroundTransparency = 1
+		action.AnchorPoint = Vector2.new(0.5, 0)
+		action.Position = UDim2.new(0.5, 0, 0, 542)
+		action.Size = UDim2.new(1, -44, 0, 84)
+		action.ZIndex = 3
+		local shadow = Instance.new("Frame")
+		shadow.Name = "Shadow"
+		shadow.BorderSizePixel = 0
+		shadow.Position = UDim2.fromOffset(0, 7)
+		shadow.Size = UDim2.fromScale(1, 1)
+		shadow.ZIndex = 3
+		rounded(shadow, 16)
+		shadow.Parent = action
+		local face = Instance.new("Frame")
+		face.Name = "Face"
+		face.BorderSizePixel = 0
+		face.Size = UDim2.fromScale(1, 1)
+		face.ZIndex = 4
+		rounded(face, 16)
+		stroke(face, BUTTONS.Equip[2], 4, true)
+		local shine = Instance.new("UIGradient")
+		shine.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(215, 215, 215))
+		shine.Rotation = 90
+		shine.Parent = face
+		face.Parent = action
+	end
+	local actionLabel = label(action, "Label", 4, {
+		TextSize = 50,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 5,
+	})
+	local function paintAction(kind)
+		local c = BUTTONS[kind]
+		action.Shadow.BackgroundColor3 = c[2]
+		action.Face.BackgroundColor3 = c[1]
+		action.Face:FindFirstChildOfClass("UIStroke").Color = c[2]
+		actionLabel.Text = kind
+		action.Active = kind ~= "Equipped"
+		action:SetAttribute("Does", kind)
+	end
+
+	-- the X, over the top right corner (QM's Figma, designs/figma/close_button.md)
 	local close = Ui.make(holder, "Close", "TextButton")
 	if not close:FindFirstChild("Plate") then
 		local k = SIZE.X / 2710
@@ -886,11 +912,7 @@ function Backpack.init()
 		bodyFrame.Size = UDim2.fromScale(1, 1)
 		bodyFrame.ZIndex = 7
 		rounded(bodyFrame, math.round(20 * k))
-		local stroke = Instance.new("UIStroke")
-		stroke.Color = CLOSE_DARK
-		stroke.Thickness = math.round(10 * k)
-		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		stroke.Parent = bodyFrame
+		stroke(bodyFrame, CLOSE_DARK, math.round(10 * k), true)
 		local glow = Instance.new("ImageLabel")
 		glow.Name = "Glow"
 		glow.BackgroundTransparency = 1
@@ -942,7 +964,7 @@ function Backpack.init()
 		mergeButton.AutoButtonColor = false
 		mergeButton.BackgroundTransparency = 1
 		mergeButton.AnchorPoint = Vector2.new(0.5, 0)
-		mergeButton.Position = UDim2.new(0.5, 0, 1, -math.round(114 * k))
+		mergeButton.Position = UDim2.new(0, PAD + LIST_W // 2, 1, -math.round(114 * k))
 		mergeButton.Size = UDim2.fromOffset(math.round(690 * k), math.round(228 * k))
 		mergeButton.ZIndex = 6
 		-- (the green plate pulses and squashes; the word stays put, at one size, QM)
@@ -986,17 +1008,13 @@ function Backpack.init()
 		bodyImg.Size = UDim2.fromScale(1, 1)
 		bodyImg.ZIndex = 7
 		rounded(bodyImg, math.round(20 * k))
-		local stroke = Instance.new("UIStroke")
-		stroke.Color = MERGE_DARK
-		stroke.Thickness = math.round(10 * k)
-		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		stroke.Parent = bodyImg
+		stroke(bodyImg, MERGE_DARK, math.round(10 * k), true)
 		bodyImg.Parent = plate
 		local function word(name, color, dy, z, transparency)
 			local t = Instance.new("TextLabel")
 			t.Name = name
 			t.BackgroundTransparency = 1
-			t.FontFace = FONT
+			t.FontFace = MONT
 			t.Text = "MERGE"
 			t.TextSize = math.round(100 * k)
 			t.TextColor3 = color
@@ -1033,352 +1051,232 @@ function Backpack.init()
 			end
 		end)
 		mergeButton.Activated:Connect(function()
-			if mergeButton:GetAttribute("Merges") and mergeRemote and playMerge then
+			if mergeRemote and playMerge then
 				playMerge()
 			end
 		end)
 	end
-	-- what MERGE would merge: the weapon you hold if it can, else the first one that can
-	-- (commons first, as the rows run)
-	local function toMerge()
-		local owned = {}
-		for _, s in TABS.Weapons.owned() do
-			owned[s.id] = s.n
+
+	-- ---- filling it in ---------------------------------------------------------------
+
+	local weaponSquares = {} -- [id] = its square in the list (for the merge's flights)
+
+	local function clear(parent)
+		for _, child in parent:GetChildren() do
+			if child:IsA("GuiObject") and not Ui.isTemplate(child) then
+				child:Destroy()
+			end
 		end
-		local function can(id)
-			return Config.Merge.Into[id] ~= nil and (owned[id] or 0) >= Config.Merge.Cost
+	end
+
+	-- a square of something you have, copied from `template`
+	local function square(template, parent, id, order, count, equipped)
+		local b = Ui.copy(template, id, parent)
+		b.LayoutOrder = order
+		local img = b:FindFirstChild("Icon")
+		if img then
+			icon(img, tab, id)
 		end
-		local held = TABS.Weapons.equipped()[1]
-		if held and can(held) then
-			return held
+		local c = b:FindFirstChild("Count")
+		if c then
+			c.Visible = count > 1
+			local n = c:FindFirstChild("Label")
+			if n then
+				n.Text = "x" .. count
+			end
 		end
-		for _, rarity in RARITIES do
-			for _, id in byRarity[rarity] or {} do
-				if can(id) then
-					return id
+		local t = b:FindFirstChild("Tick")
+		if t then
+			t.Visible = equipped
+		end
+		local ring = b:FindFirstChild("Ring")
+		if ring then
+			ring.Visible = picked[tab] == id
+		end
+		if Ui.live then
+			b.Activated:Connect(function()
+				picked[tab] = id
+				for _, other in list:GetDescendants() do
+					if other.Name == "Ring" and other.Parent and not Ui.isTemplate(other.Parent) then
+						other.Visible = other.Parent.Name == id
+					end
+				end
+				showDetails()
+			end)
+		end
+		return b
+	end
+
+	local function locked(template, parent, name, order)
+		local l = Ui.copy(template, name, parent)
+		l.LayoutOrder = order
+		return l
+	end
+
+	local function fillWeapons()
+		local owned, held = ownedWeapons(), heldWeapon()
+		if not (picked.Weapons and owned[picked.Weapons]) then
+			picked.Weapons = held
+		end
+		table.clear(weaponSquares)
+		for _, s in weaponSections do
+			local rarity, g, template = s[1], s[3], s[4]
+			clear(g)
+			for i, id in weaponsBy[rarity] do
+				if owned[id] then
+					weaponSquares[id] = square(template, g, id, i, owned[id], id == held)
+				else
+					locked(lockedOne, g, id, i)
 				end
 			end
 		end
-		return nil
+	end
+
+	local function fillPets()
+		local owned, pen = ownedPets(), penPets()
+		local inPen = {}
+		for _, kind in pen do
+			inPen[kind] = true
+		end
+		if not (picked.Pets and owned[picked.Pets]) then
+			picked.Pets = pen[1] or next(owned)
+		end
+		local slots = Config.Backpack.PenSlots
+		penHeader.Pill.Label.Text = string.format("Equipped · %d/%d", #pen, slots)
+		clear(penBox)
+		for i = 1, slots do
+			local kind = pen[i]
+			if kind then
+				square(petTemplate(Config.Pets[kind].Rarity), penBox, kind, i, 1, false)
+			else
+				Ui.copy(emptyOne, "Empty" .. i, penBox).LayoutOrder = i
+			end
+		end
+		for _, s in petSections do
+			local rarity, g, template = s[1], s[3], s[4]
+			clear(g)
+			for i, kind in petsBy[rarity] do
+				if owned[kind] then
+					square(template, g, kind, i, owned[kind], inPen[kind] == true)
+				else
+					locked(petLocked, g, kind, i)
+				end
+			end
+		end
+	end
+
+	-- the right: what's picked in the open tab
+	function showDetails()
+		local id = picked[tab]
+		local has = id and (if tab == "Weapons" then ownedWeapons()[id] else ownedPets()[id])
+		for _, child in details:GetChildren() do
+			if child:IsA("GuiObject") then
+				child.Visible = has ~= nil
+			end
+		end
+		if not has then
+			return
+		end
+		local rarity = rarityOf(tab, id)
+		local colors = ITEM_COLORS[rarity] or ITEM_COLORS.Common
+		big.BackgroundColor3 = colors.Dark
+		bigOutline.Color = colors.Outline
+		bigGlow.ImageColor3 = colors.Light
+		for _, child in big:GetChildren() do
+			if child:IsA("ViewportFrame") then
+				child:Destroy()
+			end
+		end
+		icon(bigIcon, tab, id)
+		nameLabel.Text = nameOf(tab, id)
+		rarityPill.BackgroundColor3 = pillColor(rarity)
+		rarityLabel.Text = rarity
+		local equipped
+		if tab == "Weapons" then
+			equipped = heldWeapon() == id
+			paintAction(if equipped then "Equipped" else "Equip")
+		else
+			equipped = table.find(penPets(), id) ~= nil
+			paintAction(if equipped then "Unequip" else "Equip")
+		end
+		infoTick.Visible = equipped
+		infoLabel.Text = if equipped then "      Equipped" else "Owned: " .. has
+	end
+
+	local merging = false
+	function rebuild()
+		weaponsPage.Visible = tab == "Weapons"
+		petsPage.Visible = tab == "Pets"
+		paintTabs()
+		if tab == "Weapons" then
+			fillWeapons()
+		else
+			fillPets()
+		end
+		showDetails()
+		local owned = ownedWeapons()
+		local can = false
+		for id, n in owned do
+			if Config.Merge.Into[id] and n >= Config.Merge.Cost then
+				can = true
+			end
+		end
+		mergeButton.Visible = tab == "Weapons" and can and not merging
 	end
 
 	if not Ui.live then
-		-- (in Studio: show the Items tab, as it opens)
-		items.Visible = true
-		pets.Visible = false
-		for _, part in petParts do
-			part.Visible = false
-		end
+		-- (in Studio: the Weapons tab, filled with PREVIEW's things)
+		rebuild()
 		return
 	end
 
 	petRemote = ReplicatedStorage:WaitForChild("PetEquip", 10)
 	weaponRemote = ReplicatedStorage:WaitForChild("EquipWeapon", 10)
 	mergeRemote = ReplicatedStorage:WaitForChild("MergeWeapon", 10)
-	header:GetPropertyChangedSignal("TextBounds"):Connect(placeDashes)
 
-	local function tile(parent, id, count, order, onClick)
-		local t = TABS[tab]
-		local b = Ui.copy(templates[parent], id, parent)
-		b.LayoutOrder = order
-		local scale = b:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", b)
-		local img = b:FindFirstChild("Icon")
-		if img then
-			icon(img, tab, id)
-		end
-		local countLabel = b:FindFirstChild("Count")
-		if countLabel then
-			countLabel.Text = "x" .. (count or 1)
-			countLabel.Visible = count ~= nil and count > 1
-		end
-		local oddsLabel = b:FindFirstChild("Odds")
-		if oddsLabel then
-			local odds = t.odds(id)
-			oddsLabel.Visible = odds ~= nil
-			if odds then
-				local c = rarityColors(t.rarity(id))
-				oddsLabel.Text = "1/" .. Popups.abbreviate(odds)
-				oddsLabel.TextColor3 = c.Fill
-				local stroke = oddsLabel:FindFirstChildOfClass("UIStroke")
-				if stroke then
-					stroke.Color = c.Stroke
-				end
-			end
-		end
-		Snappy.hook(b, { 14, 4 })
-		b.MouseEnter:Connect(function()
-			if os.clock() > flashUntil then
-				setHeader(t.detail(id), rarityColors(t.rarity(id)).Fill)
-			end
-		end)
-		b.MouseLeave:Connect(function()
-			if os.clock() > flashUntil then
-				setHeader(headerText)
-			end
-		end)
-		b.Activated:Connect(onClick)
-		return b
-	end
-
-	local function emptySlot(order)
-		local s = Ui.copy(emptyOne, "Empty" .. order, row)
-		s.LayoutOrder = order
-	end
-
-	local function flash(text)
-		flashUntil = os.clock() + 1.6
-		setHeader(text, RED_TEXT)
-		task.delay(1.65, function()
-			if os.clock() >= flashUntil then
-				setHeader(headerText)
-			end
-		end)
-	end
-
-	-- best first: rarest (then highest score), or by name
-	local function sorted(list)
-		local t = TABS[tab]
-		table.sort(list, function(a, b)
-			if sortBy == "Name" then
-				return t.name(a.id) < t.name(b.id)
-			end
-			local ra, rb = RANK[t.rarity(a.id)] or 0, RANK[t.rarity(b.id)] or 0
-			if ra ~= rb then
-				return ra > rb
-			end
-			local sa, sb = t.score(a.id), t.score(b.id)
-			if sa ~= sb then
-				return sa > sb
-			end
-			return t.name(a.id) < t.name(b.id)
-		end)
-		return list
-	end
-
-	local function rebuildItems()
-		local owned = {}
-		for _, s in TABS.Weapons.owned() do
-			owned[s.id] = s.n
-		end
-		local held = TABS.Weapons.equipped()[1]
-		for _, entry in itemRows do
-			local rarity, r, template = entry[1], entry[2], entry[3]
-			for _, child in r:GetChildren() do
-				if child:IsA("GuiObject") and not Ui.isTemplate(child) then
-					child:Destroy()
-				end
-			end
-			for i, id in byRarity[rarity] do
-				if not owned[id] then
-					Ui.copy(unknownOne, id, r).LayoutOrder = i
-					continue
-				end
-				local b = Ui.copy(template, id, r)
-				b.LayoutOrder = i
-				local img = b:FindFirstChild("Icon")
-				if img then
-					icon(img, "Weapons", id)
-				end
-				local ring = b:FindFirstChild("Ring")
-				if ring then
-					ring.Visible = id == held
-				end
-				local count = b:FindFirstChild("Count")
-				if count then
-					count.Visible = owned[id] > 1
-					for _, label in count:GetDescendants() do
-						if label:IsA("TextLabel") then
-							label.Text = "x" .. owned[id]
-						end
-					end
-				end
-				Snappy.hook(b, SQUARE_RING)
-				b.Activated:Connect(function()
-					if weaponRemote and id ~= TABS.Weapons.equipped()[1] then
-						weaponRemote:FireServer(id)
-					end
-				end)
-			end
-		end
-	end
-
-	-- a pet's square, wired up (Snappy: outlined and a touch faded on hover)
-	local function pressable(b, onClick)
-		Snappy.hook(b, SQUARE_RING)
-		b.Activated:Connect(onClick)
-	end
-
-	local function petSquare(template, kind, parent, order, count, ring)
-		local b = Ui.copy(template, kind, parent)
-		b.LayoutOrder = order
-		local img = b:FindFirstChild("Icon")
-		if img then
-			icon(img, "Pets", kind)
-		end
-		local r = b:FindFirstChild("Ring")
-		if r then
-			r.Visible = ring
-		end
-		local c = b:FindFirstChild("Count")
-		if c then
-			c.Visible = count > 1
-			for _, label in c:GetDescendants() do
-				if label:IsA("TextLabel") then
-					label.Text = "x" .. count
-				end
-			end
-		end
-		return b
-	end
-
-	-- the Pets tab: click a pet below to put one in your pen, one in the pen to take it out
-	local function rebuildPets()
-		local holders = { pen }
-		for _, entry in petRows do
-			table.insert(holders, entry[2])
-		end
-		for _, f in holders do
-			for _, child in f:GetChildren() do
-				if child:IsA("GuiObject") and not Ui.isTemplate(child) then
-					child:Destroy()
-				end
-			end
-		end
-		local owned = {}
-		for _, s in TABS.Pets.owned() do
-			owned[s.id] = s.n
-		end
-		local equipped = TABS.Pets.equipped()
-		local inPen = {}
-		for _, kind in equipped do
-			inPen[kind] = (inPen[kind] or 0) + 1
-		end
-		-- the pen's slots
-		for i = 1, TABS.Pets.slots() do
-			local kind = equipped[i]
-			if kind then
-				local template = petTemplates[TABS.Pets.rarity(kind)] or petRows[1][3]
-				local b = petSquare(template, kind, pen, i, 1, false) -- (no white ring in the pen, QM)
-				pressable(b, function()
-					if petRemote then
-						petRemote:FireServer("unequip", i)
-					end
-				end)
-			else
-				Ui.copy(petUnknown, "Empty" .. i, pen).LayoutOrder = i
-			end
-		end
-		-- the rows: what's left of each once the pen's are taken out; your last one in the pen
-		-- just goes see-through (not a "?": you have it)
-		for _, entry in petRows do
-			local rarity, r, template = entry[1], entry[2], entry[3]
-			for i, kind in petsBy[rarity] do
-				local have = owned[kind] or 0
-				if have == 0 then
-					Ui.copy(petUnknown, kind, r).LayoutOrder = i
-					continue
-				end
-				local left = have - (inPen[kind] or 0)
-				local b = petSquare(template, kind, r, i, left, false)
-				if left <= 0 then
-					fade(b, LAST_ONE)
-					pressable(b, function()
-						-- (takes it back out of the pen)
-						local at = table.find(TABS.Pets.equipped(), kind)
-						if at and petRemote then
-							petRemote:FireServer("unequip", at)
-						end
-					end)
-				else
-					pressable(b, function()
-						if #TABS.Pets.equipped() < TABS.Pets.slots() and petRemote then
-							petRemote:FireServer("equip", kind)
-						end
-					end)
-				end
-			end
-		end
-	end
-
-	function rebuild()
-		items.Visible = tab == "Weapons"
-		pets.Visible = tab == "Pets"
-		local merges = if tab == "Weapons" then toMerge() else nil
-		mergeButton:SetAttribute("Merges", merges)
-		mergeButton.Visible = merges ~= nil
-		for _, part in petParts do
-			part.Visible = false -- (the old Pets tab, before QM's rows)
+	-- the details' button
+	Snappy.hook(action, { 16, 6 })
+	action.Activated:Connect(function()
+		local id = picked[tab]
+		local does = action:GetAttribute("Does")
+		if not id or does == "Equipped" then
+			return
 		end
 		if tab == "Weapons" then
-			rebuildItems()
-			return
-		end
-		if tab == "Pets" then
-			rebuildPets()
-			return
-		end
-		local t = TABS[tab]
-		for _, holderFrame in { row, grid } do
-			for _, child in holderFrame:GetChildren() do
-				if child:IsA("GuiObject") and not Ui.isTemplate(child) then
-					child:Destroy()
-				end
+			if weaponRemote then
+				weaponRemote:FireServer(id)
 			end
-		end
-		local owned = t.owned()
-		local equipped = t.equipped()
-		-- the row
-		for i = 1, t.slots() do
-			local id = equipped[i]
-			if id then
-				tile(row, id, nil, i, function()
-					if tab == "Pets" and petRemote then
-						petRemote:FireServer("unequip", i)
-					end
-				end)
-			else
-				emptySlot(i)
+		elseif does == "Unequip" then
+			local at = table.find(penPets(), id)
+			if at and petRemote then
+				petRemote:FireServer("unequip", at)
 			end
-		end
-		-- the grid: what's left once the equipped ones are taken out
-		local left = {}
-		for _, s in owned do
-			local n = s.n
-			for _, id in equipped do
-				if id == s.id then
-					n -= 1
-				end
+		elseif #penPets() < Config.Backpack.PenSlots then
+			if petRemote then
+				petRemote:FireServer("equip", id)
 			end
-			if n > 0 then
-				table.insert(left, { id = s.id, n = n })
+		else
+			-- (the pen's full: a quick red flash on the button says so)
+			actionLabel.Text = "Pen full!"
+			action.Face.BackgroundColor3 = Color3.fromHex("E5484D")
+			task.delay(0.6, showDetails)
+		end
+	end)
+
+	-- the tabs
+	for name, b in tabButtons do
+		local reset = Snappy.hook(b, { 14, 4 })
+		b.Activated:Connect(function()
+			if tab ~= name then
+				reset() -- (its look's about to change: let go of the faded one first)
+				tab = name
+				weaponsPage.CanvasPosition = Vector2.zero
+				petsColumn.CanvasPosition = Vector2.zero
+				rebuild()
 			end
-		end
-		for i, s in sorted(left) do
-			tile(grid, s.id, s.n, i, function()
-				if tab == "Pets" then
-					if #t.equipped() >= t.slots() then
-						flash("Your pen is full! Click a pet above to take it out.")
-					elseif petRemote then
-						petRemote:FireServer("equip", s.id)
-					end
-				elseif weaponRemote then
-					weaponRemote:FireServer(s.id)
-				end
-			end)
-		end
-		emptyNote.Text = t.empty
-		emptyNote.Visible = #left == 0 and #equipped == 0
-		headerText = t.header(equipped)
-		if os.clock() > flashUntil then
-			setHeader(headerText)
-		end
+		end)
 	end
 
-	-- the merge (QM, Oct 26): the merged weapon's square flashes white and squashes, the new
-	-- one pops up out of it and drifts over to its own square, and only when it lands does
-	-- that square fill in (or its "xN" count up), with a bounce and a flash of its own. The
-	-- Backpack holds still (no rebuilds) until then.
-	local merging = false
 	local function whiteFlash(square, peak)
 		local f = Instance.new("Frame")
 		f.Name = "Flash"
@@ -1410,14 +1308,15 @@ function Backpack.init()
 		local k = holder.AbsoluteSize.X / math.max(holder.Size.X.Offset, 1)
 		return (gui.AbsolutePosition + gui.AbsoluteSize / 2 - holder.AbsolutePosition) / k
 	end
+	-- a weapon's square in the list (locked or not)
 	local function squareOf(id)
-		for _, entry in itemRows do
-			local sq = entry[2]:FindFirstChild(id)
+		for _, s in weaponSections do
+			local sq = s[3]:FindFirstChild(id)
 			if sq then
-				return sq, entry[3]
+				return sq
 			end
 		end
-		return nil, nil
+		return nil
 	end
 	-- one merge's flight: id's square flashes and squashes, what it makes pops up out of it and
 	-- drifts over to its own square (yields until it's there)
@@ -1435,7 +1334,7 @@ function Backpack.init()
 		fly.AnchorPoint = Vector2.new(0.5, 0.5)
 		fly.ZIndex = 50
 		for _, d in fly:GetDescendants() do
-			if d.Name == "Ring" or d.Name == "Count" then
+			if d.Name == "Ring" or d.Name == "Count" or d.Name == "Tick" then
 				d.Visible = false
 			end
 		end
@@ -1483,20 +1382,17 @@ function Backpack.init()
 		if merging then
 			return
 		end
-		local owned = {}
-		for _, s in TABS.Weapons.owned() do
-			owned[s.id] = s.n
-		end
+		local owned = ownedWeapons()
 		local flights = {}
 		for _, rarity in RARITIES do
-			for _, id in byRarity[rarity] or {} do
+			for _, id in weaponsBy[rarity] or {} do
 				local into = Config.Merge.Into[id]
 				if into and (owned[id] or 0) >= Config.Merge.Cost then
 					local from, to = squareOf(id), squareOf(into)
 					local template = nil
-					for _, entry in itemRows do
-						if table.find(byRarity[entry[1]], into) then
-							template = entry[3]
+					for _, s in weaponSections do
+						if s[1] == Config.Weapons[into].Rarity then
+							template = s[4]
 						end
 					end
 					if from and to and template then
@@ -1539,33 +1435,11 @@ function Backpack.init()
 		end
 	end
 
-	local function selectTab(name)
-		tab = name
-		for n, b in tabButtons do
-			local on = n == name
-			b.button.BackgroundTransparency = if on then 0.8 else 1
-			b.art.ImageTransparency = if on then 0 else 0.5
-		end
-		grid.CanvasPosition = Vector2.zero
-		items.CanvasPosition = Vector2.zero
-		petRowsFrame.CanvasPosition = Vector2.zero
-		rebuild()
-	end
-	for name, b in tabButtons do
-		local reset = Snappy.hook(b.button, { 10, 0 })
-		b.button.Activated:Connect(function()
-			if tab ~= name then
-				reset() -- (its look's about to change: let go of the faded one first)
-				selectTab(name)
-			end
-		end)
-	end
-
 	-- kept up to date while it's open (and fresh each time it opens)
 	local dirty = false
 	local function changed()
 		if merging then
-			return -- (playMerge rebuilds once its weapon lands)
+			return -- (playMerge rebuilds once its weapons land)
 		end
 		if holder.Visible then
 			rebuild()
@@ -1573,30 +1447,24 @@ function Backpack.init()
 			dirty = true
 		end
 	end
-	for _, t in TABS do
-		for _, attr in t.attributes do
-			if attr ~= "Weapon" then
-				player:GetAttributeChangedSignal(attr):Connect(changed)
-			end
-		end
+	for _, name in { "Weapons", "PetsOwned", "PenPets" } do
+		player:GetAttributeChangedSignal(name):Connect(changed)
 	end
-	-- (switching weapons only moves the white ring: rebuilding every square made their "xN"s
-	-- flicker, QM)
+	-- (switching weapons only moves the tick and the details: rebuilding every square made
+	-- their counts flicker, QM)
 	player:GetAttributeChangedSignal("Weapon"):Connect(function()
 		if merging then
 			return
 		end
-		local held = TABS.Weapons.equipped()[1]
-		for _, entry in itemRows do
-			for _, square in entry[2]:GetChildren() do
-				local ring = square:FindFirstChild("Ring")
-				if ring and not Ui.isTemplate(square) then
-					ring.Visible = square.Name == held
-				end
+		local held = heldWeapon()
+		for id, sq in weaponSquares do
+			local t = sq:FindFirstChild("Tick")
+			if t then
+				t.Visible = id == held
 			end
 		end
-		if not holder.Visible then
-			dirty = true
+		if tab == "Weapons" then
+			showDetails()
 		end
 	end)
 	holder:GetPropertyChangedSignal("Visible"):Connect(function()
@@ -1605,7 +1473,7 @@ function Backpack.init()
 			rebuild()
 		end
 	end)
-	selectTab("Weapons")
+	rebuild()
 end
 
 return Backpack
