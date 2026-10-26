@@ -772,6 +772,8 @@ function Popups.init(root, hudFrames)
 	if not Ui.live then
 		return
 	end
+	-- (the HUD starts shown, whatever it was left as in StarterGui while editing)
+	setHud(true)
 	-- (in game: on, but clear until a popup opens)
 	blurOn = blur.Size
 	hazeOn = { Brightness = tint.Brightness, Contrast = tint.Contrast, Saturation = tint.Saturation }
