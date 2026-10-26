@@ -16,6 +16,7 @@
 --   Popups.frame(name, title, size, tiled) -> body, holder  -- another popup (client/Backpack),
 --                                  -- after init: its content goes in body; `tiled` gives it
 --                                  -- QM's plain tiled beige panel (no title or X) instead
+--   Popups.fitScreen(name, left)          -- that popup fills the screen's height as it opens
 --
 -- They're real objects QM edits in Studio (StarterGui > Hud > Root > ShopPopup ...: see
 -- client/Ui). Every piece is made with a Name and only when it isn't there yet, and its
@@ -47,6 +48,12 @@ local GOLD = Color3.fromRGB(246, 186, 66)
 local MINT = Color3.fromRGB(160, 238, 104)
 local TEAL = Color3.fromRGB(88, 216, 192)
 local BLUR = 14
+-- the world behind an open popup goes hazy like frosted glass (QM: LassoAPet's Worlds menu):
+-- blurred (BLUR), and paler and softer
+local HAZE = { Brightness = 0.06, Contrast = -0.15, Saturation = -0.35 }
+local NO_HAZE = { Brightness = 0, Contrast = 0, Saturation = 0 }
+local DESIGN_HEIGHT = 1080 -- (Hud's: the root's design pixels)
+local FIT_MARGIN = 16 -- screen px a screen-filling popup keeps clear top and bottom (1rem)
 local ICONS = { -- (the HUD counters' art, cropped to the icon)
 	Power = "rbxassetid://108359754385647",
 	Cash = "rbxassetid://83332868999001",
@@ -325,7 +332,7 @@ end
 local scaled, hud = nil, {}
 local popups = {}
 local open = nil
-local blur = nil
+local blur, tint = nil, nil
 
 local function frame(name, title, size, tiled)
 	-- (StarterGui > Hud > Root > ShopPopup: in Studio, tick its Visible to see it while editing;
@@ -402,6 +409,25 @@ Popups.frame = function(name, title, size, tiled)
 	return body, popups[name].holder
 end
 Popups.darkPanel = darkPanel
+
+-- makes a popup grow, as it opens, to fill the screen's height bar FIT_MARGIN top and bottom
+-- (QM: the Backpack), or its width if that runs out first; `left` is how many design px of it
+-- stick out past the panel's left edge (the Backpack's Items / Pets buttons), so the lot is
+-- centred
+function Popups.fitScreen(name, left)
+	local p = popups[name]
+	p.fit = function()
+		local view = workspace.CurrentCamera.ViewportSize
+		local margin = FIT_MARGIN * DESIGN_HEIGHT / view.Y
+		local width = view.X * DESIGN_HEIGHT / view.Y
+		local size = p.holder.Size
+		local outline = 12 -- (the panel's outline, outside it)
+		local w, h = size.X.Offset + left + outline, size.Y.Offset + outline
+		local k = math.min((DESIGN_HEIGHT - 2 * margin) / h, (width - 2 * margin) / w)
+		p.holder.Position = UDim2.new(0.5, left / 2 * k, 0.5, 0)
+		return k
+	end
+end
 
 -- ---- the three popups (placeholder content in the real layout) ----------------------
 
@@ -669,10 +695,13 @@ local function show(name)
 	local p = popups[name]
 	open = name
 	p.holder.Visible = true
-	p.scale.Scale = 0.6
-	TweenService:Create(p.scale, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
-		:Play()
+	p.full = if p.fit then p.fit() else 1
+	p.scale.Scale = 0.6 * p.full
+	TweenService:Create(p.scale, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Scale = p.full,
+	}):Play()
 	TweenService:Create(blur, TweenInfo.new(0.25), { Size = BLUR }):Play()
+	TweenService:Create(tint, TweenInfo.new(0.25), HAZE):Play()
 	setHud(false)
 end
 
@@ -686,13 +715,13 @@ function Popups.close()
 	local swell = TweenService:Create(
 		p.scale,
 		TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{ Scale = 1.06 }
+		{ Scale = 1.06 * (p.full or 1) }
 	)
 	swell.Completed:Once(function()
 		local shrink = TweenService:Create(
 			p.scale,
 			TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-			{ Scale = 0.3 }
+			{ Scale = 0.3 * (p.full or 1) }
 		)
 		shrink.Completed:Once(function()
 			if popups[open or ""] ~= p then
@@ -703,6 +732,7 @@ function Popups.close()
 	end)
 	swell:Play()
 	TweenService:Create(blur, TweenInfo.new(0.2), { Size = 0 }):Play()
+	TweenService:Create(tint, TweenInfo.new(0.2), NO_HAZE):Play()
 	setHud(true)
 end
 
@@ -734,6 +764,9 @@ function Popups.init(root, hudFrames)
 	blur.Name = "PopupBlur"
 	blur.Size = 0
 	blur.Parent = Lighting
+	tint = Instance.new("ColorCorrectionEffect")
+	tint.Name = "PopupHaze"
+	tint.Parent = Lighting
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if input.KeyCode == Enum.KeyCode.Escape and open and not processed then
 			Popups.close()

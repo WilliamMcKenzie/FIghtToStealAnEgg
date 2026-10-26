@@ -484,6 +484,7 @@ end
 
 function Backpack.init()
 	local body, holder = Popups.frame("Backpack", "Backpack", SIZE, true) -- (QM's tiled panel, Oct 26)
+	Popups.fitScreen("Backpack", 184) -- (as big as the screen allows, QM; the side buttons: 24 + 160)
 	local tab = "Weapons" -- (Items first, QM's mockup)
 	local sortBy = "Rarity"
 	local flashUntil = 0
