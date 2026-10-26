@@ -76,6 +76,7 @@ local UNKNOWN = Color3.fromHex("C1A283")
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local MERGE_TEXTURE = "rbxassetid://87121220953662" -- (assets/ui/merge_button_texture.png: QM's green checker)
 local MERGE_DARK = Color3.fromHex("00A529") -- the MERGE button's outline and shadow
+local CLOSE_DARK = Color3.fromHex("720006") -- the X's outline and shadow
 local MERGE_PULSE = 0.05 -- how much bigger it swells at the top of each pulse
 local MERGE_PULSE_TIME = 1.1 -- seconds a pulse takes
 local MERGE_SPIN = 40 -- degrees a second the sunburst behind it turns
@@ -846,6 +847,98 @@ function Backpack.init()
 	end
 	-- MERGE (QM, Oct 26): under the Items tab, sat on the panel's bottom edge, only while
 	-- you've Config.Merge.Cost of a weapon that merges into another (Config.Merge.Into)
+	-- the X (QM's Figma, designs/figma/close_button.md): a red square over the panel's top
+	-- right corner, its lowercase "x" in Fredoka One, closing the Backpack
+	local close = Ui.make(holder, "Close", "TextButton")
+	if not close:FindFirstChild("Plate") then
+		local k = SIZE.X / 2710
+		close.Text = ""
+		close.AutoButtonColor = false
+		close.BackgroundTransparency = 1
+		close.Position = UDim2.fromOffset(math.round(2566 * k), math.round(-54 * k))
+		close.Size = UDim2.fromOffset(math.round(192 * k), math.round(192 * k))
+		close.ZIndex = 6
+		local plate = Instance.new("Frame")
+		plate.Name = "Plate"
+		plate.BackgroundTransparency = 1
+		plate.AnchorPoint = Vector2.new(0.5, 0.5)
+		plate.Position = UDim2.fromScale(0.5, 0.5)
+		plate.Size = UDim2.fromScale(1, 1)
+		plate.ZIndex = 6
+		Instance.new("UIScale").Parent = plate
+		plate.Parent = close
+		local shadow = Instance.new("Frame")
+		shadow.Name = "Shadow"
+		shadow.BackgroundColor3 = CLOSE_DARK
+		shadow.BorderSizePixel = 0
+		shadow.Position = UDim2.fromOffset(0, math.round(16 * k))
+		shadow.Size = UDim2.fromScale(1, 1)
+		shadow.ZIndex = 6
+		rounded(shadow, math.round(20 * k))
+		shadow.Parent = plate
+		-- (the radial gradient: the glow's lighter red in the middle over the edge's red)
+		local bodyFrame = Instance.new("Frame")
+		bodyFrame.Name = "Body"
+		bodyFrame.BackgroundColor3 = Color3.fromHex("F32020")
+		bodyFrame.BorderSizePixel = 0
+		bodyFrame.Size = UDim2.fromScale(1, 1)
+		bodyFrame.ZIndex = 7
+		rounded(bodyFrame, math.round(20 * k))
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = CLOSE_DARK
+		stroke.Thickness = math.round(10 * k)
+		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		stroke.Parent = bodyFrame
+		local glow = Instance.new("ImageLabel")
+		glow.Name = "Glow"
+		glow.BackgroundTransparency = 1
+		glow.Image = RADIAL
+		glow.ImageColor3 = Color3.fromHex("FF5656")
+		glow.Size = UDim2.fromScale(1, 1)
+		glow.ZIndex = 7
+		rounded(glow, math.round(20 * k))
+		glow.Parent = bodyFrame
+		bodyFrame.Parent = plate
+		local function glyph(name, color, dy, z, transparency)
+			local t = Instance.new("TextLabel")
+			t.Name = name
+			t.BackgroundTransparency = 1
+			t.FontFace = Font.fromEnum(Enum.Font.FredokaOne)
+			t.Text = "x"
+			t.TextSize = math.round(130 * k)
+			t.TextColor3 = color
+			t.TextTransparency = transparency
+			t.Position = UDim2.fromOffset(0, dy - 2)
+			t.Size = UDim2.fromScale(1, 1)
+			t.ZIndex = z
+			local o = Instance.new("UIStroke")
+			o.Color = Color3.new(0, 0, 0)
+			o.Thickness = 3
+			o.Transparency = transparency
+			o.LineJoinMode = Enum.LineJoinMode.Round
+			o.Parent = t
+			t.Parent = plate
+		end
+		glyph("XShadow", Color3.new(0, 0, 0), math.round(8 * k), 8, 0.75)
+		glyph("X", WHITE, 0, 9, 0)
+	end
+	if Ui.live then
+		local scale = close.Plate:FindFirstChildOfClass("UIScale")
+		close.MouseEnter:Connect(function()
+			tween(scale, 0.12, { Scale = 1.08 }, Enum.EasingStyle.Back)
+		end)
+		close.MouseLeave:Connect(function()
+			tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
+		end)
+		close.MouseButton1Down:Connect(function()
+			tween(scale, 0.06, { Scale = 0.9 })
+		end)
+		close.Activated:Connect(function()
+			tween(scale, 0.15, { Scale = 1 }, Enum.EasingStyle.Back)
+			Popups.close()
+		end)
+	end
+
 	local playMerge -- (below: the merge's animation, then the merge)
 	local mergeButton = Ui.make(holder, "Merge", "TextButton")
 	if not mergeButton:FindFirstChild("Plate") then
