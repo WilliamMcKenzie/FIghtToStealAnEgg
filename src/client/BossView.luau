@@ -69,6 +69,9 @@ local NUMBER_SHADOW_ALPHA = 0.75 -- shadow transparency
 local NUMBER_RISE = 3.5 -- studs it floats up
 local NUMBER_LIFE = 0.45 -- seconds on screen
 local NUMBER_POP = 1.4 -- how big it overshoots as it pops in, before settling to full size
+-- (drawn at SHARP times the size and scaled back down, so the text grows smoothly instead of
+-- stepping a whole font size at a time)
+local SHARP = 4
 local DEATH = 0.5 -- seconds it takes to shrink away
 local SLEEP = Config.BossSleep
 local INTRO = Config.BossIntro
@@ -87,27 +90,31 @@ local function damageNumber(body, amount)
 	-- hit again before the last number's gone: it's replaced by one with the two added up, popping
 	-- in afresh, so a quick run of hits counts up like a combo (QM)
 	local combo = combos[body]
+	local x = (math.random() - 0.5) * 3
 	if combo and combo.gui.Parent then
 		combo.gui:Destroy()
 		amount += combo.total
+		x = combo.x -- (in the same spot, so it pops rather than jumps)
 	end
 	local gui = Instance.new("BillboardGui")
 	gui.Adornee = body
 	gui.AlwaysOnTop = true
-	gui.Size = UDim2.fromOffset(160, 40)
-	local x = (math.random() - 0.5) * 3
+	gui.Size = UDim2.fromOffset(160 * SHARP, 40 * SHARP)
 	gui.StudsOffset = Vector3.new(x, body.Size.Y / 2 + 1, 0)
 	local holder = Instance.new("Frame")
 	holder.BackgroundTransparency = 1
 	holder.Size = UDim2.fromScale(1, 1)
+	-- (scaled about its middle, so the pop grows from the number's centre)
+	holder.AnchorPoint = Vector2.new(0.5, 0.5)
+	holder.Position = UDim2.fromScale(0.5, 0.5)
 	local function text(colour, offset, z)
 		local label = Instance.new("TextLabel")
 		label.BackgroundTransparency = 1
 		label.Size = UDim2.fromScale(1, 1)
-		label.Position = UDim2.fromOffset(offset, offset)
+		label.Position = UDim2.fromOffset(offset * SHARP, offset * SHARP)
 		label.ZIndex = z
 		label.FontFace = NUMBER_FONT
-		label.TextSize = NUMBER_SIZE
+		label.TextSize = NUMBER_SIZE * SHARP
 		label.TextColor3 = colour
 		label.Text = "-" .. tostring(math.round(amount))
 		label.Parent = holder
@@ -123,10 +130,10 @@ local function damageNumber(body, amount)
 	gui.Parent = body
 	-- pops in: bursts past full size, then settles back (overshoot and settle)
 	local grow = TweenService:Create(scale, TweenInfo.new(0.06, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Scale = NUMBER_POP,
+		Scale = NUMBER_POP / SHARP,
 	})
 	grow.Completed:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 / SHARP })
 			:Play()
 	end)
 	grow:Play()
@@ -141,10 +148,10 @@ local function damageNumber(body, amount)
 	TweenService:Create(shadow, fade, { TextTransparency = 1 }):Play()
 	task.delay(NUMBER_LIFE * 0.5, function()
 		TweenService:Create(scale, TweenInfo.new(NUMBER_LIFE * 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Scale = 0.6,
+			Scale = 0.6 / SHARP,
 		}):Play()
 	end)
-	combos[body] = { gui = gui, total = amount }
+	combos[body] = { gui = gui, total = amount, x = x }
 	task.delay(NUMBER_LIFE, function()
 		gui:Destroy()
 		if combos[body] and combos[body].gui == gui then
