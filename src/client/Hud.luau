@@ -186,14 +186,15 @@ function Hud.start()
 	-- buttons: stacked down the right edge, centred on the screen's middle (QM's mockup, Oct 26).
 	-- They stay up during fights now, beside the boss bar, as in the mockup.
 	local hudFrames = {} -- (hidden while a popup is open)
+	local SIDE_SCALE = 0.75 -- times each button's art size (QM, Oct 26: they were too big)
 	local SIDE_MARGIN = 30 -- design px from the right edge
-	local SIDE_GAP = 165 -- design px between the buttons' centres
+	local SIDE_GAP = math.round(165 * SIDE_SCALE) -- design px between the buttons' centres
 	for i, b in { { "Shop", 128, 140 }, { "Index", 128, 137 }, { "Rebirth", 132, 146 } } do
 		local img = image(root, b[1] .. "Button", b[1], {
 			button = true,
 			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -SIDE_MARGIN - (132 - b[2]) / 2, 0.5, (i - 2) * SIDE_GAP),
-			Size = UDim2.fromOffset(b[2], b[3]),
+			Position = UDim2.new(1, -SIDE_MARGIN - (132 - b[2]) / 2 * SIDE_SCALE, 0.5, (i - 2) * SIDE_GAP),
+			Size = UDim2.fromOffset(math.round(b[2] * SIDE_SCALE), math.round(b[3] * SIDE_SCALE)),
 		})
 		bouncy(img)
 		if Ui.live then
