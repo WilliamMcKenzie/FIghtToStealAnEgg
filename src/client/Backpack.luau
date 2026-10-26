@@ -316,7 +316,7 @@ end
 -- ---- the popup ------------------------------------------------------------------------
 
 function Backpack.init()
-	local body, holder = Popups.frame("Backpack", "Backpack", SIZE)
+	local body, holder = Popups.frame("Backpack", "Backpack", SIZE, true) -- (QM's tiled panel, Oct 26)
 	local tab = "Pets"
 	local sortBy = "Rarity"
 	local flashUntil = 0

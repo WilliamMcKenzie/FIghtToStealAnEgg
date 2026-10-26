@@ -13,8 +13,9 @@
 --   Popups.init(root, hudFrames)  -- once, from Hud (root = its scaled frame; the boss
 --                                  -- bar hides itself while Popups.isOpen())
 --   Popups.toggle(name)                     -- "Shop", "Index", "Rebirth", "Backpack"
---   Popups.frame(name, title, size) -> body, holder  -- another popup (client/Backpack),
---                                  -- after init: its content goes in body
+--   Popups.frame(name, title, size, tiled) -> body, holder  -- another popup (client/Backpack),
+--                                  -- after init: its content goes in body; `tiled` gives it
+--                                  -- QM's tiled beige panel instead of the dark one
 --
 -- They're real objects QM edits in Studio (StarterGui > Hud > Root > ShopPopup ...: see
 -- client/Ui). Every piece is made with a Name and only when it isn't there yet, and its
@@ -295,6 +296,30 @@ function Popups.bar(parent, props, icon, colors)
 	end
 end
 
+-- QM's tiled panel (Oct 26, for the Backpack): the beige checker texture (assets/ui/TileBG.png,
+-- two squares a side) repeated over it, rounded, with a C1A283 outline. Until the texture's
+-- uploaded it's plain beige.
+local TILE_PANEL = "" -- (rbxassetid of assets/ui/TileBG.png)
+local TILE = 80 -- design px of one repeat (two checker squares)
+local function tiledPanel(parent, props)
+	local img, fresh = make(parent, "ImageLabel", props)
+	if fresh then
+		img.BackgroundColor3 = Color3.fromRGB(231, 206, 181)
+		img.BorderSizePixel = 0
+		img.Image = TILE_PANEL
+		img.ScaleType = Enum.ScaleType.Tile
+		img.TileSize = UDim2.fromOffset(TILE, TILE)
+		apply(img, props)
+		corner(img, 18)
+		local s = Instance.new("UIStroke")
+		s.Thickness = 6
+		s.Color = Color3.fromHex("C1A283")
+		s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		s.Parent = img
+	end
+	return img, fresh
+end
+
 -- ---- the frame every popup shares ---------------------------------------------------
 
 local scaled, hud = nil, {}
@@ -302,7 +327,7 @@ local popups = {}
 local open = nil
 local blur = nil
 
-local function frame(name, title, size)
+local function frame(name, title, size, tiled)
 	-- (StarterGui > Hud > Root > ShopPopup: in Studio, tick its Visible to see it while editing;
 	-- the game hides it again until it's opened)
 	local holder, fresh = Ui.make(scaled, name .. "Popup", "Frame")
@@ -317,7 +342,11 @@ local function frame(name, title, size)
 	local scale = Ui.make(holder, "Pop", "UIScale")
 	scale.Scale = 1
 
-	darkPanel(holder, { Name = "Panel", Size = UDim2.fromScale(1, 1) }, 0.8)
+	if tiled then
+		tiledPanel(holder, { Name = "Panel", Size = UDim2.fromScale(1, 1) })
+	else
+		darkPanel(holder, { Name = "Panel", Size = UDim2.fromScale(1, 1) }, 0.8)
+	end
 
 	Popups.text(holder, {
 		Name = "Title",
@@ -365,8 +394,8 @@ local function frame(name, title, size)
 	return body
 end
 
-Popups.frame = function(name, title, size)
-	local body = frame(name, title, size)
+Popups.frame = function(name, title, size, tiled)
+	local body = frame(name, title, size, tiled)
 	return body, popups[name].holder
 end
 Popups.darkPanel = darkPanel
