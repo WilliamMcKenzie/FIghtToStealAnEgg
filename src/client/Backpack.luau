@@ -73,6 +73,8 @@ local ITEM_OUTLINE = 4 -- px
 local RADIAL = "rbxassetid://106131181340173" -- (rbxassetid of assets/ui/RadialGlow.png: white in the middle fading out)
 local UNKNOWN = Color3.fromHex("C1A283")
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local MERGE_TEXTURE = "rbxassetid://87121220953662" -- (assets/ui/merge_button_texture.png: QM's green checker)
+local MERGE_DARK = Color3.fromHex("00A529") -- the MERGE button's outline and shadow
 local TYPE_ORDER = { Melee = 1, Ranged = 2, Magic = 3 }
 -- the Pets tab (QM's mockup, Oct 26): your pen's slots along the top, a gap, then a row per
 -- rarity like the Items tab
@@ -840,25 +842,87 @@ function Backpack.init()
 	end
 	-- MERGE (QM, Oct 26): under the Items tab, sat on the panel's bottom edge, only while
 	-- you've Config.Merge.Cost of a weapon that merges into another (Config.Merge.Into)
-	local mergeButton
-	mergeButton = Popups.button(
-		holder,
-		{
-			Name = "Merge",
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 1, 0),
-			Size = UDim2.fromOffset(240, 80),
-			ZIndex = 6,
-		},
-		"MERGE",
-		Popups.GREEN,
-		function()
+	local mergeButton = Ui.make(holder, "Merge", "TextButton")
+	if not mergeButton:FindFirstChild("Body") then
+		-- QM's Figma (designs/figma/merge_button.md, scaled from its 2710-wide panel to ours):
+		-- a green checker with a darker green outline and a solid shadow under it, "MERGE"
+		-- in white with a black outline and a soft shadow
+		local k = SIZE.X / 2710
+		mergeButton.Text = ""
+		mergeButton.AutoButtonColor = false
+		mergeButton.BackgroundTransparency = 1
+		mergeButton.AnchorPoint = Vector2.new(0.5, 0)
+		mergeButton.Position = UDim2.new(0.5, 0, 1, -math.round(114 * k))
+		mergeButton.Size = UDim2.fromOffset(math.round(690 * k), math.round(228 * k))
+		mergeButton.ZIndex = 6
+		Instance.new("UIScale").Parent = mergeButton
+		local shadow = Instance.new("Frame")
+		shadow.Name = "Shadow"
+		shadow.BackgroundColor3 = MERGE_DARK
+		shadow.BorderSizePixel = 0
+		shadow.Position = UDim2.fromOffset(0, math.round(16 * k))
+		shadow.Size = UDim2.fromScale(1, 1)
+		shadow.ZIndex = 6
+		rounded(shadow, math.round(20 * k))
+		shadow.Parent = mergeButton
+		local bodyImg = Instance.new("ImageLabel")
+		bodyImg.Name = "Body"
+		bodyImg.BackgroundColor3 = Color3.fromHex("88F421")
+		bodyImg.BorderSizePixel = 0
+		bodyImg.Image = MERGE_TEXTURE
+		bodyImg.ScaleType = Enum.ScaleType.Tile
+		bodyImg.TileSize = UDim2.fromOffset(math.round(180 * k), math.round(180 * k))
+		bodyImg.Size = UDim2.fromScale(1, 1)
+		bodyImg.ZIndex = 7
+		rounded(bodyImg, math.round(20 * k))
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = MERGE_DARK
+		stroke.Thickness = math.round(10 * k)
+		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		stroke.Parent = bodyImg
+		bodyImg.Parent = mergeButton
+		local function word(name, color, dy, z, transparency)
+			local t = Instance.new("TextLabel")
+			t.Name = name
+			t.BackgroundTransparency = 1
+			t.FontFace = FONT
+			t.Text = "MERGE"
+			t.TextSize = math.round(100 * k)
+			t.TextColor3 = color
+			t.TextTransparency = transparency
+			t.Position = UDim2.fromOffset(0, dy)
+			t.Size = UDim2.fromScale(1, 1)
+			t.ZIndex = z
+			local o = Instance.new("UIStroke")
+			o.Color = Color3.new(0, 0, 0)
+			o.Thickness = 3
+			o.Transparency = transparency
+			o.LineJoinMode = Enum.LineJoinMode.Round
+			o.Parent = t
+			t.Parent = mergeButton
+		end
+		word("LabelShadow", Color3.new(0, 0, 0), math.round(8 * k), 8, 0.75)
+		word("Label", WHITE, 0, 9, 0)
+	end
+	if Ui.live then
+		local scale = mergeButton:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", mergeButton)
+		mergeButton.MouseEnter:Connect(function()
+			tween(scale, 0.12, { Scale = 1.05 }, Enum.EasingStyle.Back)
+		end)
+		mergeButton.MouseLeave:Connect(function()
+			tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
+		end)
+		mergeButton.MouseButton1Down:Connect(function()
+			tween(scale, 0.06, { Scale = 0.92 })
+		end)
+		mergeButton.Activated:Connect(function()
+			tween(scale, 0.15, { Scale = 1.05 }, Enum.EasingStyle.Back)
 			local id = mergeButton:GetAttribute("Merges")
 			if id and mergeRemote then
 				mergeRemote:FireServer(id)
 			end
-		end
-	)
+		end)
+	end
 	-- what MERGE would merge: the weapon you hold if it can, else the first one that can
 	-- (commons first, as the rows run)
 	local function toMerge()
