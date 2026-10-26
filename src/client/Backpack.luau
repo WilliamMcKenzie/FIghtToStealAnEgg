@@ -65,7 +65,7 @@ local ITEM_COLORS = {
 	Legendary = Color3.fromRGB(232, 176, 44),
 	Mythic = Color3.fromRGB(226, 48, 92),
 }
-local RADIAL = "" -- (rbxassetid of assets/ui/RadialGlow.png: white in the middle fading out)
+local RADIAL = "rbxassetid://106131181340173" -- (rbxassetid of assets/ui/RadialGlow.png: white in the middle fading out)
 local UNKNOWN = Color3.fromHex("C1A283")
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local TYPE_ORDER = { Melee = 1, Ranged = 2, Magic = 3 }
