@@ -9,7 +9,7 @@
    ]
   },
   "OutlineThickness": 5,
-  "TextOutlineThickness": 4
+  "TextOutlineThickness": 3
  },
  "children": [
   {
@@ -31655,7 +31655,7 @@
             0.2078431397676468
            ]
           },
-          "Thickness": 4
+          "Thickness": 3
          }
         }
        ],
@@ -31705,7 +31705,7 @@
           1
          ]
         },
-        "TextSize": 23,
+        "TextSize": 25,
         "Transparency": 1,
         "ZIndex": 3
        }
@@ -32725,7 +32725,7 @@
             0.2078431397676468
            ]
           },
-          "Thickness": 4
+          "Thickness": 3
          }
         }
        ],
@@ -32775,7 +32775,7 @@
           1
          ]
         },
-        "TextSize": 23,
+        "TextSize": 25,
         "Transparency": 1,
         "ZIndex": 3
        }
@@ -33795,7 +33795,7 @@
             0.2078431397676468
            ]
           },
-          "Thickness": 4
+          "Thickness": 3
          }
         }
        ],
@@ -33845,7 +33845,7 @@
           1
          ]
         },
-        "TextSize": 23,
+        "TextSize": 25,
         "Transparency": 1,
         "ZIndex": 3
        }
@@ -34865,7 +34865,7 @@
             0.2078431397676468
            ]
           },
-          "Thickness": 4
+          "Thickness": 3
          }
         }
        ],
@@ -34915,7 +34915,7 @@
           1
          ]
         },
-        "TextSize": 30,
+        "TextSize": 32,
         "Transparency": 1,
         "ZIndex": 3
        }
@@ -35998,7 +35998,7 @@
             0.2078431397676468
            ]
           },
-          "Thickness": 4
+          "Thickness": 3
          }
         }
        ],
@@ -36048,7 +36048,7 @@
           1
          ]
         },
-        "TextSize": 45,
+        "TextSize": 47,
         "TextXAlignment": {
          "e": "TextXAlignment",
          "t": "EnumItem",
@@ -37136,7 +37136,7 @@
             0.2078431397676468
            ]
           },
-          "Thickness": 4
+          "Thickness": 3
          }
         }
        ],
@@ -37186,7 +37186,7 @@
           1
          ]
         },
-        "TextSize": 45,
+        "TextSize": 47,
         "TextXAlignment": {
          "e": "TextXAlignment",
          "t": "EnumItem",
