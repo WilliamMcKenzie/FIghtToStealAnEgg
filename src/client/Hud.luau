@@ -40,7 +40,7 @@ local IMAGES = {
 }
 local DESIGN_HEIGHT = 1080
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
-local TEXT = 45
+local TEXT = 47 -- (QM, Oct 26: 2px up)
 local BAR_EASE = 25 -- how fast the red catches up with the health (quick, not a pop)
 local TRAIL_LAG = 0.5 -- seconds the trail bar lags behind the red (QM, Oct 24)
 local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight starts (QM, Oct 25)
@@ -166,7 +166,7 @@ function Hud.start()
 	-- Each is a see-through ImageButton holding Art (Outline.icon: the ring, then the icon) and
 	-- Label, laid out as in QM's Figma: a 128 icon with its 30px name `labelTop` px down it.
 	local hudFrames = {} -- (hidden while a popup is open)
-	local LABEL_TEXT = 30 -- (at the 128 icon size; scaled with the button)
+	local LABEL_TEXT = 32 -- (at the 128 icon size; scaled with the button. QM, Oct 26: 2px up)
 	local function iconButton(name, art, labelTop, scale, props)
 		local button, fresh = Ui.make(root, name, "ImageButton")
 		if fresh then

@@ -25,7 +25,7 @@ local Outline = {}
 local DEFAULTS = {
 	OutlineColor = Color3.fromRGB(4, 4, 53), -- (the icon pack's navy)
 	OutlineThickness = 5,
-	TextOutlineThickness = 4,
+	TextOutlineThickness = 3, -- (QM, Oct 26: 1px less)
 }
 -- the ring: copies of the silhouette around a circle at the full thickness, and a sparser one at
 -- half, so thin bits (the sword's tip) don't show gaps between the copies
