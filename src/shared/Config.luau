@@ -779,8 +779,11 @@ return {
 	},
 
 	-- the enemies out in the biomes (Server/Mobs; QM, Oct 26: they replace the training
-	-- grounds). Each biome keeps Count of its mob wandering its floor, back Respawn seconds
-	-- after one falls, so you farm Strength where you fight. While a boss is out in a
+	-- grounds). Each biome keeps Count mobs wandering its floor, back Respawn seconds
+	-- after one falls, so you farm Strength where you fight. Each one is a random pet from
+	-- its biome's eggs (Config.Eggs.Kinds, any with odds; QM, Oct 26), drawn at the pet's
+	-- own size; Mob and Size here are only for a biome whose eggs are still the Horse
+	-- placeholder (Lava, for now). Health, Strength, Speed and Attacks are the biome's. While a boss is out in a
 	-- biome (someone stole one of its eggs) it stops sending new ones; those already there
 	-- stay, and it fills up again once that boss is dead or gone home.
 	-- They're a real threat (QM, Oct 26), well under a boss: each one bites for about 40%
@@ -792,8 +795,6 @@ return {
 	Mobs = {
 		Biomes = {
 			Meadow = {
-				Mob = "Pig",
-				Size = 0.55,
 				Health = 180,
 				Count = 6,
 				Strength = 2,
@@ -801,10 +802,6 @@ return {
 				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 6 } }, -- (boss: 10 a second)
 			},
 			Desert = {
-				Mob = "KingCrab",
-				Name = "Sand Crab",
-				Tint = "Sand",
-				Size = 1,
 				Health = 270,
 				Count = 7,
 				Strength = 5,
@@ -812,8 +809,6 @@ return {
 				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 12 } }, -- (boss: 20)
 			},
 			Ice = {
-				Mob = "Penguin",
-				Size = 0.6,
 				Health = 350,
 				Count = 7,
 				Strength = 15,

@@ -1,7 +1,7 @@
 -- The enemies out in the biomes (QM, Oct 26: they replace the training grounds). Each
--- biome keeps Config.Mobs.Biomes[biome].Count of its mob wandering its floor (Meadow pigs,
--- Desert sand crabs, Ice penguins, Lava rock hogs), and you farm Strength off them where
--- you fight: each hit trains the enemy's Strength (Server/Combat). One that falls is
+-- biome keeps Config.Mobs.Biomes[biome].Count mobs wandering its floor, each a random
+-- pet from that biome's eggs (Config.Eggs.Kinds) at the pet's own size (QM, Oct 26), and
+-- you farm Strength off them where you fight: each hit trains the enemy's Strength (Server/Combat). One that falls is
 -- replaced Config.Mobs.Respawn seconds later, somewhere on its biome's floor away from
 -- everyone, but not while that biome's boss is out (someone stole one of its eggs:
 -- Server/Eggs, Server/Bosses); the ones already there stay, and the biome fills up again
@@ -23,6 +23,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local MapData = require(ReplicatedStorage.Shared.MapData)
+local Pets = require(ReplicatedStorage.Shared.Pets)
 local Combat = require(script.Parent.Combat)
 local Bosses = require(script.Parent.Bosses)
 local BossAttacks = require(script.Parent.BossAttacks)
@@ -35,7 +36,7 @@ folder.Parent = workspace
 
 local C = Config.Mobs
 local mobs = {} -- [body] = { biome, home, goal, wait, yaw, g, rng, radius, target, angry, b }
-local zones = {} -- [biome] = { cells (walkable cell centres), bounds, count, due (respawn timers) }
+local zones = {} -- [biome] = { cells (walkable cell centres), bounds, count, due (respawn timers), pets }
 
 -- ---- the floor ---------------------------------------------------------------------------
 
@@ -113,12 +114,31 @@ local function spot(zone, rng)
 	return best
 end
 
+-- the pets a biome's eggs hatch (any with odds), or none while they're only the Horse
+-- placeholder
+local function petsOf(biome)
+	local list = {}
+	for kind, weight in Config.Eggs.Kinds[biome] or {} do
+		if weight > 0 and kind ~= "Horse" and Config.Pets[kind] then
+			table.insert(list, kind)
+		end
+	end
+	table.sort(list)
+	return list
+end
+
 local function spawnMob(biome)
 	local zone = zones[biome]
 	local g = C.Biomes[biome]
 	local rng = Random.new()
 	local at = spot(zone, rng)
-	local radius = g.Radius or C.MobRadius
+	-- what it looks like: one of the biome's pets, as big as when you ride it
+	local model, size, name, tint, radius = g.Mob, g.Size, g.Name or g.Mob, g.Tint, g.Radius or C.MobRadius
+	if #zone.pets > 0 then
+		local kind = zone.pets[rng:NextInteger(1, #zone.pets)]
+		model, size, name, tint = kind, Pets.class(kind).size, Pets.name(kind), nil
+		radius = math.max(Pets.stats(kind).Hitbox, 1.5)
+	end
 	local body = Instance.new("Part")
 	body.Name = biome .. "Mob"
 	body.Anchored, body.CanCollide, body.CanTouch = true, false, false
@@ -126,10 +146,10 @@ local function spawnMob(biome)
 	body.Size = Vector3.new(radius * 2, 4, radius * 2)
 	local yaw = rng:NextNumber(-math.pi, math.pi)
 	body.CFrame = CFrame.new(at) * CFrame.Angles(0, yaw, 0)
-	body:SetAttribute("Model", g.Mob)
-	body:SetAttribute("ModelSize", g.Size)
-	body:SetAttribute("Tint", g.Tint)
-	body:SetAttribute("Name", g.Name or g.Mob)
+	body:SetAttribute("Model", model)
+	body:SetAttribute("ModelSize", size)
+	body:SetAttribute("Tint", tint)
+	body:SetAttribute("Name", name)
 	body:SetAttribute("Health", g.Health)
 	body:SetAttribute("MaxHealth", g.Health)
 	body:SetAttribute("Radius", radius)
@@ -212,7 +232,7 @@ function Mobs.start(_map)
 		if g and area.Bounds then
 			local cells = walkable(area.Name, area.Bounds)
 			if #cells > 0 then
-				zones[area.Name] = { cells = cells, bounds = area.Bounds, count = 0, due = {} }
+				zones[area.Name] = { cells = cells, bounds = area.Bounds, count = 0, due = {}, pets = petsOf(area.Name) }
 				for _ = 1, g.Count do
 					spawnMob(area.Name)
 				end
