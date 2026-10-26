@@ -1194,7 +1194,7 @@ function Backpack.init()
 				end
 				Snappy.hook(b, SQUARE_RING)
 				b.Activated:Connect(function()
-					if weaponRemote and id ~= held then
+					if weaponRemote and id ~= TABS.Weapons.equipped()[1] then
 						weaponRemote:FireServer(id)
 					end
 				end)
@@ -1575,9 +1575,30 @@ function Backpack.init()
 	end
 	for _, t in TABS do
 		for _, attr in t.attributes do
-			player:GetAttributeChangedSignal(attr):Connect(changed)
+			if attr ~= "Weapon" then
+				player:GetAttributeChangedSignal(attr):Connect(changed)
+			end
 		end
 	end
+	-- (switching weapons only moves the white ring: rebuilding every square made their "xN"s
+	-- flicker, QM)
+	player:GetAttributeChangedSignal("Weapon"):Connect(function()
+		if merging then
+			return
+		end
+		local held = TABS.Weapons.equipped()[1]
+		for _, entry in itemRows do
+			for _, square in entry[2]:GetChildren() do
+				local ring = square:FindFirstChild("Ring")
+				if ring and not Ui.isTemplate(square) then
+					ring.Visible = square.Name == held
+				end
+			end
+		end
+		if not holder.Visible then
+			dirty = true
+		end
+	end)
 	holder:GetPropertyChangedSignal("Visible"):Connect(function()
 		if holder.Visible and dirty then
 			dirty = false
