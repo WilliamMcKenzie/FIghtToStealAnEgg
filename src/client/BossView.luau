@@ -228,6 +228,12 @@ local function add(body)
 	local view = {
 		animal = animal,
 		last = body.Position,
+		-- where the server last put it (its body's CFrame as it last arrived), when, and how
+		-- fast it was going between the last two (see SMOOTH)
+		sample = body.CFrame,
+		sampleAt = os.clock(),
+		velocity = Vector3.zero,
+		shown = body.CFrame,
 		colours = colours,
 		health = body:GetAttribute("Health"),
 	}
@@ -334,11 +340,42 @@ for _, name in { "Bosses", "Mobs", "PenPets" } do
 	end)
 end
 
+-- The server moves each body (anchored) a step at a time, and its moves arrive here a few
+-- frames apart and unevenly: drawn straight there, a model would stutter
+-- along and its gaits flicker between still and dashing. So it's drawn where its body
+-- is heading (its last move carried on a moment, as long as moves keep coming) and eased
+-- toward that, like LassoAPet's other riders; its speed is how fast it's drawn moving.
+local SMOOTH = 12 -- how quickly the drawn model catches up (1/s; LassoAPet's riders')
+local AHEAD = 0.25 -- seconds at most it's carried on past its last move
+local STOPPED = 0.2 -- no move for this long and it has stopped
+local SNAP = 30 -- studs off and it's put straight there (a teleport, a respawn)
+
+local function follow(body, view, dt, now)
+	local cf = body.CFrame
+	if cf ~= view.sample then
+		local gap = now - view.sampleAt
+		view.velocity = if gap > 0 and gap < STOPPED
+			then (cf.Position - view.sample.Position) * Vector3.new(1, 0, 1) / gap
+			else Vector3.zero
+		view.sample, view.sampleAt = cf, now
+	elseif now - view.sampleAt > STOPPED then
+		view.velocity = Vector3.zero
+	end
+	local want = CFrame.new(view.velocity * math.min(now - view.sampleAt, AHEAD)) * cf
+	if (view.shown.Position - want.Position).Magnitude > SNAP then
+		view.shown = want
+	else
+		view.shown = view.shown:Lerp(want, 1 - math.exp(-SMOOTH * dt))
+	end
+	return view.shown
+end
+
 RunService.RenderStepped:Connect(function(dt)
 	local now = os.clock()
 	for body, view in views do
 		local animal = view.animal
-		local pos = body.Position
+		local shown = follow(body, view, dt, now)
+		local pos = shown.Position
 		local speed = ((pos - view.last) * Vector3.new(1, 0, 1)).Magnitude / math.max(dt, 1e-3)
 		view.last = pos
 		animal:update(dt, speed, 0)
@@ -365,7 +402,9 @@ RunService.RenderStepped:Connect(function(dt)
 		if not view.pose then
 			ground -= Vector3.new(0, body.Size.Y * SLEEP.Sink * s, 0)
 		end
-		animal.model:PivotTo(CFrame.new(ground) * body.CFrame.Rotation)
+		-- (its root's CFrame, not PivotTo: the root is anchored and every other part hangs off
+		-- it by a joint, so this moves the whole model at once, as LassoAPet places its animals)
+		animal.model.PrimaryPart.CFrame = CFrame.new(ground) * shown.Rotation
 		if view.pose and s > 0 then
 			-- lying in its pose, breathing (over whatever idle had it doing, by how asleep it is)
 			local pose = view.pose

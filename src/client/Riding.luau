@@ -4,16 +4,22 @@
 -- The character still walks with its normal Humanoid (so movement, collisions and the
 -- sword all work as before); the horse is a client-side model under it, and the rider
 -- is lifted into the saddle visually:
---   horse   anchored at the ground under the character, facing where it faces, placed so
---           its seat is under the character's centre, animated by Horse:update (idle
---           when still, gallop when moving, leaning into turns)
+--   horse   welded to the HumanoidRootPart (massless, so the Humanoid moves as before), at
+--           the ground under the character, facing where it faces, placed so its seat is
+--           under the character's centre, animated by Horse:update (idle when still,
+--           gallop when moving, leaning into turns). Welded rather than moved every frame
+--           (as LassoAPet does with its script-driven, anchored rider): physics moves the
+--           pet and the rider together, so the pet can't trail a physics step behind the
+--           rider and judder under them at speed
 --   rider   the Root joint (HumanoidRootPart -> LowerTorso) puts the hips on the seat,
 --           which rides on the horse's root bone, so the rider bobs and pitches with
 --           the gallop,
 --           and the hips and knees take a riding pose (thighs forward and apart, shins
 --           back), overriding whatever the Animator plays on those joints
--- Transforms are written in PreSimulation (after the Animator), like SwingPose's. They
--- aren't replicated, so each client does this for every character.
+-- Transforms are written in PreSimulation (after the Animator), like SwingPose's, and the
+-- rider's is worked out relative to the HumanoidRootPart, so where physics then puts the
+-- character doesn't matter. They aren't replicated, so each client does this for every
+-- character.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -52,6 +58,25 @@ local function rest(joint)
 	return joint.Attachment0.WorldCFrame, joint.Attachment1.CFrame
 end
 
+-- A pet under the character: welded to its HumanoidRootPart, part of its assembly (every
+-- part already massless, and not colliding, touching or queried, so the Humanoid walks,
+-- stands and finds the floor as if it weren't there)
+local function newPet(character, kind, root)
+	local horse = Pets.class(kind).new()
+	horse.model.Name = character.Name .. kind
+	local base = horse.model.PrimaryPart
+	base.Anchored = false
+	base.Massless = true
+	base.CFrame = root.CFrame
+	local weld = Instance.new("Weld")
+	weld.Name = "RiderWeld"
+	weld.Part0 = root
+	weld.Part1 = base
+	weld.Parent = base
+	horse.model.Parent = workspace
+	return horse, weld
+end
+
 local function mount(character)
 	local root = character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -79,10 +104,8 @@ local function mount(character)
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 	end
 	local kind = petOf(character)
-	local horse = Pets.class(kind).new()
-	horse.model.Name = character.Name .. kind
-	horse.model.Parent = workspace
-	local m = { horse = horse, kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil }
+	local m = { kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil }
+	m.horse, m.weld = newPet(character, kind, root)
 	mounts[character] = m
 	return m
 end
@@ -116,9 +139,8 @@ RunService.PreSimulation:Connect(function(dt)
 		if kind ~= m.kind then
 			-- (a new pet: swapped in under the rider, nothing else changes)
 			m.horse.model:Destroy()
-			m.horse, m.kind = Pets.class(kind).new(), kind
-			m.horse.model.Name = character.Name .. kind
-			m.horse.model.Parent = workspace
+			m.kind = kind
+			m.horse, m.weld = newPet(character, kind, m.root)
 		end
 		local root, horse = m.root, m.horse
 
@@ -133,20 +155,21 @@ RunService.PreSimulation:Connect(function(dt)
 		m.yaw = yaw
 		horse:update(dt, velocity.Magnitude, math.clamp(-turnRate / 4, -1, 1))
 
-		-- the horse at the ground under the character, its seat under the character
-		local ground = root.Position.Y - root.Size.Y / 2 - m.humanoid.HipHeight
-		local facing = CFrame.Angles(0, yaw, 0)
+		-- the horse at the ground under the character, its seat under the character (in the
+		-- HumanoidRootPart's frame: the weld keeps it there, facing where the character faces)
 		local seat = horse.seat * horse.size * horse.scale
-		local at = Vector3.new(root.Position.X, ground, root.Position.Z)
-			- facing:VectorToWorldSpace(seat * Vector3.new(1, 0, 1))
-		horse.model:PivotTo(CFrame.new(at) * facing)
+		local place = CFrame.new(-seat.X, -(root.Size.Y / 2 + m.humanoid.HipHeight), -seat.Z)
+		if m.weld.C0 ~= place then
+			m.weld.C0 = place
+		end
 
 		-- the rider into the saddle
 		-- (worked out from the root bone's joint as it's just been posed, rather than read
 		-- back from the bone part, which only moves when the joints are next solved: the
 		-- rider would trail a frame behind the gallop)
 		local bone = horse.bones.root
-		local seatCF = horse.model.PrimaryPart.CFrame
+		local seatCF = root.CFrame
+			* place
 			* bone.C0
 			* bone.Transform
 			* CFrame.new((horse.seat - horse.pivots.root) * horse.size * horse.scale)
