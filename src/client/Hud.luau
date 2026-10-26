@@ -180,11 +180,16 @@ function Hud.start()
 		-- it, while its outline stays OutlineThickness wide)
 		local height = labelTop + 37
 		local holder = Outline.icon(button, "Art", HudIcons[art], HudIcons[art .. "Mask"], {
-			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.fromScale(0.5, 0),
+			AnchorPoint = Vector2.new(0.5, 0.5), -- (centred, so the hover grows and turns it in place)
+			Position = UDim2.fromScale(0.5, 64 / height),
 			Size = UDim2.fromScale(1, 128 / height),
 		})
 		Ui.make(holder, "Square", "UIAspectRatioConstraint")
+		if holder.AnchorPoint == Vector2.new(0.5, 0) then
+			-- (baked before the hover turned it: centre it, where it was, so it turns in place)
+			holder.AnchorPoint = Vector2.new(0.5, 0.5)
+			holder.Position = UDim2.fromScale(0.5, 64 / height)
+		end
 		text(button, "Label", {
 			Text = art,
 			TextSize = math.round(LABEL_TEXT * scale),

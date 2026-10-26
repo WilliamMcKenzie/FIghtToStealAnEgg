@@ -1,11 +1,15 @@
 -- How every button feels (QM, Oct 26: "snappy and satisfying", no transitions): nothing grows
 -- or eases. Hovering one fades it 10% and, where it has one, shows its white outline;
 -- pressing fades it a little more. All at once, on the frame it happens. An icon outlined by
--- client/Outline has its outline turn white instead of getting a ring.
+-- client/Outline has its outline turn white instead of getting a ring, and the icon grows
+-- 1.2x and tilts 12 degrees over 0.1s (QM, Oct 26). It grows by its Size, not a UIScale, so the
+-- outline stays the same width.
 --
 --   Snappy.hook(button, ring)   -- once per button; ring = { radius, inflate } gives it a white
 --                               -- outline on hover (a HoverRing frame, inflate px bigger all
 --                               -- round), nil for none (an image with see-through edges)
+
+local TweenService = game:GetService("TweenService")
 
 local Snappy = {}
 
@@ -13,6 +17,9 @@ local HOVER_FADE = 0.1
 local PRESS_FADE = 0.2
 local RING_THICKNESS = 3
 local WHITE = Color3.new(1, 1, 1)
+local ICON_GROW = 1.2
+local ICON_TILT = 12 -- degrees
+local ICON_EASE = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 -- what fades: every image, text, filled background and stroke on it (not its HoverRing, or
 -- anything named Rays: the MERGE button's sunburst)
@@ -85,6 +92,28 @@ function Snappy.hook(button, ring)
 	local hoverRing = if ring then makeRing(button, ring) else nil
 	local over, down = false, false
 	local outlineColor = nil -- (the outline's own colour, while it's white)
+	local art = button:FindFirstChild("Art")
+	local artSize = nil -- (the icon's own size, while it's grown)
+	local function pop(on)
+		if not (art and art:FindFirstChild("Outline")) then
+			return
+		end
+		if on and not artSize then
+			artSize = art.Size
+		end
+		if not artSize then
+			return
+		end
+		local s = artSize
+		local k = if on then ICON_GROW else 1
+		TweenService:Create(art, ICON_EASE, {
+			Size = UDim2.new(s.X.Scale * k, s.X.Offset * k, s.Y.Scale * k, s.Y.Offset * k),
+			Rotation = if on then ICON_TILT else 0,
+		}):Play()
+		if not on then
+			artSize = nil
+		end
+	end
 	local function whiten(on)
 		local copies = outlineCopies(button)
 		if on and not outlineColor and copies[1] then
@@ -103,6 +132,7 @@ function Snappy.hook(button, ring)
 	local function apply()
 		base = base or fadeable(button)
 		whiten(over)
+		pop(over)
 		local k = if down then PRESS_FADE elseif over then HOVER_FADE else 0
 		for _, entry in base do
 			local obj, prop, v = entry[1], entry[2], entry[3]
@@ -143,6 +173,7 @@ function Snappy.hook(button, ring)
 		base = nil
 		over, down = false, false
 		whiten(false)
+		pop(false)
 		if hoverRing then
 			hoverRing.Visible = false
 		end
