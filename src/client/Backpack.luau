@@ -846,6 +846,7 @@ function Backpack.init()
 	end
 	-- MERGE (QM, Oct 26): under the Items tab, sat on the panel's bottom edge, only while
 	-- you've Config.Merge.Cost of a weapon that merges into another (Config.Merge.Into)
+	local playMerge -- (below: the merge's animation, then the merge)
 	local mergeButton = Ui.make(holder, "Merge", "TextButton")
 	if not mergeButton:FindFirstChild("Plate") then
 		-- QM's Figma (designs/figma/merge_button.md, scaled from its 2710-wide panel to ours):
@@ -960,8 +961,8 @@ function Backpack.init()
 		mergeButton.Activated:Connect(function()
 			tween(press, 0.15, { Value = 1.05 }, Enum.EasingStyle.Back)
 			local id = mergeButton:GetAttribute("Merges")
-			if id and mergeRemote then
-				mergeRemote:FireServer(id)
+			if id and mergeRemote and playMerge then
+				playMerge(id)
 			end
 		end)
 	end
@@ -1330,6 +1331,141 @@ function Backpack.init()
 		end
 	end
 
+	-- the merge (QM, Oct 26): the merged weapon's square flashes white and squashes, the new
+	-- one pops up out of it and drifts over to its own square, and only when it lands does
+	-- that square fill in (or its "xN" count up), with a bounce and a flash of its own. The
+	-- Backpack holds still (no rebuilds) until then.
+	local merging = false
+	local function whiteFlash(square, peak)
+		local f = Instance.new("Frame")
+		f.Name = "Flash"
+		f.BackgroundColor3 = WHITE
+		f.BackgroundTransparency = 1
+		f.BorderSizePixel = 0
+		f.Size = UDim2.fromScale(1, 1)
+		f.ZIndex = 20
+		rounded(f, 6)
+		f.Parent = square
+		local up = TweenService:Create(f, TweenInfo.new(0.07, Enum.EasingStyle.Quad), { BackgroundTransparency = peak })
+		up.Completed:Once(function()
+			local down =
+				TweenService:Create(f, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { BackgroundTransparency = 1 })
+			down.Completed:Once(function()
+				f:Destroy()
+			end)
+			down:Play()
+		end)
+		up:Play()
+	end
+	local function bounce(gui, size)
+		local scale = gui:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", gui)
+		scale.Scale = size
+		tween(scale, 0.35, { Scale = 1 }, Enum.EasingStyle.Back)
+	end
+	-- a square's middle, in the popup's own (unscaled) pixels
+	local function middle(gui)
+		local k = holder.AbsoluteSize.X / math.max(holder.Size.X.Offset, 1)
+		return (gui.AbsolutePosition + gui.AbsoluteSize / 2 - holder.AbsolutePosition) / k
+	end
+	local function squareOf(id)
+		for _, entry in itemRows do
+			local sq = entry[2]:FindFirstChild(id)
+			if sq then
+				return sq, entry[3]
+			end
+		end
+		return nil, nil
+	end
+	function playMerge(id)
+		local into = Config.Merge.Into[id]
+		local from, _ = squareOf(id)
+		local to, _ = squareOf(into or "")
+		local templateFor = nil
+		for _, entry in itemRows do
+			if table.find(byRarity[entry[1]], into) then
+				templateFor = entry[3]
+			end
+		end
+		if merging or not (into and from and to and templateFor) then
+			mergeRemote:FireServer(id)
+			return
+		end
+		merging = true
+		mergeButton.Visible = false
+		local before = player:GetAttribute("Weapons")
+		mergeRemote:FireServer(id)
+		-- 1: the merged ones flash white and squash
+		whiteFlash(from, 0.05)
+		local fromScale = from:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", from)
+		tween(fromScale, 0.08, { Scale = 0.82 })
+		task.delay(0.1, function()
+			tween(fromScale, 0.3, { Scale = 1 }, Enum.EasingStyle.Back)
+		end)
+		-- 2: the new one pops up out of it...
+		local fly = templateFor:Clone()
+		fly.Name = "Merging"
+		fly.Visible = true
+		fly.Active = false
+		fly.AnchorPoint = Vector2.new(0.5, 0.5)
+		fly.ZIndex = 50
+		for _, d in fly:GetDescendants() do
+			if d.Name == "Ring" or d.Name == "Count" then
+				d.Visible = false
+			end
+		end
+		local img = fly:FindFirstChild("Icon")
+		if img then
+			icon(img, "Weapons", into)
+		end
+		local a, b = middle(from), middle(to)
+		fly.Position = UDim2.fromOffset(a.X, a.Y)
+		local flyScale = fly:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", fly)
+		flyScale.Scale = 0
+		fly.Parent = holder
+		task.wait(0.12)
+		tween(flyScale, 0.22, { Scale = 1.35 }, Enum.EasingStyle.Back)
+		local lift = a - Vector2.new(0, 70)
+		local t = Instance.new("NumberValue")
+		tween(t, 0.22, { Value = 0.25 })
+		t.Changed:Connect(function(v)
+			if v <= 0.25 then
+				local p = a:Lerp(lift, v / 0.25)
+				fly.Position = UDim2.fromOffset(p.X, p.Y)
+			end
+		end)
+		task.wait(0.3)
+		-- 3: ...and drifts over to its square on a gentle arc, settling to its size
+		local start = Vector2.new(fly.Position.X.Offset, fly.Position.Y.Offset)
+		local control = (start + b) / 2 - Vector2.new(0, 90)
+		local drift = Instance.new("NumberValue")
+		drift.Changed:Connect(function(v)
+			local p = start:Lerp(control, v):Lerp(control:Lerp(b, v), v)
+			fly.Position = UDim2.fromOffset(p.X, p.Y)
+			fly.Rotation = math.sin(v * math.pi) * -8
+		end)
+		TweenService:Create(drift, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { Value = 1 })
+			:Play()
+		tween(flyScale, 0.6, { Scale = 1 })
+		task.wait(0.6)
+		-- 4: it lands: (once the server's caught up) the square fills in or counts up
+		local waited = 0
+		while player:GetAttribute("Weapons") == before and waited < 2 do
+			waited += task.wait()
+		end
+		fly:Destroy()
+		merging = false
+		rebuild()
+		local landed = squareOf(into)
+		if landed then
+			whiteFlash(landed, 0.15)
+			bounce(landed, 1.3)
+			local count = landed:FindFirstChild("Count")
+			if count and count.Visible then
+				bounce(count, 1.6)
+			end
+		end
+	end
+
 	local function selectTab(name)
 		tab = name
 		for n, b in tabButtons do
@@ -1359,6 +1495,9 @@ function Backpack.init()
 	-- kept up to date while it's open (and fresh each time it opens)
 	local dirty = false
 	local function changed()
+		if merging then
+			return -- (playMerge rebuilds once its weapon lands)
+		end
 		if holder.Visible then
 			rebuild()
 		else
