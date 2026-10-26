@@ -7,7 +7,7 @@
 --
 -- It fills the Pets tab the same way (a few pets in the pen, one of them your last one so its
 -- square below is see-through); SHOW picks which tab it opens on.
-local SHOW = "Pets" -- "Items" or "Pets"
+local SHOW = "Items" -- "Items" or "Pets"
 local RS = game:GetService("ReplicatedStorage")
 local Config = require(RS.Shared.Config)
 local Weapons = require(RS.Shared.Weapons.Weapons)
