@@ -53,7 +53,7 @@ function Pets.stats(kind)
 			Rarity = pet.Rarity,
 			Cash = pet.Cash or 0,
 			Health = math.round(base.Health * (1 + lean) * (box / HORSE_HITBOX) ^ tune.Hitbox),
-			Speed = math.round(base.Speed * (1 - lean) * 10) / 10,
+			Speed = math.round((if pet.Speed then tune.MountSpeed * pet.Speed else base.Speed * (1 - lean)) * 10) / 10, -- (LassoAPet's speeds: QM, Oct 26)
 			Hitbox = math.round(box * 10) / 10,
 		}
 	end
