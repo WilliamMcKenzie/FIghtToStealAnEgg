@@ -189,7 +189,13 @@ function Bosses.summon(biome, player)
 		return nil
 	end
 	arena.ready = false
+	local kind = list[math.random(#list)]
 	local at = arena.spot * Vector3.new(1, 0, 1)
+	-- (a rooted boss, Centre: the middle of its arena instead of the dais)
+	local bounds = arena.bounds
+	if Config.Bosses[kind].Centre and bounds then
+		at = Vector3.new((bounds[1] + bounds[3]) / 2, 0, (bounds[2] + bounds[4]) / 2)
+	end
 	-- (facing whoever called it up; else south, the way intruders come in from: QM)
 	local yaw = HOME_YAW
 	local root = player and player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -199,7 +205,7 @@ function Bosses.summon(biome, player)
 			yaw = math.atan2(look.X, look.Z)
 		end
 	end
-	local body, b = make(list[math.random(#list)], at, yaw)
+	local body, b = make(kind, at, yaw)
 	b.biome, b.bounds = biome, arena.bounds
 	body:SetAttribute("Biome", biome)
 	body:SetAttribute("Intro", true)

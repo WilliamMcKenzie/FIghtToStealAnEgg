@@ -289,14 +289,29 @@ return {
 			Size = 1, -- (about 50 studs tall; QM, Oct 27: the bosses but the Mother Hen grew 1.67x with the pets)
 			Health = 200,
 			Cash = 50, -- to each player who beat it
-			Speed = 9,
+			-- a ranged boss (QM, Oct 27): rooted in the middle of its arena, it only turns to
+			-- face you and casts the Flower Staff's own orbs, with weaker homing to dodge
+			Speed = 0,
+			Centre = true, -- (it arrives in the middle of its arena, not on the dais)
 			StopAt = 1,
 			Radius = 15,
 			Turn = 3.5,
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+				{
+					Kind = "Magic",
+					Every = 1.4, -- seconds between volleys
+					Like = "RafflesiaBloom", -- (the Flower Staff: three green orbs, fanned)
+					Damage = 6, -- each orb
+					Height = 4, -- studs off the ground (about a rider's)
+					Shot = {
+						Homing = 70, -- (the staff's 240 for players: QM, these must be dodgeable)
+						Launch = 35, -- (players' set off up to 90 degrees wide; these come more at you)
+						Range = 90,
+						Slack = 0, -- (players' shots get extra width to hit; these don't)
+					},
+				},
 			},
 		},
 		MajesticUnicorn = {

@@ -13,8 +13,12 @@
 --
 --   Shots.fire(character, id, yaw, seed)   -- a weapon's volley from that rider (seed: its
 --                                          magic shots' random launch angles)
+--   Shots.boss(body, i, yaw, seed, origin) -- a boss's Magic attack (its Attacks[i]): the
+--                                          same orbs, flying at the players in its fight
+--                                          (the server's BossShot remote calls it)
 
 local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -23,6 +27,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Projectiles = require(Shared.Projectiles)
 local Weapons = require(Shared.Weapons.Weapons)
+local Pets = require(Shared.Pets)
 local Riding = require(script.Parent.Riding)
 
 local Shots = {}
@@ -32,7 +37,9 @@ folder.Name = "Shots"
 folder.Parent = workspace
 
 local WHITE = Color3.new(1, 1, 1)
-local active = {} -- { { shot, model, spin, look, color } }
+local active = {} -- { { shot, model, spin, look, color, biome (a boss's: it flies at players) } }
+local HORSE_HITBOX = Pets.stats("Horse").Hitbox
+local PLAYER_RADIUS = 1 -- (as Server/BossAttacks)
 
 local function block(model, size, cf, color, props)
 	local p = Instance.new("Part")
@@ -241,6 +248,36 @@ function Shots.fire(character, id, yaw, seed)
 	end
 end
 
+function Shots.boss(body, i, yaw, seed, origin)
+	local c = body and Config.Bosses[body:GetAttribute("Kind")]
+	local a = c and c.Attacks and c.Attacks[i]
+	if not (a and typeof(origin) == "Vector3") then
+		return
+	end
+	local s = Projectiles.bossShot(a)
+	sound(s.FireSound, s.FireVolume, nil, origin)
+	for _, shot in Projectiles.volley(s, true, origin, yaw, seed) do
+		local d = build(s)
+		d.shot, d.s, d.biome = shot, s, body:GetAttribute("Biome") or false
+		table.insert(active, d)
+	end
+end
+
+-- what a boss's shot can hit here: every living player in its fight
+local function players(biome)
+	local list = {}
+	for _, p in Players:GetPlayers() do
+		local character = p.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if root and humanoid and humanoid.Health > 0 and p:GetAttribute("LockedIn") == biome then
+			local extra = Pets.stats(p:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
+			table.insert(list, { body = root, pos = root.Position, radius = PLAYER_RADIUS + extra })
+		end
+	end
+	return list
+end
+
 -- what a shot can hit here: every living boss and mob (flat circles); a boss still
 -- arriving (or asleep) isn't there to hit, shots pass over it
 local function targets()
@@ -266,10 +303,16 @@ RunService.RenderStepped:Connect(function(dt)
 		return
 	end
 	local list = targets()
+	local fights = {} -- [biome] = its players, for bosses' shots
 	for i = #active, 1, -1 do
 		local a = active[i]
 		local shot = a.shot
-		for _ in Projectiles.step(shot, dt, list) do
+		local hits = list
+		if a.biome ~= nil then
+			fights[a.biome] = fights[a.biome] or players(a.biome)
+			hits = fights[a.biome]
+		end
+		for _ in Projectiles.step(shot, dt, hits) do
 			local at = shot.pos
 			if a.s.Look ~= "Arrow" then -- (no burst where an arrow lands: QM)
 				pop(at, a.color, 1.2 * (a.s.Size or 1))
@@ -334,5 +377,7 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 end)
+
+ReplicatedStorage:WaitForChild("BossShot").OnClientEvent:Connect(Shots.boss)
 
 return Shots
