@@ -7,6 +7,11 @@
 -- DataStore outage can't wipe anyone), and in a Studio playtest without API access it
 -- just doesn't save (it warns once).
 --
+-- Offline earnings (QM, Oct 27: LassoAPet's "You earn $X/Day offline!"): every save
+-- stamps LastSeen (os.time()); back again, you're paid your pen's income (PetInventory.income)
+-- for the time away, up to Config.Data.OfflineMax seconds. Player attribute OfflinePaid is
+-- what came in, for client/Hud's "+$X" popup.
+--
 -- Rebirth lives here too: with enough cash (Config.Rebirth), your cash, Strength,
 -- training grounds and regions reset, and every hit trains StrengthBonus more for each rebirth.
 --
@@ -20,6 +25,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Combat = require(script.Parent.Combat)
+local PetInventory = require(script.Parent.PetInventory)
 
 local Data = {}
 
@@ -43,6 +49,7 @@ local function snapshot(player)
 	for _, key in keys() do
 		out[key] = player:GetAttribute(key)
 	end
+	out.LastSeen = os.time()
 	return out
 end
 
@@ -95,6 +102,15 @@ local function load(player)
 	end
 	Combat.refresh(player)
 	loaded[player] = true
+	-- the time away, paid at the pen's rate
+	if type(data) == "table" and type(data.LastSeen) == "number" then
+		local away = math.clamp(os.time() - data.LastSeen, 0, Config.Data.OfflineMax)
+		local paid = math.floor(PetInventory.income(player) * away)
+		if paid > 0 then
+			player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + paid)
+			player:SetAttribute("OfflinePaid", paid)
+		end
+	end
 end
 
 function Data.rebirthCost(player)

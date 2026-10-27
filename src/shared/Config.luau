@@ -760,6 +760,7 @@ return {
 	Data = {
 		Store = "Players_v1",
 		AutoSave = 90, -- seconds
+		OfflineMax = 86400, -- seconds away paid for at most (QM, Oct 27: "/Day offline")
 	},
 
 	-- rebirth (Server/Data, the Rebirth popup): cash needed is Cost x Growth ^ rebirths so far;
