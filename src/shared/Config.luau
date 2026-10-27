@@ -821,6 +821,9 @@ return {
 	-- it and hold F to hatch it: its top pops off and the pet jumps out onto the spot, into
 	-- your Backpack and pen (Server/Hatchery).
 	Hatch = {
+		-- the Growing Eggs popup's GROW ALL (QM's Figma, Oct 27; client/EggsPanel): every egg
+		-- in your pen ready at once, for Robux. Not sold yet: no developer product or server side.
+		GrowAllProduct = nil,
 		PenEggs = 8, -- most eggs waiting in a pen at once
 		Range = 10, -- studs from an egg you can hatch it (LassoAPet's SpeedupEgg.Range)
 		HoldTime = 0.35, -- seconds holding F

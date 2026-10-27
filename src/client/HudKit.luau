@@ -9,6 +9,7 @@
 --   HudKit.back(parent, look, props)     -- a Figma rectangle built natively (QM, Oct 27: no
 --     images for flat pieces): its fill or gradient, the stud texture over it, the bevel, its
 --     inside border and the black outline round it. `look` is one of HudKit.LOOKS.
+--   HudKit.outlineArt(icon, px)          -- outlines an icon black (copies of it under it)
 --   HudKit.button(parent, name, w, h, props, look) -- a w x h (Figma px) button on a Back of
 --     that look. Under the mouse it grows from its centre and its back darkens (QM, Oct 27),
 --     its icon and text not.
@@ -80,7 +81,20 @@ HudKit.LOOKS = {
 	Pink = { top = rgb("ff00f2"), bottom = rgb("c300ff"), bevel = { 0.5, 0.5 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
 	PetCard = { top = rgb("ff963c"), bottom = rgb("ad5810"), from = 0.683, bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
 	RedPlain = { top = rgb("ff0000"), bottom = rgb("d90000"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
+	GreyPlain = { top = rgb("a6a6a6"), bottom = rgb("6e6e6e"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
 	GreenPlain = { top = rgb("00ff11"), bottom = rgb("00d92b"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
+	-- the Growing Eggs popup (QM's Figma EggsPopup, Oct 27; client/EggsPanel)
+	TanHeader = {
+		across = { rgb("fac086"), rgb("e5ab74"), rgb("d09561") },
+		bevel = { 0.5, 0, Color3.new(1, 1, 1), rgb("c37731"), 12 },
+		tile = { 223.5, 0.8 },
+		outline = 8,
+	},
+	Yellow = { top = rgb("fff000"), bottom = rgb("ff8a00"), bevel = { 0.5, 0.5 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
+	EggCard = { fill = rgb("3f3f3f"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
+	-- (its progress bar: the green across a dark track; the black border goes round the track)
+	EggTrack = { fill = rgb("1c1c1c"), outline = 6, corner = 8 },
+	EggGrow = { across = { rgb("00e900"), rgb("00b800"), rgb("008800") }, tile = { 230, 0.8, "Weld" }, corner = 8 },
 	Panel = { fill = rgb("323232"), border = { Color3.new(0, 0, 0), 6, 0.5 }, tile = { 223.5, 0.9 }, outline = 8, corner = 20 },
 	Card = { fill = Color3.new(1, 1, 1), border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
 }
@@ -280,6 +294,27 @@ function HudKit.button(parent, name, w, h, props, look)
 	Ui.make(b, "Hover", "UIScale")
 	HudKit.hover(b)
 	return b
+end
+
+-- an icon outlined black like the text beside it (QM, Oct 27: the Robux icons): black copies
+-- of it nudged px out all round, under it. Once: a second call does nothing.
+function HudKit.outlineArt(icon, px)
+	local stem = string.gsub(icon.Name, "Icon$", "")
+	local parent = icon.Parent
+	if not parent or parent:FindFirstChild(stem .. "Outline1") then
+		return
+	end
+	local z = icon.ZIndex
+	icon.ZIndex = z + 1
+	for k = 1, 8 do
+		local a = (k - 1) * math.pi / 4
+		local copy = icon:Clone()
+		copy.Name = stem .. "Outline" .. k
+		copy.ImageColor3 = HudKit.BLACK
+		copy.Position = icon.Position + UDim2.fromOffset(math.round(math.cos(a) * px), math.round(math.sin(a) * px))
+		copy.ZIndex = z
+		copy.Parent = parent
+	end
 end
 
 -- wires a button's hover (in Play): its Hover UIScale grows, its Back darkens
