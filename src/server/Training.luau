@@ -1,6 +1,6 @@
 -- The training grounds (QM, Oct 24): five pen-sized yards along the south of the base,
--- the free straw dummies and one per biome (Meadow pigs, Desert sand crabs, Ice
--- penguins, Lava rock hogs). Strength only ever comes from attacking (Server/Combat):
+-- the free straw dummies and one per biome (Meadow pets, Desert cactus monsters, Ice
+-- pets, Lava rock hogs). Strength only ever comes from attacking (Server/Combat):
 -- each hit trains the enemy's Strength (Config.Training.Grounds), so these are for
 -- standing and swinging, RuneScape sand-crab style. A biome's ground is fenced off until
 -- you buy it (Cost in cash, the prompt at its gate; player attribute Train<Name>, which a
@@ -14,7 +14,8 @@
 -- with its Attacks (Config.Training.Grounds, run by Server/BossAttacks like a boss's),
 -- hard enough to kill you (QM, Oct 26), until you leave the yard, die, or stop hitting it
 -- for Config.Training.Calm seconds. Each mob is a random pet from its biome's eggs
--- (Config.Eggs.Kinds), as big as when you ride it.
+-- (Config.Eggs.Kinds), as big as when you ride it, or the ground's own Pet (the Desert's
+-- cactus monsters: QM, Oct 27). Higher grounds are bigger: Config.Training's Grow.
 --
 --   Training.start(map)   -- once, after Map.ensure()
 
@@ -44,6 +45,10 @@ end
 -- the pets a biome's eggs hatch (any with odds), or none while they're only the Horse
 -- placeholder
 local function petsOf(biome)
+	local pet = Config.Training.Grounds[biome].Pet
+	if pet then
+		return { pet }
+	end
 	local list = {}
 	for kind, weight in Config.Eggs.Kinds[biome] or {} do
 		if weight > 0 and kind ~= "Horse" and Config.Pets[kind] then
@@ -63,7 +68,7 @@ local function spawnMob(name, x, z, half)
 	local pets = petsOf(name)
 	if #pets > 0 then
 		local kind = pets[rng:NextInteger(1, #pets)]
-		model, size, label, tint = kind, Pets.class(kind).size, Pets.name(kind), nil
+		model, size, label, tint = kind, Pets.class(kind).size, g.Name or Pets.name(kind), nil
 		radius = math.max(Pets.stats(kind).Hitbox, 1.5)
 	end
 	local body = Instance.new("Part")
@@ -156,13 +161,13 @@ function Training.start(map)
 			base = a
 		end
 	end
-	local half = base.TrainSize / 2 - 6
 	for _, t in base.Training do
 		local name, x, z = t[1], t[2], t[3]
 		local g = Config.Training.Grounds[name]
 		local zone = map.Base.Training:FindFirstChild(name)
 		if g and zone then
-			if g.Mob then
+			local half = base.TrainSize / 2 + (g.Grow or 0) * Config.Training.Tile / 2 - 6
+			if g.Count then
 				for _ = 1, g.Count do
 					spawnMob(name, x, z, half)
 				end
