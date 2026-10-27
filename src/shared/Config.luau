@@ -735,7 +735,7 @@ return {
 	SprintTiers = { 2.05, 4.1, 5 },
 	-- A white trail off you while you sprint (client/SprintTrail): Life seconds long at a
 	-- horse's sprint, longer the faster you go, up to MaxLife.
-	SprintTrail = { On = true, Life = 0.12, MaxLife = 0.6, Transparency = 0.55 },
+	SprintTrail = { On = false, Life = 0.12, MaxLife = 0.6, Transparency = 0.55 }, -- (off: QM, Oct 27)
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds
 	-- (client/SkyFlash). Start: its see-through at the flash. Distance: studs round the camera.
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
