@@ -312,6 +312,11 @@ local function add(body)
 	-- client/BossIntro)
 	if body:GetAttribute("Intro") then
 		view.appearAt = os.clock() + INTRO.PanIn
+		view.appearFor = INTRO.Appear
+	elseif body:GetAttribute("Rise") then
+		-- (a boss's minion pops straight up out of the ground: Server/Minions)
+		view.appearAt = os.clock()
+		view.appearFor = body:GetAttribute("Rise")
 	end
 	-- (a pen pet just hatched: hidden till its egg's top pops off, then it jumps out,
 	-- LassoAPet's hatch; server time HatchPop, from HatchFrom studs up: Server/Pens)
@@ -412,7 +417,7 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 		local ground = pos - Vector3.new(0, body.Size.Y / 2, 0)
 		if view.appearAt then
-			local k = math.clamp((now - view.appearAt) / INTRO.Appear, 0, 1)
+			local k = math.clamp((now - view.appearAt) / view.appearFor, 0, 1)
 			-- (overshooting a little and settling: an ease-out "back")
 			local e = 1 + 2.70158 * (k - 1) ^ 3 + 1.70158 * (k - 1) ^ 2
 			animal:setScale(math.max(e, 0.05))

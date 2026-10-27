@@ -358,10 +358,39 @@ return {
 			Turn = 3.5,
 			Strength = 6,
 			Respawn = 25,
-			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
-			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
+			-- (QM, Oct 27: the Cactus Boss tries out new mechanics. Besides its bite, it flings
+			-- green cactus bombs at everyone (Server/BossAttacks' Lob, drawn by client/Bombs):
+			-- each lands Airtime seconds later where you stood when it was thrown, so keep moving)
 			Attacks = {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 16 },
+				{
+					Kind = "Lob",
+					Every = 3.5, -- seconds between volleys
+					Count = 2, -- extra bombs scattered round you, besides the one at your feet
+					Scatter = 22, -- how far off (studs) the extras can land
+					Radius = 7, -- each blast's radius (studs)
+					Airtime = 1.3, -- seconds in the air (the red ring's fill time)
+					Height = 18, -- the arc's peak, studs above the straight line
+					Damage = 14,
+					Style = "Cactus", -- (client/Bombs' look)
+				},
+			},
+			-- at half health it calls up cactus monsters to help (Server/Minions, QM Oct 27):
+			-- Desert Cactus pets, Scale x their riding size, chasing whoever's nearest
+			Minions = {
+				At = 0.5, -- of its health
+				Count = 3,
+				Model = "Cactus",
+				Name = "Cactus Monster",
+				Scale = 1.8,
+				Health = 500, -- (about 3s of swinging when you get here: Config.Training's Desert)
+				Speed = 14,
+				Strength = 3, -- what each hit trains (x damage, like any enemy)
+				Spread = 10, -- studs out from the boss's edge they pop up
+				Rise = 0.6, -- seconds to pop up out of the ground
+				Attacks = {
+					{ Kind = "Contact", Every = 1.2, Reach = 3, Damage = 7 },
+				},
 			},
 		},
 		ElderBoar = {
