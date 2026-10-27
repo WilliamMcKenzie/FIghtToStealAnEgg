@@ -40,7 +40,8 @@ local SHINE_ALPHA = 0.7 -- their transparency
 -- each rarity's card (QM's Figma, Oct 27): its back's gradient, bottom to top (reaching the
 -- top colour `at` of the way up), and its rarity's text colour. From Mythic up (QM, Oct 27:
 -- after their Pickaxe Shop's Divine, Cosmic, Celestial, Void and Omega cards) they `move`:
--- the back's gradient turns slowly round and a band of `text2` sweeps across the rarity.
+-- the back's gradient turns round with a light sheen sweeping across it (QM, Oct 27: the
+-- backs should visibly move), and a band of `text2` sweeps across the rarity.
 local function hex(h)
 	return Color3.fromHex(h)
 end
@@ -57,7 +58,8 @@ local RARITY = {
 	Void = { bottom = hex("6a2cd8"), top = hex("cdb2ff"), at = 1, text = hex("5a3ae0"), text2 = hex("12004a"), move = true },
 	Omega = { bottom = hex("4ed46a"), top = hex("eaffd8"), at = 1, text = hex("b4ff6a"), text2 = hex("2fae3a"), move = true },
 }
-local SPIN = 30 -- degrees a second a moving card's back turns
+local SPIN = 45 -- degrees a second a moving card's back turns
+local SHEEN = 0.45 -- transparency at the middle of the sheen's band
 local SWEEP = 2.5 -- seconds a band takes across a moving rarity's text
 local POP = 0.12 -- seconds it takes to pop open
 local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
@@ -65,7 +67,7 @@ local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
 local gui -- the WeaponShop frame
 local cards -- its scrolling row
 local template
-local moving = {} -- { { back's Fill, rarity's UIGradient } } of the moving cards
+local moving = {} -- { { back's Fill, rarity's UIGradient, sheen's UIGradient } } of the moving cards
 
 -- ---- building ---------------------------------------------------------------------------
 
@@ -308,7 +310,29 @@ local function fill(card, id)
 				else ColorSequence.new(look.top, look.bottom)
 			back.Fill.Rotation = 90
 			if look.move then
-				table.insert(moving, { back.Fill, card.Rarity.UIGradient })
+				-- the sheen: a white band, slanted, made here (only moving cards have one)
+				local sheen = Instance.new("Frame")
+				sheen.Name = "Sheen"
+				sheen.BackgroundColor3 = Color3.new(1, 1, 1)
+				sheen.BorderSizePixel = 0
+				sheen.Size = UDim2.fromScale(1, 1)
+				local corner = back:FindFirstChildOfClass("UICorner")
+				if corner then
+					corner:Clone().Parent = sheen
+				end
+				local band = Instance.new("UIGradient")
+				band.Rotation = 60
+				band.Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 1),
+					NumberSequenceKeypoint.new(0.4, 1),
+					NumberSequenceKeypoint.new(0.5, SHEEN),
+					NumberSequenceKeypoint.new(0.6, 1),
+					NumberSequenceKeypoint.new(1, 1),
+				})
+				band.Offset = Vector2.new(-1.5, 0)
+				band.Parent = sheen
+				sheen.Parent = back
+				table.insert(moving, { back.Fill, card.Rarity.UIGradient, band })
 			end
 		end
 	else
@@ -447,6 +471,7 @@ function WeaponShop.init(root)
 		for _, m in moving do
 			m[1].Rotation = turn
 			m[2].Offset = Vector2.new(sweep, 0)
+			m[3].Offset = Vector2.new(sweep * 1.5, 0) -- (further: its band is slanted)
 		end
 	end)
 
