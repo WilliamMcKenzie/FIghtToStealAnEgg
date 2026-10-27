@@ -43,7 +43,8 @@ local BAR_W, BAR_H = 634, 60 -- the boss bar inside its 6px outline (QM's Figma:
 -- the red glow round the bar (Figma: 16 spread, 16 blur, 25%): assets/ui/hud/BossGlow.png, a
 -- blurred white rounded square sliced round its middle, reaching GLOW px past the outline
 local GLOW = 32
-local GLOW_ALPHA = 0.75
+local GLOW_ALPHA = 0.75 -- at its strongest: it pulses from gone to this (QM, Oct 27)
+local GLOW_PULSE = 1.2 -- seconds a pulse takes
 local DESIGN_HEIGHT = 1080
 local ITALIC = HudKit.ITALIC
 local BLACK = HudKit.BLACK
@@ -395,6 +396,10 @@ function Hud.start()
 			end
 		end
 		local now = os.clock()
+		if bar.Visible then
+			local beat = 0.5 - 0.5 * math.cos(now * 2 * math.pi / GLOW_PULSE)
+			glow.ImageTransparency = 1 - (1 - GLOW_ALPHA) * beat
+		end
 		local fraction
 		if best then
 			if state == "hidden" or state == "out" then
@@ -413,10 +418,10 @@ function Hud.start()
 		else
 			if state == "shown" then
 				-- (killed: it stays, emptying, then pops out; walked off or it slept: out now)
-				local dead = following == nil
+				local slain = following == nil
 					or following.Parent == nil
 					or (following:GetAttribute("Health") or 0) <= 0
-				if dead then
+				if slain then
 					state = "lingering"
 					dead(true)
 					leftAt = now
