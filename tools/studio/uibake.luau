@@ -25,9 +25,22 @@ for _, m in client:GetChildren() do
 end
 copy.Parent = tmp
 tmp.Parent = game:GetService("ServerStorage")
+-- (Shared too: its modules stay cached the same way, so a fresh copy stands in for it while
+-- baking, and the real one goes back after)
+local RS = game:GetService("ReplicatedStorage")
+local shared = RS:FindFirstChild("Shared")
+local fresh = shared and shared:Clone()
+if fresh then
+	shared.Parent = nil
+	fresh.Parent = RS
+end
 local ok, res = pcall(function()
 	return require(copy.Hud).start()
 end)
+if fresh then
+	fresh:Destroy()
+	shared.Parent = RS
+end
 tmp:Destroy()
 if not ok then
 	return "error: " .. tostring(res)
