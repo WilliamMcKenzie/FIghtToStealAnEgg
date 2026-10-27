@@ -56,7 +56,7 @@ local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight sta
 -- empty, for LINGER seconds first)
 local POP_IN = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local POP_OUT = TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-local LINGER = 1.5 -- (QM, Oct 27: long enough to see the head turn dead, at full size)
+local LINGER = 0.3 -- (QM, Oct 27: the head's pop and turn, then out)
 -- (QM, Oct 27: at the kill the bull's head pops up to FACE_POP, turns to the dead one at the
 -- top, and settles back)
 local FACE_POP = 1.2
