@@ -2,7 +2,8 @@
 -- the right: a gold header with "1/5 Active" and the pink "+1 Equip [30R]" (more pen slots
 -- for Robux: not sold yet, Config.Backpack.SlotProduct), and under it a row per pet owned
 -- (each copy): its render (Shared/ItemIcons), its name (white: QM), its cash a second, and
--- Unequip (red, the pen's pets first), Equip (green) or Full (grey, no room in the pen). The red ">" tab on its left slides
+-- Riding (yellow: the one you ride, first; it's out of the pen but still counts and earns),
+-- Unequip (red, the pen's other pets), Equip (green) or Full (grey, no room in the pen). The red ">" tab on its left slides
 -- it away. Equip and Unequip go through Server/PetInventory's PetEquip remote.
 --
 --   PetsPanel.init(root, petsButton)   -- once, from Hud
@@ -39,6 +40,7 @@ local OUTLINES = { -- text outlines (Figma)
 	Unequip = hex("7a0000"),
 	Equip = hex("006b10"),
 	Full = hex("3a3a3a"),
+	Riding = hex("8a5a00"),
 }
 
 local panel, rows, template, countLabel
@@ -74,11 +76,12 @@ local function rowTemplate()
 		ZIndex = 2,
 	})
 	cash.Outline.Color = OUTLINES.Cash
-	-- (Full: QM's grey one, when the pen has no room)
+	-- (Full: QM's grey one, when the pen has no room; Riding: their yellow one)
 	for _, b in {
 		{ "PetUnequip", "RedPlain", "Unequip" },
 		{ "PetEquip", "GreenPlain", "Equip" },
 		{ "PetFull", "GreyPlain", "Full" },
+		{ "PetRiding", "YellowPlain", "Riding" },
 	} do
 		local btn = button(row, b[1], 272, 112, { Position = UDim2.fromOffset(fig(567), fig(47)), ZIndex = 3 }, b[2])
 		local text = label(btn, "Text", {
@@ -128,9 +131,16 @@ local function listed()
 		left[stack.id] = stack.n
 	end
 	local list = {}
+	local ridden = player:GetAttribute("Pet")
 	for slot, kind in pen do
 		left[kind] = (left[kind] or 0) - 1
-		table.insert(list, { kind = kind, slot = slot })
+		-- (the one ridden first: the first copy of its kind in the pen)
+		if kind == ridden then
+			ridden = nil
+			table.insert(list, 1, { kind = kind, slot = slot, riding = true })
+		else
+			table.insert(list, { kind = kind, slot = slot })
+		end
 	end
 	local spare = {}
 	for kind, n in left do
@@ -205,7 +215,8 @@ function PetsPanel.init(root, petsButton)
 			row.PetName.Text = Pets.name(kind)
 			row.PetCash.Text = "($" .. RegionBlocker.abbreviate(Config.Pets[kind].Cash or 0) .. "/s)"
 			local full = entry.slot == nil and inPen >= slots
-			row.PetUnequip.Visible = entry.slot ~= nil
+			row.PetRiding.Visible = entry.riding == true
+			row.PetUnequip.Visible = entry.slot ~= nil and not entry.riding
 			row.PetEquip.Visible = entry.slot == nil and not full
 			row.PetFull.Visible = full
 			for _, b in { row.PetUnequip, row.PetEquip } do
@@ -225,7 +236,7 @@ function PetsPanel.init(root, petsButton)
 		end
 	end
 	refresh()
-	for _, name in { "PetsOwned", "PenPets" } do
+	for _, name in { "PetsOwned", "PenPets", "Pet" } do
 		player:GetAttributeChangedSignal(name):Connect(refresh)
 	end
 end
