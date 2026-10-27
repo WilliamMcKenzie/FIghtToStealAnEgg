@@ -257,8 +257,14 @@ function Shots.boss(body, i, yaw, seed, origin)
 	local s = Projectiles.bossShot(a)
 	sound(s.FireSound, s.FireVolume, nil, origin)
 	for _, shot in Projectiles.volley(s, true, origin, yaw, seed) do
-		local d = build(s)
-		d.shot, d.s, d.biome = shot, s, body:GetAttribute("Biome") or false
+		local look = s
+		if shot.size ~= (s.Size or 1) then
+			-- (drawn at its own random size: SizeMax)
+			look = table.clone(s)
+			look.Size = shot.size
+		end
+		local d = build(look)
+		d.shot, d.s, d.biome = shot, look, body:GetAttribute("Biome") or false
 		table.insert(active, d)
 	end
 end

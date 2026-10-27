@@ -74,13 +74,17 @@ function Projectiles.volley(s, magic, origin, yaw, seed, id)
 		if wobble > 0 then
 			offset += rng:NextNumber(-wobble, wobble)
 		end
+		-- (SizeMax: each a random size from Size up to SizeMax x it, from the same seed: the
+		-- Sandworm's spits, QM)
+		local size = (s.Size or 1) * (if s.SizeMax then rng:NextNumber(1, s.SizeMax) else 1)
 		table.insert(shots, {
 			id = id,
 			pos = origin,
 			dir = dirOf(yaw + offset),
 			speed = s.Speed or 100,
 			left = s.Range or 50,
-			radius = Config.Shots.Radius * (s.Size or 1),
+			size = size,
+			radius = Config.Shots.Radius * size,
 			homing = math.rad(s.Homing or 0),
 			hits = 1 + math.max(0, math.floor(s.Pierce or 0)),
 			splash = if (s.Splash or 0) > 0 then s.Splash else nil,

@@ -424,9 +424,10 @@ return {
 						Color = Color3.fromRGB(232, 190, 116), -- sand
 						Count = 1,
 						Size = 1.4,
+						SizeMax = 1.6, -- each a random size, Size up to this x it (QM)
 						Speed = 40,
 						Homing = 50, -- (gentle: you can dodge them)
-						Launch = 45, -- each sets off up to this many degrees off its aim, at random (QM)
+						Launch = 90, -- each sets off up to this many degrees off its aim, at random (QM)
 						Range = 100,
 						Slack = 0,
 					},
