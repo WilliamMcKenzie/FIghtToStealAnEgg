@@ -2,12 +2,12 @@
 --   Weapons.get(id) -> its Config.Weapons entry (the starting weapon's for an unknown id), with its
 --                      Shot filled in from Config.Shots[Type] and any live tuning applied
 --   Weapons.makeTool(id)       -- the Tool players hold (attributes Weapon, WeaponType), unlit
---   Weapons.makeModel(id, k)   -- an anchored copy, k times the held size (spin, shots)
+--   Weapons.makeModel(id, k)   -- an anchored copy, k times the held size (shop, shots)
 --   Weapons.slash(c, id)       -- Config.Slash (or SlashTuning's live copy) with a melee
 --                              -- weapon's Slash values over it
 --   Weapons.range(id, c)       -- how close a target has to be before it attacks
 --   Weapons.cooldown(id, c)    -- seconds between attacks
---   Weapons.drops(bossKind)    -- { { id, weight } }: what that boss can drop
+--   Weapons.forSale()          -- the ids Carl sells (with a Price), cheapest first
 --
 -- Live tuning (QM, Oct 25; client/WeaponTuning shows the held weapon's values under
 -- Workspace > Weapon): every number, colour, switch and Look can be changed in Play.
@@ -89,7 +89,7 @@ end
 
 function Weapons.get(id)
 	if not Config.Weapons[id] then
-		id = Config.WeaponDrops.Start
+		id = Config.Arsenal.Start
 	end
 	local out = merged[id]
 	if out then
@@ -241,7 +241,7 @@ local function same(a, b)
 	return a == b
 end
 
-local ORDER = { "Name", "Type", "Rarity", "Boss", "Damage", "Weight" }
+local ORDER = { "Name", "Type", "Rarity", "Damage", "Price" }
 
 -- its Config.Weapons block: the fixed fields, then Slash or Shot with every value that
 -- differs from the base (Config.Slash, or Config.Shots[Type])
@@ -326,7 +326,7 @@ end
 
 function Weapons.makeTool(id)
 	if not Weapons.exists(id) then
-		id = Config.WeaponDrops.Start
+		id = Config.Arsenal.Start
 	end
 	local w = Weapons.get(id)
 	local model = Weapons.makeModel(id, 1)
@@ -427,16 +427,20 @@ function Weapons.cooldown(id, c)
 	return Weapons.slash(c or Config.Slash, id).Cooldown
 end
 
--- every droppable weapon, and the boss's own one (a boss-only weapon drops from its boss only)
-function Weapons.drops(bossKind)
+-- every weapon with a Price (Config.Weapons), cheapest first, then by name
+function Weapons.forSale()
 	local list = {}
 	for id, w in Config.Weapons do
-		if w.Weight and w.Weight > 0 and (w.Boss == nil or w.Boss == bossKind) then
-			table.insert(list, { id = id, weight = w.Weight })
+		if w.Price then
+			table.insert(list, id)
 		end
 	end
-	table.sort(list, function(a, b) -- (a steady order, so odds and rolls don't depend on hashing)
-		return a.id < b.id
+	table.sort(list, function(a, b)
+		local pa, pb = Config.Weapons[a].Price, Config.Weapons[b].Price
+		if pa ~= pb then
+			return pa < pb
+		end
+		return a < b
 	end)
 	return list
 end
