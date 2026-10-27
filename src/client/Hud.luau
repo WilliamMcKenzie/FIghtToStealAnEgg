@@ -35,6 +35,7 @@ local HudImages = require(script.Parent.HudImages)
 local HudKit = require(script.Parent.HudKit)
 local Hotbar = require(script.Parent.Hotbar)
 local Ui = require(script.Parent.Ui)
+local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config"))
 local RegionBlocker = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("RegionBlocker"))
 
 local Hud = {}
@@ -342,8 +343,9 @@ function Hud.start()
 	count("Power")
 	count("Cash")
 
-	-- "You earn $1.2B/Day offline! 😈" (QM, Oct 27: LassoAPet's, 1:1), top centre: a day of
-	-- your pen's income (the Income attribute, cash a second: Server/PetInventory)
+	-- "You earn $1.2B/Day offline! 😈" (QM, Oct 27: LassoAPet's, 1:1), top centre: the most a
+	-- day offline pays (Server/Data: Config.Data.OfflineRate of your pen's income, the Income
+	-- attribute, for up to OfflineMax seconds)
 	local offline = label(root, "OfflineEarn", {
 		RichText = true,
 		Text = "You earn $0/Day offline! 😈",
@@ -355,7 +357,7 @@ function Hud.start()
 	})
 	offline.Outline.Thickness = 4
 	local function earn()
-		local day = (player:GetAttribute("Income") or 0) * 86400
+		local day = (player:GetAttribute("Income") or 0) * Config.Data.OfflineRate * Config.Data.OfflineMax
 		offline.Text = string.format(
 			'You earn <font color="%s">$%s</font>/Day offline! 😈',
 			OFFLINE_GREEN,

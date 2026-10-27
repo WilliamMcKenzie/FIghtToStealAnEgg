@@ -760,7 +760,9 @@ return {
 	Data = {
 		Store = "Players_v1",
 		AutoSave = 90, -- seconds
-		OfflineMax = 86400, -- seconds away paid for at most (QM, Oct 27: "/Day offline")
+		-- offline earnings (QM, Oct 27): a tenth of the pen's income, for up to 4 hours away
+		OfflineRate = 0.1,
+		OfflineMax = 4 * 3600, -- seconds
 	},
 
 	-- rebirth (Server/Data, the Rebirth popup): cash needed is Cost x Growth ^ rebirths so far;
