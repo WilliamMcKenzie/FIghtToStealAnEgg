@@ -3267,655 +3267,6 @@
     {
      "children": [
       {
-       "children": [
-        {
-         "children": [],
-         "class": "UICorner",
-         "name": "UICorner",
-         "props": {
-          "CornerRadius": {
-           "t": "UDim",
-           "v": [
-            0,
-            7
-           ]
-          }
-         }
-        },
-        {
-         "children": [],
-         "class": "UIGradient",
-         "name": "Fill",
-         "props": {
-          "Color": {
-           "t": "ColorSequence",
-           "v": [
-            [
-             0,
-             0.239215686917305,
-             0.05098039284348488,
-             0.04313725605607033
-            ],
-            [
-             0.1589999943971634,
-             0.239215686917305,
-             0.05098039284348488,
-             0.04313725605607033
-            ],
-            [
-             1,
-             0.12156862765550613,
-             0.019607843831181526,
-             0.01568627543747425
-            ]
-           ]
-          },
-          "Rotation": 90
-         }
-        },
-        {
-         "children": [],
-         "class": "UIStroke",
-         "name": "Outline",
-         "props": {
-          "ApplyStrokeMode": {
-           "e": "ApplyStrokeMode",
-           "t": "EnumItem",
-           "v": "Border"
-          },
-          "Thickness": 4
-         }
-        },
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              7
-             ]
-            }
-           }
-          }
-         ],
-         "class": "ImageLabel",
-         "name": "Studs",
-         "props": {
-          "BackgroundTransparency": 1,
-          "Image": "rbxassetid://94674059514917",
-          "ImageTransparency": 0.8500000238418579,
-          "ScaleType": {
-           "e": "ScaleType",
-           "t": "EnumItem",
-           "v": "Tile"
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            1,
-            0,
-            1,
-            0
-           ]
-          },
-          "TileSize": {
-           "t": "UDim2",
-           "v": [
-            0,
-            113,
-            0,
-            113
-           ]
-          },
-          "Transparency": 1
-         }
-        }
-       ],
-       "class": "Frame",
-       "name": "BossBarBack",
-       "props": {
-        "BackgroundColor3": {
-         "t": "Color3",
-         "v": [
-          1,
-          1,
-          1
-         ]
-        },
-        "BorderSizePixel": 0,
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          1,
-          0,
-          1,
-          0
-         ]
-        }
-       }
-      },
-      {
-       "children": [
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              7
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIGradient",
-           "name": "Fill",
-           "props": {
-            "Color": {
-             "t": "ColorSequence",
-             "v": [
-              [
-               0,
-               1,
-               0.9529411792755127,
-               0.8392156958580017
-              ],
-              [
-               0.1589999943971634,
-               1,
-               0.9529411792755127,
-               0.8392156958580017
-              ],
-              [
-               1,
-               1,
-               0.7607843279838562,
-               0.47843137383461
-              ]
-             ]
-            },
-            "Rotation": 90
-           }
-          },
-          {
-           "children": [
-            {
-             "children": [],
-             "class": "UICorner",
-             "name": "UICorner",
-             "props": {
-              "CornerRadius": {
-               "t": "UDim",
-               "v": [
-                0,
-                7
-               ]
-              }
-             }
-            }
-           ],
-           "class": "ImageLabel",
-           "name": "Studs",
-           "props": {
-            "BackgroundTransparency": 1,
-            "Image": "rbxassetid://94674059514917",
-            "ImageTransparency": 0.8500000238418579,
-            "ScaleType": {
-             "e": "ScaleType",
-             "t": "EnumItem",
-             "v": "Tile"
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              1,
-              0,
-              1,
-              0
-             ]
-            },
-            "TileSize": {
-             "t": "UDim2",
-             "v": [
-              0,
-              113,
-              0,
-              113
-             ]
-            },
-            "Transparency": 1
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "BossBarTrail",
-         "props": {
-          "BackgroundColor3": {
-           "t": "Color3",
-           "v": [
-            1,
-            1,
-            1
-           ]
-          },
-          "BorderSizePixel": 0,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            646,
-            0,
-            66
-           ]
-          },
-          "ZIndex": 2
-         }
-        }
-       ],
-       "class": "Frame",
-       "name": "TrailClip",
-       "props": {
-        "BackgroundTransparency": 1,
-        "ClipsDescendants": true,
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          1,
-          0,
-          1,
-          0
-         ]
-        },
-        "Transparency": 1,
-        "ZIndex": 2
-       }
-      },
-      {
-       "children": [
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              7
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIGradient",
-           "name": "Fill",
-           "props": {
-            "Color": {
-             "t": "ColorSequence",
-             "v": [
-              [
-               0,
-               0.9333333373069763,
-               0.23137255012989044,
-               0.18431372940540314
-              ],
-              [
-               0.1589999943971634,
-               0.9333333373069763,
-               0.23137255012989044,
-               0.18431372940540314
-              ],
-              [
-               1,
-               0.7490196228027344,
-               0.13333334028720856,
-               0.09803921729326248
-              ]
-             ]
-            },
-            "Rotation": 90
-           }
-          },
-          {
-           "children": [
-            {
-             "children": [],
-             "class": "UICorner",
-             "name": "UICorner",
-             "props": {
-              "CornerRadius": {
-               "t": "UDim",
-               "v": [
-                0,
-                7
-               ]
-              }
-             }
-            }
-           ],
-           "class": "ImageLabel",
-           "name": "Studs",
-           "props": {
-            "BackgroundTransparency": 1,
-            "Image": "rbxassetid://94674059514917",
-            "ImageTransparency": 0.75,
-            "ScaleType": {
-             "e": "ScaleType",
-             "t": "EnumItem",
-             "v": "Tile"
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              1,
-              0,
-              1,
-              0
-             ]
-            },
-            "TileSize": {
-             "t": "UDim2",
-             "v": [
-              0,
-              113,
-              0,
-              113
-             ]
-            },
-            "Transparency": 1
-           }
-          },
-          {
-           "children": [],
-           "class": "Frame",
-           "name": "Light",
-           "props": {
-            "BackgroundColor3": {
-             "t": "Color3",
-             "v": [
-              1,
-              1,
-              1
-             ]
-            },
-            "BackgroundTransparency": 0.550000011920929,
-            "BorderSizePixel": 0,
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              1,
-              0,
-              0,
-              5
-             ]
-            },
-            "Transparency": 0.550000011920929
-           }
-          },
-          {
-           "children": [],
-           "class": "Frame",
-           "name": "Light",
-           "props": {
-            "BackgroundColor3": {
-             "t": "Color3",
-             "v": [
-              1,
-              1,
-              1
-             ]
-            },
-            "BackgroundTransparency": 0.550000011920929,
-            "BorderSizePixel": 0,
-            "Position": {
-             "t": "UDim2",
-             "v": [
-              0,
-              0,
-              0,
-              5
-             ]
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              0,
-              5,
-              1,
-              -5
-             ]
-            },
-            "Transparency": 0.550000011920929
-           }
-          },
-          {
-           "children": [],
-           "class": "Frame",
-           "name": "Shade",
-           "props": {
-            "BackgroundColor3": {
-             "t": "Color3",
-             "v": [
-              0.4313725531101227,
-              0,
-              0
-             ]
-            },
-            "BackgroundTransparency": 0.699999988079071,
-            "BorderSizePixel": 0,
-            "Position": {
-             "t": "UDim2",
-             "v": [
-              0,
-              5,
-              1,
-              -5
-             ]
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              1,
-              -5,
-              0,
-              5
-             ]
-            },
-            "Transparency": 0.699999988079071
-           }
-          },
-          {
-           "children": [],
-           "class": "Frame",
-           "name": "Shade",
-           "props": {
-            "BackgroundColor3": {
-             "t": "Color3",
-             "v": [
-              0.4313725531101227,
-              0,
-              0
-             ]
-            },
-            "BackgroundTransparency": 0.699999988079071,
-            "BorderSizePixel": 0,
-            "Position": {
-             "t": "UDim2",
-             "v": [
-              1,
-              -5,
-              0,
-              5
-             ]
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              0,
-              5,
-              1,
-              -5
-             ]
-            },
-            "Transparency": 0.699999988079071
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "BossBarFill",
-         "props": {
-          "BackgroundColor3": {
-           "t": "Color3",
-           "v": [
-            1,
-            1,
-            1
-           ]
-          },
-          "BorderSizePixel": 0,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            646,
-            0,
-            66
-           ]
-          },
-          "ZIndex": 3
-         }
-        }
-       ],
-       "class": "Frame",
-       "name": "Clip",
-       "props": {
-        "BackgroundTransparency": 1,
-        "ClipsDescendants": true,
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          1,
-          0,
-          1,
-          0
-         ]
-        },
-        "Transparency": 1,
-        "ZIndex": 3
-       }
-      },
-      {
-       "children": [
-        {
-         "children": [],
-         "class": "UIStroke",
-         "name": "Outline",
-         "props": {
-          "Thickness": 4
-         }
-        }
-       ],
-       "class": "TextLabel",
-       "name": "BossName",
-       "props": {
-        "AnchorPoint": {
-         "t": "Vector2",
-         "v": [
-          0.5,
-          0.5
-         ]
-        },
-        "BackgroundTransparency": 1,
-        "FontFace": {
-         "t": "Font",
-         "v": [
-          "rbxasset://fonts/families/Montserrat.json",
-          "ExtraBold",
-          "Normal"
-         ]
-        },
-        "Position": {
-         "t": "UDim2",
-         "v": [
-          0.5,
-          0,
-          0,
-          -4
-         ]
-        },
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          0,
-          600,
-          0,
-          50
-         ]
-        },
-        "Text": "BOSS",
-        "TextColor3": {
-         "t": "Color3",
-         "v": [
-          1,
-          1,
-          1
-         ]
-        },
-        "TextSize": 47,
-        "Transparency": 1,
-        "ZIndex": 5
-       }
-      }
-     ],
-     "class": "Frame",
-     "name": "BossBar",
-     "props": {
-      "AnchorPoint": {
-       "t": "Vector2",
-       "v": [
-        0.5,
-        0
-       ]
-      },
-      "BackgroundTransparency": 1,
-      "Position": {
-       "t": "UDim2",
-       "v": [
-        0.5,
-        0,
-        0,
-        56
-       ]
-      },
-      "Size": {
-       "t": "UDim2",
-       "v": [
-        0,
-        646,
-        0,
-        66
-       ]
-      },
-      "Transparency": 1
-     }
-    },
-    {
-     "children": [
-      {
        "children": [],
        "class": "UIScale",
        "name": "Pop",
@@ -4505,7 +3856,7 @@
           1
          ]
         },
-        "TextSize": 64,
+        "TextSize": 80,
         "TextXAlignment": {
          "e": "TextXAlignment",
          "t": "EnumItem",
@@ -4565,7 +3916,7 @@
           0
          ]
         },
-        "TextSize": 64,
+        "TextSize": 80,
         "TextXAlignment": {
          "e": "TextXAlignment",
          "t": "EnumItem",
@@ -6945,6 +6296,1073 @@
       },
       "Transparency": 1,
       "ZIndex": 10
+     }
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UICorner",
+         "name": "UICorner",
+         "props": {
+          "CornerRadius": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIGradient",
+         "name": "Fill",
+         "props": {
+          "Color": {
+           "t": "ColorSequence",
+           "v": [
+            [
+             0,
+             0.38823530077934265,
+             0,
+             0.10980392247438431
+            ],
+            [
+             1,
+             0.38823530077934265,
+             0,
+             0.10980392247438431
+            ]
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "ApplyStrokeMode": {
+           "e": "ApplyStrokeMode",
+           "t": "EnumItem",
+           "v": "Border"
+          },
+          "Thickness": 6
+         }
+        },
+        {
+         "children": [],
+         "class": "Frame",
+         "name": "Light",
+         "props": {
+          "BackgroundColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "BackgroundTransparency": 0.75,
+          "BorderSizePixel": 0,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            0,
+            4
+           ]
+          },
+          "Transparency": 0.75
+         }
+        },
+        {
+         "children": [],
+         "class": "Frame",
+         "name": "Light",
+         "props": {
+          "BackgroundColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "BackgroundTransparency": 0.75,
+          "BorderSizePixel": 0,
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0,
+            0,
+            0,
+            4
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            4,
+            1,
+            -4
+           ]
+          },
+          "Transparency": 0.75
+         }
+        },
+        {
+         "children": [],
+         "class": "Frame",
+         "name": "Shade",
+         "props": {
+          "BackgroundColor3": {
+           "t": "Color3",
+           "v": [
+            0,
+            0,
+            0
+           ]
+          },
+          "BackgroundTransparency": 0.75,
+          "BorderSizePixel": 0,
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0,
+            4,
+            1,
+            -4
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            -4,
+            0,
+            4
+           ]
+          },
+          "Transparency": 0.75
+         }
+        },
+        {
+         "children": [],
+         "class": "Frame",
+         "name": "Shade",
+         "props": {
+          "BackgroundColor3": {
+           "t": "Color3",
+           "v": [
+            0,
+            0,
+            0
+           ]
+          },
+          "BackgroundTransparency": 0.75,
+          "BorderSizePixel": 0,
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            1,
+            -4,
+            0,
+            4
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            4,
+            1,
+            -4
+           ]
+          },
+          "Transparency": 0.75
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "BossBarBack",
+       "props": {
+        "BackgroundColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "BorderSizePixel": 0,
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          1,
+          0,
+          1,
+          0
+         ]
+        }
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              4
+             ]
+            }
+           }
+          },
+          {
+           "children": [],
+           "class": "UIGradient",
+           "name": "Fill",
+           "props": {
+            "Color": {
+             "t": "ColorSequence",
+             "v": [
+              [
+               0,
+               1,
+               0.9529411792755127,
+               0.8392156958580017
+              ],
+              [
+               0.1589999943971634,
+               1,
+               0.9529411792755127,
+               0.8392156958580017
+              ],
+              [
+               1,
+               1,
+               0.7607843279838562,
+               0.47843137383461
+              ]
+             ]
+            },
+            "Rotation": 90
+           }
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UICorner",
+             "name": "UICorner",
+             "props": {
+              "CornerRadius": {
+               "t": "UDim",
+               "v": [
+                0,
+                4
+               ]
+              }
+             }
+            }
+           ],
+           "class": "ImageLabel",
+           "name": "Studs",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://94674059514917",
+            "ImageTransparency": 0.8500000238418579,
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Tile"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "TileSize": {
+             "t": "UDim2",
+             "v": [
+              0,
+              115,
+              0,
+              115
+             ]
+            },
+            "Transparency": 1
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "BossBarTrail",
+         "props": {
+          "BackgroundColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "BorderSizePixel": 0,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            634,
+            0,
+            60
+           ]
+          },
+          "ZIndex": 2
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "TrailClip",
+       "props": {
+        "BackgroundTransparency": 1,
+        "ClipsDescendants": true,
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          1,
+          0,
+          1,
+          0
+         ]
+        },
+        "Transparency": 1,
+        "ZIndex": 2
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              4
+             ]
+            }
+           }
+          },
+          {
+           "children": [],
+           "class": "UIGradient",
+           "name": "Fill",
+           "props": {
+            "Color": {
+             "t": "ColorSequence",
+             "v": [
+              [
+               0,
+               1,
+               0,
+               0
+              ],
+              [
+               0.1589999943971634,
+               1,
+               0,
+               0
+              ],
+              [
+               1,
+               0.7137255072593689,
+               0,
+               0.05098039284348488
+              ]
+             ]
+            },
+            "Rotation": 90
+           }
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UICorner",
+             "name": "UICorner",
+             "props": {
+              "CornerRadius": {
+               "t": "UDim",
+               "v": [
+                0,
+                4
+               ]
+              }
+             }
+            }
+           ],
+           "class": "ImageLabel",
+           "name": "Studs",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://94674059514917",
+            "ImageTransparency": 0.800000011920929,
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Tile"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "TileSize": {
+             "t": "UDim2",
+             "v": [
+              0,
+              115,
+              0,
+              115
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "Frame",
+           "name": "Light",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              1,
+              1,
+              1
+             ]
+            },
+            "BackgroundTransparency": 0.75,
+            "BorderSizePixel": 0,
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              0,
+              4
+             ]
+            },
+            "Transparency": 0.75
+           }
+          },
+          {
+           "children": [],
+           "class": "Frame",
+           "name": "Light",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              1,
+              1,
+              1
+             ]
+            },
+            "BackgroundTransparency": 0.75,
+            "BorderSizePixel": 0,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              1,
+              -4
+             ]
+            },
+            "Transparency": 0.75
+           }
+          },
+          {
+           "children": [],
+           "class": "Frame",
+           "name": "Shade",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "BackgroundTransparency": 0.75,
+            "BorderSizePixel": 0,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              1,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              -4,
+              0,
+              4
+             ]
+            },
+            "Transparency": 0.75
+           }
+          },
+          {
+           "children": [],
+           "class": "Frame",
+           "name": "Shade",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "BackgroundTransparency": 0.75,
+            "BorderSizePixel": 0,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              1,
+              -4,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              1,
+              -4
+             ]
+            },
+            "Transparency": 0.75
+           }
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UIStroke",
+             "name": "UIStroke",
+             "props": {
+              "ApplyStrokeMode": {
+               "e": "ApplyStrokeMode",
+               "t": "EnumItem",
+               "v": "Border"
+              },
+              "Color": {
+               "t": "Color3",
+               "v": [
+                1,
+                1,
+                1
+               ]
+              },
+              "Thickness": 10,
+              "Transparency": 0.800000011920929
+             }
+            },
+            {
+             "children": [],
+             "class": "UICorner",
+             "name": "UICorner",
+             "props": {
+              "CornerRadius": {
+               "t": "UDim",
+               "v": [
+                0,
+                0
+               ]
+              }
+             }
+            }
+           ],
+           "class": "Frame",
+           "name": "Border",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              10,
+              0,
+              10
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              -20,
+              1,
+              -20
+             ]
+            },
+            "Transparency": 1
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "BossBarFill",
+         "props": {
+          "BackgroundColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "BorderSizePixel": 0,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            634,
+            0,
+            60
+           ]
+          },
+          "ZIndex": 3
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Clip",
+       "props": {
+        "BackgroundTransparency": 1,
+        "ClipsDescendants": true,
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          1,
+          0,
+          1,
+          0
+         ]
+        },
+        "Transparency": 1,
+        "ZIndex": 3
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              4
+             ]
+            }
+           }
+          },
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "UIStroke",
+           "props": {
+            "ApplyStrokeMode": {
+             "e": "ApplyStrokeMode",
+             "t": "EnumItem",
+             "v": "Border"
+            },
+            "Color": {
+             "t": "Color3",
+             "v": [
+              1,
+              0,
+              0
+             ]
+            },
+            "Thickness": 12,
+            "Transparency": 0.9300000071525574
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Ring1",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              4
+             ]
+            }
+           }
+          },
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "UIStroke",
+           "props": {
+            "ApplyStrokeMode": {
+             "e": "ApplyStrokeMode",
+             "t": "EnumItem",
+             "v": "Border"
+            },
+            "Color": {
+             "t": "Color3",
+             "v": [
+              1,
+              0,
+              0
+             ]
+            },
+            "Thickness": 18,
+            "Transparency": 0.9300000071525574
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Ring2",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              4
+             ]
+            }
+           }
+          },
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "UIStroke",
+           "props": {
+            "ApplyStrokeMode": {
+             "e": "ApplyStrokeMode",
+             "t": "EnumItem",
+             "v": "Border"
+            },
+            "Color": {
+             "t": "Color3",
+             "v": [
+              1,
+              0,
+              0
+             ]
+            },
+            "Thickness": 24,
+            "Transparency": 0.9300000071525574
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Ring3",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              4
+             ]
+            }
+           }
+          },
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "UIStroke",
+           "props": {
+            "ApplyStrokeMode": {
+             "e": "ApplyStrokeMode",
+             "t": "EnumItem",
+             "v": "Border"
+            },
+            "Color": {
+             "t": "Color3",
+             "v": [
+              1,
+              0,
+              0
+             ]
+            },
+            "Thickness": 30,
+            "Transparency": 0.9300000071525574
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Ring4",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Transparency": 1
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "Glow",
+       "props": {
+        "BackgroundTransparency": 1,
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          1,
+          0,
+          1,
+          0
+         ]
+        },
+        "Transparency": 1,
+        "ZIndex": 0
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIScale",
+         "name": "Grow",
+         "props": []
+        }
+       ],
+       "class": "ImageLabel",
+       "name": "BossAliveIcon",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "Image": "rbxassetid://121430525012474",
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          -32
+         ]
+        },
+        "ScaleType": {
+         "e": "ScaleType",
+         "t": "EnumItem",
+         "v": "Fit"
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          146,
+          0,
+          83
+         ]
+        },
+        "Transparency": 1,
+        "ZIndex": 6
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIScale",
+         "name": "Grow",
+         "props": []
+        }
+       ],
+       "class": "ImageLabel",
+       "name": "BossDeadIcon",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0
+         ]
+        },
+        "BackgroundTransparency": 1,
+        "Image": "rbxassetid://117390149916258",
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0.5,
+          0,
+          0,
+          -32
+         ]
+        },
+        "ScaleType": {
+         "e": "ScaleType",
+         "t": "EnumItem",
+         "v": "Fit"
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          146,
+          0,
+          83
+         ]
+        },
+        "Transparency": 1,
+        "Visible": false,
+        "ZIndex": 6
+       }
+      }
+     ],
+     "class": "Frame",
+     "name": "BossBar",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        0.5,
+        0
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        0.5,
+        0,
+        0,
+        56
+       ]
+      },
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        634,
+        0,
+        60
+       ]
+      },
+      "Transparency": 1
      }
     }
    ],
