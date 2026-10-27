@@ -6886,70 +6886,6 @@
             },
             "Transparency": 0.75
            }
-          },
-          {
-           "children": [
-            {
-             "children": [],
-             "class": "UIStroke",
-             "name": "UIStroke",
-             "props": {
-              "ApplyStrokeMode": {
-               "e": "ApplyStrokeMode",
-               "t": "EnumItem",
-               "v": "Border"
-              },
-              "Color": {
-               "t": "Color3",
-               "v": [
-                1,
-                1,
-                1
-               ]
-              },
-              "Thickness": 10,
-              "Transparency": 0.800000011920929
-             }
-            },
-            {
-             "children": [],
-             "class": "UICorner",
-             "name": "UICorner",
-             "props": {
-              "CornerRadius": {
-               "t": "UDim",
-               "v": [
-                0,
-                0
-               ]
-              }
-             }
-            }
-           ],
-           "class": "Frame",
-           "name": "Border",
-           "props": {
-            "BackgroundTransparency": 1,
-            "Position": {
-             "t": "UDim2",
-             "v": [
-              0,
-              10,
-              0,
-              10
-             ]
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              1,
-              -20,
-              1,
-              -20
-             ]
-            },
-            "Transparency": 1
-           }
           }
          ],
          "class": "Frame",
@@ -6996,239 +6932,51 @@
        }
       },
       {
-       "children": [
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              4
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "UIStroke",
-           "props": {
-            "ApplyStrokeMode": {
-             "e": "ApplyStrokeMode",
-             "t": "EnumItem",
-             "v": "Border"
-            },
-            "Color": {
-             "t": "Color3",
-             "v": [
-              1,
-              0,
-              0
-             ]
-            },
-            "Thickness": 12,
-            "Transparency": 0.9300000071525574
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "Ring1",
-         "props": {
-          "BackgroundTransparency": 1,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            1,
-            0,
-            1,
-            0
-           ]
-          },
-          "Transparency": 1
-         }
-        },
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              4
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "UIStroke",
-           "props": {
-            "ApplyStrokeMode": {
-             "e": "ApplyStrokeMode",
-             "t": "EnumItem",
-             "v": "Border"
-            },
-            "Color": {
-             "t": "Color3",
-             "v": [
-              1,
-              0,
-              0
-             ]
-            },
-            "Thickness": 18,
-            "Transparency": 0.9300000071525574
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "Ring2",
-         "props": {
-          "BackgroundTransparency": 1,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            1,
-            0,
-            1,
-            0
-           ]
-          },
-          "Transparency": 1
-         }
-        },
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              4
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "UIStroke",
-           "props": {
-            "ApplyStrokeMode": {
-             "e": "ApplyStrokeMode",
-             "t": "EnumItem",
-             "v": "Border"
-            },
-            "Color": {
-             "t": "Color3",
-             "v": [
-              1,
-              0,
-              0
-             ]
-            },
-            "Thickness": 24,
-            "Transparency": 0.9300000071525574
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "Ring3",
-         "props": {
-          "BackgroundTransparency": 1,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            1,
-            0,
-            1,
-            0
-           ]
-          },
-          "Transparency": 1
-         }
-        },
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              4
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "UIStroke",
-           "props": {
-            "ApplyStrokeMode": {
-             "e": "ApplyStrokeMode",
-             "t": "EnumItem",
-             "v": "Border"
-            },
-            "Color": {
-             "t": "Color3",
-             "v": [
-              1,
-              0,
-              0
-             ]
-            },
-            "Thickness": 30,
-            "Transparency": 0.9300000071525574
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "Ring4",
-         "props": {
-          "BackgroundTransparency": 1,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            1,
-            0,
-            1,
-            0
-           ]
-          },
-          "Transparency": 1
-         }
-        }
-       ],
-       "class": "Frame",
+       "children": [],
+       "class": "ImageLabel",
        "name": "Glow",
        "props": {
         "BackgroundTransparency": 1,
+        "Image": "rbxassetid://136536336593533",
+        "ImageColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          0,
+          0
+         ]
+        },
+        "ImageTransparency": 0.75,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          -38,
+          0,
+          -38
+         ]
+        },
+        "ScaleType": {
+         "e": "ScaleType",
+         "t": "EnumItem",
+         "v": "Slice"
+        },
         "Size": {
          "t": "UDim2",
          "v": [
           1,
-          0,
+          76,
           1,
-          0
+          76
+         ]
+        },
+        "SliceCenter": {
+         "t": "Rect",
+         "v": [
+          40,
+          40,
+          88,
+          88
          ]
         },
         "Transparency": 1,
