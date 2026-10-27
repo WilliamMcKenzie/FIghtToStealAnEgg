@@ -14,5 +14,14 @@
   "ShopButton": "rbxassetid://107051431084993",
   "IndexButton": "rbxassetid://74988943576360",
   "PetsButton": "rbxassetid://89948114192855",
-  "AddPowerButton": "rbxassetid://75370681620229"
+  "AddPowerButton": "rbxassetid://75370681620229",
+  "RobuxIcon": "rbxassetid://86362799525767",
+  "ShopHeader": "rbxassetid://84022293279897",
+  "ShopPanel": "rbxassetid://93518917257750",
+  "ShopClose": "rbxassetid://99438563486401",
+  "ShopCard": "rbxassetid://80027070088197",
+  "ShopEquip": "rbxassetid://127469302548725",
+  "ShopBuy": "rbxassetid://79434455660918",
+  "ShopRobux": "rbxassetid://119158550820557",
+  "ShopDps": "rbxassetid://82624739520825"
 }
