@@ -1,4 +1,4 @@
--- Your weapon (the sword to start; bosses drop more: client/WeaponSpin): it's always
+-- Your weapon (the sword to start; bosses drop more: Server/Arsenal): it's always
 -- out, and it attacks by itself (QM, Oct 24, Archero-style). Melee weapons slash as
 -- below; Ranged and Magic ones shoot at the nearest target in their Range (client/Shots
 -- draws the shots, the server runs them for the damage), but only while you stand still.
@@ -41,7 +41,7 @@ require(script.Regions)
 require(script.Liquid)
 require(script.Vendor)
 require(script.Sprint)
-require(script.WeaponSpin)
+require(script.ChatCommands)
 require(script.WeaponTuning)
 require(script.PoseTuning)
 local remote = ReplicatedStorage:WaitForChild("Slash")
@@ -221,7 +221,7 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 end)
 
--- the weapon (or the egg you picked in the hotbar: client/Hotbar) is always out: no Roblox
+-- the weapon (or the egg you are holding) is always out: no Roblox
 -- inventory bar (so no keys to put it away), and it's equipped whenever it's in the backpack
 local function hideBackpack()
 	-- (SetCoreGuiEnabled can fail if the core scripts aren't up yet: retry briefly)

@@ -1,5 +1,5 @@
 -- Puts the game's UI into StarterGui as real objects, for QM to edit in Studio (client/Ui):
--- runs client/Hud's building code (with the popups, Backpack and egg hotbar) in Edit mode.
+-- runs client/Hud's building code (just the boss bar since the Oct 27 UI wipe) in Edit mode.
 -- Only adds what's missing, so it never undoes QM's edits: run it again after the UI code
 -- gains new pieces. Run with lu.py in Edit (sync src/ first), then save the place.
 if game:GetService("RunService"):IsRunning() then

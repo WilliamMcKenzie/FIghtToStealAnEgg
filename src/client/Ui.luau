@@ -9,7 +9,7 @@
 --     tweens); its look is whatever QM left it as. Anything missing is still made, so the
 --     game works before a bake, and new pieces show up before the next one.
 -- StarterGui isn't in default.project.json, so syncing src/ never touches it. Pieces that
--- repeat (Backpack tiles, egg slots) are cloned from hidden "...Template" objects, edit those.
+-- repeat are cloned from hidden "...Template" objects (Ui.template), edit those.
 --
 --   Ui.live                                  -- true in Play, false while baking in Edit
 --   Ui.make(parent, name, class, props) -> instance, fresh   -- fresh: just made, so add

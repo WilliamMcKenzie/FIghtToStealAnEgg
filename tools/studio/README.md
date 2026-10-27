@@ -17,7 +17,7 @@ don't rebuild the place from Rojo over it.
 
 ## The UI in StarterGui (QM edits it in Studio)
 
-The HUD, the Shop / Index / Rebirth / Backpack popups and the egg hotbar are real objects in
+The game's UI (since the Oct 27 wipe, just the boss bar) is real objects in
 `StarterGui > Hud` (see `src/client/Ui.luau`). StarterGui isn't in the Rojo tree, so syncing
 `src/` never touches it: QM's edits there are kept in the place.
 - `python3 lu.py uibake.luau` (Edit, after syncing `src/`): adds whatever UI is missing to
@@ -28,3 +28,5 @@ The HUD, the Shop / Index / Rebirth / Backpack popups and the egg hotbar are rea
   (replacing those ScreenGuis), e.g. a fresh one.
 In Play the scripts find the objects by name and only wire them up, so renaming or deleting
 one makes the game build a default one in its place.
+- `python3 lu.py ui_strip.luau` (Edit, one-off, Oct 27): deletes everything in StarterGui.Hud but
+  the boss bar. Save the place, then `uisave.py`.

@@ -1,25 +1,23 @@
 -- Eggs in hands and in pens (QM, Oct 25, LassoAPet's hatching: Server/Hatchery).
 --
---   Held: anyone holding an egg (a Tool with EggTool, picked in the hotbar) gets that egg
+--   Held: anyone holding an egg (a Tool with EggTool) gets that egg
 --     drawn out in front of their hand.
 --   Placing: while you hold one, a see-through egg follows the mouse over your pen; click
 --     or tap to put it down there (PlaceEgg).
 --   In pens: every player's placed eggs (their PenEggs attribute) stand in their pen,
 --     twitching now and then, a countdown over each ("Ready!" once it's up). By one of
 --     your own that's ready, hold E to hatch it (HatchEgg). The hatch plays for everyone
---     (Hatched): the egg shakes and its top pops off; you get a "New pet!" banner.
+--     (Hatched): the egg shakes and its top pops off.
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Egg = require(Shared.Eggs.Egg)
-local PetIcons = require(Shared.PetIcons)
 local Pets = require(Shared.Pets)
 
 local player = Players.LocalPlayer
@@ -321,64 +319,6 @@ end)
 
 -- ---- hatching --------------------------------------------------------------------------
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "Hatch"
-gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.Parent = player:WaitForChild("PlayerGui")
-
--- "New pet!" with its picture and name in its rarity's colour, popping in up top
-local function banner(kind)
-	local holder = Instance.new("Frame")
-	holder.BackgroundTransparency = 1
-	holder.AnchorPoint = Vector2.new(0.5, 0)
-	holder.Position = UDim2.fromScale(0.5, 0.12)
-	holder.Size = UDim2.fromOffset(420, 260)
-	local scale = Instance.new("UIScale")
-	scale.Scale = 0.3
-	scale.Parent = holder
-	local icon = Instance.new("ImageLabel")
-	icon.BackgroundTransparency = 1
-	icon.Image = PetIcons.Pets[kind] or ""
-	icon.ScaleType = Enum.ScaleType.Fit
-	icon.AnchorPoint = Vector2.new(0.5, 0)
-	icon.Position = UDim2.fromScale(0.5, 0)
-	icon.Size = UDim2.fromOffset(170, 170)
-	icon.Parent = holder
-	local rarity = Config.Rarities[Config.Pets[kind].Rarity] or Config.Rarities.Common
-	for i, line in { { "New pet!", Color3.new(1, 1, 1), INK, 40 }, { Pets.name(kind), rarity.Fill, rarity.Stroke, 48 } } do
-		local label = Instance.new("TextLabel")
-		label.BackgroundTransparency = 1
-		label.FontFace = FONT
-		label.Text = line[1]
-		label.TextColor3 = line[2]
-		label.TextSize = line[4]
-		label.AnchorPoint = Vector2.new(0.5, 0)
-		label.Position = UDim2.new(0.5, 0, 0, if icon.Image == "" then (i - 1) * 50 else 150 + (i - 1) * 46)
-		label.Size = UDim2.new(1, 0, 0, 50)
-		local stroke = Instance.new("UIStroke")
-		stroke.Thickness = 4
-		stroke.Color = line[3]
-		stroke.LineJoinMode = Enum.LineJoinMode.Round
-		stroke.Parent = label
-		label.Parent = holder
-	end
-	holder.Parent = gui
-	TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
-		:Play()
-	task.delay(2.6, function()
-		local out = TweenService:Create(
-			scale,
-			TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-			{ Scale = 0 }
-		)
-		out.Completed:Once(function()
-			holder:Destroy()
-		end)
-		out:Play()
-	end)
-end
-
 ReplicatedStorage:WaitForChild("Hatched").OnClientEvent:Connect(function(owner, id, kind, at)
 	local s = shown[id]
 	if not s then
@@ -405,9 +345,6 @@ ReplicatedStorage:WaitForChild("Hatched").OnClientEvent:Connect(function(owner, 
 		s.hatching = nil
 		forget(id)
 	end)
-	if owner == player then
-		banner(kind)
-	end
 end)
 
 RunService.RenderStepped:Connect(function(dt)
