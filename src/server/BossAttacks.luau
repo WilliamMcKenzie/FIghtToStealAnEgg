@@ -13,6 +13,12 @@
 --   Shot  { Every, Count, Spread, Speed, Size, Damage, Range }: a fan of Count glowing
 --         balls (Spread degrees apart) at its target, flying Speed studs/s.
 --   Nova  { Every, Count, Speed, Size, Damage, Range }: Count balls out all round it.
+--   Magic { Every, Like, Shot, Damage, Burst, BurstGap, Height }: a staff's volley at its
+--         target, flown exactly as a player's (Shared/Projectiles, drawn by client/Shots):
+--         Like is the weapon whose Shot it borrows (the Flower Staff's three orbs), Shot
+--         its own values over that (weaker Homing so they can be dodged, Color, Count...).
+--         Burst volleys, BurstGap seconds apart (the Sandworm's 1, 2, 3). Height: studs
+--         above the ground they fly at. Every client draws them from the BossShot remote.
 --   Bombs { Every, Count, Radius, Windup, Damage, Scatter }: a circle under every fighter
 --         (and Count more scattered round them, up to Scatter studs off) that blows up
 --         after Windup.
@@ -32,6 +38,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Pets = require(Shared:WaitForChild("Pets"))
+local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Config = require(Shared:WaitForChild("Config"))
 local HORSE_HITBOX = Pets.stats("Horse").Hitbox
 
@@ -46,6 +53,15 @@ local SHOT = Color3.fromRGB(255, 140, 40)
 local FLOOR_Y = 0.15
 
 local shots = {} -- [part] = { dir, speed, travelled, range, damage, radius, biome }
+local magic = {} -- { { shot, damage, biome } }: Magic attacks' shots in the air
+
+-- (everyone draws a boss's Magic shots: (body, attack index, yaw, seed, origin))
+local bossShot = Instance.new("RemoteEvent")
+bossShot.Name = "BossShot"
+bossShot.Parent = ReplicatedStorage
+
+-- how wide a player is to a boss's Magic shot (studs, plus their pet's extra hitbox)
+local PLAYER_RADIUS = 1
 
 -- a living player's root, humanoid and extra: how much further their pet's hitbox reaches
 -- than the Horse's
@@ -167,6 +183,30 @@ local function nearest(position, list)
 	return best, bestDist
 end
 
+-- one Magic volley from a boss at whoever's nearest (re-aimed for each of a burst)
+local function cast(body, b, i, a)
+	if not body.Parent or (body:GetAttribute("Health") or 0) <= 0 then
+		return
+	end
+	local list = fighters(b.biome)
+	local pos = flat(body.Position)
+	local target = nearest(pos, list)
+	if not target then
+		return
+	end
+	local toward = flat(target.root.Position - pos)
+	toward = if toward.Magnitude > 0.01 then toward.Unit else Vector3.new(0, 0, -1)
+	local yaw = math.atan2(-toward.X, -toward.Z)
+	local from = pos + toward * b.c.Radius
+	local origin = Vector3.new(from.X, groundAt(from) + (a.Height or 4), from.Z)
+	local seed = math.random(0, 2 ^ 30 - 1)
+	local s = Projectiles.bossShot(a)
+	for _, shot in Projectiles.volley(s, true, origin, yaw, seed) do
+		table.insert(magic, { shot = shot, damage = a.Damage, biome = b.biome })
+	end
+	bossShot:FireAllClients(body, i, yaw, seed, origin)
+end
+
 -- (the cos of half its melee cone: a fighter at most this far off its facing gets hit)
 local coneCos = math.cos(math.rad(Config.BossMelee.Cone / 2))
 
@@ -222,6 +262,11 @@ function BossAttacks.update(body, b, dt, list)
 				local angle = math.rad((k - (a.Count + 1) / 2) * a.Spread)
 				fire(b.biome, pos + toward * b.c.Radius, CFrame.Angles(0, angle, 0):VectorToWorldSpace(toward), a)
 			end
+		elseif a.Kind == "Magic" then
+			b.timers[i] = a.Every
+			for k = 1, math.max(1, a.Burst or 1) do
+				task.delay((k - 1) * (a.BurstGap or 0.3), cast, body, b, i, a)
+			end
 		elseif a.Kind == "Nova" then
 			b.timers[i] = a.Every
 			local spin = math.random() * math.pi
@@ -246,6 +291,27 @@ function BossAttacks.update(body, b, dt, list)
 end
 
 RunService.Heartbeat:Connect(function(dt)
+	-- Magic shots: the same maths every client draws them with, against the fight's players
+	if #magic > 0 then
+		local byBiome = {}
+		for i = #magic, 1, -1 do
+			local m = magic[i]
+			local targets = byBiome[m.biome]
+			if not targets then
+				targets = {}
+				for _, f in fighters(m.biome) do
+					table.insert(targets, { body = f.root, pos = f.root.Position, radius = PLAYER_RADIUS + f.extra, f = f })
+				end
+				byBiome[m.biome] = targets
+			end
+			for _, t in Projectiles.step(m.shot, dt, targets) do
+				t.f.humanoid:TakeDamage(m.damage)
+			end
+			if m.shot.dead then
+				table.remove(magic, i)
+			end
+		end
+	end
 	for ball, s in shots do
 		local step = s.speed * dt
 		ball.Position += s.dir * step

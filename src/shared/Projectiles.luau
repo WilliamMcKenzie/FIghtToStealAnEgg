@@ -10,6 +10,11 @@
 -- shot hits whatever height it flies at; Config.Shots.Slack widens every one a little.
 --
 --   Projectiles.spawn(id, origin, yaw, seed) -> { shot, ... }   -- a weapon's volley
+--   Projectiles.volley(s, magic, origin, yaw, seed) -> { shot, ... } -- the same from a Shot
+--                                                         -- table itself (magic: it Launches)
+--   Projectiles.bossShot(a) -> s   -- a boss's "Magic" attack's Shot (Server/BossAttacks):
+--                                  -- Config.Shots.Magic, then its Like weapon's Shot (the
+--                                  -- Flower Staff's orbs, say), then its own Shot over them
 --   Projectiles.step(shot, dt, targets) -> { target, ... } -- what it hit this step;
 --                                                         -- shot.dead once it's spent
 
@@ -26,19 +31,43 @@ local function dirOf(yaw)
 	return Vector3.new(-math.sin(yaw), 0, -math.cos(yaw))
 end
 
+-- (built once per attack table: client and server build the same one from Config)
+local bossShots = setmetatable({}, { __mode = "k" })
+
+function Projectiles.bossShot(a)
+	local s = bossShots[a]
+	if s then
+		return s
+	end
+	s = table.clone(Config.Shots.Magic)
+	if a.Like then
+		for k, v in Weapons.get(a.Like).Shot or {} do
+			s[k] = v
+		end
+	end
+	for k, v in a.Shot or {} do
+		s[k] = v
+	end
+	bossShots[a] = s
+	return s
+end
+
 function Projectiles.spawn(id, origin, yaw, seed)
 	local w = Weapons.get(id) -- (with any live tuning: Weapons.tune)
-	local s = w.Shot
-	if not s then
+	if not w.Shot then
 		return {}
 	end
+	return Projectiles.volley(w.Shot, w.Type == "Magic", origin, yaw, seed, id)
+end
+
+function Projectiles.volley(s, magic, origin, yaw, seed, id)
 	local count = math.max(1, math.floor(s.Count or 1))
 	local spread = math.rad(s.Spread or 0)
 	local shots = {}
 	-- (a Magic shot sets off up to its Launch degrees off the aim, at random
 	-- from the shot's seed, so its homing curves it in: QM; the server and every client use
 	-- the same seed, so they all fly it the same way)
-	local wobble = if w.Type == "Magic" then math.rad(s.Launch or 0) else 0
+	local wobble = if magic then math.rad(s.Launch or 0) else 0
 	local rng = Random.new(math.floor(seed or 0))
 	for i = 1, count do
 		local offset = if count > 1 then spread * ((i - 1) / (count - 1) - 0.5) else 0
@@ -56,6 +85,7 @@ function Projectiles.spawn(id, origin, yaw, seed)
 			hits = 1 + math.max(0, math.floor(s.Pierce or 0)),
 			splash = if (s.Splash or 0) > 0 then s.Splash else nil,
 			cone = math.cos(math.rad(s.HomingCone or 135)),
+			slack = s.Slack or Config.Shots.Slack, -- (a boss's shots at players set their own)
 			hit = {}, -- [body] = true: each target only once
 			age = 0,
 			dead = false,
@@ -109,7 +139,7 @@ function Projectiles.step(shot, dt, targets)
 		if not shot.hit[t.body] then
 			local p = flat(t.pos)
 			local c = closest(flat(from), flat(to), p)
-			if (c - p).Magnitude <= t.radius + shot.radius + Config.Shots.Slack then
+			if (c - p).Magnitude <= t.radius + shot.radius + shot.slack then
 				table.insert(hits, { t = t, d = (c - flat(from)).Magnitude, at = Vector3.new(c.X, from.Y, c.Z) })
 			end
 		end
