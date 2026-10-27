@@ -19,6 +19,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Egg = require(Shared.Eggs.Egg)
 local Pets = require(Shared.Pets)
+local OnScreen = require(script.Parent.OnScreen)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -365,6 +366,9 @@ RunService.RenderStepped:Connect(function(dt)
 			if s.prompt then
 				s.prompt.Enabled = left <= 0
 			end
+		end
+		if not s.hatching and not OnScreen.near(s.egg.model:GetPivot().Position, 8) then
+			continue -- (off screen: no twitching, QM Oct 27)
 		end
 		if not s.hatching and clock >= s.nextTwitch then
 			s.egg:play("twitch")

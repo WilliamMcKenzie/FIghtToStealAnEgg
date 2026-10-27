@@ -61,10 +61,16 @@ end)
 
 local offset = 0
 local last = 0
+local checked = 0
 local camera = workspace.CurrentCamera
 RunService.RenderStepped:Connect(function(dt)
 	offset += BarrierSwirl.step(style, dt)
-	local markers = map:FindFirstChild("Biomes") and map.Biomes:FindFirstChild("Barriers")
+	local now = os.clock()
+	-- (which barriers show: ten times a second is plenty, QM Oct 27)
+	local markers = now - checked >= 0.1 and map:FindFirstChild("Biomes") and map.Biomes:FindFirstChild("Barriers")
+	if markers then
+		checked = now
+	end
 	for _, wall in if markers then markers:GetChildren() else {} do
 		local want = shownFor(wall)
 		BarrierSwirl.shadows(wall, style, want)
@@ -76,7 +82,6 @@ RunService.RenderStepped:Connect(function(dt)
 			swirls[wall]:show(want)
 		end
 	end
-	local now = os.clock()
 	if now - last < 1 / math.max(BarrierSwirl.knob(style, "FPS"), 1) then
 		return
 	end

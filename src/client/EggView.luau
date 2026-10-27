@@ -14,6 +14,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Egg = require(Shared.Eggs.Egg)
+local OnScreen = require(script.Parent.OnScreen)
 
 local TWITCH = Config.Eggs.Twitch
 local POP = 0.55 -- seconds: an egg's pop in
@@ -144,7 +145,14 @@ RunService.RenderStepped:Connect(function(dt)
 			local t = math.min(1, (os.clock() - view.vanish) / VANISH)
 			egg.model:ScaleTo(math.max(0.02, view.scale * (1 - t) ^ 2))
 		end
-		egg.model:PivotTo(base)
+		-- (only moved when its spot does: QM Oct 27, every egg's parts moved every frame lagged)
+		if view.placed ~= base then
+			view.placed = base
+			egg.model:PivotTo(base)
+		end
+		if not OnScreen.near(base.Position, 8) then
+			continue -- (off screen: no twitching)
+		end
 		if now >= view.nextTwitch then
 			egg:play("twitch")
 			view.nextTwitch = now + TWITCH[1] + math.random() * (TWITCH[2] - TWITCH[1])

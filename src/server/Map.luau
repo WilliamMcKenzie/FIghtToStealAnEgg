@@ -37,6 +37,7 @@ local Studs = require(Shared.Studs)
 local VendorStallModel = require(Shared.VendorStallModel)
 local Egg = require(Shared.Eggs.Egg)
 local Cactus = require(Shared.Animals.Cactus)
+local HiddenFaces = require(Shared.HiddenFaces)
 
 local Map = {}
 Map.data = MapData
@@ -752,7 +753,11 @@ local function nest(parent, x, z, rng)
 	end
 	-- (a stick on a ring: local X along the ring, Y up, Z pointing inward)
 	local function ring(a, r, h)
-		return CFrame.fromMatrix(Vector3.new(r * math.cos(a), h, r * math.sin(a)), Vector3.new(-math.sin(a), 0, math.cos(a)), Vector3.yAxis)
+		return CFrame.fromMatrix(
+			Vector3.new(r * math.cos(a), h, r * math.sin(a)),
+			Vector3.new(-math.sin(a), 0, math.cos(a)),
+			Vector3.yAxis
+		)
 	end
 	-- floor: a criss-cross mat the egg sits on
 	for i = 1, 30 do
@@ -1227,6 +1232,10 @@ function Map.ensure()
 					.. "): Map Baker > Rebuild to bake it again"
 			)
 		end
+		-- (a map baked before Shared/HiddenFaces: drop its unseen textures now, QM Oct 27)
+		if not map:GetAttribute("HiddenFacesCulled") then
+			HiddenFaces.cull(map)
+		end
 		return map
 	end
 	return Map.build()
@@ -1288,6 +1297,8 @@ function Map.build(data)
 		model:SetAttribute("Scale", v[5])
 		put(model, v[2], v[3], v[4], v[5], v[6])
 	end
+	-- (the textures on faces nobody sees, thousands of them: QM Oct 27, the game lagged)
+	HiddenFaces.cull(map)
 	map:SetAttribute("Baked", not RunService:IsRunning())
 	map:SetAttribute("Saved", MapData.Saved)
 	map.Parent = workspace

@@ -17,6 +17,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Horse = require(Shared.Animals.Horse)
+local OnScreen = require(script.Parent.OnScreen)
 
 -- Recolours (a mob's Tint): each part's colour through fn, the rest of the data shared
 local TINTS = {
@@ -132,7 +133,8 @@ local function damageNumber(body, amount)
 		Scale = NUMBER_POP / SHARP,
 	})
 	grow.Completed:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 / SHARP })
+		TweenService
+			:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 / SHARP })
 			:Play()
 	end)
 	grow:Play()
@@ -296,7 +298,10 @@ local function add(body)
 		end
 		for part in inHead do
 			local joint = part:FindFirstChildWhichIsA("JointInstance")
-			table.insert(head, { part = part, size = part.Size, joint = joint, c0 = joint and joint.C0, c1 = joint and joint.C1 })
+			table.insert(
+				head,
+				{ part = part, size = part.Size, joint = joint, c0 = joint and joint.C0, c1 = joint and joint.C1 }
+			)
 		end
 		view.head = head
 		view.headRoot = neck
@@ -378,6 +383,19 @@ RunService.RenderStepped:Connect(function(dt)
 		local pos = shown.Position
 		local speed = ((pos - view.last) * Vector3.new(1, 0, 1)).Magnitude / math.max(dt, 1e-3)
 		view.last = pos
+		-- (off screen, both where it is and where it was last drawn: not animated or moved
+		-- this frame, QM Oct 27: dozens of animals' joints every frame lagged the game)
+		local reach = body.Size.Magnitude + 6
+		if
+			not view.diedAt
+			and not view.appearAt
+			and not OnScreen.near(pos, reach)
+			and not (view.drawnAt and OnScreen.near(view.drawnAt, reach))
+		then
+			view.sleep = if body:GetAttribute("Asleep") then 1 else 0
+			continue
+		end
+		view.drawnAt = pos
 		animal:update(dt, speed, 0)
 		if view.diedAt then
 			local k = math.clamp((now - view.diedAt) / DEATH, 0, 1)
