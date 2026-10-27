@@ -54,6 +54,11 @@ local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight sta
 local POP_IN = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local POP_OUT = TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In)
 local LINGER = 0.9
+-- (QM, Oct 27: at the kill the bull's head pops up to FACE_POP, turns to the dead one at the
+-- top, and settles back)
+local FACE_POP = 1.2
+local FACE_UP = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local FACE_DOWN = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
 local player = Players.LocalPlayer
 
@@ -166,10 +171,37 @@ function Hud.start()
 		end
 		faces[name] = face
 	end
-	local function dead(yes)
+	local grows = {}
+	for name, face in faces do
+		grows[name] = Ui.make(face, "Grow", "UIScale")
+	end
+	local killed = 0 -- (bumped each kill, so an old pop's swap is dropped)
+	local function swap(yes)
 		faces.BossAliveIcon.Visible = not yes
 		faces.BossDeadIcon.Visible = yes
+	end
+	-- dead(true): the kill's pop (up, swap at the top, settle); dead(false): alive at once
+	local function dead(yes)
+		killed += 1
 		glow.Visible = not yes
+		if not yes then
+			swap(false)
+			for _, g in grows do
+				g.Scale = 1
+			end
+			return
+		end
+		local this = killed
+		local up = TweenService:Create(grows.BossAliveIcon, FACE_UP, { Scale = FACE_POP })
+		up.Completed:Connect(function(how)
+			if how ~= Enum.PlaybackState.Completed or killed ~= this then
+				return
+			end
+			grows.BossDeadIcon.Scale = FACE_POP
+			swap(true)
+			TweenService:Create(grows.BossDeadIcon, FACE_DOWN, { Scale = 1 }):Play()
+		end)
+		up:Play()
 	end
 
 
