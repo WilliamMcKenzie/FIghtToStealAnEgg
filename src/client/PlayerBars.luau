@@ -1,9 +1,14 @@
 -- Over every player (QM's Figma Healthbar, Page 1, Oct 27): their name, and their health as
 -- QM's little green bar (assets/ui/HpBack.png under HpFill.png, the fill cut from the right
 -- as they're hurt) with the number over its middle. (It showed their ride's name before.)
+-- A hit (QM, Oct 27, like the boss bar) flashes the green white, leaves a white trail where
+-- it was that catches up, and pops a red "-10" over their head (client/DamageNumbers).
 -- Roblox's own name and health over characters is turned off.
 
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local DamageNumbers = require(script.Parent.DamageNumbers)
 
 local FILL, BACK = "rbxassetid://90275415984527", "rbxassetid://133695040857929"
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -11,6 +16,10 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 -- 37 tall from 30 down, over the bar)
 local W, H = 216, 67
 local NAME_STROKE = Color3.fromRGB(70, 70, 70)
+local WIDE = 7.8 -- studs across (QM, Oct 27: 30% up from 6, to read from further off)
+local FLASH = 0.1 -- seconds the green takes to fade back from white on a hit
+local TRAIL = 0.3 -- seconds the white trail takes to catch up
+local HURT = Color3.fromRGB(255, 60, 60) -- the damage numbers over players
 
 local function attach(character)
 	local humanoid = character:WaitForChild("Humanoid", 10)
@@ -26,8 +35,9 @@ local function attach(character)
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "PlayerBar"
 	gui.Adornee = head
-	gui.Size = UDim2.fromScale(6, 6 * H / W) -- (studs: it shrinks with distance like the world)
-	gui.StudsOffset = Vector3.new(0, 2.6, 0)
+	gui.Size = UDim2.fromScale(WIDE, WIDE * H / W) -- (studs: it shrinks with distance like the world)
+	gui.StudsOffset = Vector3.new(0, 2.9, 0)
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui.MaxDistance = 120
 	gui.LightInfluence = 0
 	-- (each text fills its Figma box: Montserrat ExtraBold, white, outlined)
@@ -68,22 +78,76 @@ local function attach(character)
 	back.Image = BACK
 	back.Size = UDim2.fromScale(1, 1)
 	back.Parent = bar
+	-- a white pill inside the art's 4px black border (216 x 18: 208 x 10 inside)
+	local function pill(parent, name)
+		local p = Instance.new("Frame")
+		p.Name = name
+		p.BackgroundColor3 = Color3.new(1, 1, 1)
+		p.BorderSizePixel = 0
+		p.Position = UDim2.fromScale(4 / 216, 4 / 18)
+		p.Size = UDim2.fromScale(208 / 216, 10 / 18)
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0.5, 0)
+		corner.Parent = p
+		p.Parent = parent
+		return p
+	end
+	-- the trail: the stretch the green just lost, white, cut to it (as the fill is)
+	local trailClip = Instance.new("Frame")
+	trailClip.BackgroundTransparency = 1
+	trailClip.ClipsDescendants = true
+	trailClip.Size = UDim2.fromScale(0, 1)
+	trailClip.ZIndex = 2
+	trailClip.Parent = bar
+	local trail = Instance.new("Frame")
+	trail.BackgroundTransparency = 1
+	trail.Parent = trailClip
+	pill(trail, "Pill")
 	local clip = Instance.new("Frame")
 	clip.BackgroundTransparency = 1
 	clip.ClipsDescendants = true
 	clip.Size = UDim2.fromScale(1, 1)
+	clip.ZIndex = 3
 	clip.Parent = bar
 	local fill = Instance.new("ImageLabel")
 	fill.BackgroundTransparency = 1
 	fill.Image = FILL
 	fill.Size = UDim2.fromScale(1, 1)
 	fill.Parent = clip
+	local flash = pill(fill, "Flash") -- (over the green, fading out after a hit)
+	flash.BackgroundTransparency = 1
+	local f = 1 -- the green's width
+	local trailAt = Instance.new("NumberValue") -- the trail's right end (tweened)
+	local function drawTrail()
+		local to = math.max(trailAt.Value, f)
+		trailClip.Position = UDim2.fromScale(f, 0)
+		trailClip.Size = UDim2.fromScale(to - f, 1)
+		-- (the pill keeps the whole bar's size and place, so it's cut, not squashed)
+		trail.Position = UDim2.fromScale(if to > f then -f / (to - f) else 0, 0)
+		trail.Size = UDim2.fromScale(if to > f then 1 / (to - f) else 1, 1)
+	end
+	trailAt.Changed:Connect(drawTrail)
+	local last = humanoid.Health
 	local function health()
-		local f = math.clamp(humanoid.Health / math.max(humanoid.MaxHealth, 1), 0, 1)
+		local was = f
+		f = math.clamp(humanoid.Health / math.max(humanoid.MaxHealth, 1), 0, 1)
 		clip.Size = UDim2.fromScale(f, 1)
 		-- (the art keeps its full width inside the clip, so it's cut, not squashed)
 		fill.Size = UDim2.fromScale(if f > 0 then 1 / f else 1, 1)
 		hp.Text = tostring(math.max(0, math.ceil(humanoid.Health)))
+		local lost = last - humanoid.Health
+		last = humanoid.Health
+		if f < was and lost > 0 then
+			-- a hit: the green flashes white, the trail starts where it was and catches up
+			flash.BackgroundTransparency = 0
+			TweenService:Create(flash, TweenInfo.new(FLASH), { BackgroundTransparency = 1 }):Play()
+			trailAt.Value = math.max(trailAt.Value, was)
+			TweenService:Create(trailAt, TweenInfo.new(TRAIL, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Value = f }):Play()
+			DamageNumbers.pop(head, lost, gui.StudsOffset.Y + 1.5, HURT)
+		else
+			trailAt.Value = f
+		end
+		drawTrail()
 	end
 	humanoid.HealthChanged:Connect(health)
 	humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(health)
