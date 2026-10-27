@@ -477,14 +477,17 @@ RunService.RenderStepped:Connect(function(dt)
 		local speed = ((pos - view.last) * Vector3.new(1, 0, 1)).Magnitude / math.max(dt, 1e-3)
 		view.last = pos
 		-- (off screen, both where it is and where it was last drawn: not animated or moved
-		-- this frame, QM Oct 27: dozens of animals' joints every frame lagged the game)
+		-- this frame, QM Oct 27: dozens of animals' joints every frame lagged the game. It's
+		-- always drawn once first, or a new one off screen would hang where its model was
+		-- built, all of them in a floating clump)
 		local reach = body.Size.Magnitude + 6
 		if
-			not view.diedAt
+			view.drawnAt
+			and not view.diedAt
 			and not view.appearAt
 			and not view.hatchPop
 			and not OnScreen.near(pos, reach)
-			and not (view.drawnAt and OnScreen.near(view.drawnAt, reach))
+			and not OnScreen.near(view.drawnAt, reach)
 		then
 			view.sleep = if body:GetAttribute("Asleep") then 1 else 0
 			continue
