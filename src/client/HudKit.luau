@@ -82,6 +82,7 @@ HudKit.LOOKS = {
 	PetCard = { top = rgb("ff963c"), bottom = rgb("ad5810"), from = 0.683, bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
 	RedPlain = { top = rgb("ff0000"), bottom = rgb("d90000"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
 	GreyPlain = { top = rgb("a6a6a6"), bottom = rgb("6e6e6e"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
+	YellowPlain = { top = rgb("ffec3d"), bottom = rgb("f2b705"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
 	GreenPlain = { top = rgb("00ff11"), bottom = rgb("00d92b"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
 	-- the Growing Eggs popup (QM's Figma EggsPopup, Oct 27; client/EggsPanel)
 	TanHeader = {
