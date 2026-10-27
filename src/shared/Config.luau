@@ -374,6 +374,16 @@ return {
 		Delay = 10,
 		Rate = 0.1, -- 10% of max health a second
 	},
+	-- boss melee only hits in front (QM, Oct 27: circle round a boss and you dodge it).
+	-- Contact attacks (Server/BossAttacks) hit only fighters within Cone degrees (the whole
+	-- wedge, centred on its facing), and bosses turn at most TurnRate degrees a second
+	-- (Server/Bosses; a boss's own TurnRate overrides it). A Horse (44 studs/s) circling
+	-- Mother Hen's reach (about 15 studs out) sweeps about 170 degrees a second, so it
+	-- outruns 120; a Fish (about 26 studs/s) can't, until it hugs closer.
+	BossMelee = {
+		Cone = 100,
+		TurnRate = 120,
+	},
 	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home and leaves
 	-- a boss arriving (QM, Oct 25: they only appear once you steal an egg): the camera of
 	-- everyone locked into its fight pans over to its dais, it pops up there while the screen's
