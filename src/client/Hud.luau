@@ -40,8 +40,10 @@ local RegionBlocker = require(game:GetService("ReplicatedStorage"):WaitForChild(
 local Hud = {}
 
 local BAR_W, BAR_H = 634, 60 -- the boss bar inside its 6px outline (QM's Figma: 646 x 72 with it)
-local GLOW = { 6, 12, 18, 24 } -- px of the red glow's rings round the bar (Figma: 16 spread, 16 blur, 25%)
-local GLOW_ALPHA = 0.93 -- each ring's transparency (they stack, densest at the bar)
+-- the red glow round the bar (Figma: 16 spread, 16 blur, 25%): assets/ui/hud/BossGlow.png, a
+-- blurred white rounded square sliced round its middle, reaching GLOW px past the outline
+local GLOW = 32
+local GLOW_ALPHA = 0.75
 local DESIGN_HEIGHT = 1080
 local ITALIC = HudKit.ITALIC
 local BLACK = HudKit.BLACK
@@ -131,29 +133,24 @@ function Hud.start()
 	if old then
 		old:Destroy()
 	end
-	-- the glow: rings of red stroke round the bar, under it
-	local glow
-	glow, fresh = Ui.make(bar, "Glow", "Frame")
-	if fresh then
-		glow.BackgroundTransparency = 1
-		glow.Size = UDim2.fromScale(1, 1)
-		glow.ZIndex = 0
-		for i, width in GLOW do
-			local ring = Instance.new("Frame")
-			ring.Name = "Ring" .. i
-			ring.BackgroundTransparency = 1
-			ring.Size = UDim2.fromScale(1, 1)
-			local corner = Instance.new("UICorner")
-			corner.CornerRadius = UDim.new(0, fig(8)) -- (the bar's: the stroke rounds out from it)
-			corner.Parent = ring
-			local stroke = Instance.new("UIStroke")
-			stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			stroke.Color = Color3.fromRGB(255, 0, 0)
-			stroke.Transparency = GLOW_ALPHA
-			stroke.Thickness = 6 + width
-			stroke.Parent = ring
-			ring.Parent = glow
-		end
+	-- the glow, under it (a Frame of stroke rings before: those looked stepped, QM said)
+	local glow = bar:FindFirstChild("Glow")
+	if glow and not glow:IsA("ImageLabel") then
+		glow:Destroy()
+	end
+	local reach = 6 + GLOW -- (past the bar's 6px outline)
+	glow = HudKit.art(bar, "Glow", {
+		Image = HudImages.BossGlow or "",
+		ImageColor3 = Color3.fromRGB(255, 0, 0),
+		ImageTransparency = GLOW_ALPHA,
+		ScaleType = Enum.ScaleType.Slice,
+		SliceCenter = Rect.new(40, 40, 88, 88),
+		Position = UDim2.fromOffset(-reach, -reach),
+		Size = UDim2.new(1, 2 * reach, 1, 2 * reach),
+		ZIndex = 0,
+	})
+	if glow.Image == "" then
+		glow.Image = HudImages.BossGlow or "" -- (baked before it was uploaded)
 	end
 	-- the bull's head (QM's Figma AliveIcon and DeadIcon, 146 x 83: assets/ui/hud), over the
 	-- bar's middle, 26px above its outline

@@ -61,8 +61,7 @@ HudKit.LOOKS = {
 	BossRed = {
 		top = rgb("ff0000"),
 		bottom = rgb("b6000d"),
-		bevel = { 0.75, 0.75, nil, nil, 8 },
-		border = { Color3.new(1, 1, 1), 20, 0.8 },
+		bevel = { 0.75, 0.75, nil, nil, 8 }, -- (its one inner shadow: QM, no second band)
 		tile = { 233, 0.8, "Weld" },
 		corner = 8,
 	},
