@@ -10,5 +10,9 @@
   "PetsIcon": "rbxassetid://135122637332207",
   "CashIcon": "rbxassetid://102450910988008",
   "PowerIcon": "rbxassetid://123860946510182",
-  "EggsButton": "rbxassetid://138402944308533"
+  "EggsButton": "rbxassetid://138402944308533",
+  "ShopButton": "rbxassetid://107051431084993",
+  "IndexButton": "rbxassetid://74988943576360",
+  "PetsButton": "rbxassetid://89948114192855",
+  "AddPowerButton": "rbxassetid://75370681620229"
 }
