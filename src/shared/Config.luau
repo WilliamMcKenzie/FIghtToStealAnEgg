@@ -236,6 +236,13 @@ return {
 		Reach = 12, -- studs from the counter where Talk shows
 		LookRange = 30, -- he turns to watch a player this close
 		Hop = 0.45, -- seconds of his hello hop
+		-- every weapon he sells can also be bought with Robux (QM's Weapon Shop design, Oct
+		-- 27): one Roblox developer product per weapon. Robux is the price shown, by rarity
+		-- (placeholders; a weapon's own Robux in Config.Weapons goes over it). Products =
+		-- [weapon id] = its developer product id from the Creator Dashboard; a weapon without
+		-- one can't be bought with Robux yet (Server/Arsenal's ProcessReceipt hands it over).
+		Robux = { Common = 30, Uncommon = 75, Rare = 150, Epic = 400, Mythic = 1000 },
+		Products = {},
 	},
 
 	-- bosses (server/Bosses.luau, client/BossView.luau). Each biome's sleeps in its arena's

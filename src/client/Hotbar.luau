@@ -9,17 +9,16 @@
 --   Hotbar.init(root, fig)  -- once, from Hud (root = its scaled frame, fig = Figma px -> design px)
 --
 -- In Studio: StarterGui > Hud > Root > Hotbar > SlotTemplate is the slot every one is copied
--- from (tick its Visible to see it): its Number, Count and Ring (client/Ui). What's in a slot
--- is drawn live (the weapon's or egg's 3D model), so there's no image to upload.
+-- from (tick its Visible to see it): its Picture, Number, Count and Ring (client/Ui). The
+-- pictures are the weapon and egg renders (Shared/ItemIcons; QM, Oct 27).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Egg = require(Shared.Eggs.Egg)
+local ItemIcons = require(Shared.ItemIcons)
 local Stacks = require(Shared.Stacks)
-local Weapons = require(Shared.Weapons.Weapons)
 local Ui = require(script.Parent.Ui)
 
 local Hotbar = {}
@@ -38,37 +37,6 @@ local KEYS = {
 	Enum.KeyCode.Nine,
 }
 
--- `model` in a ViewportFrame filling `slot`, flat-lit (full ambient, no light, no stud
--- texture) like the held weapons, turned a little like an item icon
-local function picture(slot, model, tilt)
-	local vp = Instance.new("ViewportFrame")
-	vp.Name = "Picture"
-	vp.BackgroundTransparency = 1
-	vp.Size = UDim2.fromScale(1, 1)
-	vp.Ambient = Color3.new(1, 1, 1)
-	vp.LightColor = Color3.new(0, 0, 0)
-	vp.ZIndex = 2
-	local cam = Instance.new("Camera")
-	cam.FieldOfView = 30
-	cam.Parent = vp
-	vp.CurrentCamera = cam
-	for _, d in model:GetDescendants() do
-		if d:IsA("Texture") or d:IsA("Decal") then
-			d:Destroy()
-		elseif d:IsA("BasePart") and d.Material ~= Enum.Material.Neon then
-			d.Material = Enum.Material.SmoothPlastic
-			d.Reflectance = 0
-		end
-	end
-	model:PivotTo(CFrame.identity)
-	local box, size = model:GetBoundingBox()
-	model:PivotTo(tilt * CFrame.new(-box.Position))
-	model.Parent = vp
-	local r = size.Magnitude * 0.5
-	cam.CFrame = CFrame.lookAt(Vector3.new(0, 0, r / math.tan(math.rad(15)) * 0.95), Vector3.zero)
-	vp.Parent = slot
-end
-
 local function slotTemplate(fig)
 	local b = Instance.new("TextButton")
 	b.Text = ""
@@ -79,6 +47,13 @@ local function slotTemplate(fig)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, fig(20))
 	corner.Parent = b
+	local picture = Instance.new("ImageLabel")
+	picture.Name = "Picture"
+	picture.BackgroundTransparency = 1
+	picture.ScaleType = Enum.ScaleType.Fit
+	picture.Size = UDim2.fromScale(1, 1)
+	picture.ZIndex = 2
+	picture.Parent = b
 	local ring = Instance.new("UIStroke")
 	ring.Name = "Ring"
 	ring.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -170,18 +145,7 @@ function Hotbar.init(root, fig)
 				slot.Number.Text = tostring(i)
 				slot.Count.Visible = s.count > 1
 				slot.Count.Text = "x" .. s.count
-				local ok, model = pcall(function()
-					if s.kind then
-						return Egg.new(s.kind, 1).model
-					end
-					return Weapons.makeModel(weapon or "", 1)
-				end)
-				if ok and model then
-					local tilt = if s.kind
-						then CFrame.Angles(0, math.rad(-20), 0)
-						else CFrame.Angles(0, 0, math.rad(-45)) * CFrame.Angles(0, math.rad(90), 0)
-					picture(slot, model, tilt)
-				end
+				slot.Picture.Image = (if s.kind then ItemIcons.Eggs[s.kind] else ItemIcons.Weapons[weapon or ""]) or ""
 				slot.Activated:Connect(function()
 					pick(i)
 				end)

@@ -10,7 +10,10 @@
 --   Arsenal.give(player, id, equip)  -- owns it (and equips it); /weapon <id>, owner only
 --   Arsenal.buy(player, id) -> ok, why  -- for its Price in cash: owned and equipped
 --                                       -- (the BuyWeapon RemoteFunction: Carl's shop)
+--   BuyWeaponRobux (RemoteEvent, id)    -- prompts its developer product (Config.Vendor.Products);
+--                                       -- ProcessReceipt owns and equips it once paid
 
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -147,6 +150,30 @@ function Arsenal.start()
 	buyRemote.Name = "BuyWeapon"
 	buyRemote.OnServerInvoke = Arsenal.buy
 	buyRemote.Parent = ReplicatedStorage
+
+	-- Robux: each weapon's developer product (QM's Weapon Shop, Oct 27)
+	local weaponOf = {} -- [product id] = weapon id
+	for id, product in Config.Vendor.Products do
+		weaponOf[product] = id
+	end
+	local robuxRemote = Instance.new("RemoteEvent")
+	robuxRemote.Name = "BuyWeaponRobux"
+	robuxRemote.OnServerEvent:Connect(function(player, id)
+		local product = typeof(id) == "string" and Config.Vendor.Products[id]
+		if product and Config.Weapons[id] and Config.Weapons[id].Price and not Arsenal.owns(player, id) then
+			MarketplaceService:PromptProductPurchase(player, product)
+		end
+	end)
+	robuxRemote.Parent = ReplicatedStorage
+	MarketplaceService.ProcessReceipt = function(receipt)
+		local player = Players:GetPlayerByUserId(receipt.PlayerId)
+		local id = weaponOf[receipt.ProductId]
+		if not (player and id) then
+			return Enum.ProductPurchaseDecision.NotProcessedYet -- (asked again when they're back)
+		end
+		Arsenal.give(player, id, true)
+		return Enum.ProductPurchaseDecision.PurchaseGranted
+	end
 
 	local function joined(player)
 		player:SetAttribute("Weapons", player:GetAttribute("Weapons") or START)

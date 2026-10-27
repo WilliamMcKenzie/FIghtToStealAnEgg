@@ -1,0 +1,45 @@
+-- Every weapon's and egg's icon (rendered by tools/render_weapon_icons.py and
+-- tools/render_pet_icons.py at 128px, QM Oct 27: all UI pictures of weapons and eggs are
+-- these renders). Written by tools/item_icon_ids.py from the uploads' ids.json; don't edit.
+-- [id or kind] = "rbxassetid://..."
+return {
+	Weapons = {
+		Axe = "rbxassetid://134821323381733",
+		BloodBow = "rbxassetid://87632350715373",
+		Club = "rbxassetid://84190249344843",
+		FireStaff = "rbxassetid://139433300186401",
+		KendoStick = "rbxassetid://97312827403274",
+		LightningStaff = "rbxassetid://119913789780316",
+		Longbow = "rbxassetid://76818712921989",
+		Longsword = "rbxassetid://85106250463179",
+		NatureBow = "rbxassetid://100460384527686",
+		RafflesiaBloom = "rbxassetid://95866069977768",
+		Shortbow = "rbxassetid://126732264279538",
+		Shortsword = "rbxassetid://121128400621282",
+		Staff = "rbxassetid://77026734206964",
+		UnholyLance = "rbxassetid://96308152090776",
+		Waraxe = "rbxassetid://113113801086549",
+		WaterStaff = "rbxassetid://119258333233739",
+		WindStaff = "rbxassetid://133874451729640",
+	},
+	Eggs = {
+		Boar = "rbxassetid://91087482472440",
+		Bunny = "rbxassetid://124477131360576",
+		Cactus = "rbxassetid://72978799482819",
+		Fish = "rbxassetid://91431740840993",
+		Horse = "rbxassetid://129030070160206",
+		IceGolem = "rbxassetid://103728006758880",
+		Icebringer = "rbxassetid://113278020375281",
+		Penguin = "rbxassetid://114757680772721",
+		Pig = "rbxassetid://101609170583615",
+		Pinto = "rbxassetid://104988650465874",
+		Rhino = "rbxassetid://98886736414680",
+		Sandworm = "rbxassetid://114473391142577",
+		Scorpion = "rbxassetid://76176202860174",
+		SnackYak = "rbxassetid://88865178111376",
+		Snake = "rbxassetid://124711494158915",
+		Snowman = "rbxassetid://100906048342936",
+		SpineLizard = "rbxassetid://140477206345601",
+		Unicorn = "rbxassetid://76464820545405",
+	},
+}

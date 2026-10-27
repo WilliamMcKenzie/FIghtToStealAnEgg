@@ -1,4 +1,4 @@
--- The HUD's images (QM's NewUI Figma layers, exported to assets/ui/hud) by name. Empty until
+-- The HUD's images (QM's NewUI Figma layers, exported to assets/ui/hud and assets/ui/shop) by name. Empty until
 -- they're uploaded (tools/studio/imgup.py); each one shows blank until then.
 return {
 	ShopButton = "rbxassetid://107051431084993",
@@ -12,4 +12,14 @@ return {
 	AddPowerButton = "rbxassetid://75370681620229",
 	PowerIcon = "rbxassetid://123860946510182",
 	CashIcon = "rbxassetid://102450910988008",
+	-- the Weapon Shop (assets/ui/shop)
+	ShopHeader = "",
+	ShopPanel = "",
+	ShopClose = "",
+	ShopCard = "",
+	ShopEquip = "",
+	ShopBuy = "",
+	ShopRobux = "",
+	ShopDps = "",
+	RobuxIcon = "",
 }
