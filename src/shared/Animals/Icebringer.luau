@@ -11,5 +11,5 @@ local IcebringerModel = require(script.Parent.IcebringerModel)
 return Horse.variant("Icebringer", IcebringerModel, "Legendary", {
 	seat = Vector3.new(0, 9.8, 1.1),
 	neck = { center = Vector3.new(0, 9, -0.8), radius = 1.3 },
-	-- (LassoAPet had it at size 3, 2.2x its tier: here it's sized to its tier like the rest)
+	size = 3, -- (LassoAPet's: tier 3, like the Snake, then QM wanted it 2x its model and 1.5x that)
 })

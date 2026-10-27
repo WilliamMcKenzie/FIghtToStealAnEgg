@@ -9,10 +9,6 @@ return {
 	AnimalScale = {},
 	StudTransparency = 0.5, -- every stud Texture (floor, walls, sword, horse): 0.5 = half strength (QM, Oct 24)
 
-	-- the horse everyone starts on (Animals/Horse.luau): its size, times the Blockbench drawing
-	-- (every pet's speed: its rarity's, PetStats below)
-	HorseSize = 0.6,
-
 	-- every world colour, by the ColorKey attribute on the parts (and checker Textures)
 	-- that wear it. Live-tunable in Play through workspace.WorldColors (Shared/WorldColors).
 	WorldColors = {
@@ -767,6 +763,7 @@ return {
 		MountSpeed = 44,
 		Hitbox = 0.5, -- 0: size doesn't matter; 1: twice the hitbox, twice the health
 		TierGrowth = 1.6, -- each size tier reads this much bigger than the one below (LassoAPet's)
+		SmallSize = 10.4, -- studs a tier 1 pet reads (LassoAPet's PetSmallSize: the Horse at 1x its drawing)
 	},
 
 	-- Sprint (QM, Oct 26; client/Sprint): ride Delay seconds without stopping and your pet
@@ -889,7 +886,7 @@ return {
 			Lava = {
 				Cost = 2000000,
 				Mob = "RockHog",
-				Size = 0.5,
+				Size = 1.98, -- (LassoAPet's Rock Hog: tier 2, AnimalScale 1.5)
 				Health = 20000,
 				Count = 4,
 				Strength = 45,

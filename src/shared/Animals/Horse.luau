@@ -2,8 +2,8 @@
 -- The shape, bones and animations come from QM's Blockbench model
 -- (designs/Horse.bbmodel), converted into Animals/HorseModel.luau by
 --   python3 tools/bbmodel_to_luau.py --zyx designs/Horse.bbmodel src/shared/Animals/HorseModel.luau
--- Units are studs; the horse faces -Z. Its size is Config.HorseSize times the drawing
--- (every other pet is sized to read as big as it, a tier up bigger: tierSize below).
+-- Units are studs; the horse faces -Z. Every pet, the horse too, is sized like LassoAPet's
+-- (tierSize below), so Lasso's seats and riding positions carry over as they are.
 --
 --   local horse = Horse.new()
 --   horse.model.Parent = workspace
@@ -97,13 +97,13 @@ local function silhouette(data)
 	return math.sqrt(sides[2] * sides[3])
 end
 
--- A pet's size from its model (QM, Oct 25: LassoAPet's tiers): a tier 1 pet reads as big
--- as the Horse at Config.HorseSize, each tier up Config.PetStats.TierGrowth x the one below.
-local HORSE_READS = Config.HorseSize * silhouette(HorseModel)
+-- A pet's size from its model, exactly LassoAPet's (QM, Oct 27: the same sizes as there): a
+-- tier 1 pet reads Config.PetStats.SmallSize studs (the Horse at its drawing's own size),
+-- each tier up Config.PetStats.TierGrowth x the one below.
 local function tierSize(name, data)
 	local pet = Config.Pets[name]
 	local tier = pet and pet.Tier or 1
-	local size = HORSE_READS * Config.PetStats.TierGrowth ^ (tier - 1) / silhouette(data)
+	local size = Config.PetStats.SmallSize * Config.PetStats.TierGrowth ^ (tier - 1) / silhouette(data)
 	return math.round(size * 100) / 100 -- (one template per animal: Rig caches by size)
 end
 
