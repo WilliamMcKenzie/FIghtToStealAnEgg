@@ -102,7 +102,7 @@ function MapFile.decode(text)
 		Areas = {},
 		Props = {},
 		Ruins = {},
-		Vendors = {}, -- { name, x, z, yaw, scale, y }: the cactus vendor's stall (Server/Map)
+		Vendors = {}, -- { name, x, z, yaw, scale, y, title }: the cactus vendor's stall (Server/Map)
 		Grid = { X0 = x0, Z0 = z0, Cell = cell, Cols = cols, Rows = file.rows, Tiles = {} },
 	}
 
@@ -188,7 +188,7 @@ function MapFile.decode(text)
 			byName[o.area].Boss = { o.x, o.z }
 		elseif o.type == "Vendor" then
 			local y = o.y or MapFile.groundAt(data, o.x, o.z)
-			table.insert(data.Vendors, { o.name or "Carl", o.x, o.z, o.yaw or 0, o.scale or 1, y })
+			table.insert(data.Vendors, { o.name or "Carl", o.x, o.z, o.yaw or 0, o.scale or 1, y, o.title or "" })
 		end
 	end
 	return data

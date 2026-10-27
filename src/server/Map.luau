@@ -1154,7 +1154,75 @@ end
 -- striped cloth roof with a cactus growing up through it, a heap of eggs behind, and Carl
 -- (a cactus guy) behind the counter with a Talk prompt. Built at the origin, its counter
 -- facing -z; Map.build turns and moves it. Client/Vendor swaps this Carl for one that idles.
-local function vendor(parent, name)
+local TITLE_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+
+-- the shop's sign over the roof and its ring on the ground (QM, Oct 27: like his reference's
+-- Pickaxe Shop): parts of the stall, so they turn and scale with it
+local function shopSign(model, title)
+	local s = Config.Vendor
+	if title ~= "" then
+		local anchor = Instance.new("Part")
+		anchor.Name = "Title"
+		anchor.Anchored, anchor.CanCollide, anchor.CanQuery, anchor.CanTouch = true, false, false, false
+		anchor.Transparency = 1
+		anchor.Size = Vector3.new(1, 1, 1)
+		anchor.CFrame = CFrame.new(0, 19.5, 0)
+		anchor.Parent = model
+		local gui = Instance.new("BillboardGui")
+		gui.Size = UDim2.fromScale(s.TitleHeight * 6, s.TitleHeight)
+		gui.LightInfluence = 0
+		gui.MaxDistance = 200
+		gui.Parent = anchor
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.fromScale(1, 1)
+		label.BackgroundTransparency = 1
+		label.FontFace = TITLE_FONT
+		label.TextScaled = true
+		label.TextColor3 = Color3.new(1, 1, 1)
+		label.Text = title
+		local gradient = Instance.new("UIGradient")
+		gradient.Rotation = 90
+		gradient.Color = ColorSequence.new(s.TitleTop, s.TitleBottom)
+		gradient.Parent = label
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 3
+		stroke.Color = s.TitleStroke
+		stroke.Parent = label
+		label.Parent = gui
+	end
+	-- the ring: a see-through disc with a glowing rim of short neon blocks round it
+	local ring = Instance.new("Model")
+	ring.Name = "Ring"
+	local r, at = s.RingRadius, CFrame.new(0, 0, -s.RingAhead)
+	local disc = Instance.new("Part")
+	disc.Name = "Disc"
+	disc.Shape = Enum.PartType.Cylinder
+	disc.Size = Vector3.new(0.12, r * 2, r * 2)
+	disc.CFrame = at * CFrame.new(0, 0.07, 0) * CFrame.Angles(0, 0, math.pi / 2)
+	disc.Color = s.RingColor
+	disc.Material = Enum.Material.SmoothPlastic
+	disc.Transparency = 0.6
+	disc.CastShadow = false
+	disc.Anchored, disc.CanCollide, disc.CanQuery, disc.CanTouch = true, false, false, false
+	disc.Parent = ring
+	local n = 48
+	for i = 1, n do
+		local a = (i - 0.5) / n * math.pi * 2
+		local rim = Instance.new("Part")
+		rim.Name = "Rim"
+		rim.Size = Vector3.new(0.8, 0.3, 2 * math.pi * r / n + 0.12)
+		rim.CFrame = at * CFrame.Angles(0, a, 0) * CFrame.new(r - 0.4, 0.15, 0)
+		rim.Color = s.RingColor
+		rim.Material = Enum.Material.Neon
+		rim.Transparency = 0.15
+		rim.CastShadow = false
+		rim.Anchored, rim.CanCollide, rim.CanQuery, rim.CanTouch = true, false, false, false
+		rim.Parent = ring
+	end
+	ring.Parent = model
+end
+
+local function vendor(parent, name, title)
 	local model = Instance.new("Model")
 	model.Name = "Vendor"
 	model:SetAttribute("Name", name)
@@ -1217,6 +1285,7 @@ local function vendor(parent, name)
 	prompt.RequiresLineOfSight = false
 	prompt.MaxActivationDistance = Config.Vendor.Reach
 	prompt.Parent = counter
+	shopSign(model, title or "")
 	model.Parent = parent
 	return model
 end
@@ -1295,7 +1364,7 @@ function Map.build(data)
 	end
 	local vendors = folder("Vendors", map)
 	for _, v in MapData.Vendors or {} do
-		local model = vendor(vendors, v[1])
+		local model = vendor(vendors, v[1], v[7])
 		model:SetAttribute("Scale", v[5])
 		put(model, v[2], v[3], v[4], v[5], v[6])
 	end
