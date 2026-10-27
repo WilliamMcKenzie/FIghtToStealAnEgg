@@ -430,7 +430,8 @@ return {
 				Hole = 0.75, -- the hole's radius, x Radius
 				HoleColor = Color3.fromRGB(70, 48, 30),
 				Sand = Color3.fromRGB(226, 190, 128),
-				Mound = 0.55, -- the travelling mound's radius, x Radius
+				Sand2 = Color3.fromRGB(196, 156, 96), -- (the burrow's mounds alternate the two)
+				Mound = 2.6, -- tunnelling: LassoAPet's Sandworm burrow, x this (its Size)
 			},
 		},
 		ElderBoar = {

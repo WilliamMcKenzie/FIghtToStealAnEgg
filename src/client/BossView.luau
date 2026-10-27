@@ -429,8 +429,8 @@ local function burrowFrame(body, view, dt, ground)
 		w.state = state
 	end
 	if state == "Under" then
-		w.mound = w.mound or BurrowFx.mound(w.radius * cfg.Mound, cfg.Sand)
-		w.mound:place(ground, dt)
+		w.mound = w.mound or BurrowFx.mound(cfg.Mound, { cfg.Sand, cfg.Sand2 })
+		w.mound:place(ground)
 		return 0, 0
 	elseif state == "Emerge" then
 		-- (shoots up out of the hole, overshooting a little, head first, then bends to look)
