@@ -400,12 +400,35 @@ function Hud.start()
 	paid()
 	player:GetAttributeChangedSignal("OfflinePaid"):Connect(paid)
 
-	-- (out of the way of the boss bar, which shows in the same spot in a fight)
-	local function clear()
-		offline.Visible = not (Ui.live and bar.Visible)
+	-- only while you stand in your own pen (QM, Oct 27), and out of the way of the boss bar,
+	-- which shows in the same spot in a fight
+	local function inPen()
+		local index = player:GetAttribute("Pen")
+		local map = workspace:FindFirstChild("Map")
+		local pens = map and map:FindFirstChild("Base") and map.Base:FindFirstChild("Pens")
+		local character = player.Character
+		local me = character and character:FindFirstChild("HumanoidRootPart")
+		if not (index and pens and me) then
+			return false
+		end
+		for _, pen in pens:GetChildren() do
+			local area = pen:GetAttribute("Index") == index and pen:FindFirstChild("Area")
+			if area then
+				local p = area.CFrame:PointToObjectSpace(me.Position)
+				return math.abs(p.X) <= area.Size.X / 2 and math.abs(p.Z) <= area.Size.Z / 2
+			end
+		end
+		return false
 	end
-	clear()
-	bar:GetPropertyChangedSignal("Visible"):Connect(clear)
+	offline.Visible = not Ui.live
+	if Ui.live then
+		task.spawn(function()
+			while true do
+				offline.Visible = inPen() and not bar.Visible
+				task.wait(0.2)
+			end
+		end)
+	end
 
 	-- (no Roblox health bar in the top right: QM, Oct 25)
 	task.spawn(function()
