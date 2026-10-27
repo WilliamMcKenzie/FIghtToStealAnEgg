@@ -16,7 +16,7 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 -- 37 tall from 30 down, over the bar)
 local W, H = 216, 67
 local NAME_STROKE = Color3.fromRGB(70, 70, 70)
-local WIDE = 7.8 -- studs across (QM, Oct 27: 30% up from 6, to read from further off)
+local WIDE = 9.4 -- studs across (QM, Oct 27: 6, then 30% up, then 20% more, to read from further off)
 local FLASH = 0.1 -- seconds the green takes to fade back from white on a hit
 local TRAIL = 0.3 -- seconds the white trail takes to catch up
 local HURT = Color3.fromRGB(255, 60, 60) -- the damage numbers over players
@@ -36,7 +36,7 @@ local function attach(character)
 	gui.Name = "PlayerBar"
 	gui.Adornee = head
 	gui.Size = UDim2.fromScale(WIDE, WIDE * H / W) -- (studs: it shrinks with distance like the world)
-	gui.StudsOffset = Vector3.new(0, 2.9, 0)
+	gui.StudsOffset = Vector3.new(0, 3.2, 0)
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui.MaxDistance = 120
 	gui.LightInfluence = 0
