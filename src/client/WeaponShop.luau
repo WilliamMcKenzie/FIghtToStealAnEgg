@@ -36,6 +36,20 @@ local NAME_STROKE = Color3.fromRGB(70, 70, 70)
 local SHINE = { { at = 0.62, width = 0.07 }, { at = 0.72, width = 0.025 } } -- across the header, of its width
 local SHINE_SLANT = 22 -- degrees the stripes lean
 local SHINE_ALPHA = 0.7 -- their transparency
+-- each rarity's card (QM's Figma, Oct 27): its back's gradient, bottom to top (reaching the
+-- top colour `at` of the way up), and its rarity's text colour. Mythic isn't in Figma yet
+-- (a gold stand-in).
+local function hex(h)
+	return Color3.fromHex(h)
+end
+local RARITY = {
+	Common = {},
+	Uncommon = { bottom = hex("7aff2c"), top = hex("ccff25"), at = 0.736, text = hex("00ff00") },
+	Rare = { bottom = hex("36a8ff"), top = hex("00f0ff"), at = 1, text = hex("00b7ff") },
+	Epic = { bottom = hex("d950ff"), top = hex("fe4aff"), at = 1, text = hex("d300ff") },
+	Legendary = { bottom = hex("ff4c56"), top = hex("fbb8bb"), at = 1, text = hex("ff0004") },
+	Mythic = { bottom = hex("ff9d00"), top = hex("ffe14a"), at = 1, text = hex("ffb300") },
+}
 local POP = 0.12 -- seconds it takes to pop open
 local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
 
@@ -50,13 +64,26 @@ local function cardTemplate()
 	local card = Instance.new("Frame")
 	card.BackgroundTransparency = 1
 	card.Size = UDim2.fromOffset(fig(729), fig(991))
-	HudKit.back(card, "Card", {})
+	local back = HudKit.back(card, "Card", {})
+	-- (Figma: an inset white glow, 16px, on every rarity but Common)
+	local glow = Instance.new("Frame")
+	glow.Name = "Glow"
+	glow.BackgroundTransparency = 1
+	glow.Position = UDim2.fromOffset(fig(5 + 16), fig(5 + 16))
+	glow.Size = UDim2.new(1, -2 * fig(5 + 16), 1, -2 * fig(5 + 16))
+	local glowStroke = Instance.new("UIStroke")
+	glowStroke.Color = Color3.new(1, 1, 1)
+	glowStroke.Transparency = 0.5
+	glowStroke.Thickness = fig(16)
+	glowStroke.Parent = glow
+	glow.Parent = back
 	local picture = Instance.new("ImageLabel")
 	picture.Name = "Picture"
 	picture.BackgroundTransparency = 1
 	picture.ScaleType = Enum.ScaleType.Fit
-	picture.Position = UDim2.fromOffset(0, fig(91))
-	picture.Size = UDim2.fromOffset(fig(729), fig(729))
+	-- (QM's new cards, Oct 27: every weapon fits a 512 square, so none spills off the card)
+	picture.Position = UDim2.fromOffset(fig(109), fig(237))
+	picture.Size = UDim2.fromOffset(fig(512), fig(512))
 	picture.ZIndex = 2
 	picture.Parent = card
 	local name = label(card, "WeaponName", {
@@ -240,13 +267,34 @@ end
 
 local function fill(card, id)
 	local w = Config.Weapons[id] or {}
-	local rarity = Config.Rarities[w.Rarity] or Config.Rarities.Common
+	local look = RARITY[w.Rarity] or RARITY.Common
 	card.WeaponName.Text = w.Name or id
 	card.Rarity.Text = w.Rarity or "Common"
-	card.Rarity.TextColor3 = Color3.new(1, 1, 1)
-	card.Rarity.Outline.Color = rarity.Stroke
-	-- (Figma's Common: white at the top to grey at the bottom; others in their colour)
-	card.Rarity.UIGradient.Color = ColorSequence.new(Color3.new(1, 1, 1):Lerp(rarity.Fill, 0.5), rarity.Fill:Lerp(Color3.new(0, 0, 0), 0.42))
+	local back = card:FindFirstChild("Back")
+	if look.top then
+		-- (Figma: bottom colour up to the top one, which it reaches `at` of the way up)
+		card.Rarity.TextColor3 = look.text
+		card.Rarity.UIGradient.Enabled = false
+		card.Rarity.Outline.Color = look.text:Lerp(Color3.new(0, 0, 0), 0.6)
+		if back then
+			back.Fill.Color = if look.at < 1
+				then ColorSequence.new({
+					ColorSequenceKeypoint.new(0, look.top),
+					ColorSequenceKeypoint.new(1 - look.at, look.top),
+					ColorSequenceKeypoint.new(1, look.bottom),
+				})
+				else ColorSequence.new(look.top, look.bottom)
+			back.Fill.Rotation = 90
+		end
+	else
+		-- (Common: a white card, its rarity white at the top to grey at the bottom)
+		card.Rarity.TextColor3 = Color3.new(1, 1, 1)
+		card.Rarity.UIGradient.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(135, 135, 135))
+		card.Rarity.Outline.Color = Config.Rarities.Common.Stroke
+	end
+	if back and back:FindFirstChild("Glow") then
+		back.Glow.Visible = look.top ~= nil
+	end
 	card.Picture.Image = ItemIcons.Weapons[id] or ""
 end
 
