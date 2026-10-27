@@ -1,5 +1,5 @@
 -- What a slash can hit, and what hitting trains (QM, Oct 24: Strength is a byproduct of
--- attacking). Bosses and the biomes' mobs register their invisible bodies here
+-- attacking). Bosses, training mobs and dummies register their invisible bodies here
 -- with a handler; a slash checks every one of them (the reach and arc test bosses had)
 -- and calls the handler of each it catches with the slash's damage.
 --

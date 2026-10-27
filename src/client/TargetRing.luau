@@ -1,5 +1,5 @@
--- The marker under whatever your auto-attack is aiming at (a boss's body, or a
--- biome mob's), flat on the floor round its Radius. QM's reference (Oct 26): three
+-- The marker under whatever your auto-attack is aiming at (a boss's body, or a training
+-- mob's or dummy's), flat on the floor round its Radius. QM's reference (Oct 26): three
 -- lighter curved dashes round the outside, slowly turning, and inside them a thin ring
 -- whose red fades inward to clear at the middle. (Handle adornments, like LassoAPet's
 -- selection ring, so moving it costs next to nothing; the fade is a stack of thin bands.)

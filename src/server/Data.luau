@@ -1,13 +1,14 @@
 -- Saving (QM, Oct 24): each player's progress lives in their attributes while they play
--- (Cash, Strength, Eggs, Rebirths, Region<Name> for each region, Weapons and Weapon: Server/Arsenal, PetsOwned and
+-- (Cash, Strength, Eggs, Rebirths, Train<Name> for each training ground bought,
+-- Region<Name> for each region, Weapons and Weapon: Server/Arsenal, PetsOwned and
 -- PenPets: Server/PetInventory, PenEggs: Server/Hatchery) and is
 -- saved to a DataStore when they leave, every Config.Data.AutoSave seconds, and when the
 -- server shuts down. Nothing is saved for a player whose data failed to load (so a
 -- DataStore outage can't wipe anyone), and in a Studio playtest without API access it
 -- just doesn't save (it warns once).
 --
--- Rebirth lives here too: with enough cash (Config.Rebirth), your cash, Strength and
--- regions reset, and every hit trains StrengthBonus more for each rebirth.
+-- Rebirth lives here too: with enough cash (Config.Rebirth), your cash, Strength,
+-- training grounds and regions reset, and every hit trains StrengthBonus more for each rebirth.
 --
 --   Data.start()                 -- once
 --   Data.rebirthCost(player) -> cash needed for their next rebirth
@@ -28,6 +29,9 @@ local warned = false
 
 local function keys()
 	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "PenEggs" }
+	for name in Config.Training.Grounds do
+		table.insert(list, "Train" .. name)
+	end
 	for name in Config.Regions.Cost do
 		table.insert(list, "Region" .. name)
 	end
@@ -83,6 +87,12 @@ local function load(player)
 			end
 		end
 	end
+	-- (free grounds stay open whatever was saved)
+	for name, g in Config.Training.Grounds do
+		if g.Cost <= 0 then
+			player:SetAttribute("Train" .. name, true)
+		end
+	end
 	Combat.refresh(player)
 	loaded[player] = true
 end
@@ -100,6 +110,9 @@ local function rebirth(player)
 	player:SetAttribute("Rebirths", (player:GetAttribute("Rebirths") or 0) + 1)
 	player:SetAttribute("Cash", 0)
 	player:SetAttribute("Strength", 0)
+	for name, g in Config.Training.Grounds do
+		player:SetAttribute("Train" .. name, g.Cost <= 0)
+	end
 	for name in Config.Regions.Cost do
 		player:SetAttribute("Region" .. name, nil)
 	end
@@ -126,6 +139,9 @@ function Data.reset(player)
 	player:SetAttribute("HeldEgg", nil)
 	player:SetAttribute("HeldEggKind", nil)
 	player:SetAttribute("LockedIn", nil)
+	for name, g in Config.Training.Grounds do
+		player:SetAttribute("Train" .. name, g.Cost <= 0)
+	end
 	for name in Config.Regions.Cost do
 		player:SetAttribute("Region" .. name, nil)
 	end

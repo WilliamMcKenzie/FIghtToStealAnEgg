@@ -24,8 +24,6 @@
 --   Bosses.reroll()                  -- every biome's boss gone, ready to be summoned again
 --   Bosses.wake(biome)
 --   Bosses.alive(biome) -> its boss is up or can be summoned (not dead, waiting)
---   Bosses.out(biome) -> its boss is out (summoned, not yet dead or gone home): Server/
---                        Mobs sends that biome no new mobs meanwhile
 --   Bosses.defeated                  -- BindableEvent: Event(biome)
 --   Bosses.ended                     -- BindableEvent: Event(biome), when its fight's over:
 --                                       the boss died, went home, or was rerolled
@@ -233,15 +231,6 @@ function Bosses.alive(biome)
 		end
 	end
 	return arenas[biome] ~= nil and arenas[biome].ready
-end
-
-function Bosses.out(biome)
-	for _, b in live do
-		if b.biome == biome then
-			return true
-		end
-	end
-	return false
 end
 
 function Bosses.wake(biome)
