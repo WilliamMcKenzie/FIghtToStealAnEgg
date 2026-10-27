@@ -1,8 +1,6 @@
 -- The cactus vendor's stall (QM, Oct 27): LassoAPet's Carl stall, copied from its
 -- src/shared/CarlStallModel.luau (made by its tools/carl_stall.py from QM's
--- designs/stall/CarlStall.bbmodel). The egg heap's LassoAPet-only eggs are swapped for ones
--- this game has, each about the same size (Kraken -> Cactus, Loong -> Boar, RoboShark ->
--- Rhino, BlueCrab -> Penguin).
+-- designs/stall/CarlStall.bbmodel), with weapons piled behind it instead of Lasso's eggs.
 -- Studs, ground at Y = 0, the counter facing -Z (a Vendor object's yaw turns it).
 
 return {
@@ -42,20 +40,29 @@ return {
 		{ name = "Cactus", size = Vector3.new(2.16, 8, 2.16), cframe = CFrame.new(6, 3.7, 1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(118, 204, 64) },
 	},
 	carl = Vector3.new(0, 0, 2.1), -- his feet
-	pile = { -- the egg heap behind him: each egg's pivot (Egg.new's model, its real size)
-		{ kind = "Cactus", cframe = CFrame.new(0, 5.4, 11, 0.9801, 0, 0.1987, 0, 1, 0, -0.1987, 0, 0.9801) },
-		{ kind = "Snake", cframe = CFrame.new(-7.3154, 3.582, 8.6723, 0.8732, -0.0876, 0.4794, 0.0998, 0.995, 0, -0.477, 0.0479, 0.8776) },
-		{ kind = "Icebringer", cframe = CFrame.new(7.3154, 3.582, 8.6723, 0.8732, 0.0876, -0.4794, -0.0998, 0.995, 0, 0.477, 0.0479, 0.8776) },
-		{ kind = "SnackYak", cframe = CFrame.new(-8.4, 2.4, 13.6, 0.6967, 0, 0.7174, 0, 1, 0, -0.7174, 0, 0.6967) },
-		{ kind = "Penguin", cframe = CFrame.new(8.4, 2.4, 13.6, 0.7648, 0, -0.6442, 0, 1, 0, 0.6442, 0, 0.7648) },
-		{ kind = "Boar", cframe = CFrame.new(8.6, 1.6, 5.4, 0.9553, 0, -0.2955, 0, 1, 0, 0.2955, 0, 0.9553) },
-		{ kind = "Rhino", cframe = CFrame.new(-8.6, 1.6, 5.4, 0.9211, 0, 0.3894, 0, 1, 0, -0.3894, 0, 0.9211) },
-		{ kind = "Unicorn", cframe = CFrame.new(-5.5973, 9.5611, 8.9085, 0.8602, -0.4155, 0.2955, 0.435, 0.9004, 0, -0.2661, 0.1285, 0.9553) },
-		{ kind = "Penguin", cframe = CFrame.new(5.3714, 10.0105, 9.5277, 0.7602, 0.3214, -0.5646, -0.3894, 0.9211, 0, 0.5201, 0.2199, 0.8253) },
-		{ kind = "Icebringer", cframe = CFrame.new(-4.3855, 12.0392, 14.3916, 0.3462, -0.1071, 0.932, 0.2955, 0.9553, 0, -0.8904, 0.2754, 0.3624) },
-		{ kind = "Snake", cframe = CFrame.new(4.7748, 12.2392, 14.6952, 0.5162, 0.1597, -0.8415, -0.2955, 0.9553, 0, 0.8039, 0.2487, 0.5403) },
-		{ kind = "Boar", cframe = CFrame.new(-2.1902, 14.3285, 10.467, 0.7885, -0.2439, 0.5646, 0.2955, 0.9553, 0, -0.5394, 0.1669, 0.8253) },
-		{ kind = "Rhino", cframe = CFrame.new(2.5646, 14.5503, 11.1541, 0.8924, 0.2279, -0.3894, -0.2474, 0.9689, 0, 0.3773, 0.0963, 0.9211) },
-		{ kind = "Unicorn", cframe = CFrame.new(0.0806, 17.597, 12.612, 0.9938, -0.0497, 0.0998, 0.05, 0.9988, 0, -0.0997, 0.005, 0.995) },
+	-- behind him, his stock (QM, Oct 27: weapons, not Lasso's eggs): two wooden crates, and
+	-- weapons stuck in the ground, leaning on the crates and lying on top of them. Each
+	-- weapon: { id, x, z, yaw, tiltX, tiltZ, down?, base? } in radians: tiltX leans its top
+	-- toward +z, tiltZ toward -x; down sticks it point first into the ground; base is the
+	-- height it rests on (a crate's top), else the ground. Server/Map builds them once,
+	-- static (Shared/Weapons' drawn models, anchored).
+	crates = {
+		{ size = Vector3.new(5, 2.6, 3.4), cframe = CFrame.new(-3.5, 1.3, 9.5), color = Color3.fromRGB(150, 100, 62) },
+		{ size = Vector3.new(4, 2, 3), cframe = CFrame.new(3.8, 1, 10.5) * CFrame.Angles(0, math.rad(12), 0), color = Color3.fromRGB(186, 132, 82) },
+	},
+	weaponScale = 1.3, -- times a held weapon's size
+	weapons = {
+		{ "Longsword", -7.4, 8, 0.3, 0, 0.25, true },
+		{ "Longsword", 7.4, 8, -0.4, 0, -0.3, true },
+		{ "Shortsword", -0.6, 12.8, 0.2, -0.2, 0.1, true },
+		{ "Axe", 4, 8.4, 0.2, 0.35, 0 },
+		{ "Waraxe", -3, 12.4, 2.8, -0.35, 0 },
+		{ "Staff", -6.8, 10.6, 0, 0, -0.3 },
+		{ "WindStaff", -6.6, 8.9, 1, 0, -0.22 },
+		{ "LightningStaff", 6.4, 11.6, 0, 0, 0.3 },
+		{ "FireStaff", 3, 12.8, 0.4, -0.35, 0 },
+		{ "Longbow", -3.5, 9.5, 0.25, math.pi / 2, 0, false, 2.6 },
+		{ "Shortbow", 3.8, 10.5, -0.5, math.pi / 2, 0, false, 2 },
+		{ "KendoStick", 0.6, 14.2, 1, math.pi / 2, 0 },
 	},
 }

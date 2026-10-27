@@ -234,13 +234,13 @@ return {
 		Hop = 0.45, -- seconds of his hello hop
 		-- the shop's sign and ring (QM, Oct 27, like Pickaxe Shop's in his reference): its
 		-- title (the Vendor object's `title` in the map editor) floats over the roof in
-		-- outlined text, light at the top to deep at the bottom, and a glowing ring lies on
+		-- outlined text, light at the top to deep at the bottom (green, QM), and a glowing ring lies on
 		-- the ground round the front of the stall
-		TitleTop = Color3.fromRGB(150, 240, 255),
-		TitleBottom = Color3.fromRGB(40, 150, 235),
-		TitleStroke = Color3.fromRGB(16, 44, 92),
+		TitleTop = Color3.fromRGB(190, 255, 120),
+		TitleBottom = Color3.fromRGB(46, 176, 64),
+		TitleStroke = Color3.fromRGB(16, 62, 28),
 		TitleHeight = 4, -- studs tall, the text (it stays that size in the world)
-		RingColor = Color3.fromRGB(70, 210, 255),
+		RingColor = Color3.fromRGB(110, 235, 90),
 		RingRadius = 12, -- studs
 		RingAhead = 5, -- its centre, this far in front of the stall's middle
 		-- every weapon he sells can also be bought with Robux (QM's Weapon Shop design, Oct

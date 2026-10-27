@@ -35,7 +35,7 @@ local WorldColors = require(Shared.WorldColors)
 local RegionBlocker = require(Shared.RegionBlocker)
 local Studs = require(Shared.Studs)
 local VendorStallModel = require(Shared.VendorStallModel)
-local Egg = require(Shared.Eggs.Egg)
+local Weapons = require(Shared.Weapons.Weapons)
 local Cactus = require(Shared.Animals.Cactus)
 local HiddenFaces = require(Shared.HiddenFaces)
 
@@ -1151,7 +1151,7 @@ end
 -- ---- the cactus vendor ------------------------------------------------------------------
 
 -- LassoAPet's Carl stall (QM, Oct 27; Shared/VendorStallModel): posts, beams, a counter, a
--- striped cloth roof with a cactus growing up through it, a heap of eggs behind, and Carl
+-- striped cloth roof with a cactus growing up through it, a pile of weapons behind, and Carl
 -- (a cactus guy) behind the counter with a Talk prompt. Built at the origin, its counter
 -- facing -z; Map.build turns and moves it. Client/Vendor swaps this Carl for one that idles.
 local TITLE_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -1250,17 +1250,52 @@ local function vendor(parent, name, title)
 			counter = part
 		end
 	end
-	for _, spec in VendorStallModel.pile do
-		local egg = Egg.new(spec.kind).model
-		for _, part in egg:GetDescendants() do
+	-- his stock behind him: crates and weapons (made once here, all anchored, nothing moves)
+	for _, spec in VendorStallModel.crates do
+		local crate = Instance.new("Part")
+		crate.Name = "Crate"
+		crate.Size = spec.size
+		crate.CFrame = spec.cframe
+		crate.Color = spec.color
+		crate.Material = Enum.Material.SmoothPlastic
+		crate.Anchored = true
+		crate.TopSurface, crate.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+		Studs.apply(crate, 0.5)
+		crate.Parent = model
+	end
+	local stock = Instance.new("Model")
+	stock.Name = "Weapons"
+	for _, w in VendorStallModel.weapons do
+		local id, x, z, yaw, tiltX, tiltZ, down, base = table.unpack(w)
+		local weapon = Weapons.makeModel(id, VendorStallModel.weaponScale)
+		local turn = CFrame.Angles(0, yaw, 0)
+			* CFrame.Angles(tiltX, 0, tiltZ)
+			* (if down then CFrame.Angles(0, 0, math.pi) else CFrame.identity)
+		weapon:PivotTo(turn)
+		-- (then up onto the ground or its crate: point first a little into the ground)
+		local low = math.huge
+		for _, part in weapon:GetDescendants() do
+			if part:IsA("BasePart") and part.Transparency < 1 then
+				local c, h = part.CFrame, part.Size / 2
+				local reach = math.abs(c.RightVector.Y) * h.X + math.abs(c.UpVector.Y) * h.Y + math.abs(c.LookVector.Y) * h.Z
+				low = math.min(low, c.Position.Y - reach)
+			end
+		end
+		weapon:PivotTo(CFrame.new(x, (base or 0) - low - (if down then 0.6 else 0), z) * turn)
+		for _, part in weapon:GetDescendants() do
 			if part:IsA("BasePart") then
 				part.Anchored = true
 				part.CanCollide, part.CanQuery, part.CanTouch = false, false, false
+				for _, joint in part:GetChildren() do
+					if joint:IsA("JointInstance") or joint:IsA("WeldConstraint") then
+						joint:Destroy()
+					end
+				end
 			end
 		end
-		egg:PivotTo(spec.cframe)
-		egg.Parent = model
+		weapon.Parent = stock
 	end
+	stock.Parent = model
 	-- where his feet go (Client/Vendor stands its own Carl here)
 	local spot = Instance.new("Part")
 	spot.Name = "CarlSpot"
