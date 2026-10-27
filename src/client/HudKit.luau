@@ -55,11 +55,19 @@ HudKit.LOOKS = {
 		tile = { 223.5, 0.8 },
 		outline = 8,
 	},
-	-- the boss bar (QM, Oct 27: their old bar's design, the weld texture for its dots): the
-	-- red health over the trail over the dark empty bar, which carries the outline
-	BossRed = { top = rgb("ee3b2f"), bottom = rgb("bf2219"), bevel = { 0.55, 0.7, nil, rgb("6e0000"), 10 }, tile = { 230, 0.75, "Weld" }, corner = 14 },
-	BossTrail = { top = rgb("fff3d6"), bottom = rgb("ffc27a"), tile = { 230, 0.85, "Weld" }, corner = 14 },
-	BossEmpty = { top = rgb("3d0d0b"), bottom = rgb("1f0504"), tile = { 230, 0.85, "Weld" }, outline = 9, corner = 14 },
+	-- the boss bar (QM's Figma Bossbar, Oct 27; its numbers are design px, doubled here): the
+	-- red health (its 53% bottom over the maroon worked out) over the trail over the empty
+	-- maroon bar, which carries the black outline
+	BossRed = {
+		top = rgb("ff0000"),
+		bottom = rgb("b6000d"),
+		bevel = { 0.75, 0.75, nil, nil, 8 },
+		border = { Color3.new(1, 1, 1), 20, 0.8 },
+		tile = { 233, 0.8, "Weld" },
+		corner = 8,
+	},
+	BossTrail = { top = rgb("fff3d6"), bottom = rgb("ffc27a"), tile = { 233, 0.85, "Weld" }, corner = 8 },
+	BossEmpty = { fill = rgb("63001c"), bevel = { 0.75, 0.75, nil, nil, 8 }, outline = 12, corner = 8 },
 	Panel = { fill = rgb("323232"), border = { Color3.new(0, 0, 0), 6, 0.5 }, tile = { 223.5, 0.9 }, outline = 8, corner = 20 },
 	Card = { fill = Color3.new(1, 1, 1), border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
 }
