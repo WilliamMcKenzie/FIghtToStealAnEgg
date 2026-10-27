@@ -2,13 +2,15 @@
 -- boss's name over it (top centre); the green Shop and blue Index buttons (left middle); the
 -- red Eggs and orange Pets buttons (right middle); the Power counter, with its little orange
 -- + button, and the Cash counter (bottom left); and the hotbar (bottom centre: client/Hotbar).
--- The buttons don't open anything yet (their popups come next).
+-- None of the buttons do anything yet (QM, Oct 27: Shop/Index, and the pen tools on the
+-- right, come later).
 --
 -- Laid out in pixels at a 1080-tall design size and scaled to the screen by a UIScale
 -- (screen height / 1080). QM's Figma frame is 2190 tall, so its numbers go through fig().
 -- The buttons' backs and the icons are QM's Figma layers exported as they are
--- (assets/ui/hud, ids in client/HudImages). Text is Montserrat ExtraBold, white with a black
--- outline; the counters' is italic.
+-- (assets/ui/hud, ids in client/HudImages; the icons at 64px, QM: less lag). Text is
+-- Montserrat ExtraBold, white with a black outline; the counters' is italic. Shop's and
+-- Index's white icons get their outline here; the rest have theirs drawn in.
 --
 -- The boss bar follows the nearest awake boss in workspace.Bosses and hides when there's none.
 -- Under the red sits QM's trail bar, cut to wherever the red was TRAIL_LAG seconds ago,
@@ -225,18 +227,38 @@ function Hud.start()
 		return b
 	end
 
-	-- Shop and Index, left middle: 384 x 128, the icon (88) 49 in, the name 174 in
+	-- Shop and Index, left middle: 384 x 128, the icon (88) 49 in, the name 174 in. Their
+	-- white icons have no outline of their own (QM, Oct 27: add it in game), so each sits on
+	-- black copies of itself nudged ICON_OUTLINE px out all round, the same black as the text's
+	local ICON_OUTLINE = 3
 	for i, name in { "Shop", "Index" } do
 		local b = button(root, name .. "Button", 384, 128, {
 			AnchorPoint = Vector2.new(0, 0.5),
 			Position = UDim2.new(0, fig(30), 0.5, (i - 1) * fig(172)),
 		})
-		art(b, name .. "Icon", {
-			AnchorPoint = Vector2.new(0, 0.5),
-			Position = UDim2.new(0, fig(49), 0.5, 0),
-			Size = UDim2.fromOffset(fig(88), fig(88)),
-			ZIndex = 2,
-		})
+		local holder
+		holder, fresh = Ui.make(b, name .. "Icon", "Frame")
+		if fresh then
+			holder.BackgroundTransparency = 1
+			holder.AnchorPoint = Vector2.new(0, 0.5)
+			holder.Position = UDim2.new(0, fig(49), 0.5, 0)
+			holder.Size = UDim2.fromOffset(fig(88), fig(88))
+			holder.ZIndex = 2
+		end
+		art(holder, name .. "Icon", { Size = UDim2.fromScale(1, 1), ZIndex = 2 })
+		for k = 1, 8 do
+			local a = (k - 1) * math.pi / 4
+			art(holder, "Outline" .. k, {
+				Image = HudImages[name .. "Icon"] or "",
+				ImageColor3 = BLACK,
+				Position = UDim2.fromOffset(
+					math.round(math.cos(a) * ICON_OUTLINE),
+					math.round(math.sin(a) * ICON_OUTLINE)
+				),
+				Size = UDim2.fromScale(1, 1),
+				ZIndex = 1,
+			})
+		end
 		label(b, "Label", {
 			Text = name,
 			AnchorPoint = Vector2.new(0, 0.5),
