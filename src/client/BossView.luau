@@ -4,6 +4,10 @@
 -- by its Model, ModelSize and Tint attributes, so idle, walk and gallop blend by its speed),
 -- stood on the ground under the body and facing its way. When its Health drops it
 -- flashes red and the damage pops up over its head; at 0 it stays red as it sinks and shrinks.
+-- A burrowing boss (the Sandworm: its Burrow attribute, Server/Bosses) stands reared up out
+-- of a hole in its Config Burrow.Pose, rises out of the ground as it surfaces (head pointing
+-- up, then bending forward to look at you) and drops back down it, and isn't drawn while
+-- it tunnels: a mound of sand runs over the ground instead (client/BurrowFx).
 -- Also hands the /boss chat command to the server (BossRequest), and B does the same;
 -- /reboss goes as RebossRequest
 -- (a key that works whatever chat the place uses).
@@ -17,6 +21,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Horse = require(Shared.Animals.Horse)
+local BurrowFx = require(script.Parent.BurrowFx)
 local OnScreen = require(script.Parent.OnScreen)
 
 -- Recolours (a mob's Tint): each part's colour through fn, the rest of the data shared
@@ -320,6 +325,10 @@ local function add(body)
 		view.hatchPop, view.hatchFrom = pop, body:GetAttribute("HatchFrom") or 0
 		animal.model.Parent = nil
 	end
+	if body:GetAttribute("Burrow") then
+		local c = Config.Bosses[body:GetAttribute("Kind")]
+		view.burrow = c and c.Burrow and { cfg = c.Burrow, radius = body:GetAttribute("Radius") or 4 }
+	end
 	views[body] = view
 	body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
@@ -337,6 +346,13 @@ end
 local function remove(body)
 	local view = views[body]
 	if view then
+		local w = view.burrow
+		if w and w.hole then
+			w.hole.close()
+		end
+		if w and w.mound then
+			w.mound:stop()
+		end
 		view.animal.model:Destroy()
 		views[body] = nil
 	end
@@ -383,11 +399,71 @@ local function follow(body, view, dt, now)
 	return view.shown
 end
 
+local function smooth01(k)
+	k = math.clamp(k, 0, 1)
+	return k * k * (3 - 2 * k)
+end
+
+-- a burrowing boss, this frame: its hole, sand and mound -> how far out of the ground it
+-- is (0 down its hole, 1 up) and its pose's neck bend (0 head straight up, 1 bent to you)
+local function burrowFrame(body, view, dt, ground)
+	local w = view.burrow
+	local cfg = w.cfg
+	local state = body:GetAttribute("Burrow")
+	local t = workspace:GetServerTimeNow() - (body:GetAttribute("BurrowAt") or 0)
+	local at = Vector3.new(body.Position.X, ground.Y, body.Position.Z)
+	if state ~= w.state then
+		if state == "Emerge" or (state == "Hide" and w.state ~= nil) then
+			BurrowFx.burst(at, w.radius, cfg.Sand)
+		end
+		if state ~= "Under" and not w.hole then
+			w.hole = BurrowFx.hole(at, w.radius * cfg.Hole, cfg.HoleColor, cfg.Sand)
+		elseif state == "Under" and w.hole then
+			w.hole.close()
+			w.hole = nil
+		end
+		if state ~= "Under" and w.mound then
+			w.mound:stop()
+			w.mound = nil
+		end
+		w.state = state
+	end
+	if state == "Under" then
+		w.mound = w.mound or BurrowFx.mound(w.radius * cfg.Mound, cfg.Sand)
+		w.mound:place(ground, dt)
+		return 0, 0
+	elseif state == "Emerge" then
+		-- (shoots up out of the hole, overshooting a little, head first, then bends to look)
+		local k = math.clamp(t / cfg.Emerge, 0, 1)
+		local e = 1 + 2.70158 * (k - 1) ^ 3 + 1.70158 * (k - 1) ^ 2
+		return e, smooth01((k - 0.35) / 0.65)
+	elseif state == "Hide" then
+		-- (rears its head back up, then drops straight down the hole)
+		local k = math.clamp(t / cfg.Hide, 0, 1)
+		return 1 - smooth01((k - 0.15) / 0.85) ^ 2, 1 - smooth01(k / 0.5)
+	end
+	return 1, 1
+end
+
 RunService.RenderStepped:Connect(function(dt)
 	local now = os.clock()
 	for body, view in views do
 		local animal = view.animal
 		local shown = follow(body, view, dt, now)
+		local out, bend = 1, 1
+		if view.burrow then
+			if body:GetAttribute("Burrow") ~= "Under" then
+				-- (it doesn't move while it's up: drawn right on its hole, only its turning eased)
+				shown = CFrame.new(body.Position) * shown.Rotation
+				view.shown, view.last = shown, body.Position
+			end
+			out, bend = burrowFrame(body, view, dt, shown.Position - Vector3.new(0, body.Size.Y / 2, 0))
+			local hidden = out <= 0 and body:GetAttribute("Burrow") == "Under"
+			animal.model.Parent = if hidden then nil else workspace
+			if hidden then
+				continue
+			end
+		end
 		local pos = shown.Position
 		local speed = ((pos - view.last) * Vector3.new(1, 0, 1)).Magnitude / math.max(dt, 1e-3)
 		view.last = pos
@@ -446,6 +522,11 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 		-- (its root's CFrame, not PivotTo: the root is anchored and every other part hangs off
 		-- it by a joint, so this moves the whole model at once, as LassoAPet places its animals)
+		if view.burrow then
+			-- (down in its hole by however far it is from being up)
+			local cfg = view.burrow.cfg
+			ground -= Vector3.new(0, cfg.Depth * animal.size * animal.scale * (1 - out), 0)
+		end
 		animal.model.PrimaryPart.CFrame = CFrame.new(ground) * shown.Rotation
 		if view.pose and s > 0 then
 			-- lying in its pose, breathing (over whatever idle had it doing, by how asleep it is)
@@ -475,6 +556,18 @@ RunService.RenderStepped:Connect(function(dt)
 					end
 				end
 				view.zzzRun = run
+			end
+		end
+		if view.burrow then
+			-- reared up out of its hole (its Pose over the animation; the neck's bend by `bend`)
+			local sc = animal.scale * animal.size
+			for bone, a in view.burrow.cfg.Pose do
+				local motor, p = animal.bones[bone], animal.pose[bone]
+				if motor and p then
+					local k = if bone == "neck" then bend else 1
+					motor.Transform = CFrame.new((p[1] + a[1] * k) * sc, (p[2] + a[2] * k) * sc, (p[3] + a[3] * k) * sc)
+						* CFrame.Angles(p[4] + a[4] * k, p[5] + a[5] * k, p[6] + a[6] * k)
+				end
 			end
 		end
 		if view.pose then

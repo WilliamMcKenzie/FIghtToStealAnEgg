@@ -30,6 +30,8 @@
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
 --         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too)
 --   BossAttacks.fighter(player) -> { root, humanoid, extra } or nil, if they're alive
+--   BossAttacks.burst(body, b)  -- every Magic attack's Burst now (a boss that fires on its
+--         own cycle, not their timers: the Sandworm's Burrow, Server/Bosses)
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -205,6 +207,16 @@ local function cast(body, b, i, a)
 		table.insert(magic, { shot = shot, damage = a.Damage, biome = b.biome })
 	end
 	bossShot:FireAllClients(body, i, yaw, seed, origin)
+end
+
+function BossAttacks.burst(body, b)
+	for i, a in b.c.Attacks or {} do
+		if a.Kind == "Magic" then
+			for k = 1, math.max(1, a.Burst or 1) do
+				task.delay((k - 1) * (a.BurstGap or 0.3), cast, body, b, i, a)
+			end
+		end
+	end
 end
 
 -- (the cos of half its melee cone: a fighter at most this far off its facing gets hit)

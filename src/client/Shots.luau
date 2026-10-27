@@ -290,6 +290,7 @@ local function targets()
 				and (body:GetAttribute("Health") or 0) > 0
 				and not body:GetAttribute("Asleep")
 				and not body:GetAttribute("Intro")
+				and not body:GetAttribute("Burrowed") -- (a Sandworm tunnelling underground)
 			then
 				table.insert(list, { body = body, pos = body.Position, radius = body:GetAttribute("Radius") or 0 })
 			end

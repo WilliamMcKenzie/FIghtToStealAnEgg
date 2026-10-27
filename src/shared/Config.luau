@@ -364,6 +364,75 @@ return {
 				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 16 },
 			},
 		},
+		-- the Desert's burrowing boss (QM, Oct 27): rooted where it surfaces, arched up out of
+		-- its hole facing you, it spits sand orbs 1, 2, 3 (Burst), waits, then dives back down
+		-- its hole and tunnels to a new spot (a mound of sand running over the ground) to pop
+		-- up again. Server/Bosses runs the cycle (its Burrow), client/BossView draws it
+		Sandworm = {
+			Name = "Sandworm",
+			Model = "Sandworm", -- (the Sandworm pet's model, QM's designs/desert/Sandworm.bbmodel)
+			Size = 2.6, -- (about 29 studs tall arched up out of the ground)
+			Health = 4000,
+			Cash = 500, -- to each player who beat it
+			Speed = 0, -- (it never walks: it tunnels, Burrow)
+			StopAt = 1,
+			Radius = 8,
+			Turn = 5,
+			TurnRate = 240, -- (degrees a second: it keeps its face on you while it's up)
+			Strength = 6,
+			Respawn = 25,
+			Attacks = {
+				{
+					Kind = "Magic", -- (fired by its Burrow cycle, not on a timer: Every is unused)
+					Every = 4,
+					Like = "Staff", -- (one orb)
+					Damage = 16, -- each orb
+					Height = 8, -- studs off the ground (about its chin)
+					Burst = 3, -- spat 1, 2, 3...
+					BurstGap = 0.3, -- ...this many seconds apart
+					Shot = {
+						Color = Color3.fromRGB(232, 190, 116), -- sand
+						Count = 1,
+						Size = 1.4,
+						Speed = 40,
+						Homing = 50, -- (gentle: you can dodge them)
+						Launch = 10,
+						Range = 100,
+						Slack = 0,
+					},
+				},
+			},
+			-- its cycle: surfaces (Emerge s), spits after Aim s, stays up Linger s after its
+			-- last spit, dives back in (Hide s), tunnels Speed studs a second to its next spot
+			-- (at least Travel s), Near..Far studs from whoever it's after and at least Hop from
+			-- where it was, inside its arena
+			Burrow = {
+				Emerge = 0.5,
+				Aim = 0.35,
+				Linger = 3,
+				Hide = 0.5,
+				Speed = 45,
+				Travel = 0.8,
+				Near = 22,
+				Far = 50,
+				Hop = 25,
+				Depth = 12.5, -- (model studs it sinks to be all underground, x Size)
+				-- how it stands up out of the hole: { x, y, z, rx, ry, rz } per bone over its
+				-- animation (studs at 1x and radians), the front half reared up, the rest down
+				-- the hole, its head bent forward to look at you
+				Pose = {
+					root = { 0, 4.5, 0, 1.05, 0, 0 },
+					Seg2 = { 0, 0, 0, 0.35, 0, 0 },
+					Seg3 = { 0, 0, 0, 0.17, 0, 0 },
+					neck = { 0, 0, 0, -1.25, 0, 0 },
+				},
+				-- the hole and the tunnelling (client/BurrowFx)
+				Hole = 0.75, -- the hole's radius, x Radius
+				HoleColor = Color3.fromRGB(70, 48, 30),
+				Sand = Color3.fromRGB(226, 190, 128),
+				Mound = 0.55, -- the travelling mound's radius, x Radius
+			},
+		},
 		ElderBoar = {
 			Name = "Elder Boar",
 			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
@@ -405,7 +474,7 @@ return {
 	-- re-rolls them all)
 	BossPools = {
 		Meadow = { "MotherHen", "GiantRafflesia", "MajesticUnicorn", "VenusFlytrap" },
-		Desert = { "CactusBoss" },
+		Desert = { "CactusBoss", "Sandworm" },
 		Ice = { "ElderBoar" },
 		Lava = { "LavaWyrm" },
 	},
