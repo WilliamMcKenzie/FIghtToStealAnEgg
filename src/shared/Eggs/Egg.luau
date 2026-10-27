@@ -8,10 +8,13 @@
 --   egg:play("twitch")                  -- a quick wobble (or "hatch")
 --   egg:update(dt)                      -- every frame while it may be playing
 --   Egg.kinds() -> { "Bat", ... }       -- every egg there's a model for
+--   Egg.sizeOf(kind) -> n               -- its egg's size: Config.Hatch.SizePerTier x per
+--                                       -- size tier of its pet (LassoAPet's Egg.sizeOf)
 --
 -- The black plates on the crack faces stay hidden inside the egg until the top shell
 -- pops off.
 
+local Config = require(script.Parent.Parent.Config)
 local Rig = require(script.Parent.Parent.Rig)
 local Studs = require(script.Parent.Parent.Studs)
 
@@ -40,6 +43,11 @@ end
 
 function Egg.has(kind)
 	return KINDS[kind] ~= nil
+end
+
+function Egg.sizeOf(kind)
+	local pet = Config.Pets[kind]
+	return Config.Hatch.SizePerTier ^ ((pet and pet.Tier or 1) - 1)
 end
 
 function Egg.new(kind, scale)

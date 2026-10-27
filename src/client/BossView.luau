@@ -76,6 +76,7 @@ local SHARP = 4
 local DEATH = 0.5 -- seconds it takes to shrink away
 local SLEEP = Config.BossSleep
 local INTRO = Config.BossIntro
+local HATCH = Config.Hatch
 local ZZZ = SLEEP.Zzz
 -- Zzz: outlined Montserrat, warm light at the top going cool blue at the bottom (QM's UI)
 local ZZZ_GRADIENT = ColorSequence.new(Color3.fromRGB(255, 246, 232), Color3.fromRGB(143, 180, 255))
@@ -312,6 +313,13 @@ local function add(body)
 	if body:GetAttribute("Intro") then
 		view.appearAt = os.clock() + INTRO.PanIn
 	end
+	-- (a pen pet just hatched: hidden till its egg's top pops off, then it jumps out,
+	-- LassoAPet's hatch; server time HatchPop, from HatchFrom studs up: Server/Pens)
+	local pop = body:GetAttribute("HatchPop")
+	if pop and workspace:GetServerTimeNow() < pop + HATCH.JumpTime then
+		view.hatchPop, view.hatchFrom = pop, body:GetAttribute("HatchFrom") or 0
+		animal.model.Parent = nil
+	end
 	views[body] = view
 	body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
@@ -389,6 +397,7 @@ RunService.RenderStepped:Connect(function(dt)
 		if
 			not view.diedAt
 			and not view.appearAt
+			and not view.hatchPop
 			and not OnScreen.near(pos, reach)
 			and not (view.drawnAt and OnScreen.near(view.drawnAt, reach))
 		then
@@ -411,6 +420,21 @@ RunService.RenderStepped:Connect(function(dt)
 			if k >= 1 then
 				animal:setScale(1)
 				view.appearAt = nil
+			end
+		end
+		if view.hatchPop then
+			-- out of the egg in an arc, growing to full size, landing on the spot (LassoAPet's)
+			local t = (workspace:GetServerTimeNow() - view.hatchPop) / HATCH.JumpTime
+			if t < 0 then
+				continue
+			end
+			t = math.min(t, 1)
+			animal.model.Parent = workspace
+			animal:setScale(0.2 + 0.8 * (1 - (1 - t) ^ 3))
+			ground += Vector3.new(0, view.hatchFrom * (1 - t) + HATCH.JumpHeight * 4 * t * (1 - t), 0)
+			if t >= 1 then
+				animal:setScale(1)
+				view.hatchPop = nil
 			end
 		end
 		-- asleep: settled low, snoring (eased in and out as it nods off or gets up)
