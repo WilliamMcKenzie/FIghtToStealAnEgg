@@ -5,6 +5,8 @@
 --              Config.Backpack.PenSlots; each one wanders in their pen (Pens.setPets)
 -- The client asks through the PetEquip remote: ("equip", kind), ("unequip", slot) or
 -- ("best") for the pets earning the most cash a second.
+-- The pen's pets pay their Cash a second (Config.Income, x the rebirth bonus): the
+-- game's main income. Player attribute Income is that rate, for the HUD.
 --
 --   PetInventory.start()               -- once, after Pens.start
 --   PetInventory.give(player, kind, n) -- n more of it (1 if nil), into the pen if there's room
@@ -113,6 +115,40 @@ local function best(player)
 	setEquipped(player, table.move(all, 1, math.min(#all, slots()), 1, {}))
 end
 
+-- cash a second from the pen's pets (Config.Income)
+function PetInventory.income(player)
+	local total = 0
+	for _, kind in PetInventory.equipped(player) do
+		total += Config.Pets[kind].Cash or 0
+	end
+	return total * (1 + Config.Rebirth.CashBonus * (player:GetAttribute("Rebirths") or 0))
+end
+
+local function pay()
+	local carry = {} -- [player] = cash under 1 left over (rebirth bonuses aren't whole)
+	while true do
+		local every = Config.Income.Every
+		task.wait(every)
+		for _, player in Players:GetPlayers() do
+			local rate = PetInventory.income(player)
+			if player:GetAttribute("Income") ~= rate then
+				player:SetAttribute("Income", rate)
+			end
+			local due = rate * every + (carry[player] or 0)
+			local whole = math.floor(due)
+			carry[player] = due - whole
+			if whole > 0 then
+				player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + whole)
+			end
+		end
+		for player in carry do
+			if player.Parent == nil then
+				carry[player] = nil
+			end
+		end
+	end
+end
+
 function PetInventory.start()
 	local remote = Instance.new("RemoteEvent")
 	remote.Name = "PetEquip"
@@ -143,6 +179,7 @@ function PetInventory.start()
 	for _, player in Players:GetPlayers() do
 		joined(player)
 	end
+	task.spawn(pay)
 end
 
 return PetInventory
