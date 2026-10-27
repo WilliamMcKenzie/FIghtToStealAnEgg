@@ -228,8 +228,8 @@ return {
 
 	-- the cactus vendor (QM, Oct 27: LassoAPet's Carl and his stall, a Vendor object in the
 	-- map editor; Server/Map builds it, Client/Vendor animates him). He sells weapons for
-	-- cash (QM, Oct 27): each weapon's Price in Config.Weapons (placeholders, by rarity:
-	-- Common 500, Uncommon 5k, Rare 50k, Epic 500k, Mythic 5M), bought once through
+	-- cash (QM, Oct 27): each weapon's Price in Config.Weapons (placeholders, climbing
+	-- with rarity), bought once through
 	-- Server/Arsenal's BuyWeapon. Talk hops hello and fires Vendor.talked (client/Vendor),
 	-- where the shop popup will open.
 	Vendor = {
@@ -241,7 +241,10 @@ return {
 		-- (placeholders; a weapon's own Robux in Config.Weapons goes over it). Products =
 		-- [weapon id] = its developer product id from the Creator Dashboard; a weapon without
 		-- one can't be bought with Robux yet (Server/Arsenal's ProcessReceipt hands it over).
-		Robux = { Common = 30, Uncommon = 75, Rare = 150, Epic = 400, Mythic = 1000 },
+		Robux = {
+			Common = 30, Uncommon = 75, Rare = 150, Epic = 400, Legendary = 700, Mythic = 1000,
+			Divine = 1500, Celestial = 2000, Cosmic = 2500, Void = 3000, Omega = 3500,
+		},
 		Products = {},
 	},
 
@@ -654,6 +657,13 @@ return {
 		Epic = { Fill = Color3.fromRGB(214, 156, 255), Stroke = Color3.fromRGB(78, 20, 118) },
 		Legendary = { Fill = Color3.fromRGB(255, 214, 94), Stroke = Color3.fromRGB(122, 74, 0) },
 		Mythic = { Fill = Color3.fromRGB(255, 122, 156), Stroke = Color3.fromRGB(110, 10, 42) },
+		-- (QM, Oct 27: higher tiers for weapons, in this order; the Weapon Shop's cards for
+		-- them have moving gradients, client/WeaponShop)
+		Divine = { Fill = Color3.fromRGB(160, 220, 255), Stroke = Color3.fromRGB(30, 60, 140) },
+		Celestial = { Fill = Color3.fromRGB(255, 200, 80), Stroke = Color3.fromRGB(110, 60, 0) },
+		Cosmic = { Fill = Color3.fromRGB(225, 110, 255), Stroke = Color3.fromRGB(60, 10, 110) },
+		Void = { Fill = Color3.fromRGB(130, 80, 255), Stroke = Color3.fromRGB(20, 0, 50) },
+		Omega = { Fill = Color3.fromRGB(160, 255, 110), Stroke = Color3.fromRGB(15, 80, 30) },
 	},
 
 	-- the Backpack (QM, Oct 25: client/Backpack, Server/PetInventory): the pets you own
@@ -1037,10 +1047,11 @@ return {
 	-- Every weapon's values can be tuned live in Play: hold it and edit Workspace > Weapon
 	-- (client/WeaponTuning); tick PrintConfig there for its block to paste back here.
 	Weapons = {
-		-- QM's weapons (Oct 25), in four tiers: Common, Uncommon, Rare, Epic. Every Ranged one
+		-- QM's weapons (Oct 25). Rarity steps up every 2-3 weapons in price order (QM, Oct 27):
+		-- Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, Celestial, then Cosmic,
+		-- Void and Omega for weapons still to come (Rarities above). Every Ranged one
 		-- shoots the same arrow (only its numbers and trail differ); Magic ones are drawn from
 		-- their numbers (client/Shots). Tune any of them live: Workspace > Weapon.
-		-- tier 1
 		-- (everyone's to start: Arsenal.Start, so Carl doesn't sell it)
 		KendoStick = {
 			Name = "Kendo Stick",
@@ -1059,9 +1070,9 @@ return {
 		Shortsword = {
 			Name = "Shortsword",
 			Type = "Melee",
-			Rarity = "Common",
+			Rarity = "Uncommon",
 			Damage = 0.5,
-			Price = 500,
+			Price = 2000,
 			Slash = {
 				Arc = 170,
 				AttackRange = 10,
@@ -1081,9 +1092,9 @@ return {
 		Staff = { -- (a plain staff, no element: QM, Oct 25)
 			Name = "Staff",
 			Type = "Magic",
-			Rarity = "Common",
+			Rarity = "Uncommon",
 			Damage = 0.9,
-			Price = 500,
+			Price = 3000,
 			Shot = {
 				Speed = 60,
 				Homing = 220,
@@ -1091,13 +1102,12 @@ return {
 				Color = Color3.fromRGB(49, 200, 242),
 			},
 		},
-		-- tier 2
 		Axe = {
 			Name = "Axe",
 			Type = "Melee",
-			Rarity = "Uncommon",
+			Rarity = "Rare",
 			Damage = 4,
-			Price = 5000,
+			Price = 10000,
 			Slash = {
 				Arc = 200,
 				AttackRange = 6,
@@ -1116,9 +1126,9 @@ return {
 		Longsword = {
 			Name = "Longsword",
 			Type = "Melee",
-			Rarity = "Uncommon",
+			Rarity = "Epic",
 			Damage = 2,
-			Price = 5000,
+			Price = 60000,
 			Slash = {
 				Arc = 240,
 				AttackRange = 20,
@@ -1135,9 +1145,9 @@ return {
 		Longbow = {
 			Name = "Longbow",
 			Type = "Ranged",
-			Rarity = "Uncommon",
+			Rarity = "Rare",
 			Damage = 1.6,
-			Price = 5000,
+			Price = 25000,
 			Shot = {
 				Cooldown = 0.8,
 				Count = 3,
@@ -1150,9 +1160,9 @@ return {
 		WindStaff = {
 			Name = "Wind Staff",
 			Type = "Magic",
-			Rarity = "Uncommon",
+			Rarity = "Epic",
 			Damage = 1.2,
-			Price = 5000,
+			Price = 100000,
 			Shot = {
 				Color = Color3.fromRGB(201, 201, 201),
 				Cooldown = 0.4,
@@ -1164,9 +1174,9 @@ return {
 		LightningStaff = {
 			Name = "Lightning Staff",
 			Type = "Magic",
-			Rarity = "Uncommon",
+			Rarity = "Rare",
 			Damage = 1.5,
-			Price = 5000,
+			Price = 15000,
 			Shot = {
 				Color = Color3.fromRGB(255, 238, 0),
 				Cooldown = 0.4,
@@ -1177,13 +1187,12 @@ return {
 				TrailLength = 0.1,
 			},
 		},
-		-- tier 3
 		WaterStaff = {
 			Name = "Water Staff",
 			Type = "Magic",
-			Rarity = "Rare",
+			Rarity = "Legendary",
 			Damage = 1.9,
-			Price = 50000,
+			Price = 250000,
 			Shot = {
 				Color = Color3.fromRGB(49, 162, 242),
 				Count = 2,
@@ -1196,9 +1205,9 @@ return {
 		Waraxe = {
 			Name = "Waraxe",
 			Type = "Melee",
-			Rarity = "Rare",
+			Rarity = "Legendary",
 			Damage = 20,
-			Price = 50000,
+			Price = 400000,
 			-- (double bladed, a big sweep round you: QM)
 			Slash = {
 				Arc = 300,
@@ -1220,9 +1229,9 @@ return {
 		Club = {
 			Name = "Club",
 			Type = "Melee",
-			Rarity = "Rare",
+			Rarity = "Legendary",
 			Damage = 10,
-			Price = 50000,
+			Price = 600000,
 			Slash = {
 				Arc = 140,
 				AttackRange = 11,
@@ -1238,13 +1247,12 @@ return {
 				Width = 5,
 			},
 		},
-		-- tier 4
 		UnholyLance = { -- (QM's, Oct 25)
 			Name = "Unholy Lance",
 			Type = "Melee",
-			Rarity = "Epic",
+			Rarity = "Mythic",
 			Damage = 2.8,
-			Price = 500000,
+			Price = 1500000,
 			Slash = {
 				Arc = 60,
 				AttackRange = 19,
@@ -1261,9 +1269,9 @@ return {
 		NatureBow = {
 			Name = "Nature Bow",
 			Type = "Ranged",
-			Rarity = "Epic",
+			Rarity = "Mythic",
 			Damage = 0.3,
-			Price = 500000,
+			Price = 2500000,
 			Shot = {
 				Cooldown = 0.2,
 				Count = 2,
@@ -1277,9 +1285,9 @@ return {
 		BloodBow = {
 			Name = "Blood Bow",
 			Type = "Ranged",
-			Rarity = "Epic",
+			Rarity = "Divine",
 			Damage = 4,
-			Price = 500000,
+			Price = 7000000,
 			Shot = {
 				Cooldown = 0.4,
 				Pierce = 1,
@@ -1294,9 +1302,9 @@ return {
 		FireStaff = {
 			Name = "Fire Staff",
 			Type = "Magic",
-			Rarity = "Epic",
+			Rarity = "Divine",
 			Damage = 7,
-			Price = 500000,
+			Price = 12000000,
 			Shot = {
 				Color = Color3.fromRGB(255, 61, 61),
 				Cooldown = 0.8,
@@ -1312,9 +1320,9 @@ return {
 		RafflesiaBloom = { -- (the Flower Staff: QM renamed it, Oct 25; the id stays for saves)
 			Name = "Flower Staff",
 			Type = "Magic",
-			Rarity = "Mythic",
+			Rarity = "Celestial",
 			Damage = 0.8,
-			Price = 5000000,
+			Price = 40000000,
 			Shot = {
 				Color = Color3.fromRGB(120, 186, 70),
 				Color2 = Color3.fromRGB(200, 235, 170),

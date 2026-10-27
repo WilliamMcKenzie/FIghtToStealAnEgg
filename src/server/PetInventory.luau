@@ -89,7 +89,10 @@ local function unequip(player, slot)
 end
 
 -- the pets earning the most cash a second, one per owned copy, rarest first on a tie
-local RANK = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5, Mythic = 6 }
+local RANK = {
+	Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5, Mythic = 6,
+	Divine = 7, Celestial = 8, Cosmic = 9, Void = 10, Omega = 11,
+}
 local function best(player)
 	local all = {}
 	for _, s in PetInventory.owned(player) do
