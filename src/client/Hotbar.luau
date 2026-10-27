@@ -38,9 +38,9 @@ local KEYS = {
 	Enum.KeyCode.Nine,
 }
 
--- `model` in a ViewportFrame filling `slot`, flat-lit (full ambient, no light, no stud
+-- `model` in a ViewportFrame filling `slot` (also client/WeaponShop's cards), flat-lit (full ambient, no light, no stud
 -- texture) like the held weapons, turned a little like an item icon
-local function picture(slot, model, tilt)
+function Hotbar.picture(slot, model, tilt)
 	local vp = Instance.new("ViewportFrame")
 	vp.Name = "Picture"
 	vp.BackgroundTransparency = 1
@@ -180,7 +180,7 @@ function Hotbar.init(root, fig)
 					local tilt = if s.kind
 						then CFrame.Angles(0, math.rad(-20), 0)
 						else CFrame.Angles(0, 0, math.rad(-45)) * CFrame.Angles(0, math.rad(90), 0)
-					picture(slot, model, tilt)
+					Hotbar.picture(slot, model, tilt)
 				end
 				slot.Activated:Connect(function()
 					pick(i)

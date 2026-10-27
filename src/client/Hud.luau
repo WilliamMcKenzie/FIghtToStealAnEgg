@@ -26,9 +26,9 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
-local TweenService = game:GetService("TweenService")
 
 local HudImages = require(script.Parent.HudImages)
+local HudKit = require(script.Parent.HudKit)
 local Hotbar = require(script.Parent.Hotbar)
 local Ui = require(script.Parent.Ui)
 local RegionBlocker = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("RegionBlocker"))
@@ -44,15 +44,9 @@ local DESIGN_HEIGHT = 1080
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local TEXT = 47 -- (QM, Oct 26: 2px up)
 local OUTLINE = Color3.fromRGB(4, 4, 53)
-local ITALIC = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic)
-local BLACK = Color3.new(0, 0, 0)
-local FIGMA_HEIGHT = 2190 -- (QM's NewUI frame)
-local HOVER_GROW = 1.08 -- a button grows this much under the mouse (QM: snappy)
-
--- Figma px to design px
-local function fig(n)
-	return math.round(n * DESIGN_HEIGHT / FIGMA_HEIGHT)
-end
+local ITALIC = HudKit.ITALIC
+local BLACK = HudKit.BLACK
+local fig = HudKit.fig
 local BAR_EASE = 25 -- how fast the red catches up with the health (quick, not a pop)
 local TRAIL_LAG = 0.5 -- seconds the trail bar lags behind the red (QM, Oct 24)
 local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight starts (QM, Oct 25)
@@ -157,75 +151,7 @@ function Hud.start()
 
 	-- ---- QM's NewUI ---------------------------------------------------------------------
 
-	-- a Figma layer exported as it is (HudImages[name])
-	local function art(parent, name, props)
-		local img, fresh = Ui.make(parent, name, "ImageLabel")
-		if fresh then
-			img.BackgroundTransparency = 1
-			img.Image = HudImages[name] or ""
-			img.ScaleType = Enum.ScaleType.Fit
-			for k, v in props do
-				img[k] = v
-			end
-		end
-		return img
-	end
-
-	-- outlined text (Figma: Montserrat ExtraBold 60, a black outline)
-	local function label(parent, name, props)
-		local l, fresh = Ui.make(parent, name, "TextLabel")
-		if fresh then
-			local stroke = Instance.new("UIStroke")
-			stroke.Name = "Outline"
-			stroke.Color = BLACK
-			stroke.Thickness = 3
-			stroke.LineJoinMode = Enum.LineJoinMode.Round
-			stroke.Parent = l
-			l.BackgroundTransparency = 1
-			l.FontFace = FONT
-			l.TextSize = fig(60)
-			l.TextColor3 = Color3.new(1, 1, 1)
-			l.TextXAlignment = Enum.TextXAlignment.Left
-			for k, v in props do
-				l[k] = v
-			end
-		end
-		return l
-	end
-
-	-- a see-through button `w` x `h` (Figma px) whose back is the exported layer (it holds
-	-- the black outline, 8 Figma px past the button's edge all round)
-	local function button(parent, name, w, h, props)
-		local b, fresh = Ui.make(parent, name, "ImageButton")
-		if fresh then
-			b.BackgroundTransparency = 1
-			b.Image = ""
-			b.AutoButtonColor = false
-			b.Size = UDim2.fromOffset(fig(w), fig(h))
-			for k, v in props do
-				b[k] = v
-			end
-		end
-		art(b, name, {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.new(1, fig(16), 1, fig(16)),
-			ScaleType = Enum.ScaleType.Stretch,
-		})
-		local grow = Ui.make(b, "Hover", "UIScale")
-		if Ui.live then
-			local function to(scale)
-				TweenService:Create(grow, TweenInfo.new(0.08, Enum.EasingStyle.Quad), { Scale = scale }):Play()
-			end
-			b.MouseEnter:Connect(function()
-				to(HOVER_GROW)
-			end)
-			b.MouseLeave:Connect(function()
-				to(1)
-			end)
-		end
-		return b
-	end
+	local art, label, button = HudKit.art, HudKit.label, HudKit.button
 
 	-- Shop and Index, left middle: 384 x 128, the icon (88) 49 in, the name 174 in. Their
 	-- white icons have no outline of their own (QM, Oct 27: add it in game), so each sits on
