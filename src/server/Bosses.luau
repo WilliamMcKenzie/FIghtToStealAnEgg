@@ -30,7 +30,7 @@
 --   Bosses.engaged                   -- BindableEvent: Event(player, biome), on a hit
 --   Bosses.killed                    -- BindableEvent: Event(kind, players), when one is
 --                                       beaten (not on /reboss): everyone in its fight and
---                                       everyone who hit it, (nothing listens now: QM, Oct 27, no more weapon drops)
+--                                       everyone who hit it (each is paid its Cash first; nothing else listens now: QM, Oct 27, no more weapon drops)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -84,6 +84,13 @@ local function hurt(body, amount)
 			for _, player in Players:GetPlayers() do
 				if b.hitters[player] or (b.biome and player:GetAttribute("LockedIn") == b.biome) then
 					table.insert(winners, player)
+				end
+			end
+			-- its Cash to each of them (Config.Bosses)
+			local cash = b.c.Cash or 0
+			if cash > 0 then
+				for _, player in winners do
+					player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + cash)
 				end
 			end
 			Bosses.killed:Fire(b.kind, winners)

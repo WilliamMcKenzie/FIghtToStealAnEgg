@@ -252,10 +252,12 @@ return {
 	-- middle until someone steals one of its eggs or hits it (Server/Eggs); /boss spawns a
 	-- Chicken in front of you. Model is a module in Shared/Animals (<Model>Model.luau),
 	-- Size times its Blockbench drawing. Strength is what each hit on it trains (x the damage
-	-- you dealt: Config.Training). Health (QM, Oct 25): Mother Hen is
-	-- 20 Kendo Stick hits at 0 Strength and 5 at 1,000 (Config.Power); each later boss takes 20,
-	-- 30, 40, 50 Kendo Stick hits at the Strength you'd have reaching it: Meadow's at 0, Cactus
-	-- Boss at 2,000, Elder Boar at 18,000, Lava Wyrm at 140,000.
+	-- you dealt: Config.Training). Cash is paid to everyone who beat it (Server/Bosses).
+	-- Balance (Oct 27): Mother Hen is 20 Kendo Stick hits at 0 Strength and 5 at 1,000
+	-- (QM, Oct 25: Config.Power). Each later boss takes about 15s, 25s and 45s solo with the
+	-- weapon and Strength you'd have reaching it (Staff at ~3K Strength, Longsword at ~100K,
+	-- Waraxe at ~4M); raids go faster. Your health only comes from your pet (100 to 200), so
+	-- boss damage climbs gently: about 10, 7, 5 and 4 hits kill a pet from that biome.
 	Bosses = {
 		Chicken = {
 			Model = "Chicken",
@@ -272,6 +274,7 @@ return {
 			Model = "Chicken",
 			Size = 3.84, -- (about 40 studs tall: QM, Oct 25, 1.6x)
 			Health = 200,
+			Cash = 50, -- to each player who beat it
 			Speed = 10,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 11,
@@ -289,6 +292,7 @@ return {
 			Model = "GiantRafflesia", -- (LassoAPet's, QM Oct 25: its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
 			Size = 0.6, -- (about 30 studs tall)
 			Health = 200,
+			Cash = 50, -- to each player who beat it
 			Speed = 9,
 			StopAt = 1,
 			Radius = 9,
@@ -304,6 +308,7 @@ return {
 			Model = "MajesticUnicorn", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 2.4, -- (about 32 studs tall)
 			Health = 200,
+			Cash = 50, -- to each player who beat it
 			Speed = 10,
 			StopAt = 1,
 			Radius = 8,
@@ -319,6 +324,7 @@ return {
 			Model = "VenusFlytrap", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 1.8, -- (about 31 studs tall)
 			Health = 200,
+			Cash = 50, -- to each player who beat it
 			Speed = 10,
 			StopAt = 1,
 			Radius = 9,
@@ -333,7 +339,8 @@ return {
 			Name = "Cactus Boss",
 			Model = "CactusBoss", -- (LassoAPet's, QM Oct 24)
 			Size = 2.4, -- (about 29 studs tall)
-			Health = 1300,
+			Health = 4000,
+			Cash = 500, -- to each player who beat it
 			Speed = 11,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 13,
@@ -343,14 +350,15 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 20 },
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 16 },
 			},
 		},
 		ElderBoar = {
 			Name = "Elder Boar",
 			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
 			Size = 2, -- (about 27 studs tall, 40 long)
-			Health = 2350,
+			Health = 30000,
+			Cash = 5000, -- to each player who beat it
 			Speed = 9,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 12,
@@ -360,14 +368,15 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 35 },
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 26 },
 			},
 		},
 		LavaWyrm = {
 			Name = "Lava Wyrm",
 			Model = "LavaWyrm", -- (LassoAPet's, QM Oct 24)
 			Size = 1.4, -- (about 16 studs tall, 60 long)
-			Health = 3600,
+			Health = 200000,
+			Cash = 40000, -- to each player who beat it
 			Speed = 8,
 			StopAt = 1, -- (walks right into you: its Contact reaches 4)
 			Radius = 10,
@@ -377,7 +386,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 60 },
+				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 40 },
 			},
 		},
 	},
@@ -641,11 +650,21 @@ return {
 
 	-- rebirth (Server/Data, the Rebirth popup): cash needed is Cost x Growth ^ rebirths so far;
 	-- it resets your cash, Strength and training grounds, and each rebirth makes every hit
-	-- train StrengthBonus more (0.5: 1.5x after one, 2x after two)
+	-- train StrengthBonus more (0.5: 1.5x after one, 2x after two) and your pen earn
+	-- CashBonus more (Config.Income). Weapons and pets are kept. (Balance, Oct 27: the first
+	-- is about an hour and a half in, after the Lava Valley.)
 	Rebirth = {
-		Cost = 25000,
+		Cost = 10000000,
 		Growth = 3,
 		StrengthBonus = 0.5,
+		CashBonus = 0.5,
+	},
+
+	-- income (Server/PetInventory, Balance Oct 27): the pets in your pen pay their Cash
+	-- (Config.Pets) every Every seconds, x (1 + Rebirth.CashBonus x rebirths). It's the
+	-- game's main cash; bosses pay a little too (Config.Bosses' Cash).
+	Income = {
+		Every = 1,
 	},
 
 	-- rarities (QM, Oct 25): a name's colours by its animal's rarity, a bright fill with a
@@ -695,8 +714,8 @@ return {
 	-- pet you ride is all your health and speed (Shared/Pets works them out, PetStats
 	-- below); its name shows over you in its rarity's colours (Rarities above).
 	--   Rarity  its rarity
-	--   Cash    cash a second it earns (LassoAPet's PetIncome, the Tundra's after its
-	--           income curve; not paid out yet: nothing hatches so far)
+	--   Cash    cash a second it earns in your pen (LassoAPet's PetIncome, the Tundra's
+	--           after its income curve; Config.Income)
 	--   Tier    its size tier (LassoAPet's PetTiers): 1 reads as big as the Horse, each
 	--           tier PetStats.TierGrowth x bigger
 	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
@@ -783,17 +802,19 @@ return {
 	-- it, its gate shows a blocker only you see (client/Regions: a navy wall with its name,
 	-- price and a Buy button, and its shadow on the floor); Server/Regions sells it and
 	-- Server/Data saves it (Region<Name>). A rebirth locks them again, like the training
-	-- grounds. Prices are placeholders.
+	-- grounds. Balance (Oct 27): a full pen of a biome's pets (Config.Income) pays for the
+	-- next one in about 5, 10 and 25 minutes, after a few weapons; past the Lava Valley they're
+	-- placeholders until those biomes have pets.
 	Regions = {
 		Cost = {
 			Meadow = 0,
-			Desert = 2500,
-			Ice = 25000,
-			Lava = 250000,
-			Dungeon = 2500000,
-			Forest = 2500000,
-			Castle = 25000000,
-			Ocean = 25000000,
+			Desert = 6000,
+			Ice = 120000,
+			Lava = 1500000,
+			Dungeon = 20000000,
+			Forest = 20000000,
+			Castle = 250000000,
+			Ocean = 250000000,
 		},
 		Names = { Ice = "Tundra", Lava = "Lava Valley", Castle = "Red Castle", Forest = "Magic Circle", Ocean = "Ocean Trench" }, -- (what players see, where it isn't the key)
 		Shadow = 20, -- studs its shadow spreads across the floor before it's gone
@@ -820,14 +841,12 @@ return {
 	-- The training grounds at the south of the base, one per biome, are fenced off until
 	-- bought with cash (a rebirth will lock them again); their mobs wander and come back
 	-- Respawn seconds after they fall, for AFK training (RuneScape's sand crabs).
-	-- Rough AFK times from 0 Strength with the Kendo Stick, swinging non-stop on one ground:
-	--             to 1K     10K     100K     1M
-	--   Dummies  1.3 min   8 min    56 min   7 h
-	--   Meadow   0.7       4        28       3.5 h
-	--   Desert   0.3       1.6      11       83 min
-	--   Tundra   0.1       0.5      4        28 min
-	--   Lava     -         0.2      1.2      9 min
-	-- A mob's Health is about 6 Kendo Stick hits for the Strength you'd have arriving there.
+	-- Balance (Oct 27): each ground costs a little more than its biome's region, so you buy it
+	-- once that biome's pets are paying. A mob's Health is about 4 seconds of swinging for the
+	-- weapon and Strength you'd have then (Meadow ~100 a second, Desert ~300, Tundra ~1,300,
+	-- Lava ~4,500), and its bites are about 60% of its boss's hit every 1.5s.
+	-- (Strength grows into the millions by the Lava Valley: Config.Power's log curve keeps
+	-- what it does in check.)
 	-- Mobs fight back (QM, Oct 26): hit one and it turns on you, follows you round its yard
 	-- at Chase x its Speed and bites with its Attacks (Server/BossAttacks' Contact, like
 	-- the bosses), until you've left its yard, died, or not hit it for Calm seconds. They
@@ -842,37 +861,37 @@ return {
 			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
 			Meadow = {
 				Cost = 300,
-				Health = 180,
+				Health = 400,
 				Count = 4,
 				Strength = 2,
 				Speed = 4,
 				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 6 } }, -- (boss: 10 a second)
 			},
 			Desert = {
-				Cost = 4000,
-				Health = 270,
+				Cost = 8000,
+				Health = 1500,
 				Count = 5,
 				Strength = 5,
 				Speed = 2.5,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 12 } }, -- (boss: 20)
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 10 } }, -- (boss: 16)
 			},
 			Ice = {
-				Cost = 40000,
-				Health = 350,
+				Cost = 150000,
+				Health = 6000,
 				Count = 4,
 				Strength = 15,
 				Speed = 3,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 20 } }, -- (boss: 35)
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 16 } }, -- (boss: 26)
 			},
 			Lava = {
-				Cost = 400000,
+				Cost = 2000000,
 				Mob = "RockHog",
 				Size = 0.5,
-				Health = 430,
+				Health = 20000,
 				Count = 4,
 				Strength = 45,
 				Speed = 3.5,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 35 } }, -- (boss: 60)
+				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 24 } }, -- (boss: 40)
 			},
 		},
 		Respawn = 4,
@@ -1048,6 +1067,9 @@ return {
 	-- (client/WeaponTuning); tick PrintConfig there for its block to paste back here.
 	Weapons = {
 		-- QM's weapons (Oct 25). Rarity steps up every 2-3 weapons in price order (QM, Oct 27):
+		-- (Balance, Oct 27: each weapon in price order is 1.3x the one before in damage a second,
+		-- Damage x Count / Cooldown, from the Kendo Stick's 2 to the Flower Staff's 133; prices
+		-- roughly double each step, 500 to 75M, so a new biome's cash buys the next few.)
 		-- Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, Celestial, then Cosmic,
 		-- Void and Omega for weapons still to come (Rarities above). Every Ranged one
 		-- shoots the same arrow (only its numbers and trail differ); Magic ones are drawn from
@@ -1071,8 +1093,8 @@ return {
 			Name = "Shortsword",
 			Type = "Melee",
 			Rarity = "Uncommon",
-			Damage = 0.5,
-			Price = 2000,
+			Damage = 1.35,
+			Price = 1500,
 			Slash = {
 				Arc = 170,
 				AttackRange = 10,
@@ -1085,7 +1107,7 @@ return {
 			Name = "Shortbow",
 			Type = "Ranged",
 			Rarity = "Common",
-			Damage = 0.8,
+			Damage = 1.2,
 			Price = 500,
 			Shot = { Cooldown = 0.45, Range = 45 },
 		},
@@ -1093,8 +1115,8 @@ return {
 			Name = "Staff",
 			Type = "Magic",
 			Rarity = "Uncommon",
-			Damage = 0.9,
-			Price = 3000,
+			Damage = 3.1,
+			Price = 3500,
 			Shot = {
 				Speed = 60,
 				Homing = 220,
@@ -1106,7 +1128,7 @@ return {
 			Name = "Axe",
 			Type = "Melee",
 			Rarity = "Rare",
-			Damage = 4,
+			Damage = 5.7,
 			Price = 10000,
 			Slash = {
 				Arc = 200,
@@ -1127,8 +1149,8 @@ return {
 			Name = "Longsword",
 			Type = "Melee",
 			Rarity = "Epic",
-			Damage = 2,
-			Price = 60000,
+			Damage = 12.5,
+			Price = 100000,
 			Slash = {
 				Arc = 240,
 				AttackRange = 20,
@@ -1146,8 +1168,8 @@ return {
 			Name = "Longbow",
 			Type = "Ranged",
 			Rarity = "Rare",
-			Damage = 1.6,
-			Price = 25000,
+			Damage = 2.6,
+			Price = 50000,
 			Shot = {
 				Cooldown = 0.8,
 				Count = 3,
@@ -1161,8 +1183,8 @@ return {
 			Name = "Wind Staff",
 			Type = "Magic",
 			Rarity = "Epic",
-			Damage = 1.2,
-			Price = 100000,
+			Damage = 6.5,
+			Price = 250000,
 			Shot = {
 				Color = Color3.fromRGB(201, 201, 201),
 				Cooldown = 0.4,
@@ -1175,8 +1197,8 @@ return {
 			Name = "Lightning Staff",
 			Type = "Magic",
 			Rarity = "Rare",
-			Damage = 1.5,
-			Price = 15000,
+			Damage = 3,
+			Price = 25000,
 			Shot = {
 				Color = Color3.fromRGB(255, 238, 0),
 				Cooldown = 0.4,
@@ -1191,8 +1213,8 @@ return {
 			Name = "Water Staff",
 			Type = "Magic",
 			Rarity = "Legendary",
-			Damage = 1.9,
-			Price = 250000,
+			Damage = 7.4,
+			Price = 500000,
 			Shot = {
 				Color = Color3.fromRGB(49, 162, 242),
 				Count = 2,
@@ -1206,8 +1228,8 @@ return {
 			Name = "Waraxe",
 			Type = "Melee",
 			Rarity = "Legendary",
-			Damage = 20,
-			Price = 400000,
+			Damage = 55,
+			Price = 1000000,
 			-- (double bladed, a big sweep round you: QM)
 			Slash = {
 				Arc = 300,
@@ -1230,8 +1252,8 @@ return {
 			Name = "Club",
 			Type = "Melee",
 			Rarity = "Legendary",
-			Damage = 10,
-			Price = 600000,
+			Damage = 108,
+			Price = 2000000,
 			Slash = {
 				Arc = 140,
 				AttackRange = 11,
@@ -1251,8 +1273,8 @@ return {
 			Name = "Unholy Lance",
 			Type = "Melee",
 			Rarity = "Mythic",
-			Damage = 2.8,
-			Price = 1500000,
+			Damage = 21,
+			Price = 4000000,
 			Slash = {
 				Arc = 60,
 				AttackRange = 19,
@@ -1270,8 +1292,8 @@ return {
 			Name = "Nature Bow",
 			Type = "Ranged",
 			Rarity = "Mythic",
-			Damage = 0.3,
-			Price = 2500000,
+			Damage = 6,
+			Price = 8000000,
 			Shot = {
 				Cooldown = 0.2,
 				Count = 2,
@@ -1286,8 +1308,8 @@ return {
 			Name = "Blood Bow",
 			Type = "Ranged",
 			Rarity = "Divine",
-			Damage = 4,
-			Price = 7000000,
+			Damage = 31.5,
+			Price = 15000000,
 			Shot = {
 				Cooldown = 0.4,
 				Pierce = 1,
@@ -1303,8 +1325,8 @@ return {
 			Name = "Fire Staff",
 			Type = "Magic",
 			Rarity = "Divine",
-			Damage = 7,
-			Price = 12000000,
+			Damage = 82,
+			Price = 30000000,
 			Shot = {
 				Color = Color3.fromRGB(255, 61, 61),
 				Cooldown = 0.8,
@@ -1321,8 +1343,8 @@ return {
 			Name = "Flower Staff",
 			Type = "Magic",
 			Rarity = "Celestial",
-			Damage = 0.8,
-			Price = 40000000,
+			Damage = 22,
+			Price = 75000000,
 			Shot = {
 				Color = Color3.fromRGB(120, 186, 70),
 				Color2 = Color3.fromRGB(200, 235, 170),
