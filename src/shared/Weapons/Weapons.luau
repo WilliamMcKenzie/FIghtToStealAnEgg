@@ -8,6 +8,8 @@
 --   Weapons.range(id, c)       -- how close a target has to be before it attacks
 --   Weapons.cooldown(id, c)    -- seconds between attacks
 --   Weapons.forSale()          -- the ids Carl sells (with a Price), cheapest first
+--   Weapons.robux(id)          -- its Robux price in Carl's shop (nil: not for sale)
+--   Weapons.dps(id, strength)  -- damage a second at that Strength (the shop's DPS)
 --
 -- Live tuning (QM, Oct 25; client/WeaponTuning shows the held weapon's values under
 -- Workspace > Weapon): every number, colour, switch and Look can be changed in Play.
@@ -20,6 +22,7 @@
 -- Grip is the sword's.
 
 local Config = require(script.Parent.Parent.Config)
+local Power = require(script.Parent.Parent.Power)
 local Rig = require(script.Parent.Parent.Rig)
 local Studs = require(script.Parent.Parent.Studs)
 local KendoStickModel = require(script.Parent.KendoStickModel)
@@ -443,6 +446,23 @@ function Weapons.forSale()
 		return a < b
 	end)
 	return list
+end
+
+function Weapons.robux(id)
+	local w = Config.Weapons[id]
+	if not (w and w.Price) then
+		return nil
+	end
+	return w.Robux or Config.Vendor.Robux[w.Rarity]
+end
+
+-- one target's damage a second: Slash.Damage x Strength's curve x its Damage x shots at
+-- once, over its cooldown (quicker with Strength), as Server/Combat deals it
+function Weapons.dps(id, strength)
+	local w = Weapons.get(id)
+	local count = if w.Shot then w.Shot.Count or 1 else 1
+	local damage = Config.Slash.Damage * Power.damage(strength) * (w.Damage or 1) * count
+	return damage * Power.speed(strength) / Weapons.cooldown(id)
 end
 
 return Weapons
