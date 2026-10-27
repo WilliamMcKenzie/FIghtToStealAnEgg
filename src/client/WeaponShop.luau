@@ -78,23 +78,11 @@ local function price(n)
 	return "$" .. RegionBlocker.abbreviate(n or 0)
 end
 
--- the Robux button's icon outlined black like the text beside it: black copies of it
--- nudged ICON_OUTLINE px out all round, under it (as Hud does Shop's and Index's icons)
+-- the Robux button's icon outlined black like the text beside it (HudKit.outlineArt)
 local function outlineRobux(robux)
 	local icon = robux:FindFirstChild("RobuxIcon")
-	if not icon or robux:FindFirstChild("RobuxOutline1") then
-		return
-	end
-	icon.ZIndex = 6
-	for k = 1, 8 do
-		local a = (k - 1) * math.pi / 4
-		local copy = icon:Clone()
-		copy.Name = "RobuxOutline" .. k
-		copy.ImageColor3 = HudKit.BLACK
-		copy.Position = icon.Position
-			+ UDim2.fromOffset(math.round(math.cos(a) * ICON_OUTLINE), math.round(math.sin(a) * ICON_OUTLINE))
-		copy.ZIndex = 5
-		copy.Parent = robux
+	if icon then
+		HudKit.outlineArt(icon, ICON_OUTLINE)
 	end
 end
 

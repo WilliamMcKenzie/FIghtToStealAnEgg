@@ -2,19 +2,18 @@
 -- the right: a gold header with "1/5 Active" and the pink "+1 Equip [30R]" (more pen slots
 -- for Robux: not sold yet, Config.Backpack.SlotProduct), and under it a row per pet owned
 -- (each copy): its render (Shared/ItemIcons), its name (white: QM), its cash a second, and
--- Unequip (red, the pen's pets first) or Equip (green). The red ">" tab on its left slides
+-- Unequip (red, the pen's pets first), Equip (green) or Full (grey, no room in the pen). The red ">" tab on its left slides
 -- it away. Equip and Unequip go through Server/PetInventory's PetEquip remote.
 --
 --   PetsPanel.init(root, petsButton)   -- once, from Hud
 --   PetsPanel.open() / PetsPanel.close() / PetsPanel.isOpen()
 --
 -- In Studio: StarterGui > Hud > Root > PetsPanel (tick its Visible to see it). Rows are
--- copies of Body > Rows > RowTemplate, edit that one.
+-- copies of Rows > RowTemplate, edit that one.
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -22,8 +21,8 @@ local ItemIcons = require(Shared.ItemIcons)
 local Pets = require(Shared.Pets)
 local RegionBlocker = require(Shared.RegionBlocker)
 local Stacks = require(Shared.Stacks)
-local HudImages = require(script.Parent.HudImages)
 local HudKit = require(script.Parent.HudKit)
+local SidePanel = require(script.Parent.SidePanel)
 local Ui = require(script.Parent.Ui)
 
 local PetsPanel = {}
@@ -33,18 +32,16 @@ local fig, art, label, button = HudKit.fig, HudKit.art, HudKit.label, HudKit.but
 local function hex(h)
 	return Color3.fromHex(h)
 end
--- (Figma: the frame is 1168 x 734, the tab 234 of it on the left; everything below is in its px)
-local W, H = 1168, 734
-local SLIDE = TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-local SLIDE_OUT = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+-- (Figma px, through fig: the popup itself is client/SidePanel's)
 local OUTLINES = { -- text outlines (Figma)
 	Title = hex("8a3a00"),
 	Cash = hex("0a5a00"),
 	Unequip = hex("7a0000"),
 	Equip = hex("006b10"),
+	Full = hex("3a3a3a"),
 }
 
-local gui, rows, template, countLabel, shownAt
+local panel, rows, template, countLabel
 
 -- a row (Figma Card: 876 x 207)
 local function rowTemplate()
@@ -77,7 +74,12 @@ local function rowTemplate()
 		ZIndex = 2,
 	})
 	cash.Outline.Color = OUTLINES.Cash
-	for _, b in { { "PetUnequip", "RedPlain", "Unequip" }, { "PetEquip", "GreenPlain", "Equip" } } do
+	-- (Full: QM's grey one, when the pen has no room)
+	for _, b in {
+		{ "PetUnequip", "RedPlain", "Unequip" },
+		{ "PetEquip", "GreenPlain", "Equip" },
+		{ "PetFull", "GreyPlain", "Full" },
+	} do
 		local btn = button(row, b[1], 272, 112, { Position = UDim2.fromOffset(fig(567), fig(47)), ZIndex = 3 }, b[2])
 		local text = label(btn, "Text", {
 			Text = b[3],
@@ -92,47 +94,9 @@ local function rowTemplate()
 end
 
 local function build(root)
-	local fresh
-	gui, fresh = Ui.make(root, "PetsPanel", "Frame")
-	if fresh then
-		-- (Figma: 30 in from the right, centred up and down)
-		gui.BackgroundTransparency = 1
-		gui.AnchorPoint = Vector2.new(1, 0.5)
-		gui.Position = UDim2.new(1, -fig(30), 0.5, 0)
-		gui.Size = UDim2.fromOffset(fig(W), fig(H))
-		gui.ZIndex = 10
-		gui.Visible = not Ui.live
-	end
-	shownAt = gui.Position
-	local close = button(gui, "PetsClose", 174, 174, { Position = UDim2.fromOffset(0, fig(273)), ZIndex = 4 }, "Red")
-	label(close, "Arrow", {
-		Text = ">",
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextSize = fig(120),
-		Size = UDim2.fromScale(1, 1),
-		ZIndex = 5,
-	})
-	HudKit.back(gui, "Panel", {
-		Name = "Body",
-		-- (tucked under the header, so only its bottom corners show rounded)
-		Position = UDim2.fromOffset(fig(234), fig(110)),
-		Size = UDim2.fromOffset(fig(934), fig(624)),
-	})
-	HudKit.back(gui, "GoldHeader", {
-		Name = "Header",
-		Position = UDim2.fromOffset(fig(234), 0),
-		Size = UDim2.fromOffset(fig(934), fig(130)),
-		ZIndex = 2,
-	})
-	countLabel = label(gui, "Count", {
-		Text = "1/5 Active",
-		TextSize = fig(70),
-		Position = UDim2.fromOffset(fig(265), fig(23)),
-		Size = UDim2.fromOffset(fig(480), fig(85)),
-		ZIndex = 4,
-	})
-	countLabel.Outline.Color = OUTLINES.Title
-	local buy = button(gui, "PetsBuySlot", 384, 90, { Position = UDim2.fromOffset(fig(768), fig(19)), ZIndex = 4 }, "Pink")
+	panel = SidePanel.new(root, "PetsPanel", "GoldHeader", "1/5 Active", OUTLINES.Title)
+	countLabel = panel.title
+	local buy = button(panel.gui, "PetsBuySlot", 384, 90, { Position = UDim2.fromOffset(fig(768), fig(19)), ZIndex = 4 }, "Pink")
 	label(buy, "Text", {
 		Text = "+1 Equip [" .. Config.Backpack.SlotRobux .. "R]",
 		TextSize = fig(35),
@@ -140,35 +104,15 @@ local function build(root)
 		Size = UDim2.new(0, fig(290), 1, 0),
 		ZIndex = 5,
 	})
-	art(buy, "RobuxIcon", {
-		Image = HudImages.RobuxIcon or "",
+	local robux = art(buy, "RobuxIcon", {
 		Position = UDim2.fromOffset(fig(312), fig(9)),
 		Size = UDim2.fromOffset(fig(61), fig(67)),
 		ZIndex = 5,
 	})
-
-	rows, fresh = Ui.make(gui, "Rows", "ScrollingFrame")
-	if fresh then
-		rows.BackgroundTransparency = 1
-		rows.BorderSizePixel = 0
-		rows.Position = UDim2.fromOffset(fig(265) - 4, fig(160) - 4)
-		rows.Size = UDim2.fromOffset(fig(876) + 8 + 10, fig(544))
-		rows.CanvasSize = UDim2.new()
-		rows.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		rows.ScrollingDirection = Enum.ScrollingDirection.Y
-		rows.ScrollBarThickness = 6
-		rows.ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150)
-		rows.ZIndex = 3
-		local pad = Instance.new("UIPadding")
-		pad.PaddingLeft, pad.PaddingTop = UDim.new(0, 4), UDim.new(0, 4)
-		pad.Parent = rows
-		local layout = Instance.new("UIListLayout")
-		layout.Padding = UDim.new(0, fig(36))
-		layout.SortOrder = Enum.SortOrder.LayoutOrder
-		layout.Parent = rows
-	end
+	HudKit.outlineArt(robux, 3) -- (QM: outlined like its text)
+	rows = panel.rows
 	template = Ui.template(rows, "RowTemplate", rowTemplate)
-	return close, buy
+	return buy
 end
 
 -- ---- filling in -------------------------------------------------------------------------
@@ -211,46 +155,29 @@ local function listed()
 end
 
 function PetsPanel.isOpen()
-	return gui ~= nil and gui.Visible
+	return panel ~= nil and panel:isOpen()
 end
 
 function PetsPanel.open()
-	if not gui or gui.Visible then
-		return
+	if panel then
+		panel:open()
 	end
-	gui.Visible = true
-	gui.Position = shownAt + UDim2.fromOffset(fig(W) + fig(60), 0)
-	TweenService:Create(gui, SLIDE, { Position = shownAt }):Play()
 end
 
 function PetsPanel.close()
-	if not gui or not gui.Visible then
-		return
+	if panel then
+		panel:close()
 	end
-	local out = TweenService:Create(gui, SLIDE_OUT, { Position = shownAt + UDim2.fromOffset(fig(W) + fig(60), 0) })
-	out.Completed:Connect(function(how)
-		if how == Enum.PlaybackState.Completed then
-			gui.Visible = false
-			gui.Position = shownAt
-		end
-	end)
-	out:Play()
 end
 
 function PetsPanel.init(root, petsButton)
-	local close, buy = build(root)
+	local buy = build(root)
 	if not Ui.live then
 		return
 	end
-	gui.Visible = false
-	close.Activated:Connect(PetsPanel.close)
 	if petsButton then
 		petsButton.Activated:Connect(function()
-			if PetsPanel.isOpen() then
-				PetsPanel.close()
-			else
-				PetsPanel.open()
-			end
+			panel:toggle()
 		end)
 	end
 	buy.Activated:Connect(function()
@@ -277,11 +204,10 @@ function PetsPanel.init(root, petsButton)
 			row.Picture.Image = (ItemIcons.Pets or {})[kind] or ""
 			row.PetName.Text = Pets.name(kind)
 			row.PetCash.Text = "($" .. RegionBlocker.abbreviate(Config.Pets[kind].Cash or 0) .. "/s)"
+			local full = entry.slot == nil and inPen >= slots
 			row.PetUnequip.Visible = entry.slot ~= nil
-			row.PetEquip.Visible = entry.slot == nil
-			if entry.slot == nil and inPen >= slots then
-				row.PetEquip.Text.Text = "Full"
-			end
+			row.PetEquip.Visible = entry.slot == nil and not full
+			row.PetFull.Visible = full
 			for _, b in { row.PetUnequip, row.PetEquip } do
 				HudKit.hover(b) -- (a copy doesn't keep the template's)
 			end
