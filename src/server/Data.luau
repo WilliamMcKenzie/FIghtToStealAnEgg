@@ -9,7 +9,7 @@
 --
 -- Offline earnings (QM, Oct 27: LassoAPet's "You earn $X/Day offline!"): every save
 -- stamps LastSeen (os.time()); back again, you're paid your pen's income (PetInventory.income)
--- for the time away, up to Config.Data.OfflineMax seconds. Player attribute OfflinePaid is
+-- times Config.Data.OfflineRate for the time away, up to Config.Data.OfflineMax seconds. Player attribute OfflinePaid is
 -- what came in, for client/Hud's "+$X" popup.
 --
 -- Rebirth lives here too: with enough cash (Config.Rebirth), your cash, Strength,
@@ -105,7 +105,7 @@ local function load(player)
 	-- the time away, paid at the pen's rate
 	if type(data) == "table" and type(data.LastSeen) == "number" then
 		local away = math.clamp(os.time() - data.LastSeen, 0, Config.Data.OfflineMax)
-		local paid = math.floor(PetInventory.income(player) * away)
+		local paid = math.floor(PetInventory.income(player) * Config.Data.OfflineRate * away)
 		if paid > 0 then
 			player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + paid)
 			player:SetAttribute("OfflinePaid", paid)
