@@ -42,4 +42,6 @@ return {
 		SpineLizard = "rbxassetid://98643461623675",
 		Unicorn = "rbxassetid://134634389588659",
 	},
+	Pets = {
+	},
 }

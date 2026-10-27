@@ -1,5 +1,5 @@
-# Writes src/shared/ItemIcons.luau from the uploaded icons' ids (assets/weapons/icons/ids.json
-# and assets/eggs/icons/ids.json, written by tools/studio/imgup.py). Run after uploading.
+# Writes src/shared/ItemIcons.luau from the uploaded icons' ids (assets/weapons/icons/ids.json,
+# assets/eggs/icons/ids.json and assets/pets/icons/ids.json, written by tools/studio/imgup.py). Run after uploading.
 import json, os
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
@@ -16,7 +16,11 @@ out = [
     "-- [id or kind] = \"rbxassetid://...\"",
     "return {",
 ]
-for name, path in (("Weapons", "assets/weapons/icons/ids.json"), ("Eggs", "assets/eggs/icons/ids.json")):
+for name, path in (
+    ("Weapons", "assets/weapons/icons/ids.json"),
+    ("Eggs", "assets/eggs/icons/ids.json"),
+    ("Pets", "assets/pets/icons/ids.json"),
+):
     out.append("\t%s = {" % name)
     for k, v in sorted(ids(path).items()):
         out.append('\t\t%s = "%s",' % (k, v))

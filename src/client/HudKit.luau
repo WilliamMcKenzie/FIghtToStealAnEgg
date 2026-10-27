@@ -30,7 +30,8 @@ HudKit.FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWei
 HudKit.ITALIC = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic)
 HudKit.BLACK = Color3.new(0, 0, 0)
 
--- the Figma rectangles' looks. top/bottom: a top-to-bottom gradient (Figma: from at 15.9%);
+-- the Figma rectangles' looks. top/bottom: a top-to-bottom gradient (Figma: from at 15.9%,
+--   or `from`);
 -- across: a left-to-right one; tile: the texture's tile size in Figma (px), its
 --   transparency (1 - its Figma opacity), and which of QM's Figma textures: studs
 --   (assets/ui/StudTile.png) or Weld (assets/ui/WeldTile.png: the red and orange buttons);
@@ -67,6 +68,19 @@ HudKit.LOOKS = {
 	},
 	BossTrail = { top = rgb("fff3d6"), bottom = rgb("ffc27a"), tile = { 233, 0.85, "Weld" }, corner = 8 },
 	BossEmpty = { fill = rgb("63001c"), bevel = { 0.75, 0.75, nil, nil, 8 }, outline = 12, corner = 8 },
+	-- the Active Pets popup (QM's Figma ActivePets, Oct 27; client/PetsPanel)
+	GoldHeader = {
+		top = rgb("ffd300"),
+		bottom = rgb("ffa200"),
+		from = 0.001,
+		bevel = { 0.5, 0.5, Color3.new(1, 1, 1), rgb("b60000"), 12 },
+		tile = { 223.5, 0.8 },
+		outline = 8,
+	},
+	Pink = { top = rgb("ff00f2"), bottom = rgb("c300ff"), bevel = { 0.5, 0.5 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
+	PetCard = { top = rgb("ff963c"), bottom = rgb("ad5810"), from = 0.683, bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
+	RedPlain = { top = rgb("ff0000"), bottom = rgb("d90000"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
+	GreenPlain = { top = rgb("00ff11"), bottom = rgb("00d92b"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
 	Panel = { fill = rgb("323232"), border = { Color3.new(0, 0, 0), 6, 0.5 }, tile = { 223.5, 0.9 }, outline = 8, corner = 20 },
 	Card = { fill = Color3.new(1, 1, 1), border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
 }
@@ -160,7 +174,7 @@ function HudKit.back(parent, look, props)
 		fill.Rotation = 90
 		fill.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, spec.top),
-			ColorSequenceKeypoint.new(0.159, spec.top),
+			ColorSequenceKeypoint.new(spec.from or 0.159, spec.top),
 			ColorSequenceKeypoint.new(1, spec.bottom),
 		})
 	else
