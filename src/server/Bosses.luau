@@ -16,6 +16,11 @@
 -- taken once the nests refill (QM, Oct 26).
 -- A boss with Minions (Config.Bosses) calls them up once it's down to Minions.At of its
 -- health (Server/Minions); they go when the fight ends.
+-- A boss with a Burrow (the Sandworm, QM Oct 27) never walks: it surfaces, spits its Magic
+-- attacks' bursts at you, lingers, dives back down and tunnels to a new spot nearby, over
+-- and over. Its Burrow attribute says which part it's in (Emerge, Up, Hide, Under, from
+-- server time BurrowAt, for client/BossView), and while Under it's Burrowed: it can't be
+-- hit and shots pass over it.
 -- (The old sleeping bosses, QM Oct 25: Asleep bodies can't be hit and stand still, and
 -- client/BossView still draws them sleeping; nothing sets Asleep now.)
 --
@@ -141,10 +146,21 @@ local function make(kind, at, yaw)
 	body:SetAttribute("MaxHealth", c.Health)
 	body:SetAttribute("Radius", c.Radius)
 	local b = { kind = kind, c = c, yaw = yaw, home = at, calm = 0, hitters = {} }
+	if c.Burrow then
+		-- (it arrives already up, and spits once the intro's over)
+		b.burrow = { state = "Up", t = 0 }
+		body:SetAttribute("Burrow", "Up")
+		body:SetAttribute("BurrowAt", workspace:GetServerTimeNow())
+	end
 	live[body] = b
 	Combat.add(body, function(player, damage)
 		-- (arriving, or asleep, it can't be hurt at all: QM Oct 25)
-		if not live[body] or body:GetAttribute("Asleep") or body:GetAttribute("Intro") then
+		if
+			not live[body]
+			or body:GetAttribute("Asleep")
+			or body:GetAttribute("Intro")
+			or body:GetAttribute("Burrowed")
+		then
 			return
 		end
 		if b.biome then
@@ -295,6 +311,137 @@ local function turnToward(b, offset, dt)
 	b.yaw += math.clamp(turn * (1 - math.exp(-dt * b.c.Turn)), -most, most)
 end
 
+-- gone home (or back down its hole) with nobody left to fight: summonable again
+local function leave(body, b)
+	live[body] = nil
+	Combat.remove(body)
+	body:Destroy()
+	if arenas[b.biome] then
+		arenas[b.biome].ready = true
+	end
+	Bosses.ended:Fire(b.biome)
+end
+
+local function flat(v)
+	return v * Vector3.new(1, 0, 1)
+end
+
+local function setBurrow(body, w, state)
+	w.state, w.t = state, 0
+	body:SetAttribute("Burrow", state)
+	body:SetAttribute("BurrowAt", workspace:GetServerTimeNow())
+	body:SetAttribute("Burrowed", state == "Under")
+end
+
+-- where a burrowing boss comes up next: inside its arena (or near home, for a /boss one),
+-- Near..Far from its target and at least Hop from where it went down
+local function nextSpot(b, pos, target)
+	local cfg = b.c.Burrow
+	local x0, z0, x1, z1
+	if b.bounds then
+		local r = b.c.Radius + 4
+		x0, x1 = math.min(b.bounds[1], b.bounds[3]) + r, math.max(b.bounds[1], b.bounds[3]) - r
+		z0, z1 = math.min(b.bounds[2], b.bounds[4]) + r, math.max(b.bounds[2], b.bounds[4]) - r
+	else
+		x0, x1, z0, z1 = b.home.X - cfg.Far, b.home.X + cfg.Far, b.home.Z - cfg.Far, b.home.Z + cfg.Far
+	end
+	local best, bestScore = nil, math.huge
+	for _ = 1, 24 do
+		local p = Vector3.new(x0 + math.random() * (x1 - x0), pos.Y, z0 + math.random() * (z1 - z0))
+		-- (how far off it is from what it wants: 0 is a spot that fits)
+		local score = math.max(0, cfg.Hop - flat(p - pos).Magnitude)
+		if target then
+			local d = flat(p - target.Position).Magnitude
+			score += math.max(0, cfg.Near - d) + math.max(0, d - cfg.Far)
+		end
+		if score < bestScore then
+			best, bestScore = p, score
+			if score <= 0 then
+				break
+			end
+		end
+	end
+	return best or pos
+end
+
+local function faceNow(b, pos, target)
+	local offset = flat(target.Position - pos)
+	if offset.Magnitude > 1e-3 then
+		b.yaw = math.atan2(-offset.X, -offset.Z)
+	end
+end
+
+-- a burrowing boss's cycle, a frame of it -> where it is now (nil: it's gone)
+local function burrowStep(body, b, dt, target, pos)
+	local cfg = b.c.Burrow
+	local w = b.burrow
+	w.t += dt
+	-- (nobody left in the fight: it goes back down its hole and leaves)
+	if target then
+		b.calm = 0
+	elseif b.biome then
+		b.calm += dt
+	end
+	local leaving = b.calm > Config.BossCalmDown
+	if w.state == "Emerge" or w.state == "Up" then
+		if target then
+			turnToward(b, flat(target.Position - pos), dt)
+		end
+		if w.state == "Emerge" then
+			if w.t >= cfg.Emerge then
+				setBurrow(body, w, "Up")
+				w.spat = nil
+			end
+		elseif leaving then
+			setBurrow(body, w, "Hide")
+		elseif not w.spat then
+			if target and w.t >= cfg.Aim then
+				-- spits its bursts, then stays up Linger seconds after the last
+				local last = 0
+				for _, a in b.c.Attacks or {} do
+					if a.Kind == "Magic" then
+						last = math.max(last, (math.max(1, a.Burst or 1) - 1) * (a.BurstGap or 0.3))
+					end
+				end
+				BossAttacks.burst(body, b)
+				w.spat = w.t + last + cfg.Linger
+			end
+		elseif w.t >= w.spat then
+			setBurrow(body, w, "Hide")
+		end
+	elseif w.state == "Hide" then
+		if w.t >= cfg.Hide then
+			if leaving then
+				leave(body, b)
+				return nil
+			end
+			setBurrow(body, w, "Under")
+			w.to = nextSpot(b, pos, target)
+		end
+	elseif w.state == "Under" then
+		if leaving then
+			leave(body, b)
+			return nil
+		end
+		-- tunnelling to its next spot (facing the way it goes: the mound's heading)
+		local offset = flat(w.to - pos)
+		local step = cfg.Speed * dt
+		if offset.Magnitude > step then
+			b.yaw = math.atan2(-offset.X, -offset.Z)
+			pos += offset.Unit * step
+		else
+			pos = Vector3.new(w.to.X, pos.Y, w.to.Z)
+			if w.t >= cfg.Travel then
+				if target then
+					faceNow(b, pos, target)
+				end
+				setBurrow(body, w, "Emerge")
+			end
+		end
+	end
+	return pos
+end
+
 RunService.Heartbeat:Connect(function(dt)
 	for body, b in live do
 		local c = b.c
@@ -303,6 +450,13 @@ RunService.Heartbeat:Connect(function(dt)
 			continue
 		end
 		local target, distance = nearestPlayer(pos, b.biome)
+		if b.burrow then
+			pos = burrowStep(body, b, dt, target, pos)
+			if pos then
+				body.CFrame = CFrame.new(pos) * CFrame.Angles(0, b.yaw, 0)
+			end
+			continue
+		end
 		-- (its attacks, Server/BossAttacks: a slam's wind-up holds it still)
 		local hold = b.biome ~= nil and BossAttacks.update(body, b, dt, BossAttacks.fighters(b.biome))
 		if target then
@@ -321,13 +475,7 @@ RunService.Heartbeat:Connect(function(dt)
 			if b.calm > Config.BossCalmDown then
 				local offset = (b.home - pos) * Vector3.new(1, 0, 1)
 				if offset.Magnitude < 1 then
-					live[body] = nil
-					Combat.remove(body)
-					body:Destroy()
-					if arenas[b.biome] then
-						arenas[b.biome].ready = true
-					end
-					Bosses.ended:Fire(b.biome)
+					leave(body, b)
 					continue
 				else
 					turnToward(b, offset, dt)

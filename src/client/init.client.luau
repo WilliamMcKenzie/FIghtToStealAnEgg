@@ -149,6 +149,7 @@ local function nearestBoss(root, range)
 				and (body:GetAttribute("Health") or 0) > 0
 				and not body:GetAttribute("Asleep") -- (arriving, or asleep, it can't be hit)
 				and not body:GetAttribute("Intro")
+				and not body:GetAttribute("Burrowed") -- (tunnelling underground)
 				and (ground == nil or player:GetAttribute("Train" .. ground) ~= false)
 			then
 				local d = ((body.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude
