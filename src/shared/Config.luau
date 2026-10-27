@@ -979,13 +979,17 @@ return {
 	-- kill you: while one's biting you, Server/Regen doesn't heal you.
 	-- Each mob is a random pet from its biome's eggs (Config.Eggs.Kinds, any with odds; QM,
 	-- Oct 26), drawn at the pet's own size; Mob and Size are only for a ground whose eggs
-	-- are still the Horse placeholder (Lava, for now).
+	-- are still the Horse placeholder (Lava, for now). Pet (and Name) put one pet in a ground
+	-- instead: the Desert's cactus monsters (QM, Oct 27).
+	-- Grow (QM, Oct 27): each ground's yard is the map's trainSize plus this many Tiles
+	-- of side length, a tile more each tier up.
 	Training = {
 		PerDamage = 0.1, -- (at 0 Strength a Kendo Stick hit deals 10: Strength 2 trains 2, as before)
 		Grounds = {
 			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
 			Meadow = {
 				Cost = 300,
+				Grow = 0,
 				Health = 400,
 				Count = 4,
 				Strength = 2,
@@ -994,6 +998,9 @@ return {
 			},
 			Desert = {
 				Cost = 8000,
+				Grow = 1,
+				Pet = "Cactus",
+				Name = "Cactus Monster",
 				Health = 1500,
 				Count = 5,
 				Strength = 5,
@@ -1002,6 +1009,7 @@ return {
 			},
 			Ice = {
 				Cost = 150000,
+				Grow = 2,
 				Health = 6000,
 				Count = 4,
 				Strength = 15,
@@ -1010,6 +1018,7 @@ return {
 			},
 			Lava = {
 				Cost = 2000000,
+				Grow = 3,
 				Mob = "RockHog",
 				Size = 1.98, -- (LassoAPet's Rock Hog: tier 2, AnimalScale 1.5)
 				Health = 20000,
@@ -1023,6 +1032,7 @@ return {
 		Chase = 2.5, -- an angry mob moves this many times its Speed
 		Calm = 8, -- seconds without being hit before it forgets you
 		MobRadius = 2.5, -- a mob's body half-width (hits and reach)
+		Tile = 4, -- studs: one map cell (a Grow step)
 	},
 
 	Slash = {

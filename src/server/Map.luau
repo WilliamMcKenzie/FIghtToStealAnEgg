@@ -672,9 +672,11 @@ local function baseFurniture(parent)
 	-- the training grounds: fenced yards, their gates facing the spawn (Server/Training
 	-- fills them and sells their gates; client/Barriers keeps a locked gate solid)
 	local training = folder("Training", parent)
-	local size = base.TrainSize
 	for _, t in base.Training do
 		local name, x, z = t[1], t[2], t[3]
+		-- (each tier up a tile wider: Config.Training's Grow, QM Oct 27)
+		local g = Config.Training.Grounds[name]
+		local size = base.TrainSize + (g and g.Grow or 0) * Config.Training.Tile
 		local zone = Instance.new("Model")
 		zone.Name = name
 		zone:SetAttribute("X", x)
