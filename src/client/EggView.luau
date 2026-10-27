@@ -6,6 +6,8 @@
 -- A nest's egg pops in when its nests refill (PopAt: the server time it pops, QM Oct 26):
 -- it springs up out of the nest with a hop, a spin and a puff of sparkles. When its
 -- fight's over (Vanish) it shrinks away.
+-- A nest's egg has its name and rarity floating over it (QM, Oct 27: "Rhino Egg" in white,
+-- "Epic" under it in its rarity's colour), there once it's popped in, gone as it vanishes.
 
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -14,11 +16,17 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Egg = require(Shared.Eggs.Egg)
+local Pets = require(Shared.Pets)
 local OnScreen = require(script.Parent.OnScreen)
 
 local TWITCH = Config.Eggs.Twitch
 local POP = 0.55 -- seconds: an egg's pop in
 local VANISH = 0.3 -- seconds: shrinking away
+-- the nest egg's label: outlined Montserrat (QM's UI), in studs so it shrinks with distance
+local LABEL_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local LABEL_SIZE = Vector2.new(10, 3.2) -- studs: both lines
+local LABEL_ABOVE = 1.2 -- studs over the egg's top
+local LABEL_RANGE = 90 -- studs it shows within
 
 local views = {} -- [box] = { egg, next twitch (clock), scale, popAt, popped, vanish }
 
@@ -52,6 +60,43 @@ local function puff(at, size)
 	task.delay(1, part.Destroy, part)
 end
 
+local function line(parent, text, colour, y, height)
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.AnchorPoint = Vector2.new(0.5, 0)
+	label.Position = UDim2.fromScale(0.5, y)
+	label.Size = UDim2.fromScale(1, height)
+	label.FontFace = LABEL_FONT
+	label.TextScaled = true
+	label.TextColor3 = colour
+	label.Text = text
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 3
+	stroke.Color = Color3.new(0, 0, 0)
+	stroke.LineJoinMode = Enum.LineJoinMode.Round
+	stroke.Parent = label
+	label.Parent = parent
+end
+
+-- "Rhino Egg" over "Epic" (its rarity's colour), over a nest's egg
+local function nestLabel(box, kind)
+	local pet = Config.Pets[kind]
+	local rarity = pet and pet.Rarity or "Common"
+	local colours = Config.Rarities[rarity] or Config.Rarities.Common
+	local board = Instance.new("BillboardGui")
+	board.Name = "EggLabel"
+	board.Size = UDim2.fromScale(LABEL_SIZE.X, LABEL_SIZE.Y)
+	board.StudsOffsetWorldSpace = Vector3.new(0, box.Size.Y / 2 + LABEL_ABOVE + LABEL_SIZE.Y / 2, 0)
+	board.MaxDistance = LABEL_RANGE
+	board.LightInfluence = 0
+	board.AlwaysOnTop = true
+	board.Adornee = box
+	line(board, Pets.name(kind) .. " Egg", Color3.new(1, 1, 1), 0, 0.52)
+	line(board, rarity, colours.Fill, 0.52, 0.48)
+	board.Parent = box
+	return board
+end
+
 local function add(box)
 	if views[box] or not box:IsA("BasePart") then
 		return
@@ -76,6 +121,10 @@ local function add(box)
 		egg.model:ScaleTo(view.scale * 0.05)
 	end
 	egg.model.Parent = if view.popAt then nil else workspace
+	if box.Parent and CollectionService:HasTag(box.Parent, "Nest") then
+		view.label = nestLabel(box, box:GetAttribute("EggKind") or "Horse")
+		view.label.Enabled = view.popAt == nil and not box:GetAttribute("Vanish")
+	end
 	views[box] = view
 end
 
@@ -132,6 +181,9 @@ RunService.RenderStepped:Connect(function(dt)
 			if t >= 1 then
 				view.popAt = nil
 				egg.model:ScaleTo(view.scale)
+				if view.label then
+					view.label.Enabled = true
+				end
 			else
 				egg.model:ScaleTo(math.max(0.05, view.scale * spring(t)))
 				local hop = math.sin(math.min(t * 1.4, 1) * math.pi) * box.Size.Y * 0.5
@@ -140,6 +192,9 @@ RunService.RenderStepped:Connect(function(dt)
 		elseif box:GetAttribute("Vanish") and not view.vanish then
 			view.vanish = os.clock()
 			view.scale = egg.model:GetScale()
+			if view.label then
+				view.label.Enabled = false
+			end
 		end
 		if view.vanish then
 			local t = math.min(1, (os.clock() - view.vanish) / VANISH)
