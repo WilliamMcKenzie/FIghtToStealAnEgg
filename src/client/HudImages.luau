@@ -13,4 +13,5 @@ return {
 	WeldTile = "rbxassetid://94674059514917", -- assets/ui/WeldTile.png (QM's Figma weld texture)
 	BossAliveIcon = "rbxassetid://136700539456694", -- assets/ui/hud/BossAliveIcon.png
 	BossDeadIcon = "rbxassetid://108102901826020", -- assets/ui/hud/BossDeadIcon.png
+	BossGlow = "rbxassetid://136536336593533", -- assets/ui/hud/BossGlow.png
 }
