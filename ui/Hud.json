@@ -4660,6 +4660,51 @@
               },
               "Transparency": 1
              }
+            },
+            {
+             "children": [
+              {
+               "children": [],
+               "class": "UIStroke",
+               "name": "UIStroke",
+               "props": {
+                "Color": {
+                 "t": "Color3",
+                 "v": [
+                  1,
+                  1,
+                  1
+                 ]
+                },
+                "Thickness": 8,
+                "Transparency": 0.5
+               }
+              }
+             ],
+             "class": "Frame",
+             "name": "Glow",
+             "props": {
+              "BackgroundTransparency": 1,
+              "Position": {
+               "t": "UDim2",
+               "v": [
+                0,
+                10,
+                0,
+                10
+               ]
+              },
+              "Size": {
+               "t": "UDim2",
+               "v": [
+                1,
+                -20,
+                1,
+                -20
+               ]
+              },
+              "Transparency": 1
+             }
             }
            ],
            "class": "Frame",
@@ -4695,9 +4740,9 @@
              "t": "UDim2",
              "v": [
               0,
+              54,
               0,
-              0,
-              45
+              117
              ]
             },
             "ScaleType": {
@@ -4709,9 +4754,9 @@
              "t": "UDim2",
              "v": [
               0,
-              360,
+              252,
               0,
-              360
+              252
              ]
             },
             "Transparency": 1,
