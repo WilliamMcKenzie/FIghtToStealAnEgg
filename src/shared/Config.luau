@@ -972,6 +972,10 @@ return {
 		AimTime = 0.2, -- seconds the upper body takes to turn onto a new target (never a snap)
 		AimTwist = 110, -- the most the upper body turns from the hips (degrees)
 		Damage = 10, -- per slash that catches a boss (server checks it)
+		-- every hit rolls its damage between these times the base, rounded to a whole number
+		-- (QM, Oct 27: no two hits the same); 1 and 1 turns it off. All weapons, not just swords
+		RollMin = 0.8,
+		RollMax = 1.2,
 		Alternate = true, -- swing left-to-right, then right-to-left
 	},
 

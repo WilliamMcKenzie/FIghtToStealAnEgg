@@ -15,6 +15,9 @@
 --   Combat.refresh(player)           -- updates Power after Strength is set directly
 --   Combat.damage(player) -> number
 --
+-- Every hit on every target rolls its own damage: the base times a random
+-- Config.Slash.RollMin..RollMax, rounded to a whole number (at least 1), so the damage
+-- numbers and training gains follow what that hit actually dealt.
 -- Each hit deals that damage times the equipped weapon's Damage (Config.Weapons; the
 -- player's Weapon attribute, Server/Arsenal).
 
@@ -43,6 +46,14 @@ end
 
 function Combat.damage(player)
 	return Config.Slash.Damage * Power.damage(player:GetAttribute("Strength"))
+end
+
+local rng = Random.new()
+
+local function roll(damage)
+	local c = Config.Slash
+	local lo, hi = c.RollMin or 1, c.RollMax or 1
+	return math.max(1, math.round(damage * (lo + rng:NextNumber() * (hi - lo))))
 end
 
 -- (the HUD's counter shows your Strength itself: QM, Oct 25)
@@ -104,7 +115,7 @@ function Combat.slash(player, yaw, c)
 		end
 	end
 	for _, handler in hits do
-		task.spawn(handler, player, damage)
+		task.spawn(handler, player, roll(damage))
 	end
 end
 
@@ -146,12 +157,12 @@ RunService.Heartbeat:Connect(function(dt)
 	for i = #flying, 1, -1 do
 		local f = flying[i]
 		for _, t in Projectiles.step(f.shot, dt, list) do
-			task.spawn(t.handler, f.player, f.damage)
+			task.spawn(t.handler, f.player, roll(f.damage))
 			-- a splash also hits everything else that close to where it struck
 			if f.shot.splash then
 				for _, other in list do
 					if other ~= t and ((other.pos - t.pos) * Vector3.new(1, 0, 1)).Magnitude - other.radius <= f.shot.splash then
-						task.spawn(other.handler, f.player, f.damage)
+						task.spawn(other.handler, f.player, roll(f.damage))
 					end
 				end
 			end
