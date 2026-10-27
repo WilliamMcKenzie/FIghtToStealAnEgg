@@ -49,6 +49,8 @@ local DESIGN_HEIGHT = 1080
 local ITALIC = HudKit.ITALIC
 local BLACK = HudKit.BLACK
 local fig = HudKit.fig
+local TEXT_BIG = 47 -- the offline earnings line (LassoAPet's size, in design px)
+local OFFLINE_GREEN = "#57E636" -- its amount (LassoAPet's)
 local BAR_EASE = 25 -- how fast the red catches up with the health (quick, not a pop)
 local TRAIL_LAG = 0.5 -- seconds the trail bar lags behind the red (QM, Oct 24)
 local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight starts (QM, Oct 25)
@@ -338,6 +340,35 @@ function Hud.start()
 	end
 	count("Power")
 	count("Cash")
+
+	-- "You earn $1.2B/Day offline! 😈" (QM, Oct 27: LassoAPet's, 1:1), top centre: a day of
+	-- your pen's income (the Income attribute, cash a second: Server/PetInventory)
+	local offline = label(root, "OfflineEarn", {
+		RichText = true,
+		Text = "You earn $0/Day offline! 😈",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = TEXT_BIG,
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 14),
+		Size = UDim2.fromOffset(1000, 60),
+	})
+	offline.Outline.Thickness = 4
+	local function earn()
+		local day = (player:GetAttribute("Income") or 0) * 86400
+		offline.Text = string.format(
+			'You earn <font color="%s">$%s</font>/Day offline! 😈',
+			OFFLINE_GREEN,
+			RegionBlocker.abbreviate(day)
+		)
+	end
+	earn()
+	player:GetAttributeChangedSignal("Income"):Connect(earn)
+	-- (out of the way of the boss bar, which shows in the same spot in a fight)
+	local function clear()
+		offline.Visible = not (Ui.live and bar.Visible)
+	end
+	clear()
+	bar:GetPropertyChangedSignal("Visible"):Connect(clear)
 
 	-- (no Roblox health bar in the top right: QM, Oct 25)
 	task.spawn(function()
