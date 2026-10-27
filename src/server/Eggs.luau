@@ -11,7 +11,7 @@
 -- (client/EggView plays the pop-in) and the boss can be called up again. Take one and the
 -- boss comes as usual; anyone can take the rest mid-fight. When the fight's over (boss
 -- dead, or gone home with nobody left fighting) the eggs left vanish and the cooldown
--- (Config.Eggs.Cooldown) starts again; its end is each nest's CooldownEnds attribute
+-- (Config.Eggs.Cooldown[biome]) starts again; its end is each nest's CooldownEnds attribute
 -- (server time), shown over the nests to anyone close (client/NestTimers). A biome with
 -- nests but no boss starts its cooldown once its nests are empty.
 -- With Config.Eggs.Carry off (for now: QM, Oct 25) there's no egg to carry: stealing one
@@ -192,12 +192,13 @@ function cool(biome)
 		task.delay(0.4, egg.Destroy, egg)
 	end
 	table.clear(state.eggs)
-	local ends = workspace:GetServerTimeNow() + Config.Eggs.Cooldown
+	local cooldown = Config.Eggs.Cooldown[biome] or Config.Eggs.DefaultCooldown
+	local ends = workspace:GetServerTimeNow() + cooldown
 	for _, nest in state.nests do
 		nest:SetAttribute("CooldownEnds", ends)
 	end
 	local round = state.round
-	task.delay(Config.Eggs.Cooldown, function()
+	task.delay(cooldown, function()
 		if state.round == round then
 			fill(biome)
 		end
