@@ -47,6 +47,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local BossAttacks = require(script.Parent.BossAttacks)
 local Combat = require(script.Parent.Combat)
+local Pets = require(Shared:WaitForChild("Pets"))
 local Minions = require(script.Parent.Minions)
 
 local Bosses = {}
@@ -371,6 +372,18 @@ local function faceNow(b, pos, target)
 	end
 end
 
+-- how fast a burrowing boss tunnels (studs/s): its Burrow.Speed, or as fast as LassoAPet's
+-- pet of its Model burrows (the pet's speed x LassoSprint), scaled up by how much bigger the
+-- boss is than that pet (QM, Oct 27)
+local function tunnelSpeed(c)
+	local cfg = c.Burrow
+	if cfg.Speed then
+		return cfg.Speed
+	end
+	local pet = Pets.class(c.Model)
+	return Pets.stats(c.Model).Speed * (cfg.LassoSprint or 2) * c.Size / (if pet then pet.size else 1)
+end
+
 -- a burrowing boss's cycle, a frame of it -> where it is now (nil: it's gone)
 local function burrowStep(body, b, dt, target, pos)
 	local cfg = b.c.Burrow
@@ -425,7 +438,8 @@ local function burrowStep(body, b, dt, target, pos)
 		end
 		-- tunnelling to its next spot (facing the way it goes: the mound's heading)
 		local offset = flat(w.to - pos)
-		local step = cfg.Speed * dt
+		w.speed = w.speed or tunnelSpeed(b.c)
+		local step = w.speed * dt
 		if offset.Magnitude > step then
 			b.yaw = math.atan2(-offset.X, -offset.Z)
 			pos += offset.Unit * step

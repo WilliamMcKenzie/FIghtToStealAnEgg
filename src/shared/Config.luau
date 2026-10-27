@@ -417,31 +417,33 @@ return {
 					Like = "Staff", -- (one orb)
 					Damage = 16, -- each orb
 					Height = 8, -- studs off the ground (about its chin)
-					Burst = 3, -- spat 1, 2, 3...
+					Burst = 6, -- spat one after another... (QM: 6)
 					BurstGap = 0.3, -- ...this many seconds apart
+					Pulse = true, -- its head pulses on each, like a bow (client/BossView)
 					Shot = {
 						Color = Color3.fromRGB(232, 190, 116), -- sand
 						Count = 1,
 						Size = 1.4,
 						Speed = 40,
 						Homing = 50, -- (gentle: you can dodge them)
-						Launch = 10,
+						Launch = 45, -- each sets off up to this many degrees off its aim, at random (QM)
 						Range = 100,
 						Slack = 0,
 					},
 				},
 			},
 			-- its cycle: surfaces (Emerge s), spits after Aim s, stays up Linger s after its
-			-- last spit, dives back in (Hide s), tunnels Speed studs a second to its next spot
-			-- (at least Travel s), Near..Far studs from whoever it's after and at least Hop from
+			-- last spit, dives back in (Hide s), tunnels to its next spot (at least Travel s) as
+			-- fast as LassoAPet's Sandworm burrows (its sprint, LassoSprint x the pet's speed)
+			-- scaled up by how much bigger than the pet it is (QM; or Speed studs/s if set), Near..Far studs from whoever it's after and at least Hop from
 			-- where it was, inside its arena
 			Burrow = {
 				Emerge = 0.5,
 				Aim = 0.35,
 				Linger = 3,
 				Hide = 0.5,
-				Speed = 45,
-				Travel = 0.8,
+				LassoSprint = 2, -- (LassoAPet's sprint: 2x; Server/Bosses works the speed out)
+				Travel = 0.5,
 				Near = 22,
 				Far = 50,
 				Hop = 25,
@@ -455,9 +457,7 @@ return {
 					Seg3 = { 0, 0, 0, 0.17, 0, 0 },
 					neck = { 0, 0, 0, -1.25, 0, 0 },
 				},
-				-- the hole and the tunnelling (client/BurrowFx)
-				Hole = 0.75, -- the hole's radius, x Radius
-				HoleColor = Color3.fromRGB(70, 48, 30),
+				-- the sand it throws up and its tunnelling (client/BurrowFx; no hole: QM)
 				Sand = Color3.fromRGB(226, 190, 128),
 				Sand2 = Color3.fromRGB(196, 156, 96), -- (the burrow's mounds alternate the two)
 				Mound = 2.6, -- tunnelling: LassoAPet's Sandworm burrow, x this (its Size)

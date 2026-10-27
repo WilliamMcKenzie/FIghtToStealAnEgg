@@ -5,8 +5,8 @@
 -- stood on the ground under the body and facing its way. When its Health drops it
 -- flashes red and the damage pops up over its head; at 0 it stays red as it sinks and shrinks.
 -- A burrowing boss (the Sandworm: its Burrow attribute, Server/Bosses) stands reared up out
--- of a hole in its Config Burrow.Pose, rises out of the ground as it surfaces (head pointing
--- up, then bending forward to look at you) and drops back down it, and isn't drawn while
+-- of the ground in its Config Burrow.Pose (no hole drawn: QM), rises out of the ground as
+-- it surfaces (head pointing up, then bending forward to look at you) and drops back down it, and isn't drawn while
 -- it tunnels: a mound of sand runs over the ground instead (client/BurrowFx).
 -- Also hands the /boss chat command to the server (BossRequest), and B does the same;
 -- /reboss goes as RebossRequest
@@ -352,9 +352,6 @@ local function remove(body)
 	local view = views[body]
 	if view then
 		local w = view.burrow
-		if w and w.hole then
-			w.hole.close()
-		end
 		if w and w.mound then
 			w.mound:stop()
 		end
@@ -373,6 +370,18 @@ for _, name in { "Bosses", "Mobs", "PenPets" } do
 		folder.ChildRemoved:Connect(remove)
 	end)
 end
+
+-- a boss's Magic shot (Server/BossAttacks' BossShot): a Pulse attack pulses its head
+task.spawn(function()
+	ReplicatedStorage:WaitForChild("BossShot").OnClientEvent:Connect(function(body, i)
+		local view = views[body]
+		local c = view and Config.Bosses[body:GetAttribute("Kind")]
+		local a = c and c.Attacks and c.Attacks[i]
+		if a and a.Pulse then
+			view.shotAt, view.shotGap = os.clock(), a.BurstGap or a.Every or 0.5
+		end
+	end)
+end)
 
 -- The server moves each body (anchored) a step at a time, and its moves arrive here a few
 -- frames apart and unevenly: drawn straight there, a model would stutter
@@ -409,7 +418,7 @@ local function smooth01(k)
 	return k * k * (3 - 2 * k)
 end
 
--- a burrowing boss, this frame: its hole, sand and mound -> how far out of the ground it
+-- a burrowing boss, this frame: its sand bursts and burrow -> how far out of the ground it
 -- is (0 down its hole, 1 up) and its pose's neck bend (0 head straight up, 1 bent to you)
 local function burrowFrame(body, view, dt, ground)
 	local w = view.burrow
@@ -420,12 +429,6 @@ local function burrowFrame(body, view, dt, ground)
 	if state ~= w.state then
 		if state == "Emerge" or (state == "Hide" and w.state ~= nil) then
 			BurrowFx.burst(at, w.radius, cfg.Sand)
-		end
-		if state ~= "Under" and not w.hole then
-			w.hole = BurrowFx.hole(at, w.radius * cfg.Hole, cfg.HoleColor, cfg.Sand)
-		elseif state == "Under" and w.hole then
-			w.hole.close()
-			w.hole = nil
 		end
 		if state ~= "Under" and w.mound then
 			w.mound:stop()
@@ -590,6 +593,18 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 		if view.head then
 			local k = 1 + (SLEEP.Snore - 1) * s * (0.5 - 0.5 * math.cos(now / SLEEP.Breath * 2 * math.pi))
+			-- (a Pulse attack's shot: its head pulses like a bow, client/BowPulse)
+			if view.shotAt then
+				local t = (now - view.shotAt) / view.shotGap
+				local p = Config.Shots.Pulse
+				if t >= p.SettleAt then
+					view.shotAt = nil
+				elseif t < p.PeakAt then
+					k *= p.From + (p.Peak - p.From) * (t / p.PeakAt)
+				else
+					k *= p.Peak + (1 - p.Peak) * (t - p.PeakAt) / (p.SettleAt - p.PeakAt)
+				end
+			end
 			if math.abs(k - (view.headScale or 1)) > 1e-4 then
 				view.headScale = k
 				for _, h in view.head do

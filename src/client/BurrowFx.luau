@@ -1,13 +1,9 @@
 -- A burrowing boss's ground effects (the Sandworm, QM Oct 27; client/BossView drives them
 -- from its Burrow attribute):
---   a hole where it's up: a dark pit with a rim of piled sand, opening as it surfaces and
---   filling back in once it's gone down;
 --   a burst of sand thrown up and out as it bursts out of the ground or dives back in;
 --   while it tunnels, LassoAPet's Sandworm burrow (its sprint special): dirt spraying up
 --   over it and sand mounds pushing up along its path, sinking away behind it.
 --
---   BurrowFx.hole(at, radius, colour, sand) -> hole   -- at: the ground under it
---   hole:close()                                      -- fills in and goes
 --   BurrowFx.burst(at, radius, sand)
 --   BurrowFx.mound(scale, { sand, sand2 }) -> mound  -- scale: x the pet's burrow
 --   mound:place(at)                                   -- every frame, at the ground over it
@@ -24,7 +20,6 @@ folder.Name = "BurrowFx"
 folder.Parent = workspace
 
 local DUST = "rbxasset://textures/particles/smoke_main.dds"
-local FLAT = CFrame.Angles(0, 0, math.pi / 2) -- (a cylinder lying flat: its axis is X)
 
 local function part(props)
 	local p = Instance.new("Part")
@@ -91,37 +86,6 @@ local function clod(from, dir, sand, size, reach, height, life)
 			Debris:AddItem(p, 0.32)
 		end
 	end)
-end
-
-function BurrowFx.hole(at, radius, colour, sand)
-	local pit = part({
-		Name = "Hole",
-		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(0.12, 0.1, 0.1),
-		CFrame = CFrame.new(at + Vector3.new(0, 0.08, 0)) * FLAT,
-		Color = colour,
-		Material = Enum.Material.SmoothPlastic,
-	})
-	local rim = part({
-		Name = "HoleRim",
-		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(0.5, 0.1, 0.1),
-		CFrame = CFrame.new(at + Vector3.new(0, 0.05, 0)) * FLAT,
-		Color = sand,
-		Material = Enum.Material.Sand,
-	})
-	local open = TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-	TweenService:Create(pit, open, { Size = Vector3.new(0.12, radius * 2, radius * 2) }):Play()
-	TweenService:Create(rim, open, { Size = Vector3.new(0.5, radius * 2.6, radius * 2.6) }):Play()
-	local hole = {}
-	function hole.close()
-		local shut = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-		TweenService:Create(pit, shut, { Size = Vector3.new(0.12, 0.1, 0.1), Color = sand }):Play()
-		TweenService:Create(rim, shut, { Size = Vector3.new(0.5, radius * 0.5, radius * 0.5), Transparency = 1 }):Play()
-		Debris:AddItem(pit, 0.62)
-		Debris:AddItem(rim, 0.62)
-	end
-	return hole
 end
 
 function BurrowFx.burst(at, radius, sand)
