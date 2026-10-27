@@ -123,6 +123,11 @@ local hatchedRemote = Instance.new("RemoteEvent")
 hatchedRemote.Name = "Hatched"
 hatchedRemote.Parent = ReplicatedStorage
 
+-- (the pen was full: the pet went to storage)
+local storedRemote = Instance.new("RemoteEvent")
+storedRemote.Name = "PetStored"
+storedRemote.Parent = ReplicatedStorage
+
 local function hatch(player, id)
 	local pen = Pens.of(player)
 	local area = pen and pen:FindFirstChild("Area")
@@ -143,8 +148,11 @@ local function hatch(player, id)
 			local now = workspace:GetServerTimeNow()
 			local scale = Egg.sizeOf(e.k) * Config.Hatch.GrowScale
 			Pens.hatching(player, e.k, at, now + Config.Hatch.TopPops, EGG_CENTER * scale)
-			PetInventory.give(player, e.k)
+			local stored = PetInventory.give(player, e.k) == false
 			hatchedRemote:FireAllClients(player, e.id, e.k, at, now)
+			if stored then
+				storedRemote:FireClient(player, e.k) -- (client/PetsPanel: "Pet sent to storage" and the "!")
+			end
 			return
 		end
 	end

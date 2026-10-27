@@ -61,6 +61,7 @@ local function setEquipped(player, list)
 	end
 end
 
+-- true when it went into the pen, false when the pen was full (storage)
 function PetInventory.give(player, kind, n)
 	if not isPet(kind) then
 		return
@@ -70,7 +71,9 @@ function PetInventory.give(player, kind, n)
 	if #list < slots() then
 		table.insert(list, kind)
 		setEquipped(player, list)
+		return true
 	end
+	return false -- (pen full: it's owned, in storage)
 end
 
 local function equip(player, kind)

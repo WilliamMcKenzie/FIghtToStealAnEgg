@@ -9,11 +9,16 @@
 --   PetsPanel.init(root, petsButton)   -- once, from Hud
 --   PetsPanel.open() / PetsPanel.close() / PetsPanel.isOpen()
 --
+-- Hatching with a full pen sends the pet to storage (Server/Hatchery's PetStored): "Pet sent to
+-- storage" pops up mid-screen and a red "!" (QM's Figma badge) sits on the paw button until
+-- the popup is opened.
+--
 -- In Studio: StarterGui > Hud > Root > PetsPanel (tick its Visible to see it). Rows are
 -- copies of Rows > RowTemplate, edit that one.
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -164,6 +169,66 @@ local function listed()
 	return list, #pen
 end
 
+local STORED_HOLD = 2 -- seconds "Pet sent to storage" stays up
+local POP_IN = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local badge
+
+-- the red "!" on the paw button's top left corner (Figma: 64 x 64, red, 5px #700 border)
+local function buildBadge(petsButton)
+	local b, fresh = Ui.make(petsButton, "PetsBadge", "Frame")
+	if fresh then
+		b.BackgroundColor3 = hex("ff0000")
+		b.Position = UDim2.fromOffset(fig(-32), fig(-26))
+		b.Size = UDim2.fromOffset(fig(64), fig(64))
+		b.ZIndex = 10
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0.5, 0)
+		corner.Parent = b
+		local border = Instance.new("UIStroke")
+		border.Name = "Border"
+		border.Color = hex("770000")
+		border.Thickness = fig(5)
+		border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		border.Parent = b
+		local mark = label(b, "Mark", {
+			Text = "!",
+			TextSize = fig(55),
+			TextXAlignment = Enum.TextXAlignment.Center,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 11,
+		})
+		mark.Outline.Color = hex("770000")
+		mark.Outline.Thickness = fig(3)
+	end
+	b.Visible = not Ui.live -- (shown in Studio so it can be edited)
+	return b
+end
+
+-- "Pet sent to storage", popping in mid-screen, holding, then fading
+local function stored(root)
+	local pop = label(root, "PetStoredPop", {
+		Text = "Pet sent to storage",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = 72,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.3),
+		Size = UDim2.fromOffset(900, 90),
+		ZIndex = 20,
+	})
+	pop.Outline.Thickness = 5
+	local grow = Instance.new("UIScale")
+	grow.Scale = 0
+	grow.Parent = pop
+	TweenService:Create(grow, POP_IN, { Scale = 1 }):Play()
+	task.delay(STORED_HOLD, function()
+		local fade = TweenInfo.new(0.4)
+		TweenService:Create(pop, fade, { TextTransparency = 1 }):Play()
+		TweenService:Create(pop.Outline, fade, { Transparency = 1 }):Play()
+		task.wait(0.4)
+		pop:Destroy()
+	end)
+end
+
 function PetsPanel.isOpen()
 	return panel ~= nil and panel:isOpen()
 end
@@ -171,6 +236,9 @@ end
 function PetsPanel.open()
 	if panel then
 		panel:open()
+	end
+	if badge then
+		badge.Visible = false
 	end
 end
 
@@ -182,12 +250,27 @@ end
 
 function PetsPanel.init(root, petsButton)
 	local buy = build(root)
+	if petsButton then
+		badge = buildBadge(petsButton)
+	end
 	if not Ui.live then
 		return
 	end
 	if petsButton then
 		petsButton.Activated:Connect(function()
 			panel:toggle()
+			if panel:isOpen() then
+				badge.Visible = false
+			end
+		end)
+	end
+	local storedRemote = ReplicatedStorage:WaitForChild("PetStored", 10)
+	if storedRemote then
+		storedRemote.OnClientEvent:Connect(function()
+			stored(root)
+			if badge and not panel:isOpen() then
+				badge.Visible = true
+			end
 		end)
 	end
 	buy.Activated:Connect(function()
