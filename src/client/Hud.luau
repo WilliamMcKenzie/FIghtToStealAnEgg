@@ -267,6 +267,7 @@ function Hud.start()
 	end
 
 	Hotbar.init(root, fig)
+	require(script.Parent.WeaponShop).init(root) -- (Carl's: opened by Talking to him)
 
 	if not Ui.live then
 		return gui

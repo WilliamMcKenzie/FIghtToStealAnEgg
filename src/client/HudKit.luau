@@ -95,27 +95,37 @@ function HudKit.button(parent, name, w, h, props)
 		end
 	end
 	centre(b)
-	local back = HudKit.art(b, name, {
+	HudKit.art(b, name, {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
 		Size = UDim2.new(1, fig(16), 1, fig(16)),
 		ScaleType = Enum.ScaleType.Stretch,
 	})
-	local grow = Ui.make(b, "Hover", "UIScale")
-	if Ui.live then
-		local info = TweenInfo.new(HOVER_TIME, Enum.EasingStyle.Quad)
-		local function hover(on)
-			TweenService:Create(grow, info, { Scale = if on then HOVER_GROW else 1 }):Play()
+	Ui.make(b, "Hover", "UIScale")
+	HudKit.hover(b)
+	return b
+end
+
+-- wires a button's hover (in Play): its Hover UIScale grows, its back (the child named like
+-- it) darkens
+function HudKit.hover(b)
+	local grow, back = b:FindFirstChild("Hover"), b:FindFirstChild(b.Name)
+	if not (Ui.live and grow) then
+		return
+	end
+	local info = TweenInfo.new(HOVER_TIME, Enum.EasingStyle.Quad)
+	local function hover(on)
+		TweenService:Create(grow, info, { Scale = if on then HOVER_GROW else 1 }):Play()
+		if back then
 			TweenService:Create(back, info, { ImageColor3 = if on then HOVER_DARK else Color3.new(1, 1, 1) }):Play()
 		end
-		b.MouseEnter:Connect(function()
-			hover(true)
-		end)
-		b.MouseLeave:Connect(function()
-			hover(false)
-		end)
 	end
-	return b
+	b.MouseEnter:Connect(function()
+		hover(true)
+	end)
+	b.MouseLeave:Connect(function()
+		hover(false)
+	end)
 end
 
 return HudKit
