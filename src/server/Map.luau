@@ -3,7 +3,8 @@
 -- biome arenas north of it (Meadow, Desert, Ice, Lava), walled down their sides (stone
 -- pillars at the corners and joints, big ones where one biome opens onto the next; no
 -- walls between them), a gateway (two big pillars and an arch) from the base, a barrier
--- where areas meet for those in a fight (Server/Eggs), egg nests and the boss's spot.
+-- where areas meet for those in a fight (Server/Eggs), egg nests and the boss's spot, and
+-- the cactus vendor's stall.
 --
 -- Everything goes in workspace.Map. It's baked into the place in Studio's Edit mode (QM,
 -- Oct 24: see it without playing) by the Map Baker plugin (tools/studio/MapBaker.lua),
@@ -32,6 +33,10 @@ local Config = require(Shared.Config)
 local MapData = require(Shared.MapData)
 local WorldColors = require(Shared.WorldColors)
 local RegionBlocker = require(Shared.RegionBlocker)
+local Studs = require(Shared.Studs)
+local VendorStallModel = require(Shared.VendorStallModel)
+local Egg = require(Shared.Eggs.Egg)
+local Cactus = require(Shared.Animals.Cactus)
 
 local Map = {}
 Map.data = MapData
@@ -1136,6 +1141,79 @@ local function clearSite()
 	end
 end
 
+-- ---- the cactus vendor ------------------------------------------------------------------
+
+-- LassoAPet's Carl stall (QM, Oct 27; Shared/VendorStallModel): posts, beams, a counter, a
+-- striped cloth roof with a cactus growing up through it, a heap of eggs behind, and Carl
+-- (a cactus guy) behind the counter with a Talk prompt. Built at the origin, its counter
+-- facing -z; Map.build turns and moves it. Client/Vendor swaps this Carl for one that idles.
+local function vendor(parent, name)
+	local model = Instance.new("Model")
+	model.Name = "Vendor"
+	model:SetAttribute("Name", name)
+	local counter
+	for _, spec in VendorStallModel.parts do
+		local part = Instance.new("Part")
+		part.Name = spec.name
+		part.Size = spec.size
+		part.CFrame = spec.cframe
+		part.Color = spec.color
+		part.Material = Enum.Material.SmoothPlastic
+		part.Anchored = true
+		part.TopSurface, part.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+		if not Studs.apply(part, 0.5) then
+			for _, face in Enum.NormalId:GetEnumItems() do
+				local t = Instance.new("Texture")
+				t.Texture = STUDS
+				t.StudsPerTileU, t.StudsPerTileV = 0.5, 0.5
+				t.Face = face
+				t.Parent = part
+			end
+		end
+		part.Parent = model
+		if spec.name == "Counter" then
+			counter = part
+		end
+	end
+	for _, spec in VendorStallModel.pile do
+		local egg = Egg.new(spec.kind).model
+		for _, part in egg:GetDescendants() do
+			if part:IsA("BasePart") then
+				part.Anchored = true
+				part.CanCollide, part.CanQuery, part.CanTouch = false, false, false
+			end
+		end
+		egg:PivotTo(spec.cframe)
+		egg.Parent = model
+	end
+	-- where his feet go (Client/Vendor stands its own Carl here)
+	local spot = Instance.new("Part")
+	spot.Name = "CarlSpot"
+	spot.Anchored, spot.CanCollide, spot.CanQuery, spot.CanTouch = true, false, false, false
+	spot.Transparency = 1
+	spot.Size = Vector3.new(1, 1, 1)
+	spot.CFrame = CFrame.new(VendorStallModel.carl)
+	spot.Parent = model
+	local carl = Cactus.new().model
+	carl.Name = "Carl"
+	for _, part in carl:GetDescendants() do
+		if part:IsA("BasePart") then
+			part.CanCollide, part.CanQuery, part.CanTouch = false, false, false
+		end
+	end
+	carl:PivotTo(spot.CFrame)
+	carl.Parent = model
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "TalkPrompt"
+	prompt.ActionText = "Talk"
+	prompt.ObjectText = name
+	prompt.RequiresLineOfSight = false
+	prompt.MaxActivationDistance = Config.Vendor.Reach
+	prompt.Parent = counter
+	model.Parent = parent
+	return model
+end
+
 function Map.ensure()
 	local map = workspace:FindFirstChild("Map")
 	if map and map:GetAttribute("Baked") then
@@ -1203,6 +1281,12 @@ function Map.build(data)
 	local ruins = folder("Ruins", map)
 	for _, r in MapData.Ruins do
 		ruin(ruins, r)
+	end
+	local vendors = folder("Vendors", map)
+	for _, v in MapData.Vendors or {} do
+		local model = vendor(vendors, v[1])
+		model:SetAttribute("Scale", v[5])
+		put(model, v[2], v[3], v[4], v[5], v[6])
 	end
 	map:SetAttribute("Baked", not RunService:IsRunning())
 	map:SetAttribute("Saved", MapData.Saved)

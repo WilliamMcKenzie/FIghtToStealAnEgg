@@ -226,6 +226,15 @@ return {
 		LiquidSink = 1, -- and you sink this far into it, below its surface
 	},
 
+	-- the cactus vendor (QM, Oct 27: LassoAPet's Carl and his stall, a Vendor object in the
+	-- map editor; Server/Map builds it, Client/Vendor animates him). Talk does nothing yet:
+	-- he only hops hello (his job comes later).
+	Vendor = {
+		Reach = 12, -- studs from the counter where Talk shows
+		LookRange = 30, -- he turns to watch a player this close
+		Hop = 0.45, -- seconds of his hello hop
+	},
+
 	-- bosses (server/Bosses.luau, client/BossView.luau). Each biome's sleeps in its arena's
 	-- middle until someone steals one of its eggs or hits it (Server/Eggs); /boss spawns a
 	-- Chicken in front of you. Model is a module in Shared/Animals (<Model>Model.luau),

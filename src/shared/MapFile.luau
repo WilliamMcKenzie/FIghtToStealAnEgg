@@ -5,7 +5,7 @@
 -- A .map is JSON: a grid of 4-stud cells (one checker square each), `rows` north to
 -- south, one character a cell ("." is no floor: under the walls), each character a tile
 -- from `tiles` ({ id, area, key (ColorKey), top, liquid? }); the areas' settings; the
--- objects placed on it (Prop, Ruin, Pillar, Arch, Barrier, FightBarrier, Nest, Boss); `colours`, the ColorKeys QM changed from
+-- objects placed on it (Prop, Ruin, Pillar, Arch, Barrier, FightBarrier, Nest, Boss, Vendor); `colours`, the ColorKeys QM changed from
 -- Config.WorldColors ({ key: [r, g, b] }: they win over Config's); and `fixed`: walls, pillars, arches and
 -- barriers, shown in the editor but laid out by tools/map_gen.py.
 --
@@ -102,6 +102,7 @@ function MapFile.decode(text)
 		Areas = {},
 		Props = {},
 		Ruins = {},
+		Vendors = {}, -- { name, x, z, yaw, scale, y }: the cactus vendor's stall (Server/Map)
 		Grid = { X0 = x0, Z0 = z0, Cell = cell, Cols = cols, Rows = file.rows, Tiles = {} },
 	}
 
@@ -185,6 +186,9 @@ function MapFile.decode(text)
 			table.insert(byName[o.area].Nests, { o.x, o.z })
 		elseif o.type == "Boss" and byName[o.area] then
 			byName[o.area].Boss = { o.x, o.z }
+		elseif o.type == "Vendor" then
+			local y = o.y or MapFile.groundAt(data, o.x, o.z)
+			table.insert(data.Vendors, { o.name or "Carl", o.x, o.z, o.yaw or 0, o.scale or 1, y })
 		end
 	end
 	return data
