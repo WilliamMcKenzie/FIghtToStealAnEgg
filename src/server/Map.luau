@@ -101,6 +101,22 @@ local function texture(part, face, image, tile, key, z, aligned)
 	return t
 end
 
+-- the matte floor and walls: MaterialService.Matte, SmoothPlastic with a fully rough map
+-- (assets/ui/MatteRough.png). Made here if the place hasn't got it yet.
+local MATTE = "Matte"
+do
+	local MS = game:GetService("MaterialService")
+	if not MS:FindFirstChild(MATTE) then
+		pcall(function()
+			local v = Instance.new("MaterialVariant")
+			v.Name = MATTE
+			v.BaseMaterial = Enum.Material.SmoothPlastic
+			v.RoughnessMap = "rbxassetid://134094806969492"
+			v.Parent = MS
+		end)
+	end
+end
+
 -- a part coloured `key`, its checker (key .. "Checker") and studs on `faces`
 local function block(name, parent, cframe, size, key, faces, aligned)
 	local p = Instance.new("Part")
@@ -109,6 +125,9 @@ local function block(name, parent, cframe, size, key, faces, aligned)
 	p.Size = size
 	p.CFrame = cframe
 	p.Material = Enum.Material.SmoothPlastic
+	-- (QM, Oct 27: SmoothPlastic catches a white glare off the sun; MaterialService.Matte is
+	-- the same, fully rough, so it doesn't)
+	p.MaterialVariant = MATTE
 	p.TopSurface = Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	p:SetAttribute("ColorKey", key)
