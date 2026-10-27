@@ -11,6 +11,6 @@ return {
 	RobuxIcon = "rbxassetid://86362799525767",
 	StudTile = "rbxassetid://100359261064701", -- assets/ui/StudTile.png (QM's Figma stud texture)
 	WeldTile = "rbxassetid://94674059514917", -- assets/ui/WeldTile.png (QM's Figma weld texture)
-	BossAliveIcon = "rbxassetid://121430525012474", -- assets/ui/hud/BossAliveIcon.png
-	BossDeadIcon = "rbxassetid://117390149916258", -- assets/ui/hud/BossDeadIcon.png
+	BossAliveIcon = "rbxassetid://136700539456694", -- assets/ui/hud/BossAliveIcon.png
+	BossDeadIcon = "rbxassetid://108102901826020", -- assets/ui/hud/BossDeadIcon.png
 }
