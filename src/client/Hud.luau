@@ -13,7 +13,8 @@
 -- Index's white icons get their outline here; the rest have theirs drawn in.
 --
 -- The boss bar follows the nearest awake boss in workspace.Bosses and hides when there's none.
--- It's QM's old bar rebuilt natively (Oct 27: HudKit's BossRed, BossTrail and BossEmpty
+-- It pops in (a UIScale, Pop) when a fight starts and pops out when it ends, after showing
+-- the bar empty for a moment if the boss died. It's QM's old bar rebuilt natively (Oct 27: HudKit's BossRed, BossTrail and BossEmpty
 -- looks, the weld texture where their dots were). Under the red sits the trail bar, cut to wherever the red was TRAIL_LAG seconds ago,
 -- so a hit drops the red and exposes the trail, which follows it down half a second on.
 --
@@ -26,6 +27,7 @@
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local StarterGui = game:GetService("StarterGui")
 
 local HudImages = require(script.Parent.HudImages)
@@ -45,6 +47,11 @@ local fig = HudKit.fig
 local BAR_EASE = 25 -- how fast the red catches up with the health (quick, not a pop)
 local TRAIL_LAG = 0.5 -- seconds the trail bar lags behind the red (QM, Oct 24)
 local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight starts (QM, Oct 25)
+-- (QM, Oct 27: it pops in when a fight starts and out when it ends; after a kill it stays,
+-- empty, for LINGER seconds first)
+local POP_IN = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local POP_OUT = TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+local LINGER = 0.9
 
 local player = Players.LocalPlayer
 
@@ -272,6 +279,26 @@ function Hud.start()
 
 	-- the boss bar follows the nearest living, awake boss within BAR_RANGE
 	bar.Visible = false
+	local pop = Ui.make(bar, "Pop", "UIScale")
+	local state = "hidden" -- "shown", "lingering" (its boss died), "out" (popping out), "hidden"
+	local leftAt = 0
+	local function popIn()
+		state = "shown"
+		bar.Visible = true
+		pop.Scale = 0
+		TweenService:Create(pop, POP_IN, { Scale = 1 }):Play()
+	end
+	local function popOut()
+		state = "out"
+		local tween = TweenService:Create(pop, POP_OUT, { Scale = 0 })
+		tween.Completed:Connect(function(how)
+			if how == Enum.PlaybackState.Completed and state == "out" then
+				state = "hidden"
+				bar.Visible = false
+			end
+		end)
+		tween:Play()
+	end
 	local BAR_RANGE = 260
 	local shown = 1 -- the red's width
 	local history = {} -- { { os.clock(), red width }, ... } over the last TRAIL_LAG seconds
@@ -297,19 +324,42 @@ function Hud.start()
 				end
 			end
 		end
-		bar.Visible = best ~= nil
-		if not best then
-			following = nil
-			return
-		end
-		local fraction = math.clamp(best:GetAttribute("Health") / best:GetAttribute("MaxHealth"), 0, 1)
 		local now = os.clock()
-		if best ~= following then
-			following = best
-			shown = 0
-			filling = now
-			table.clear(history)
-			bossName.Text = string.upper(best:GetAttribute("Name") or best:GetAttribute("Kind") or "Boss")
+		local fraction
+		if best then
+			if state == "hidden" or state == "out" then
+				popIn()
+			end
+			state = "shown"
+			fraction = math.clamp(best:GetAttribute("Health") / best:GetAttribute("MaxHealth"), 0, 1)
+			if best ~= following then
+				following = best
+				shown = 0
+				filling = now
+				table.clear(history)
+				bossName.Text = string.upper(best:GetAttribute("Name") or best:GetAttribute("Kind") or "Boss")
+			end
+		else
+			if state == "shown" then
+				-- (killed: it stays, emptying, then pops out; walked off or it slept: out now)
+				local dead = following == nil
+					or following.Parent == nil
+					or (following:GetAttribute("Health") or 0) <= 0
+				if dead then
+					state = "lingering"
+					leftAt = now
+				else
+					popOut()
+				end
+			end
+			if state ~= "lingering" then
+				return
+			end
+			fraction = 0
+			if now - leftAt >= LINGER then
+				following = nil
+				popOut()
+			end
 		end
 		if now - filling < FILL_IN then
 			-- (a new fight: up from empty, easing out, to its health)
