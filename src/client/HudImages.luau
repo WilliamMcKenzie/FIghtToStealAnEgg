@@ -9,5 +9,6 @@ return {
 	PowerIcon = "",
 	CashIcon = "",
 	RobuxIcon = "",
-	WeldTile = "", -- assets/ui/WeldTile.png
+	StudTile = "", -- assets/ui/StudTile.png (QM's Figma stud texture)
+	WeldTile = "", -- assets/ui/WeldTile.png (QM's Figma weld texture)
 }
