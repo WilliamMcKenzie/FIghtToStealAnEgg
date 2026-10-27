@@ -16,7 +16,6 @@
 local TweenService = game:GetService("TweenService")
 
 local HudImages = require(script.Parent.HudImages)
-local Studs = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Studs"))
 local Ui = require(script.Parent.Ui)
 
 local HudKit = {}
@@ -26,8 +25,6 @@ local FIGMA_HEIGHT = 2190 -- (QM's NewUI frame)
 local HOVER_GROW = 1.08 -- a button grows this much under the mouse (QM: snappy)
 local HOVER_DARK = Color3.fromRGB(205, 205, 205) -- its back's tint then
 local HOVER_TIME = 0.08
-local STUDS_PER_TILE = 4
-local WELD_IMAGE = "rbxassetid://10509843977" -- the classic Weld surface (as Shared/Rig uses)
 
 HudKit.FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 HudKit.ITALIC = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic)
@@ -35,9 +32,8 @@ HudKit.BLACK = Color3.new(0, 0, 0)
 
 -- the Figma rectangles' looks. top/bottom: a top-to-bottom gradient (Figma: from at 15.9%);
 -- across: a left-to-right one; tile: the texture's tile size in Figma (px), its
---   transparency, and which: Roblox's classic stud decal (Figma's stud tile holds about
---   STUDS_PER_TILE studs across) or the classic Weld surface (QM, Oct 27: the red and orange
---   buttons' diamonds);
+--   transparency (1 - its Figma opacity), and which of QM's Figma textures: studs
+--   (assets/ui/StudTile.png) or Weld (assets/ui/WeldTile.png: the red and orange buttons);
 -- bevel: the inset light (top left) and shade (bottom right) and their transparency;
 -- border: an inside border's colour and width; outline: the black one round it; corner: radius
 local function rgb(hex)
@@ -172,9 +168,8 @@ function HudKit.back(parent, look, props)
 		local studs = Instance.new("ImageLabel")
 		studs.Name = "Studs"
 		studs.BackgroundTransparency = 1
-		local weld = spec.tile[3] == "Weld"
-		local size = math.max(fig(if weld then spec.tile[1] else spec.tile[1] / STUDS_PER_TILE), 2)
-		studs.Image = if weld then WELD_IMAGE else Studs.IMAGE
+		local size = math.max(fig(spec.tile[1]), 2)
+		studs.Image = (if spec.tile[3] == "Weld" then HudImages.WeldTile else HudImages.StudTile) or ""
 		studs.ScaleType = Enum.ScaleType.Tile
 		studs.TileSize = UDim2.fromOffset(size, size)
 		studs.ImageTransparency = spec.tile[2]
