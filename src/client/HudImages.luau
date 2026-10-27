@@ -9,5 +9,4 @@ return {
 	PowerIcon = "",
 	CashIcon = "",
 	RobuxIcon = "",
-	StudTile = "", -- assets/ui/StudTile.png
 }
