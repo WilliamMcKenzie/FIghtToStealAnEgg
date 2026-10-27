@@ -9,5 +9,4 @@ return {
 	PowerIcon = "rbxassetid://123860946510182",
 	CashIcon = "rbxassetid://102450910988008",
 	RobuxIcon = "rbxassetid://86362799525767",
-	StudTile = "rbxassetid://126317135829887", -- assets/ui/StudTile.png
 }
