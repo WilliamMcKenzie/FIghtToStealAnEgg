@@ -2209,6 +2209,129 @@
         "Transparency": 1,
         "ZIndex": 2
        }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UICorner",
+         "name": "UICorner",
+         "props": {
+          "CornerRadius": {
+           "t": "UDim",
+           "v": [
+            0.5,
+            0
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Border",
+         "props": {
+          "ApplyStrokeMode": {
+           "e": "ApplyStrokeMode",
+           "t": "EnumItem",
+           "v": "Border"
+          },
+          "Color": {
+           "t": "Color3",
+           "v": [
+            0.46666666865348816,
+            0,
+            0
+           ]
+          },
+          "Thickness": 2
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "Outline",
+           "props": {
+            "Color": {
+             "t": "Color3",
+             "v": [
+              0.46666666865348816,
+              0,
+              0
+             ]
+            }
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "Mark",
+         "props": {
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Normal"
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Text": "!",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "TextSize": 27,
+          "Transparency": 1,
+          "ZIndex": 11
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "PetsBadge",
+       "props": {
+        "BackgroundColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          0,
+          0
+         ]
+        },
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          -16,
+          0,
+          -13
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          32,
+          0,
+          32
+         ]
+        },
+        "ZIndex": 10
+       }
       }
      ],
      "class": "ImageButton",
