@@ -24,14 +24,13 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local ItemIcons = require(Shared.ItemIcons)
 local Weapons = require(Shared.Weapons.Weapons)
-local HudImages = require(script.Parent.HudImages)
 local HudKit = require(script.Parent.HudKit)
 local Ui = require(script.Parent.Ui)
 
 local WeaponShop = {}
 
 local player = Players.LocalPlayer
-local fig, art, label, button = HudKit.fig, HudKit.art, HudKit.label, HudKit.button
+local fig, art, label, button = HudKit.fig, HudKit.art, HudKit.label, HudKit.button -- (backs: HudKit.back)
 local DPS_COLOR = "#00FFF6"
 local NAME_STROKE = Color3.fromRGB(70, 70, 70)
 local SHINE = { { at = 0.62, width = 0.07 }, { at = 0.72, width = 0.025 } } -- across the header, of its width
@@ -51,12 +50,7 @@ local function cardTemplate()
 	local card = Instance.new("Frame")
 	card.BackgroundTransparency = 1
 	card.Size = UDim2.fromOffset(fig(729), fig(991))
-	local back = Instance.new("ImageLabel")
-	back.Name = "Back"
-	back.BackgroundTransparency = 1
-	back.Image = HudImages.ShopCard
-	back.Size = UDim2.fromScale(1, 1)
-	back.Parent = card
+	HudKit.back(card, "Card", {})
 	local picture = Instance.new("ImageLabel")
 	picture.Name = "Picture"
 	picture.BackgroundTransparency = 1
@@ -89,10 +83,10 @@ local function cardTemplate()
 	shade.Rotation = 90
 	shade.Parent = rarity
 	-- the DPS bar
-	local dps = art(card, "ShopDps", {
-		Position = UDim2.fromOffset(fig(24 - 8), fig(631 - 8)),
-		Size = UDim2.fromOffset(fig(690), fig(144)),
-		ScaleType = Enum.ScaleType.Stretch,
+	local dps = HudKit.back(card, "Dark", {
+		Name = "ShopDps",
+		Position = UDim2.fromOffset(fig(24), fig(631)),
+		Size = UDim2.fromOffset(fig(674), fig(128)),
 		ZIndex = 3,
 	})
 	label(dps, "Dps", {
@@ -104,7 +98,7 @@ local function cardTemplate()
 		ZIndex = 4,
 	})
 	-- the buttons: Equip (whole width) or the cash price and the Robux price
-	local equip = button(card, "ShopEquip", 674, 160, { Position = UDim2.fromOffset(fig(24), fig(799)), ZIndex = 4 })
+	local equip = button(card, "ShopEquip", 674, 160, { Position = UDim2.fromOffset(fig(24), fig(799)), ZIndex = 4 }, "GreenEdged")
 	label(equip, "Text", {
 		Text = "Equip",
 		TextXAlignment = Enum.TextXAlignment.Center,
@@ -112,7 +106,7 @@ local function cardTemplate()
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 5,
 	})
-	local buy = button(card, "ShopBuy", 413, 160, { Position = UDim2.fromOffset(fig(24), fig(799)), ZIndex = 4 })
+	local buy = button(card, "ShopBuy", 413, 160, { Position = UDim2.fromOffset(fig(24), fig(799)), ZIndex = 4 }, "GreenEdged")
 	label(buy, "Text", {
 		Text = "$800",
 		TextXAlignment = Enum.TextXAlignment.Center,
@@ -120,7 +114,7 @@ local function cardTemplate()
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 5,
 	})
-	local robux = button(card, "ShopRobux", 213, 160, { Position = UDim2.fromOffset(fig(479), fig(799)), ZIndex = 4 })
+	local robux = button(card, "ShopRobux", 213, 160, { Position = UDim2.fromOffset(fig(479), fig(799)), ZIndex = 4 }, "PinkEdged")
 	art(robux, "RobuxIcon", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, fig(12), 0.5, 0),
@@ -151,15 +145,15 @@ local function build(root)
 		gui.Visible = not Ui.live -- (shown in Studio to edit; in Play when Carl's Talked to)
 	end
 	Ui.make(gui, "Pop", "UIScale")
-	art(gui, "ShopPanel", {
-		Position = UDim2.fromOffset(-fig(8), fig(283) - fig(8)),
-		Size = UDim2.fromOffset(fig(2284), fig(1103)),
-		ScaleType = Enum.ScaleType.Stretch,
+	HudKit.back(gui, "Panel", {
+		Name = "Panel",
+		-- (tucked under the header, so only its bottom corners show rounded)
+		Position = UDim2.fromOffset(0, fig(263)),
+		Size = UDim2.fromOffset(fig(2268), fig(1107)),
 	})
-	local header = art(gui, "ShopHeader", {
-		Position = UDim2.fromOffset(-fig(8), -fig(8)),
-		Size = UDim2.fromOffset(fig(2284), fig(299)),
-		ScaleType = Enum.ScaleType.Stretch,
+	local header = HudKit.back(gui, "Header", {
+		Name = "Header",
+		Size = UDim2.fromOffset(fig(2268), fig(283)),
 		ZIndex = 2,
 	})
 	-- the shine: slanted white stripes, clipped to the header by a CanvasGroup (a rotated
@@ -168,8 +162,7 @@ local function build(root)
 	shine, fresh = Ui.make(header, "Shine", "CanvasGroup")
 	if fresh then
 		shine.BackgroundTransparency = 1
-		shine.Position = UDim2.fromOffset(fig(8) + 2, fig(8) + 2)
-		shine.Size = UDim2.new(1, -fig(16) - 4, 1, -fig(16) - 4)
+		shine.Size = UDim2.fromScale(1, 1)
 		shine.GroupTransparency = SHINE_ALPHA
 		shine.ZIndex = 2
 		for i, s in SHINE do
@@ -200,7 +193,7 @@ local function build(root)
 		Size = UDim2.fromOffset(fig(1100), fig(158)),
 		ZIndex = 3,
 	})
-	local close = button(gui, "ShopClose", 174, 174, { Position = UDim2.fromOffset(fig(2046), fig(54)), ZIndex = 4 })
+	local close = button(gui, "ShopClose", 174, 174, { Position = UDim2.fromOffset(fig(2046), fig(54)), ZIndex = 4 }, "Red")
 	label(close, "X", {
 		Text = "X",
 		TextXAlignment = Enum.TextXAlignment.Center,
@@ -274,7 +267,6 @@ local function refresh(card, id, mine)
 		if not card.ShopRobux.Visible then
 			-- (no Robux price: the cash one takes the whole width, on the Equip button's back)
 			card.ShopBuy.Position, card.ShopBuy.Size = card.ShopEquip.Position, card.ShopEquip.Size
-			card.ShopBuy.ShopBuy.Image = HudImages.ShopEquip
 		end
 	end
 end

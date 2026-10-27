@@ -7,7 +7,7 @@
 --
 -- Laid out in pixels at a 1080-tall design size and scaled to the screen by a UIScale
 -- (screen height / 1080). QM's Figma frame is 2190 tall, so its numbers go through fig().
--- The buttons' backs and the icons are QM's Figma layers exported as they are
+-- The buttons' backs are built natively to QM's Figma (client/HudKit); the icons are its layers exported as they are
 -- (assets/ui/hud, ids in client/HudImages; the icons at 64px, QM: less lag). Text is
 -- Montserrat ExtraBold, white with a black outline; the counters' is italic. Shop's and
 -- Index's white icons get their outline here; the rest have theirs drawn in.
@@ -161,7 +161,7 @@ function Hud.start()
 		local b = button(root, name .. "Button", 384, 128, {
 			AnchorPoint = Vector2.new(0, 0.5),
 			Position = UDim2.new(0, fig(30), 0.5, (i - 1) * fig(172)),
-		})
+		}, if name == "Shop" then "Green" else "Blue")
 		local holder
 		holder, fresh = Ui.make(b, name .. "Icon", "Frame")
 		if fresh then
@@ -199,7 +199,7 @@ function Hud.start()
 		local b = button(root, name .. "Button", 128, 128, {
 			AnchorPoint = Vector2.new(1, 0.5),
 			Position = UDim2.new(1, -fig(30), 0.5, (i - 1) * fig(163)),
-		})
+		}, if name == "Eggs" then "Red" else "Orange")
 		art(b, name .. "Icon", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
@@ -256,7 +256,7 @@ function Hud.start()
 			local add = button(row, "AddPowerButton", 64, 64, {
 				Position = UDim2.fromOffset(fig(77), fig(107)),
 				ZIndex = 4,
-			})
+			}, "Amber")
 			label(add, "Plus", {
 				Text = "+",
 				TextXAlignment = Enum.TextXAlignment.Center,
