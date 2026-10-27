@@ -3,5 +3,12 @@
   "BossBarBack": "rbxassetid://88593547866423",
   "BossBarTrail": "rbxassetid://110382419429261",
   "HpFill": "rbxassetid://90275415984527",
-  "HpBack": "rbxassetid://133695040857929"
+  "HpBack": "rbxassetid://133695040857929",
+  "ShopIcon": "rbxassetid://130215760984830",
+  "IndexIcon": "rbxassetid://75800289775667",
+  "EggsIcon": "rbxassetid://136976238742516",
+  "PetsIcon": "rbxassetid://135122637332207",
+  "CashIcon": "rbxassetid://102450910988008",
+  "PowerIcon": "rbxassetid://123860946510182",
+  "EggsButton": "rbxassetid://138402944308533"
 }
