@@ -690,6 +690,9 @@ return {
 	-- in your pen, up to PenSlots of them; the weapon you equip is the one you hold.
 	Backpack = {
 		PenSlots = 5, -- (QM, Oct 26: the Backpack's Pets tab has five)
+		-- the pet a new player owns and rides (QM, Oct 27: the pet you ride is one of your
+		-- pen's pets; Server/PetInventory). It still pays its Cash a second while ridden.
+		Starter = "Horse",
 	},
 
 	-- hatching (QM, Oct 25, LassoAPet's): a stolen egg is yours at once, in the hotbar right

@@ -2,8 +2,8 @@
 -- it: pens, eggs and the bosses' fights, the training grounds, and the weapons bosses
 -- drop (Server/Arsenal: everyone starts with the sword). Relays slashes and shots so
 -- other players see them (and lets them hit bosses, mobs and dummies: Server/Combat),
--- and spawns a boss on /boss. Your pet (player attribute Pet,
--- the Horse to start) is all your health and speed (Shared/Pets); /ride <pet> swaps it.
+-- and spawns a boss on /boss. The pet you ride (player attribute Pet: one of your pen's
+-- pets, Server/PetInventory) is all your health and speed (Shared/Pets); /ride <pet> swaps it.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -72,7 +72,6 @@ local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your Strength (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
 	player:SetAttribute("Cash", player:GetAttribute("Cash") or 0)
-	player:SetAttribute("Pet", player:GetAttribute("Pet") or "Horse")
 	player.CharacterAdded:Connect(ride)
 	player:GetAttributeChangedSignal("Pet"):Connect(function()
 		if player.Character then
@@ -230,7 +229,8 @@ rebossRequest.Name = "RebossRequest"
 rebossRequest.Parent = ReplicatedStorage
 rebossRequest.OnServerEvent:Connect(reboss)
 
--- /ride <pet>: ride that pet (QM, Oct 25: for trying the pets out until hatching comes),
+-- /ride <pet>: ride that pet (QM, Oct 25: for trying the pets out), given to you first if
+-- you don't own one (the pet ridden is always one of yours: Server/PetInventory);
 -- "/ride" alone lists them. The game's owner, or anyone in a Studio playtest.
 function swapPet(player, message)
 	if not mayReboss(player) then
@@ -239,7 +239,10 @@ function swapPet(player, message)
 	local want = (message:match("^/%a+%s+(.-)%s*$") or ""):lower():gsub("%s", "")
 	for _, kind in Pets.kinds() do
 		if kind:lower() == want then
-			player:SetAttribute("Pet", kind)
+			if not PetInventory.ride(player, kind) then
+				PetInventory.give(player, kind)
+				PetInventory.ride(player, kind)
+			end
 			return
 		end
 	end
