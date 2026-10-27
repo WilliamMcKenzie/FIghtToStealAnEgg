@@ -48,7 +48,7 @@ Training.start(map)
 Regions.start()
 Regen.start() -- (healing after Config.Regen.Delay seconds without being hit)
 Data.start() -- (after Training: it loads over the grounds' defaults)
-Arsenal.start() -- (each player's weapon tool, and the spin when a boss dies)
+Arsenal.start() -- (each player's weapon tool, and buying them from Carl)
 
 local remote = Instance.new("RemoteEvent")
 remote.Name = "Slash"
@@ -67,7 +67,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss, swapPet, givePet, testSpin, giveWeapon, giveWeapons, giveCash, resetPlayer -- (below)
+local requestBoss, reboss, swapPet, givePet, buyWeapon, giveWeapon, giveWeapons, giveCash, resetPlayer -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your Strength (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -89,8 +89,8 @@ local function joined(player)
 			swapPet(player, message)
 		elseif message:lower():match("^/give") then
 			givePet(player, message)
-		elseif message:lower():match("^/spin") or message:lower():match("^/rng") then
-			testSpin(player, message)
+		elseif message:lower():match("^/buy") then
+			buyWeapon(player, message)
 		elseif message:lower():match("^/swords") or message:lower():match("^/staffs") or message:lower():match("^/bows") then
 			giveWeapons(player, message)
 		elseif message:lower():match("^/weapon") then
@@ -308,34 +308,46 @@ weaponTune.OnServerEvent:Connect(function(player, id, key, value)
 	end
 end)
 
--- /spin [boss]: the weapon spin a boss kill gives (QM, Oct 25: for trying it), as if that
--- boss (a Config.Bosses key or name, the Mother Hen if none) had died. /weapon <weapon>
--- owns and equips one ("/weapon" alone lists them). The game's owner, or anyone in a
--- Studio playtest.
+-- /weapon <weapon> owns and equips one ("/weapon" alone gives them all); /buy <weapon> buys
+-- one from Carl with cash, as his shop will (QM, Oct 27: to try it before the shop popup).
+-- The game's owner, or anyone in a Studio playtest.
 local function squash(text)
 	return (text:lower():gsub("[%s_']", ""))
 end
-function testSpin(player, message)
+-- the weapon id a typed name means: its exact id or name first, then the first whose name
+-- starts with it, then contains it ("kendo", "horn"); nil if none
+local function findWeapon(want, ids)
+	for _, test in {
+		function(key)
+			return key == want
+		end,
+		function(key)
+			return key:sub(1, #want) == want
+		end,
+		function(key)
+			return key:find(want, 1, true) ~= nil
+		end,
+	} do
+		for _, id in ids do
+			if test(squash(id)) or test(squash(Config.Weapons[id].Name)) then
+				return id
+			end
+		end
+	end
+	return nil
+end
+function buyWeapon(player, message)
 	if not mayReboss(player) then
 		return
 	end
 	local want = squash(message:match("^/%a+%s+(.-)%s*$") or "")
-	local kind = "MotherHen"
-	if want == "" and message:lower():match("^/rng") then
-		-- (/rng: any boss's spin, so its own weapon can come up too: QM, for trying the screen)
-		local kinds = {}
-		for key in Config.Bosses do
-			table.insert(kinds, key)
-		end
-		table.sort(kinds)
-		kind = kinds[math.random(#kinds)]
+	local id = want ~= "" and findWeapon(want, Weapons.forSale())
+	if not id then
+		print("/buy one of: " .. table.concat(Weapons.forSale(), ", "))
+		return
 	end
-	for key, c in Config.Bosses do
-		if want ~= "" and (squash(key) == want or squash(c.Name or "") == want) then
-			kind = key
-		end
-	end
-	Arsenal.spin(player, kind)
+	local ok, why = Arsenal.buy(player, id)
+	print("/buy " .. id .. ": " .. (if ok then "bought" else why))
 end
 function giveWeapon(player, message)
 	if not mayReboss(player) then
@@ -356,26 +368,7 @@ function giveWeapon(player, message)
 		print("/weapon: gave all " .. #ids .. " weapons")
 		return
 	end
-	-- its exact id or name first, then the first whose name starts with it, then contains it
-	-- ("/weapon kendo", "/weapon horn")
-	local found = nil
-	for _, test in {
-		function(key)
-			return key == want
-		end,
-		function(key)
-			return key:sub(1, #want) == want
-		end,
-		function(key)
-			return key:find(want, 1, true) ~= nil
-		end,
-	} do
-		for _, id in ids do
-			if not found and (test(squash(id)) or test(squash(Config.Weapons[id].Name))) then
-				found = id
-			end
-		end
-	end
+	local found = findWeapon(want, ids)
 	if found then
 		Arsenal.give(player, found, true)
 	else
@@ -428,8 +421,7 @@ function resetPlayer(player)
 	end
 end
 for _, cmd in {
-	{ "Spin", testSpin },
-	{ "Rng", testSpin },
+	{ "Buy", buyWeapon },
 	{ "Weapon", giveWeapon },
 	{ "Swords", giveWeapons },
 	{ "Staffs", giveWeapons },

@@ -227,8 +227,11 @@ return {
 	},
 
 	-- the cactus vendor (QM, Oct 27: LassoAPet's Carl and his stall, a Vendor object in the
-	-- map editor; Server/Map builds it, Client/Vendor animates him). Talk does nothing yet:
-	-- he only hops hello (his job comes later).
+	-- map editor; Server/Map builds it, Client/Vendor animates him). He sells weapons for
+	-- cash (QM, Oct 27): each weapon's Price in Config.Weapons (placeholders, by rarity:
+	-- Common 500, Uncommon 5k, Rare 50k, Epic 500k, Mythic 5M), bought once through
+	-- Server/Arsenal's BuyWeapon. Talk hops hello and fires Vendor.talked (client/Vendor),
+	-- where the shop popup will open.
 	Vendor = {
 		Reach = 12, -- studs from the counter where Talk shows
 		LookRange = 30, -- he turns to watch a player this close
@@ -1010,19 +1013,16 @@ return {
 		Ranged = { GripOffset = Vector3.new(0.5, 0, 0.25) }, -- (bows: QM)
 	},
 
-	-- weapons (QM, Oct 25): bosses drop them. Kill a boss and everyone in its fight gets a
-	-- spin (client/WeaponSpin, Server/Arsenal) that lands on one of these; the weapon you
-	-- won is equipped (the Backpack switches between the ones you own). Three
+	-- weapons (QM, Oct 25). Bought from Carl the cactus vendor with cash (QM, Oct 27: boss
+	-- drops and the spin are gone); you hold one at a time (Server/Arsenal). Three
 	-- types: Melee slashes (Config.Slash with the weapon's Slash values over it), Ranged
 	-- shoots straight (arrows, bolts, thrown things), Magic fires slightly homing missiles
 	-- (Shared/Projectiles, client/Shots draws them). Every weapon auto-attacks like the sword.
-	--   Name     shown in the spin and the Backpack
+	--   Name     shown in the shop
 	--   Type     "Melee", "Ranged" or "Magic"
-	--   Rarity   one of Rarities (above): its colour in the spin
+	--   Rarity   one of Rarities (above): its colour
 	--   Damage   times your Power (Server/Combat: Slash.Damage x Shared/Power's Strength curve) per hit
-	--   Weight   its share of a drop (nil: never drops; the Kendo Stick is everyone's to start)
-	--   Boss     a boss-only item: only that boss (a Bosses key) drops it, and the spin
-	--            shows BONUS when it lands
+	--   Price    cash Carl sells it for (nil: not for sale; the Kendo Stick is everyone's to start)
 	--   Slash    (Melee) Config.Slash values to change: Arc, Radius, Forward, Width,
 	--            Cooldown, AttackRange, Color, Variety...
 	--   Shot     (Ranged, Magic) values over Config.Shots.Ranged or .Magic (below: every
@@ -1034,7 +1034,7 @@ return {
 		-- shoots the same arrow (only its numbers and trail differ); Magic ones are drawn from
 		-- their numbers (client/Shots). Tune any of them live: Workspace > Weapon.
 		-- tier 1
-		-- (everyone's to start: WeaponDrops.Start, so it never drops)
+		-- (everyone's to start: Arsenal.Start, so Carl doesn't sell it)
 		KendoStick = {
 			Name = "Kendo Stick",
 			Type = "Melee",
@@ -1054,7 +1054,7 @@ return {
 			Type = "Melee",
 			Rarity = "Common",
 			Damage = 0.5,
-			Weight = 30,
+			Price = 500,
 			Slash = {
 				Arc = 170,
 				AttackRange = 10,
@@ -1068,7 +1068,7 @@ return {
 			Type = "Ranged",
 			Rarity = "Common",
 			Damage = 0.8,
-			Weight = 30,
+			Price = 500,
 			Shot = { Cooldown = 0.45, Range = 45 },
 		},
 		Staff = { -- (a plain staff, no element: QM, Oct 25)
@@ -1076,7 +1076,7 @@ return {
 			Type = "Magic",
 			Rarity = "Common",
 			Damage = 0.9,
-			Weight = 30,
+			Price = 500,
 			Shot = {
 				Speed = 60,
 				Homing = 220,
@@ -1090,7 +1090,7 @@ return {
 			Type = "Melee",
 			Rarity = "Uncommon",
 			Damage = 4,
-			Weight = 18,
+			Price = 5000,
 			Slash = {
 				Arc = 200,
 				AttackRange = 6,
@@ -1111,7 +1111,7 @@ return {
 			Type = "Melee",
 			Rarity = "Uncommon",
 			Damage = 2,
-			Weight = 18,
+			Price = 5000,
 			Slash = {
 				Arc = 240,
 				AttackRange = 20,
@@ -1130,7 +1130,7 @@ return {
 			Type = "Ranged",
 			Rarity = "Uncommon",
 			Damage = 1.6,
-			Weight = 18,
+			Price = 5000,
 			Shot = {
 				Cooldown = 0.8,
 				Count = 3,
@@ -1145,7 +1145,7 @@ return {
 			Type = "Magic",
 			Rarity = "Uncommon",
 			Damage = 1.2,
-			Weight = 18,
+			Price = 5000,
 			Shot = {
 				Color = Color3.fromRGB(201, 201, 201),
 				Cooldown = 0.4,
@@ -1159,7 +1159,7 @@ return {
 			Type = "Magic",
 			Rarity = "Uncommon",
 			Damage = 1.5,
-			Weight = 18,
+			Price = 5000,
 			Shot = {
 				Color = Color3.fromRGB(255, 238, 0),
 				Cooldown = 0.4,
@@ -1176,7 +1176,7 @@ return {
 			Type = "Magic",
 			Rarity = "Rare",
 			Damage = 1.9,
-			Weight = 9,
+			Price = 50000,
 			Shot = {
 				Color = Color3.fromRGB(49, 162, 242),
 				Count = 2,
@@ -1191,7 +1191,7 @@ return {
 			Type = "Melee",
 			Rarity = "Rare",
 			Damage = 20,
-			Weight = 9,
+			Price = 50000,
 			-- (double bladed, a big sweep round you: QM)
 			Slash = {
 				Arc = 300,
@@ -1215,7 +1215,7 @@ return {
 			Type = "Melee",
 			Rarity = "Rare",
 			Damage = 10,
-			Weight = 9,
+			Price = 50000,
 			Slash = {
 				Arc = 140,
 				AttackRange = 11,
@@ -1237,7 +1237,7 @@ return {
 			Type = "Melee",
 			Rarity = "Epic",
 			Damage = 2.8,
-			Weight = 4,
+			Price = 500000,
 			Slash = {
 				Arc = 60,
 				AttackRange = 19,
@@ -1256,7 +1256,7 @@ return {
 			Type = "Ranged",
 			Rarity = "Epic",
 			Damage = 0.3,
-			Weight = 4,
+			Price = 500000,
 			Shot = {
 				Cooldown = 0.2,
 				Count = 2,
@@ -1272,7 +1272,7 @@ return {
 			Type = "Ranged",
 			Rarity = "Epic",
 			Damage = 4,
-			Weight = 4,
+			Price = 500000,
 			Shot = {
 				Cooldown = 0.4,
 				Pierce = 1,
@@ -1289,7 +1289,7 @@ return {
 			Type = "Magic",
 			Rarity = "Epic",
 			Damage = 7,
-			Weight = 4,
+			Price = 500000,
 			Shot = {
 				Color = Color3.fromRGB(255, 61, 61),
 				Cooldown = 0.8,
@@ -1300,14 +1300,14 @@ return {
 				TrailLength = 1,
 			},
 		},
-		-- boss-only (super rare, BONUS in the spin): QM cut the rest, Oct 25, keeping only this
+		-- once the Giant Rafflesia's own drop (QM cut the other boss weapons, Oct 25); Carl sells
+		-- it now like the rest, at the top price (QM, Oct 27: no more drops)
 		RafflesiaBloom = { -- (the Flower Staff: QM renamed it, Oct 25; the id stays for saves)
 			Name = "Flower Staff",
 			Type = "Magic",
 			Rarity = "Mythic",
-			Boss = "GiantRafflesia",
 			Damage = 0.8,
-			Weight = 2,
+			Price = 5000000,
 			Shot = {
 				Color = Color3.fromRGB(120, 186, 70),
 				Color2 = Color3.fromRGB(200, 235, 170),
@@ -1320,26 +1320,10 @@ return {
 			},
 		},
 	},
-	-- merging (QM, Oct 26): Cost of one weapon make the next one up its ladder (the Backpack's
-	-- MERGE button, Server/Arsenal). Into = [weapon] = what it merges into; one not here
-	-- doesn't merge.
-	Merge = {
-		Cost = 2,
-		Into = {
-			Shortsword = "Longsword",
-			Shortbow = "Longbow",
-			Longbow = "NatureBow",
-			Axe = "Waraxe",
-		},
-	},
-	-- the spin when a boss dies (client/WeaponSpin, Server/Arsenal)
-	WeaponDrops = {
+	-- weapons a player owns (Server/Arsenal). No spins, drops or merging any more (QM, Oct
+	-- 27): every weapon but the starting one is bought from Carl (Config.Vendor), once.
+	Arsenal = {
 		Start = "KendoStick", -- everyone owns this one (QM, Oct 25: the Sword's gone)
-		RaysImage = "rbxassetid://137700902661762", -- QM's sunburst behind the weapon (assets/ui/SpinRays.png, once uploaded; "" draws rays)
-		Reel = 24, -- items it flicks through before it stops
-		SpinTime = 4, -- seconds from the first flick to the stop
-		Show = 2.2, -- seconds the winner stays up before the spin fades out
-		Equip = true, -- equip what you win as it lands
 	},
 	-- shots (Shared/Projectiles): what Ranged and Magic weapons fire
 	Shots = {

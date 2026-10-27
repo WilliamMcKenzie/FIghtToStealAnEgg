@@ -30,7 +30,7 @@
 --   Bosses.engaged                   -- BindableEvent: Event(player, biome), on a hit
 --   Bosses.killed                    -- BindableEvent: Event(kind, players), when one is
 --                                       beaten (not on /reboss): everyone in its fight and
---                                       everyone who hit it, for their weapon spin
+--                                       everyone who hit it, (nothing listens now: QM, Oct 27, no more weapon drops)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

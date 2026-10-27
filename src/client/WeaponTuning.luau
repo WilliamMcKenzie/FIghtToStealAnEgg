@@ -49,7 +49,7 @@ end
 
 local function held()
 	local id = player:GetAttribute("Weapon")
-	return if Weapons.exists(id) then id else Config.WeaponDrops.Start
+	return if Weapons.exists(id) then id else Config.Arsenal.Start
 end
 
 remote.OnClientEvent:Connect(function(id, key, value)
