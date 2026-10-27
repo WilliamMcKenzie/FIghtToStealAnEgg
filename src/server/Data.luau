@@ -1,7 +1,7 @@
 -- Saving (QM, Oct 24): each player's progress lives in their attributes while they play
 -- (Cash, Strength, Eggs, Rebirths, Train<Name> for each training ground bought,
--- Region<Name> for each region, Weapons and Weapon: Server/Arsenal, PetsOwned and
--- PenPets: Server/PetInventory, PenEggs: Server/Hatchery) and is
+-- Region<Name> for each region, Weapons and Weapon: Server/Arsenal, PetsOwned,
+-- PenPets and Pet (the one ridden): Server/PetInventory, PenEggs: Server/Hatchery) and is
 -- saved to a DataStore when they leave, every Config.Data.AutoSave seconds, and when the
 -- server shuts down. Nothing is saved for a player whose data failed to load (so a
 -- DataStore outage can't wipe anyone), and in a Studio playtest without API access it
@@ -28,7 +28,7 @@ local loaded = {} -- [player] = true once their data is in
 local warned = false
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "PenEggs" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end
@@ -122,7 +122,7 @@ local function rebirth(player)
 end
 
 -- back to a brand new account (QM, Oct 25: the /reset command): nothing bought, earned or
--- owned, the Horse to ride and the starting weapon; saved straight away
+-- owned but the starter pet (Server/PetInventory gives it) and the starting weapon; saved straight away
 function Data.reset(player)
 	player:SetAttribute("Cash", 0)
 	player:SetAttribute("Strength", 0)
@@ -135,7 +135,7 @@ function Data.reset(player)
 	player:SetAttribute("PenEggs", nil)
 	player:SetAttribute("EggBag", nil)
 	player:SetAttribute("Holding", nil)
-	player:SetAttribute("Pet", "Horse")
+	player:SetAttribute("Pet", Config.Backpack.Starter)
 	player:SetAttribute("HeldEgg", nil)
 	player:SetAttribute("HeldEggKind", nil)
 	player:SetAttribute("LockedIn", nil)
