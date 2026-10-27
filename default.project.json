@@ -22,7 +22,7 @@
     "Lighting": {
       "$properties": {
         "Technology": "ShadowMap",
-        "Brightness": 1,
+        "Brightness": 0.3,
         "GlobalShadows": false,
         "ShadowSoftness": 0.2,
         "Ambient": [
@@ -31,12 +31,12 @@
           0
         ],
         "OutdoorAmbient": [
-          0.7450980392156863,
-          0.7490196078431373,
-          0.7490196078431373
+          1,
+          1,
+          1
         ],
-        "EnvironmentDiffuseScale": 0.2,
-        "EnvironmentSpecularScale": 0,
+        "EnvironmentDiffuseScale": 0,
+        "EnvironmentSpecularScale": 1,
         "ExposureCompensation": 0.5,
         "ClockTime": 12,
         "FogStart": 500,
