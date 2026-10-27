@@ -1,0 +1,12 @@
+{
+ "children": [],
+ "class": "ScreenGui",
+ "name": "ScreenGui",
+ "props": {
+  "ZIndexBehavior": {
+   "e": "ZIndexBehavior",
+   "t": "EnumItem",
+   "v": "Sibling"
+  }
+ }
+}
