@@ -7,7 +7,7 @@
      "class": "UIScale",
      "name": "Fit",
      "props": {
-      "Scale": 0.4166666567325592
+      "Scale": 0.6499999761581421
      }
     },
     {
@@ -296,7 +296,7 @@
          "name": "Studs",
          "props": {
           "BackgroundTransparency": 1,
-          "Image": "rbxassetid://126317135829887",
+          "Image": "rbxassetid://7447638591",
           "ImageTransparency": 0.800000011920929,
           "ScaleType": {
            "e": "ScaleType",
@@ -316,9 +316,9 @@
            "t": "UDim2",
            "v": [
             0,
-            44,
+            11,
             0,
-            44
+            11
            ]
           },
           "Transparency": 1
@@ -1062,7 +1062,7 @@
          "name": "Studs",
          "props": {
           "BackgroundTransparency": 1,
-          "Image": "rbxassetid://126317135829887",
+          "Image": "rbxassetid://7447638591",
           "ImageTransparency": 0.800000011920929,
           "ScaleType": {
            "e": "ScaleType",
@@ -1082,9 +1082,9 @@
            "t": "UDim2",
            "v": [
             0,
-            44,
+            11,
             0,
-            44
+            11
            ]
           },
           "Transparency": 1
@@ -1828,7 +1828,7 @@
          "name": "Studs",
          "props": {
           "BackgroundTransparency": 1,
-          "Image": "rbxassetid://126317135829887",
+          "Image": "rbxassetid://10509843977",
           "ImageTransparency": 0.800000011920929,
           "ScaleType": {
            "e": "ScaleType",
@@ -2179,7 +2179,7 @@
          "name": "Studs",
          "props": {
           "BackgroundTransparency": 1,
-          "Image": "rbxassetid://126317135829887",
+          "Image": "rbxassetid://10509843977",
           "ImageTransparency": 0.800000011920929,
           "ScaleType": {
            "e": "ScaleType",
@@ -2688,7 +2688,7 @@
            "name": "Studs",
            "props": {
             "BackgroundTransparency": 1,
-            "Image": "rbxassetid://126317135829887",
+            "Image": "rbxassetid://10509843977",
             "ImageTransparency": 0.800000011920929,
             "ScaleType": {
              "e": "ScaleType",
@@ -3549,7 +3549,7 @@
          "name": "Studs",
          "props": {
           "BackgroundTransparency": 1,
-          "Image": "rbxassetid://126317135829887",
+          "Image": "rbxassetid://7447638591",
           "ImageTransparency": 0.8999999761581421,
           "ScaleType": {
            "e": "ScaleType",
@@ -3569,9 +3569,9 @@
            "t": "UDim2",
            "v": [
             0,
-            110,
+            28,
             0,
-            110
+            28
            ]
           },
           "Transparency": 1
@@ -3717,7 +3717,7 @@
          "name": "Studs",
          "props": {
           "BackgroundTransparency": 1,
-          "Image": "rbxassetid://126317135829887",
+          "Image": "rbxassetid://7447638591",
           "ImageTransparency": 0.800000011920929,
           "ScaleType": {
            "e": "ScaleType",
@@ -3737,9 +3737,9 @@
            "t": "UDim2",
            "v": [
             0,
-            110,
+            28,
             0,
-            110
+            28
            ]
           },
           "Transparency": 1
@@ -4212,7 +4212,7 @@
            "name": "Studs",
            "props": {
             "BackgroundTransparency": 1,
-            "Image": "rbxassetid://126317135829887",
+            "Image": "rbxassetid://10509843977",
             "ImageTransparency": 0.800000011920929,
             "ScaleType": {
              "e": "ScaleType",
@@ -4578,7 +4578,7 @@
              "name": "Studs",
              "props": {
               "BackgroundTransparency": 1,
-              "Image": "rbxassetid://126317135829887",
+              "Image": "rbxassetid://7447638591",
               "ImageTransparency": 0.800000011920929,
               "ScaleType": {
                "e": "ScaleType",
@@ -4598,9 +4598,9 @@
                "t": "UDim2",
                "v": [
                 0,
-                110,
+                28,
                 0,
-                110
+                28
                ]
               },
               "Transparency": 1
@@ -4928,7 +4928,7 @@
              "name": "Studs",
              "props": {
               "BackgroundTransparency": 1,
-              "Image": "rbxassetid://126317135829887",
+              "Image": "rbxassetid://7447638591",
               "ImageTransparency": 0.800000011920929,
               "ScaleType": {
                "e": "ScaleType",
@@ -4948,9 +4948,9 @@
                "t": "UDim2",
                "v": [
                 0,
-                44,
+                11,
                 0,
-                44
+                11
                ]
               },
               "Transparency": 1
@@ -5122,7 +5122,7 @@
                "name": "Studs",
                "props": {
                 "BackgroundTransparency": 1,
-                "Image": "rbxassetid://126317135829887",
+                "Image": "rbxassetid://7447638591",
                 "ImageTransparency": 0.800000011920929,
                 "ScaleType": {
                  "e": "ScaleType",
@@ -5142,9 +5142,9 @@
                  "t": "UDim2",
                  "v": [
                   0,
-                  44,
+                  11,
                   0,
-                  44
+                  11
                  ]
                 },
                 "Transparency": 1
@@ -5407,7 +5407,7 @@
                "name": "Studs",
                "props": {
                 "BackgroundTransparency": 1,
-                "Image": "rbxassetid://126317135829887",
+                "Image": "rbxassetid://7447638591",
                 "ImageTransparency": 0.800000011920929,
                 "ScaleType": {
                  "e": "ScaleType",
@@ -5427,9 +5427,9 @@
                  "t": "UDim2",
                  "v": [
                   0,
-                  44,
+                  11,
                   0,
-                  44
+                  11
                  ]
                 },
                 "Transparency": 1
@@ -5692,7 +5692,7 @@
                "name": "Studs",
                "props": {
                 "BackgroundTransparency": 1,
-                "Image": "rbxassetid://126317135829887",
+                "Image": "rbxassetid://7447638591",
                 "ImageTransparency": 0.800000011920929,
                 "ScaleType": {
                  "e": "ScaleType",
@@ -5712,9 +5712,9 @@
                  "t": "UDim2",
                  "v": [
                   0,
-                  44,
+                  11,
                   0,
-                  44
+                  11
                  ]
                 },
                 "Transparency": 1
@@ -6072,9 +6072,9 @@
     "Size": {
      "t": "UDim2",
      "v": [
-      2.4000000953674316,
+      1.5384615659713745,
       0,
-      2.4000000953674316,
+      1.5384615659713745,
       0
      ]
     },
