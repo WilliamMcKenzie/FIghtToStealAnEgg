@@ -121,7 +121,8 @@ local function lay(nest, biome, popAt)
 	local state = biomes[biome]
 	local x, y, z = nest:GetAttribute("EggX"), nest:GetAttribute("EggY") or 1, nest:GetAttribute("EggZ")
 	local kind = Eggs.kindFor(biome)
-	local egg = Eggs.make(biome, kind, Config.Eggs.Scale.Nest)
+	local pet = Config.Pets[kind]
+	local egg = Eggs.make(biome, kind, Config.Eggs.Scale.Nest * (Config.Eggs.RarityScale[pet and pet.Rarity] or 1))
 	egg.Anchored = true
 	egg.CFrame = CFrame.new(x, y + egg.Size.Y / 2, z) * CFrame.Angles(0, math.random() * math.pi * 2, 0)
 	egg:SetAttribute("PopAt", popAt)

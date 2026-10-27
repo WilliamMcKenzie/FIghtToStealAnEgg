@@ -762,6 +762,9 @@ return {
 			Ocean = { Horse = 1 },
 		},
 		Scale = { Nest = 1.3, Carried = 0.6, Pen = 0.9 }, -- times the egg's drawing (about 4 studs tall)
+		-- a nest's egg is also this x bigger by its pet's rarity (QM, Oct 27: a Legendary's
+		-- much bigger than a Common's)
+		RarityScale = { Common = 1, Uncommon = 1.1, Rare = 1.25, Epic = 1.45, Legendary = 1.75, Mythic = 2 },
 		Twitch = { 3, 8 }, -- seconds between an egg's AFK twitches (random in this range)
 		Reward = { Meadow = 100, Desert = 600, Ice = 3000, Lava = 15000, Dungeon = 60000, Forest = 60000, Castle = 250000, Ocean = 250000 },
 		PenShows = 24, -- most eggs sat in a pen
