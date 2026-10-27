@@ -6,9 +6,12 @@
 --   HudKit.fig(n) -> design px           -- Figma px to design px
 --   HudKit.art(parent, name, props)      -- a Figma layer exported as it is (HudImages[name])
 --   HudKit.label(parent, name, props)    -- white Montserrat ExtraBold, black outline
---   HudKit.button(parent, name, w, h, props) -- a button whose back is HudImages[name]
---     (w x h Figma px; the back holds the black outline, 8 Figma px past the edge). Under the
---     mouse it grows from its centre and its back darkens (QM, Oct 27), its icon and text not.
+--   HudKit.back(parent, look, props)     -- a Figma rectangle built natively (QM, Oct 27: no
+--     images for flat pieces): its fill or gradient, the stud texture over it, the bevel, its
+--     inside border and the black outline round it. `look` is one of HudKit.LOOKS.
+--   HudKit.button(parent, name, w, h, props, look) -- a w x h (Figma px) button on a Back of
+--     that look. Under the mouse it grows from its centre and its back darkens (QM, Oct 27),
+--     its icon and text not.
 
 local TweenService = game:GetService("TweenService")
 
@@ -26,6 +29,33 @@ local HOVER_TIME = 0.08
 HudKit.FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 HudKit.ITALIC = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic)
 HudKit.BLACK = Color3.new(0, 0, 0)
+
+-- the Figma rectangles' looks. top/bottom: a top-to-bottom gradient (Figma: from at 15.9%);
+-- across: a left-to-right one; tile: the stud texture's size (Figma px) and transparency;
+-- bevel: the inset light (top left) and shade (bottom right) and their transparency;
+-- border: an inside border's colour and width; outline: the black one round it; corner: radius
+local function rgb(hex)
+	return Color3.fromHex(hex)
+end
+local BUTTON = { tile = { 89.4, 0.8 }, outline = 8, corner = 5 }
+HudKit.LOOKS = {
+	Green = { top = rgb("caff00"), bottom = rgb("0aff00"), bevel = { 0.5, 0.5 }, base = BUTTON },
+	Blue = { top = rgb("00f8ff"), bottom = rgb("00afff"), bevel = { 0.5, 0.5 }, base = BUTTON },
+	Red = { top = rgb("ff0000"), bottom = rgb("d90000"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8 } },
+	Orange = { top = rgb("ff963c"), bottom = rgb("ef8832"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8 } },
+	Amber = { top = rgb("ffa100"), bottom = rgb("ffa100"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8 } },
+	GreenEdged = { top = rgb("caff00"), bottom = rgb("0aff00"), border = { rgb("caff02"), 5 }, base = BUTTON },
+	PinkEdged = { top = rgb("ff00f2"), bottom = rgb("c300ff"), border = { rgb("ee51f9"), 5 }, base = BUTTON },
+	Dark = { fill = Color3.new(0, 0, 0), alpha = 0.6, base = BUTTON },
+	Header = {
+		across = { rgb("ff5e00"), rgb("ffbf00"), rgb("ff4400") },
+		bevel = { 0.5, 0.5, rgb("ffe500"), rgb("b60000"), 12 },
+		tile = { 223.5, 0.8 },
+		outline = 8,
+	},
+	Panel = { fill = rgb("323232"), border = { Color3.new(0, 0, 0), 6, 0.5 }, tile = { 223.5, 0.9 }, outline = 8, corner = 20 },
+	Card = { fill = Color3.new(1, 1, 1), border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+}
 
 function HudKit.fig(n)
 	return math.round(n * DESIGN_HEIGHT / FIGMA_HEIGHT)
@@ -66,6 +96,128 @@ function HudKit.label(parent, name, props)
 	return l
 end
 
+-- (a Figma look, with its base's values under it)
+local function resolve(look)
+	local spec = HudKit.LOOKS[look] or look
+	if spec.base then
+		local out = table.clone(spec.base)
+		for k, v in spec do
+			out[k] = v
+		end
+		return out
+	end
+	return spec
+end
+
+function HudKit.back(parent, look, props)
+	local spec = resolve(look)
+	local back, fresh = Ui.make(parent, props.Name or "Back", "Frame")
+	if not fresh then
+		return back
+	end
+	back.BorderSizePixel = 0
+	back.Size = UDim2.fromScale(1, 1)
+	back.BackgroundColor3 = Color3.new(1, 1, 1)
+	back.BackgroundTransparency = spec.alpha or 0
+	for k, v in props do
+		if k ~= "Name" then
+			back[k] = v
+		end
+	end
+	local corner = spec.corner and fig(spec.corner)
+	local function round(frame)
+		if corner then
+			local c = Instance.new("UICorner")
+			c.CornerRadius = UDim.new(0, corner)
+			c.Parent = frame
+		end
+	end
+	round(back)
+	local fill = Instance.new("UIGradient")
+	fill.Name = "Fill"
+	if spec.across then
+		local c = spec.across
+		fill.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, c[1]),
+			ColorSequenceKeypoint.new(0.476, c[2]),
+			ColorSequenceKeypoint.new(1, c[3]),
+		})
+	elseif spec.top then
+		fill.Rotation = 90
+		fill.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, spec.top),
+			ColorSequenceKeypoint.new(0.159, spec.top),
+			ColorSequenceKeypoint.new(1, spec.bottom),
+		})
+	else
+		fill.Color = ColorSequence.new(spec.fill)
+	end
+	fill.Parent = back
+	if spec.outline then
+		local outline = Instance.new("UIStroke")
+		outline.Name = "Outline"
+		outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		outline.Color = HudKit.BLACK
+		outline.Thickness = fig(spec.outline)
+		outline.Parent = back
+	end
+	-- the studs, tiled
+	if spec.tile then
+		local studs = Instance.new("ImageLabel")
+		studs.Name = "Studs"
+		studs.BackgroundTransparency = 1
+		studs.Image = HudImages.StudTile or "" -- (assets/ui/StudTile.png: one small tile for every texture)
+		studs.ScaleType = Enum.ScaleType.Tile
+		studs.TileSize = UDim2.fromOffset(fig(spec.tile[1]), fig(spec.tile[1]))
+		studs.ImageTransparency = spec.tile[2]
+		studs.Size = UDim2.fromScale(1, 1)
+		studs.Parent = back
+		round(studs)
+	end
+	-- the bevel: light along the top and left, shade along the bottom and right
+	if spec.bevel then
+		local b = spec.bevel
+		local width = fig(b[5] or 8)
+		for _, e in {
+			{ "Light", b[3] or Color3.new(1, 1, 1), b[1], UDim2.new(0, 0, 0, 0), UDim2.new(1, 0, 0, width) },
+			{ "Light", b[3] or Color3.new(1, 1, 1), b[1], UDim2.new(0, 0, 0, width), UDim2.new(0, width, 1, -width) },
+			{ "Shade", b[4] or HudKit.BLACK, b[2], UDim2.new(0, width, 1, -width), UDim2.new(1, -width, 0, width) },
+			{ "Shade", b[4] or HudKit.BLACK, b[2], UDim2.new(1, -width, 0, width), UDim2.new(0, width, 1, -width) },
+		} do
+			local strip = Instance.new("Frame")
+			strip.Name = e[1]
+			strip.BorderSizePixel = 0
+			strip.BackgroundColor3 = e[2]
+			strip.BackgroundTransparency = e[3]
+			strip.Position = e[4]
+			strip.Size = e[5]
+			strip.Parent = back
+		end
+	end
+	-- an inside border: a stroke round a frame inset by its width
+	if spec.border then
+		local w = fig(spec.border[2])
+		local inner = Instance.new("Frame")
+		inner.Name = "Border"
+		inner.BackgroundTransparency = 1
+		inner.Position = UDim2.fromOffset(w, w)
+		inner.Size = UDim2.new(1, -2 * w, 1, -2 * w)
+		local stroke = Instance.new("UIStroke")
+		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		stroke.Color = spec.border[1]
+		stroke.Transparency = spec.border[3] or 0
+		stroke.Thickness = w
+		stroke.Parent = inner
+		if corner then
+			local c = Instance.new("UICorner")
+			c.CornerRadius = UDim.new(0, math.max(corner - w, 0))
+			c.Parent = inner
+		end
+		inner.Parent = back
+	end
+	return back
+end
+
 -- anchors `b` on its centre without moving it (so the hover's UIScale grows it from there;
 -- also fixes a copy baked before, anchored on its left)
 local function centre(b)
@@ -83,7 +235,7 @@ local function centre(b)
 	b.AnchorPoint = Vector2.new(0.5, 0.5)
 end
 
-function HudKit.button(parent, name, w, h, props)
+function HudKit.button(parent, name, w, h, props, look)
 	local b, fresh = Ui.make(parent, name, "ImageButton")
 	if fresh then
 		b.BackgroundTransparency = 1
@@ -95,21 +247,15 @@ function HudKit.button(parent, name, w, h, props)
 		end
 	end
 	centre(b)
-	HudKit.art(b, name, {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.new(1, fig(16), 1, fig(16)),
-		ScaleType = Enum.ScaleType.Stretch,
-	})
+	HudKit.back(b, look, {})
 	Ui.make(b, "Hover", "UIScale")
 	HudKit.hover(b)
 	return b
 end
 
--- wires a button's hover (in Play): its Hover UIScale grows, its back (the child named like
--- it) darkens
+-- wires a button's hover (in Play): its Hover UIScale grows, its Back darkens
 function HudKit.hover(b)
-	local grow, back = b:FindFirstChild("Hover"), b:FindFirstChild(b.Name)
+	local grow, back = b:FindFirstChild("Hover"), b:FindFirstChild("Back")
 	if not (Ui.live and grow) then
 		return
 	end
@@ -117,7 +263,7 @@ function HudKit.hover(b)
 	local function hover(on)
 		TweenService:Create(grow, info, { Scale = if on then HOVER_GROW else 1 }):Play()
 		if back then
-			TweenService:Create(back, info, { ImageColor3 = if on then HOVER_DARK else Color3.new(1, 1, 1) }):Play()
+			TweenService:Create(back, info, { BackgroundColor3 = if on then HOVER_DARK else Color3.new(1, 1, 1) }):Play()
 		end
 	end
 	b.MouseEnter:Connect(function()

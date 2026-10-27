@@ -1,25 +1,13 @@
--- The HUD's images (QM's NewUI Figma layers, exported to assets/ui/hud and assets/ui/shop) by name. Empty until
+-- The HUD's images by name: QM's NewUI Figma icons, exported to assets/ui/hud (and the Robux
+-- icon to assets/ui/shop). Everything flat is built natively (client/HudKit). Empty until
 -- they're uploaded (tools/studio/imgup.py); each one shows blank until then.
 return {
-	ShopButton = "rbxassetid://107051431084993",
 	ShopIcon = "rbxassetid://130215760984830",
-	IndexButton = "rbxassetid://74988943576360",
 	IndexIcon = "rbxassetid://75800289775667",
-	EggsButton = "rbxassetid://138402944308533",
 	EggsIcon = "rbxassetid://136976238742516",
-	PetsButton = "rbxassetid://89948114192855",
 	PetsIcon = "rbxassetid://135122637332207",
-	AddPowerButton = "rbxassetid://75370681620229",
 	PowerIcon = "rbxassetid://123860946510182",
 	CashIcon = "rbxassetid://102450910988008",
-	-- the Weapon Shop (assets/ui/shop)
-	ShopHeader = "",
-	ShopPanel = "",
-	ShopClose = "",
-	ShopCard = "",
-	ShopEquip = "",
-	ShopBuy = "",
-	ShopRobux = "",
-	ShopDps = "",
-	RobuxIcon = "",
+	RobuxIcon = "rbxassetid://86362799525767",
+	StudTile = "rbxassetid://126317135829887", -- assets/ui/StudTile.png
 }
