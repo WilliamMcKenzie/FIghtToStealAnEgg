@@ -264,7 +264,10 @@ end
 local function turnToward(b, offset, dt)
 	local want = math.atan2(-offset.X, -offset.Z)
 	local turn = (want - b.yaw + math.pi) % (2 * math.pi) - math.pi
-	b.yaw += turn * (1 - math.exp(-dt * b.c.Turn))
+	-- (eased, but never faster than its TurnRate, so a fast pet circling it gets behind it
+	-- and out of its melee cone: Config.BossMelee)
+	local most = math.rad(b.c.TurnRate or Config.BossMelee.TurnRate) * dt
+	b.yaw += math.clamp(turn * (1 - math.exp(-dt * b.c.Turn)), -most, most)
 end
 
 RunService.Heartbeat:Connect(function(dt)

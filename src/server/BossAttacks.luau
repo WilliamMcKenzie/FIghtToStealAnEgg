@@ -3,8 +3,9 @@
 -- Config.Bosses is a list of these, each on its own timer:
 --
 --   Contact { Every, Reach, Damage, Gentle }: everyone in the fight within Reach studs of
---         its edge takes Damage, at most every Every seconds (QM, Oct 24: all bosses, for
---         now). Gentle ones never take anyone below 1 health (unused: QM, Oct 26 wants the
+--         its edge and inside its front cone (Config.BossMelee.Cone, QM Oct 27: circle
+--         behind it and its melee misses) takes Damage, at most every Every seconds (QM,
+--         Oct 24: all bosses, for now). Gentle ones never take anyone below 1 health (unused: QM, Oct 26 wants the
 --         training mobs to be able to kill you).
 --   Slam  { Every, Range, Radius, Windup, Damage }: when a fighter is within Range, it
 --         stops, a red circle grows in front of it for Windup seconds, then everything
@@ -29,7 +30,9 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Pets = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pets"))
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Pets = require(Shared:WaitForChild("Pets"))
+local Config = require(Shared:WaitForChild("Config"))
 local HORSE_HITBOX = Pets.stats("Horse").Hitbox
 
 local BossAttacks = {}
@@ -164,6 +167,9 @@ local function nearest(position, list)
 	return best, bestDist
 end
 
+-- (the cos of half its melee cone: a fighter at most this far off its facing gets hit)
+local coneCos = math.cos(math.rad(Config.BossMelee.Cone / 2))
+
 function BossAttacks.update(body, b, dt, list)
 	local attacks = b.c.Attacks
 	if not attacks then
@@ -186,10 +192,14 @@ function BossAttacks.update(body, b, dt, list)
 		local toward = flat(target.root.Position - pos)
 		toward = if toward.Magnitude > 0.01 then toward.Unit else Vector3.new(0, 0, -1)
 		if a.Kind == "Contact" then
-			-- too close and it hurts: everyone within Reach of its edge, every Every seconds
+			-- too close and it hurts: everyone within Reach of its edge and in front of it,
+			-- every Every seconds
 			local hit = false
+			local facing = flat(body.CFrame.LookVector).Unit
 			for _, f in list do
-				if flat(f.root.Position - pos).Magnitude - b.c.Radius - f.extra <= a.Reach then
+				local off = flat(f.root.Position - pos)
+				local inFront = off.Magnitude < 0.01 or facing:Dot(off.Unit) >= coneCos
+				if inFront and off.Magnitude - b.c.Radius - f.extra <= a.Reach then
 					local damage = if a.Gentle then math.min(a.Damage, f.humanoid.Health - 1) else a.Damage
 					if damage > 0 then
 						f.humanoid:TakeDamage(damage)
