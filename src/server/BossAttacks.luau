@@ -16,6 +16,12 @@
 --   Bombs { Every, Count, Radius, Windup, Damage, Scatter }: a circle under every fighter
 --         (and Count more scattered round them, up to Scatter studs off) that blows up
 --         after Windup.
+--   Lob   { Every, Count, Radius, Airtime, Damage, Scatter, Height, Style }: the Cactus
+--         Boss's bombs (QM, Oct 27, after the bombs in QM's Kingdom game): one flung in an
+--         arc at where every fighter stands now (and Count more scattered round them, up
+--         to Scatter studs off), landing Airtime seconds later and hurting everyone
+--         within Radius. Clients draw the bomb and its red landing ring, which fills from
+--         the middle out as it comes down (client/Bombs, from the BossBomb remote).
 --
 -- Only players locked into its fight (LockedIn = its biome) are hit, so someone passing
 -- through is never caught. All of it is server parts in workspace.BossFx. A pet bigger
@@ -44,6 +50,11 @@ fx.Parent = workspace
 local RED = Color3.fromRGB(255, 50, 40)
 local SHOT = Color3.fromRGB(255, 140, 40)
 local FLOOR_Y = 0.15
+
+-- (Lob: every client draws the bomb in flight and where it'll land: client/Bombs)
+local bombRemote = Instance.new("RemoteEvent")
+bombRemote.Name = "BossBomb"
+bombRemote.Parent = ReplicatedStorage
 
 local shots = {} -- [part] = { dir, speed, travelled, range, damage, radius, biome }
 
@@ -93,6 +104,31 @@ local function groundAt(position)
 	return if hit then hit.Position.Y else 0
 end
 
+-- everyone in the fight within radius of centre (flat) takes damage
+local function blast(biome, centre, radius, damage)
+	for _, f in fighters(biome) do
+		if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra then
+			f.humanoid:TakeDamage(damage)
+		end
+	end
+end
+
+-- a bomb flung from `from` to land on the ground at `centre` after a.Airtime, hurting
+-- everyone within a.Radius there (the flight and the warning are the clients': client/Bombs)
+local function lob(biome, from, centre, a)
+	local to = Vector3.new(centre.X, groundAt(centre), centre.Z)
+	bombRemote:FireAllClients({
+		from = from,
+		to = to,
+		start = workspace:GetServerTimeNow(),
+		airtime = a.Airtime,
+		radius = a.Radius,
+		height = a.Height,
+		style = a.Style,
+	})
+	task.delay(a.Airtime, blast, biome, to, a.Radius, a.Damage)
+end
+
 -- a flat red circle on the ground that fills over `windup`, then hurts everyone in the
 -- fight inside it
 local function circle(biome, centre, radius, windup, damage)
@@ -121,11 +157,7 @@ local function circle(biome, centre, radius, windup, damage)
 		)
 		:Play()
 	task.delay(windup, function()
-		for _, f in fighters(biome) do
-			if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra then
-				f.humanoid:TakeDamage(damage)
-			end
-		end
+		blast(biome, centre, radius, damage)
 		rim.Transparency = 0.2
 		fill:Destroy()
 		TweenService
@@ -239,6 +271,25 @@ function BossAttacks.update(body, b, dt, list)
 				local f = list[math.random(1, #list)]
 				local off = Vector3.new(math.random() * 2 - 1, 0, math.random() * 2 - 1) * a.Scatter
 				circle(b.biome, flat(f.root.Position) + off, a.Radius, a.Windup, a.Damage)
+			end
+		elseif a.Kind == "Lob" then
+			b.timers[i] = a.Every
+			-- (out of its top, toward each spot)
+			local top = body.Position + Vector3.new(0, body.Size.Y * 0.3, 0)
+			local function fling(spot)
+				local dir = flat(spot - pos)
+				local from = top + (if dir.Magnitude > 0.01 then dir.Unit * b.c.Radius * 0.5 else Vector3.zero)
+				lob(b.biome, from, spot, a)
+			end
+			for _, f in list do
+				fling(flat(f.root.Position))
+			end
+			for _ = 1, a.Count or 0 do
+				local f = list[math.random(1, #list)]
+				local angle = math.random() * 2 * math.pi
+				local out = a.Radius + math.random() * (a.Scatter - a.Radius)
+				local off = Vector3.new(math.cos(angle), 0, math.sin(angle)) * out
+				fling(flat(f.root.Position) + off)
 			end
 		end
 	end

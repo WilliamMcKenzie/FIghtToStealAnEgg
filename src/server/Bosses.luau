@@ -14,6 +14,8 @@
 -- (Bosses.defeated fires: the fight's players go free). Either way Bosses.ended fires and
 -- Server/Eggs starts the biome's nest cooldown: it's called up again by the next egg
 -- taken once the nests refill (QM, Oct 26).
+-- A boss with Minions (Config.Bosses) calls them up once it's down to Minions.At of its
+-- health (Server/Minions); they go when the fight ends.
 -- (The old sleeping bosses, QM Oct 25: Asleep bodies can't be hit and stand still, and
 -- client/BossView still draws them sleeping; nothing sets Asleep now.)
 --
@@ -40,6 +42,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local BossAttacks = require(script.Parent.BossAttacks)
 local Combat = require(script.Parent.Combat)
+local Minions = require(script.Parent.Minions)
 
 local Bosses = {}
 Bosses.defeated = Instance.new("BindableEvent")
@@ -51,7 +54,10 @@ local folder = Instance.new("Folder")
 folder.Name = "Bosses"
 folder.Parent = workspace
 
-local live = {} -- [body] = { kind, c, yaw, home, bounds, biome, calm }
+-- (however a fight ends, its minions go with it)
+Bosses.ended.Event:Connect(Minions.clear)
+
+local live = {} -- [body] = { kind, c, yaw, home, bounds, biome, calm, minions (called yet) }
 local arenas = {} -- [biome] = { spot, bounds, ready (a boss can be summoned) }
 local extents = {}
 local HOME_YAW = math.pi -- (facing +z, south: every arena's gateway is on its south side)
@@ -74,6 +80,12 @@ end
 local function hurt(body, amount)
 	local health = math.max(0, body:GetAttribute("Health") - amount)
 	body:SetAttribute("Health", health)
+	-- (down to its Minions.At share: its helpers arrive, once a fight: Server/Minions)
+	local m = live[body] and live[body].c.Minions
+	if m and health > 0 and not live[body].minions and health <= body:GetAttribute("MaxHealth") * m.At then
+		live[body].minions = true
+		Minions.call(body, live[body])
+	end
 	if health <= 0 then
 		local b = live[body]
 		live[body] = nil
