@@ -6,8 +6,9 @@
 -- flashes red and the damage pops up over its head; at 0 it stays red as it sinks and shrinks.
 -- A burrowing boss (the Sandworm: its Burrow attribute, Server/Bosses) stands reared up out
 -- of the ground in its Config Burrow.Pose (no hole drawn: QM), rises out of the ground as
--- it surfaces (head pointing up, then bending forward to look at you) and drops back down it, and isn't drawn while
--- it tunnels: a mound of sand runs over the ground instead (client/BurrowFx).
+-- it surfaces (head pointing up, then bending forward to look at you) and drops back down,
+-- and isn't drawn while it tunnels: LassoAPet's burrow runs over the ground instead
+-- (client/BurrowFx).
 -- Also hands the /boss chat command to the server (BossRequest), and B does the same;
 -- /reboss goes as RebossRequest
 -- (a key that works whatever chat the place uses).
