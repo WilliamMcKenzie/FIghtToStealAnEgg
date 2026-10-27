@@ -1,6 +1,7 @@
 -- One-off (QM, Oct 27: "remove ALL ui ... other than the boss HP bar"): deletes everything in
--- StarterGui.Hud.Root except the BossBar (and the Fit scale), keeping QM's edits to the bar.
--- Run with lu.py in Edit after syncing src/, then save the place and run uisave.py.
+-- StarterGui.Hud.Root that the old UI made (all but the BossBar and the Fit scale),
+-- keeping QM's edits to the bar. Only the old pieces, by name, so it never touches the new HUD.
+-- Run with lu.py in Edit after syncing src/, then uibake.luau, save the place and run uisave.py.
 if game:GetService("RunService"):IsRunning() then
 	return "playing: stop Play first"
 end
@@ -9,9 +10,17 @@ local root = hud and hud:FindFirstChild("Root")
 if not root then
 	return "no StarterGui.Hud.Root: nothing to strip"
 end
+local OLD = {}
+for _, name in {
+	"ShopPopup", "IndexPopup", "RebirthPopup", "BackpackPopup", "EggHotbar", "RebirthButton", "BackpackButton",
+} do
+	OLD[name] = true
+end
+local SHARED = { ShopButton = true, IndexButton = true, Power = true, Cash = true }
 local gone = {}
 for _, child in root:GetChildren() do
-	if child.Name ~= "BossBar" and child.Name ~= "Fit" then
+	-- (the new HUD reuses some names: the old ones are told apart by their Art child)
+	if OLD[child.Name] or (SHARED[child.Name] and child:FindFirstChild("Art")) then
 		table.insert(gone, child.Name)
 		child:Destroy()
 	end
