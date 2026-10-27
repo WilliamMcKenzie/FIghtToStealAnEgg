@@ -7,9 +7,9 @@
 -- Click an egg there to hold it instead of your weapon (HoldEgg: player attribute
 -- Holding = its kind; Server/Arsenal swaps the tool), click in your pen to put it down
 -- (PlaceEgg). A placed egg is ready Config.Hatch.Time seconds later; stand by it and hold
--- E (client/PenEggs) to hatch it (HatchEgg) into its pet, which goes in your Backpack
--- (Server/PetInventory) and into your pen if there's room. Everyone sees the hatch
--- (Hatched, to every client).
+-- F (client/PenEggs) to hatch it (HatchEgg) into its pet, which goes in your Backpack
+-- (Server/PetInventory) and into your pen if there's room, jumping out of the egg onto
+-- its spot (Pens.hatching). Everyone sees the hatch (Hatched, to every client).
 --
 -- Placed eggs are saved: player attribute PenEggs, JSON of { { id, k = kind, x, z, t =
 -- os.time() it's ready } }, x and z in studs from the middle of the pen's Area (in its
@@ -30,7 +30,10 @@ local PetInventory = require(script.Parent.PetInventory)
 
 local Hatchery = {}
 
-local EDGE = 3 -- studs kept from the pen's sides
+local Egg = require(Shared.Eggs.Egg)
+
+local EDGE = Config.Hatch.Edge -- studs kept from the pen's sides
+local EGG_CENTER = 1.6 -- an egg's middle above its base, at 1x (as client/PenEggs)
 
 local function isPet(kind)
 	return Config.Pets[kind] ~= nil
@@ -131,13 +134,17 @@ local function hatch(player, id)
 	for i, e in list do
 		if e.id == id then
 			local at = area.CFrame:PointToWorldSpace(Vector3.new(e.x, -area.Size.Y / 2, e.z))
-			if os.time() < e.t or (root.Position - at).Magnitude > Config.Hatch.Range + 6 then
+			if os.time() < e.t or ((root.Position - at) * Vector3.new(1, 0, 1)).Magnitude > Config.Hatch.Range + 4 then
 				return
 			end
 			table.remove(list, i)
 			setPlaced(player, list)
+			-- (the pet jumps out of it, grown full size by now, as the top pops off)
+			local now = workspace:GetServerTimeNow()
+			local scale = Egg.sizeOf(e.k) * Config.Hatch.GrowScale
+			Pens.hatching(player, e.k, at, now + Config.Hatch.TopPops, EGG_CENTER * scale)
 			PetInventory.give(player, e.k)
-			hatchedRemote:FireAllClients(player, e.id, e.k, at)
+			hatchedRemote:FireAllClients(player, e.id, e.k, at, now)
 			return
 		end
 	end

@@ -694,22 +694,29 @@ return {
 		Starter = "Horse",
 	},
 
-	-- hatching (QM, Oct 25, LassoAPet's): a stolen egg is yours at once, in the hotbar right
-	-- of the Backpack button (player attribute EggBag; lost when you die). Click it to hold
-	-- it instead of your weapon, click in your pen to put it down; it's ready after its
+	-- hatching (QM, Oct 25, LassoAPet's; Oct 27: all of it LassoAPet's 1:1, client/PenEggs):
+	-- a stolen egg is yours at once, in the hotbar right of the Backpack button (player
+	-- attribute EggBag; lost when you die). Click it to hold it instead of your weapon,
+	-- click in your pen to put it down; it grows from 1x to GrowScale x while it waits its
 	-- Time (seconds, LassoAPet's PetHatchTime; Default for one not listed), then stand by
-	-- it and hold E to hatch it into its pet, which goes in your Backpack (Server/Hatchery).
+	-- it and hold F to hatch it: its top pops off and the pet jumps out onto the spot, into
+	-- your Backpack and pen (Server/Hatchery).
 	Hatch = {
 		PenEggs = 8, -- most eggs waiting in a pen at once
-		Range = 14, -- studs from an egg you can hatch it
-		HoldTime = 0.5, -- seconds holding E
+		Range = 10, -- studs from an egg you can hatch it (LassoAPet's SpeedupEgg.Range)
+		HoldTime = 0.35, -- seconds holding F
+		Edge = 2, -- studs an egg is kept from the pen's sides
+		GrowScale = 2, -- a placed egg grows from 1x to this by the time it's ready (LassoAPet's EggGrowScale)
+		SizePerTier = 1.5, -- an egg is this x bigger per size tier of its pet (LassoAPet's EggSizePerTier)
+		TopPops = 1.58, -- seconds into the hatch when the top flies off and the pet jumps out
+		JumpTime = 0.6, -- seconds the pet takes to jump out onto the spot
+		JumpHeight = 5, -- studs it goes up on the way
 		Default = 15,
 		Time = {
 			Horse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 3600, -- Meadow
 			Cactus = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 7200, -- Desert
 			Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 7200, SnackYak = 3600, -- Tundra
 		},
-		Scale = { Held = 0.55 }, -- the egg in your hands, times its drawing (in the pen: Eggs.Scale.Pen)
 	},
 
 	-- pets (QM, Oct 25: LassoAPet's, with their rarity, cash a second and egg odds). The

@@ -8,6 +8,9 @@
 --   Pens.setPets(player, kinds)    -- these pets wandering in their pen (the ones they
 --                                  -- equipped in the Backpack: Server/PetInventory)
 --   Pens.clear(player)             -- no eggs or pets in it (the /reset command)
+--   Pens.facing(pen) -> yaw        -- out of the pen, toward its gate (LassoAPet's facing)
+--   Pens.hatching(player, kind, at, popAt, from) -- the next pet of this kind to come into
+--                                  -- their pen jumps out of the egg hatching at `at`
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -88,6 +91,40 @@ petFolder.Name = "PenPets"
 petFolder.Parent = workspace
 local penPets = {} -- [body] = { owner, area, yaw, goal, wait, speed, rng }
 
+-- The pens' eggs and pets face out of the pen, toward its gate (where its owner's name
+-- floats: Server/Map), as LassoAPet's face its open side. Yaw 0 faces -z.
+function Pens.facing(pen)
+	local area = pen:FindFirstChild("Area")
+	local sign = pen:FindFirstChild("OwnerSign")
+	local board = sign and sign:FindFirstChild("Board")
+	if not (area and board) then
+		return 0
+	end
+	local d = board.Position - area.Position
+	return math.atan2(-d.X, -d.Z)
+end
+
+-- A hatched pet comes into the pen where its egg stood, facing out, and holds still there
+-- while the client draws it jumping out of the egg (BossView: the body's HatchPop, the
+-- server time it pops out, and HatchFrom, the egg's middle in studs, where it jumps from).
+local hatches = {} -- [player] = { { kind, at, popAt, from, expires } }
+
+function Pens.hatching(player, kind, at, popAt, from)
+	hatches[player] = hatches[player] or {}
+	table.insert(hatches[player], { kind = kind, at = at, popAt = popAt, from = from, expires = os.clock() + 5 })
+end
+
+local function takeHatch(player, kind)
+	local list = hatches[player]
+	for i, h in list or {} do
+		if h.kind == kind and os.clock() < h.expires then
+			table.remove(list, i)
+			return h
+		end
+	end
+	return nil
+end
+
 local function spawnPet(player, area, kind)
 	local class = Pets.class(kind)
 	local box = Horse.extent(class.data) * class.size
@@ -108,12 +145,22 @@ local function spawnPet(player, area, kind)
 	body:SetAttribute("ModelSize", class.size)
 	body:SetAttribute("Name", Pets.name(kind))
 	body:SetAttribute("Owner", player.UserId)
+	local yaw, wait = rng:NextNumber(-math.pi, math.pi), rng:NextNumber(0, 2)
+	local hatch = takeHatch(player, kind)
+	if hatch then
+		yaw = Pens.facing(area.Parent)
+		body.CFrame = CFrame.new(hatch.at.X, floor + body.Size.Y / 2, hatch.at.Z) * CFrame.Angles(0, yaw, 0)
+		body:SetAttribute("HatchPop", hatch.popAt)
+		body:SetAttribute("HatchFrom", hatch.from)
+		-- (still till it's landed, then a rest as LassoAPet's do before wandering off)
+		wait = hatch.popAt - workspace:GetServerTimeNow() + Config.Hatch.JumpTime + rng:NextNumber(1, 4)
+	end
 	penPets[body] = {
 		owner = player,
 		kind = kind,
 		area = area,
-		yaw = rng:NextNumber(-math.pi, math.pi),
-		wait = rng:NextNumber(0, 2),
+		yaw = yaw,
+		wait = wait,
 		speed = 4,
 		rng = rng,
 	}
@@ -213,6 +260,7 @@ function Pens.start(map)
 		joined(player)
 	end
 	Players.PlayerRemoving:Connect(function(player)
+		hatches[player] = nil
 		for i, owner in owners do
 			if owner == player then
 				owners[i] = nil

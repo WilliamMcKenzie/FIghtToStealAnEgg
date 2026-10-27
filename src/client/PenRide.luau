@@ -18,9 +18,15 @@ local function add(body)
 	prompt.ActionText = "Ride"
 	prompt.ObjectText = body:GetAttribute("Name") or body:GetAttribute("Model") or ""
 	prompt.HoldDuration = 0
-	prompt.KeyboardKeyCode = Enum.KeyCode.F -- (E is Hatch, for eggs in the same pen)
+	prompt.KeyboardKeyCode = Enum.KeyCode.F
 	prompt.MaxActivationDistance = 12
 	prompt.RequiresLineOfSight = false
+	-- (an egg's Hatch is F too: Ride hides while one's up, as LassoAPet's does; client/PenEggs)
+	local function eggUp()
+		prompt.Enabled = not player:GetAttribute("EggPromptUp")
+	end
+	player:GetAttributeChangedSignal("EggPromptUp"):Connect(eggUp)
+	eggUp()
 	prompt.Triggered:Connect(function()
 		remote:FireServer("ride", body:GetAttribute("Model"))
 	end)

@@ -18,6 +18,7 @@ local IDS = {
 	sprint_tier = "rbxassetid://137322083927464", -- up a sprint tier: Speed Burst SFX (dash cloth)
 	-- Spiraling Wind Data Tunnel Travelling 2 (ProSoundEffects): subtle, while you sprint
 	sprint_wind = "rbxassetid://9119462999",
+	egg_hatch = "rbxassetid://96102213526905", -- an egg in your pen hatches: LassoAPet's (Rewards, QM's pick; client/PenEggs)
 }
 local VOLUME = 0.5
 local GALLOP_VOLUME = 0.35
