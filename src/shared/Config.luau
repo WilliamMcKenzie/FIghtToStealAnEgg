@@ -276,7 +276,7 @@ return {
 			Radius = 11,
 			Turn = 4,
 			Strength = 2,
-			Respawn = 20, -- (unused now: the nests' cooldown, Eggs.Cooldown, decides)
+			Respawn = 20, -- (unused now: the nests' cooldown, Eggs.Cooldown[biome], decides)
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
@@ -612,7 +612,10 @@ return {
 		StealTime = 0.6, -- seconds holding E
 		-- each biome's nests run on a cooldown (QM, Oct 26): when it's up they all refill;
 		-- when the fight their eggs start is over, the ones left vanish and it starts again
-		Cooldown = 60, -- seconds
+		-- seconds after a fight ends before the nests refill (QM, Oct 27): 10 in the Meadow,
+		-- 5 more each biome further in; both sides of the fork past the Lava share a step
+		Cooldown = { Meadow = 10, Desert = 15, Ice = 20, Lava = 25, Dungeon = 30, Forest = 30, Castle = 35, Ocean = 35 },
+		DefaultCooldown = 60, -- (a biome missing from Cooldown)
 		PopStagger = 0.15, -- seconds between each nest's egg popping in
 		TimerRange = 45, -- studs from a nest you see its cooldown over it
 		-- does a stolen egg ride on your back (and earn its reward in your pen)? Off for now
