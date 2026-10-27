@@ -15,7 +15,8 @@
 -- The boss bar follows the nearest awake boss in workspace.Bosses and hides when there's none.
 -- It pops in (a UIScale, Pop) when a fight starts and pops out when it ends, after showing
 -- the bar empty for a moment if the boss died. It's QM's old bar rebuilt natively (Oct 27: HudKit's BossRed, BossTrail and BossEmpty
--- looks, the weld texture where their dots were). Under the red sits the trail bar, cut to wherever the red was TRAIL_LAG seconds ago,
+-- looks, the weld texture where their dots were; Oct 27 again: their Figma Bossbar, with a
+-- red glow and the bull's head over the middle, its eyes X'd once the boss is dead). Under the red sits the trail bar, cut to wherever the red was TRAIL_LAG seconds ago,
 -- so a hit drops the red and exposes the trail, which follows it down half a second on.
 --
 -- It's all real objects in StarterGui > Hud > Root for QM to edit in Studio (client/Ui):
@@ -38,9 +39,10 @@ local RegionBlocker = require(game:GetService("ReplicatedStorage"):WaitForChild(
 
 local Hud = {}
 
-local BAR_W, BAR_H = 646, 66 -- the boss bar (design px)
+local BAR_W, BAR_H = 634, 60 -- the boss bar inside its 6px outline (QM's Figma: 646 x 72 with it)
+local GLOW = { 6, 12, 18, 24 } -- px of the red glow's rings round the bar (Figma: 16 spread, 16 blur, 25%)
+local GLOW_ALPHA = 0.93 -- each ring's transparency (they stack, densest at the bar)
 local DESIGN_HEIGHT = 1080
-local TEXT = 47 -- (QM, Oct 26: 2px up)
 local ITALIC = HudKit.ITALIC
 local BLACK = HudKit.BLACK
 local fig = HudKit.fig
@@ -52,6 +54,11 @@ local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight sta
 local POP_IN = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local POP_OUT = TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In)
 local LINGER = 0.9
+-- (QM, Oct 27: at the kill the bull's head pops up to FACE_POP, turns to the dead one at the
+-- top, and settles back)
+local FACE_POP = 1.2
+local FACE_UP = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local FACE_DOWN = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
 local player = Players.LocalPlayer
 
@@ -120,17 +127,82 @@ function Hud.start()
 	end
 	clip.ZIndex = 3
 	HudKit.back(clip, "BossRed", { Name = "BossBarFill", Size = UDim2.fromOffset(BAR_W, BAR_H), ZIndex = 3 })
-	-- (QM's design: black outlined, over the bar's top edge)
-	local bossName = HudKit.label(bar, "BossName", {
-		Text = "BOSS",
-		TextSize = TEXT,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0, -4),
-		Size = UDim2.fromOffset(600, 50),
-		ZIndex = 5,
-	})
-	bossName.Outline.Thickness = 4
+	local old = bar:FindFirstChild("BossName") -- (the BOSS title, before the bull's head)
+	if old then
+		old:Destroy()
+	end
+	-- the glow: rings of red stroke round the bar, under it
+	local glow
+	glow, fresh = Ui.make(bar, "Glow", "Frame")
+	if fresh then
+		glow.BackgroundTransparency = 1
+		glow.Size = UDim2.fromScale(1, 1)
+		glow.ZIndex = 0
+		for i, width in GLOW do
+			local ring = Instance.new("Frame")
+			ring.Name = "Ring" .. i
+			ring.BackgroundTransparency = 1
+			ring.Size = UDim2.fromScale(1, 1)
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, fig(8)) -- (the bar's: the stroke rounds out from it)
+			corner.Parent = ring
+			local stroke = Instance.new("UIStroke")
+			stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			stroke.Color = Color3.fromRGB(255, 0, 0)
+			stroke.Transparency = GLOW_ALPHA
+			stroke.Thickness = 6 + width
+			stroke.Parent = ring
+			ring.Parent = glow
+		end
+	end
+	-- the bull's head (QM's Figma AliveIcon and DeadIcon, 146 x 83: assets/ui/hud), over the
+	-- bar's middle, 26px above its outline
+	local faces = {}
+	for _, name in { "BossAliveIcon", "BossDeadIcon" } do
+		local face = HudKit.art(bar, name, {
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.new(0.5, 0, 0, -32),
+			Size = UDim2.fromOffset(146, 83),
+			Visible = name == "BossAliveIcon",
+			ZIndex = 6,
+		})
+		if face.Image == "" then
+			face.Image = HudImages[name] or "" -- (baked before it was uploaded)
+		end
+		faces[name] = face
+	end
+	local grows = {}
+	for name, face in faces do
+		grows[name] = Ui.make(face, "Grow", "UIScale")
+	end
+	local killed = 0 -- (bumped each kill, so an old pop's swap is dropped)
+	local function swap(yes)
+		faces.BossAliveIcon.Visible = not yes
+		faces.BossDeadIcon.Visible = yes
+	end
+	-- dead(true): the kill's pop (up, swap at the top, settle); dead(false): alive at once
+	local function dead(yes)
+		killed += 1
+		glow.Visible = not yes
+		if not yes then
+			swap(false)
+			for _, g in grows do
+				g.Scale = 1
+			end
+			return
+		end
+		local this = killed
+		local up = TweenService:Create(grows.BossAliveIcon, FACE_UP, { Scale = FACE_POP })
+		up.Completed:Connect(function(how)
+			if how ~= Enum.PlaybackState.Completed or killed ~= this then
+				return
+			end
+			grows.BossDeadIcon.Scale = FACE_POP
+			swap(true)
+			TweenService:Create(grows.BossDeadIcon, FACE_DOWN, { Scale = 1 }):Play()
+		end)
+		up:Play()
+	end
 
 
 	-- ---- QM's NewUI ---------------------------------------------------------------------
@@ -285,6 +357,7 @@ function Hud.start()
 	local function popIn()
 		state = "shown"
 		bar.Visible = true
+		dead(false)
 		pop.Scale = 0
 		TweenService:Create(pop, POP_IN, { Scale = 1 }):Play()
 	end
@@ -329,6 +402,8 @@ function Hud.start()
 		if best then
 			if state == "hidden" or state == "out" then
 				popIn()
+			elseif state == "lingering" then
+				dead(false) -- (another boss, while the last one's bar was still up)
 			end
 			state = "shown"
 			fraction = math.clamp(best:GetAttribute("Health") / best:GetAttribute("MaxHealth"), 0, 1)
@@ -337,7 +412,6 @@ function Hud.start()
 				shown = 0
 				filling = now
 				table.clear(history)
-				bossName.Text = string.upper(best:GetAttribute("Name") or best:GetAttribute("Kind") or "Boss")
 			end
 		else
 			if state == "shown" then
@@ -347,6 +421,7 @@ function Hud.start()
 					or (following:GetAttribute("Health") or 0) <= 0
 				if dead then
 					state = "lingering"
+					dead(true)
 					leftAt = now
 				else
 					popOut()
