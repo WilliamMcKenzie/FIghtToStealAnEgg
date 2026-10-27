@@ -25,6 +25,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local ItemIcons = require(Shared.ItemIcons)
 local Weapons = require(Shared.Weapons.Weapons)
+local RegionBlocker = require(Shared.RegionBlocker)
 local HudKit = require(script.Parent.HudKit)
 local Ui = require(script.Parent.Ui)
 
@@ -61,6 +62,7 @@ local RARITY = {
 local SPIN = 45 -- degrees a second a moving card's back turns
 local SHEEN = 0.45 -- transparency at the middle of the sheen's band
 local SWEEP = 2.5 -- seconds a band takes across a moving rarity's text
+local ICON_OUTLINE = 3 -- px of black round the Robux icon (QM, Oct 27: like its text's)
 local POP = 0.12 -- seconds it takes to pop open
 local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
 
@@ -70,6 +72,31 @@ local template
 local moving = {} -- { { back's Fill, rarity's UIGradient, sheen's UIGradient } } of the moving cards
 
 -- ---- building ---------------------------------------------------------------------------
+
+-- a price in cash, short: $500, $50K, $1.5M (as the Cash counter)
+local function price(n)
+	return "$" .. RegionBlocker.abbreviate(n or 0)
+end
+
+-- the Robux button's icon outlined black like the text beside it: black copies of it
+-- nudged ICON_OUTLINE px out all round, under it (as Hud does Shop's and Index's icons)
+local function outlineRobux(robux)
+	local icon = robux:FindFirstChild("RobuxIcon")
+	if not icon or robux:FindFirstChild("RobuxOutline1") then
+		return
+	end
+	icon.ZIndex = 6
+	for k = 1, 8 do
+		local a = (k - 1) * math.pi / 4
+		local copy = icon:Clone()
+		copy.Name = "RobuxOutline" .. k
+		copy.ImageColor3 = HudKit.BLACK
+		copy.Position = icon.Position
+			+ UDim2.fromOffset(math.round(math.cos(a) * ICON_OUTLINE), math.round(math.sin(a) * ICON_OUTLINE))
+		copy.ZIndex = 5
+		copy.Parent = robux
+	end
+end
 
 -- a card (Figma: 729 x 991 Figma px), its content filled in by fill()
 local function cardTemplate()
@@ -168,6 +195,7 @@ local function cardTemplate()
 		TextSize = fig(80),
 		ZIndex = 5,
 	})
+	outlineRobux(robux)
 	return card
 end
 
@@ -360,7 +388,7 @@ local function refresh(card, id, mine)
 	card.ShopRobux.Visible = not mine[id] and Weapons.robux(id) ~= nil
 	if not mine[id] then
 		if not card.ShopBuy:GetAttribute("Failing") then
-			card.ShopBuy.Text.Text = "$" .. tostring(w.Price or 0)
+			card.ShopBuy.Text.Text = price(w.Price)
 		end
 		card.ShopRobux.Text.Text = tostring(Weapons.robux(id) or "")
 		if not card.ShopRobux.Visible then
@@ -416,6 +444,7 @@ function WeaponShop.init(root)
 		local card = Ui.copy(template, "Card" .. i, cards)
 		card.LayoutOrder = i
 		fill(card, id)
+		outlineRobux(card.ShopRobux) -- (a template baked before it had one)
 		for _, b in { card.ShopEquip, card.ShopBuy, card.ShopRobux } do
 			HudKit.hover(b) -- (a copy doesn't keep the template's)
 		end
@@ -435,7 +464,7 @@ function WeaponShop.init(root)
 				card.ShopBuy.Text.Text = if why == "not enough cash" then "Need cash!" else "Can't buy"
 				task.delay(FAIL_SHOW, function()
 					card.ShopBuy:SetAttribute("Failing", nil)
-					card.ShopBuy.Text.Text = "$" .. tostring((Config.Weapons[id] or {}).Price or 0)
+					card.ShopBuy.Text.Text = price((Config.Weapons[id] or {}).Price)
 				end)
 			end
 		end)
