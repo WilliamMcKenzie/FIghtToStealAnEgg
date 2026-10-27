@@ -46,7 +46,7 @@ local quiet = false -- (while this script writes the attributes itself)
 
 local function held()
 	local id = player:GetAttribute("Weapon")
-	return if Weapons.exists(id) then id else Config.WeaponDrops.Start
+	return if Weapons.exists(id) then id else Config.Arsenal.Start
 end
 
 -- every value of weapon `id`'s pose: its own, else the default

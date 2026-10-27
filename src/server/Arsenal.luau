@@ -1,21 +1,15 @@
--- Weapons a player owns, the one they hold, and the spin a boss kill gives (QM, Oct 25).
+-- Weapons a player owns and the one they hold (QM, Oct 25), bought from Carl the cactus
+-- vendor (QM, Oct 27: no more boss drops, spins or merging; you own each weapon once).
 --
--- Player attributes (saved by Server/Data): Weapons, the ids owned with how many of each
--- (Shared/Stacks: "Axe:3,Staff"; everyone has Config.WeaponDrops.Start); Weapon, the one
--- equipped. The equipped one's tool (Shared/Weapons) is put in the Roblox backpack
--- whenever it changes and on every spawn; the client equips it at once. The Backpack
--- popup (client/Backpack) picks between owned weapons through EquipWeapon.
---
--- When a boss dies (Bosses.killed) everyone in its fight gets a spin: the server rolls
--- the weapon from that boss's drops (Weapons.drops: every droppable weapon by Weight,
--- plus the boss's own super rare one), owns it at once, and sends WeaponSpin to the
--- client to play the roulette (Config.WeaponDrops); it's equipped as the spin lands.
+-- Player attributes (saved by Server/Data): Weapons, the ids owned ("Axe,Staff"; everyone
+-- has Config.Arsenal.Start); Weapon, the one equipped. The equipped one's tool
+-- (Shared/Weapons) is put in the Roblox backpack whenever it changes and on every spawn;
+-- the client equips it at once. EquipWeapon switches between owned weapons.
 --
 --   Arsenal.start()                  -- once
---   Arsenal.spin(player, bossKind)   -- a spin (also /spin [boss], owner only)
 --   Arsenal.give(player, id, equip)  -- owns it (and equips it); /weapon <id>, owner only
---   Arsenal.merge(player, id)        -- Config.Merge.Cost of it into the next one up
---   Arsenal.mergeAll(player)         -- every merge they can do now, at once (MergeWeapon)
+--   Arsenal.buy(player, id) -> ok, why  -- for its Price in cash: owned and equipped
+--                                       -- (the BuyWeapon RemoteFunction: Carl's shop)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -24,19 +18,18 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Stacks = require(Shared.Stacks)
 local Weapons = require(Shared.Weapons.Weapons)
-local Bosses = require(script.Parent.Bosses)
 
 local Arsenal = {}
 
-local spinRemote = Instance.new("RemoteEvent")
-spinRemote.Name = "WeaponSpin"
-spinRemote.Parent = ReplicatedStorage
+local START = Config.Arsenal.Start
 
-local START = Config.WeaponDrops.Start
-
--- what they own, with how many of each ({ { id, n }, ... }), the starting weapon first
+-- what they own ({ { id, n = 1 }, ... }), the starting weapon first (an old save's
+-- duplicates, "Axe:3" from the spins, count once)
 function Arsenal.stacks(player)
 	local list = Stacks.parse(player:GetAttribute("Weapons"), Weapons.exists)
+	for _, s in list do
+		s.n = 1
+	end
 	if Stacks.count(list, START) == 0 then
 		table.insert(list, 1, { id = START, n = 1 })
 	end
@@ -61,64 +54,35 @@ function Arsenal.equip(player, id)
 	end
 end
 
--- one more of it (a duplicate stacks: x2, x3... in the backpack), and equips it
+-- owns it (once: owning it already changes nothing), and equips it
 function Arsenal.give(player, id, equip)
 	if not Weapons.exists(id) then
 		return
 	end
-	player:SetAttribute("Weapons", Stacks.format(Stacks.add(Arsenal.stacks(player), id, 1)))
+	if not Arsenal.owns(player, id) then
+		player:SetAttribute("Weapons", Stacks.format(Stacks.add(Arsenal.stacks(player), id, 1)))
+	end
 	if equip then
 		Arsenal.equip(player, id)
 	end
 end
 
--- Config.Merge.Cost of `id` traded for one of what it merges into (Config.Merge.Into); if
--- that was the last of the one they hold, they hold the new one
-function Arsenal.merge(player, id)
-	local into = Config.Merge.Into[id]
-	if not (into and Weapons.exists(into)) or id == START then
-		return false
+-- Carl's sale: its Config.Weapons Price in cash. One they own already just equips.
+function Arsenal.buy(player, id)
+	local w = typeof(id) == "string" and Config.Weapons[id]
+	if not (w and w.Price) then
+		return false, "not for sale"
 	end
-	local list = Arsenal.stacks(player)
-	if Stacks.count(list, id) < Config.Merge.Cost then
-		return false
+	if Arsenal.owns(player, id) then
+		Arsenal.equip(player, id)
+		return true
 	end
-	Stacks.add(list, id, -Config.Merge.Cost)
-	Stacks.add(list, into, 1)
-	player:SetAttribute("Weapons", Stacks.format(list))
-	if player:GetAttribute("Weapon") == id and Stacks.count(list, id) <= 0 then
-		Arsenal.equip(player, into)
+	local cash = player:GetAttribute("Cash") or 0
+	if cash < w.Price then
+		return false, "not enough cash"
 	end
-	return true
-end
-
--- every merge they can do with what they have now (QM: MERGE does them all at once): each
--- weapon Config.Merge.Cost or more of goes up its ladder as many times as it can. Counted
--- from what they had before, so what the merges make waits for the next press.
-function Arsenal.mergeAll(player)
-	local list = Arsenal.stacks(player)
-	local held = player:GetAttribute("Weapon")
-	local cost = Config.Merge.Cost
-	local merges = {}
-	for _, s in list do
-		local into = Config.Merge.Into[s.id]
-		if into and Weapons.exists(into) and s.id ~= START and s.n >= cost then
-			table.insert(merges, { id = s.id, into = into, times = s.n // cost })
-		end
-	end
-	for _, m in merges do
-		Stacks.add(list, m.id, -m.times * cost)
-		Stacks.add(list, m.into, m.times)
-	end
-	if #merges == 0 then
-		return false
-	end
-	player:SetAttribute("Weapons", Stacks.format(list))
-	for _, m in merges do
-		if held == m.id and Stacks.count(list, m.id) <= 0 then
-			Arsenal.equip(player, m.into)
-		end
-	end
+	player:SetAttribute("Cash", cash - w.Price)
+	Arsenal.give(player, id, true)
 	return true
 end
 
@@ -170,65 +134,6 @@ local function arm(player)
 	end
 end
 
-local function roll(list)
-	local total = 0
-	for _, entry in list do
-		total += entry.weight
-	end
-	local r = math.random() * total
-	for _, entry in list do
-		r -= entry.weight
-		if r <= 0 then
-			return entry.id
-		end
-	end
-	return list[#list].id
-end
-
-function Arsenal.spin(player, bossKind)
-	local list = Weapons.drops(bossKind)
-	if #list == 0 then
-		return
-	end
-	local total = 0
-	for _, entry in list do
-		total += entry.weight
-	end
-	local odds = {}
-	for _, entry in list do
-		odds[entry.id] = math.max(1, math.round(total / entry.weight))
-	end
-	local result = roll(list)
-	-- the reel it flicks through: any of the drops, evenly (so the rare one teases now and
-	-- then), never the same twice running, ending on the result
-	local reel = {}
-	local d = Config.WeaponDrops
-	for i = 1, d.Reel - 1 do
-		local pick
-		repeat
-			pick = list[math.random(#list)].id
-		until #list < 3 or (pick ~= reel[i - 1] and (i < d.Reel - 1 or pick ~= result))
-		reel[i] = pick
-	end
-	table.insert(reel, result)
-	local boss = Config.Bosses[bossKind]
-	Arsenal.give(player, result, false)
-	spinRemote:FireClient(player, {
-		reel = reel,
-		odds = odds,
-		result = result,
-		bonus = Weapons.get(result).Boss ~= nil,
-		boss = boss and (boss.Name or bossKind) or bossKind,
-	})
-	if d.Equip then
-		task.delay(d.SpinTime, function()
-			if player.Parent then
-				Arsenal.equip(player, result)
-			end
-		end)
-	end
-end
-
 function Arsenal.start()
 	local equipRemote = Instance.new("RemoteEvent")
 	equipRemote.Name = "EquipWeapon"
@@ -238,22 +143,17 @@ function Arsenal.start()
 			Arsenal.equip(player, id)
 		end
 	end)
-	local mergeRemote = Instance.new("RemoteEvent")
-	mergeRemote.Name = "MergeWeapon"
-	mergeRemote.Parent = ReplicatedStorage
-	mergeRemote.OnServerEvent:Connect(function(player, id)
-		if type(id) == "string" then
-			Arsenal.merge(player, id)
-		else
-			Arsenal.mergeAll(player)
-		end
-	end)
+	local buyRemote = Instance.new("RemoteFunction")
+	buyRemote.Name = "BuyWeapon"
+	buyRemote.OnServerInvoke = Arsenal.buy
+	buyRemote.Parent = ReplicatedStorage
 
 	local function joined(player)
 		player:SetAttribute("Weapons", player:GetAttribute("Weapons") or START)
 		player:SetAttribute("Weapon", player:GetAttribute("Weapon") or START)
 		-- (a save from before a weapon was cut, like the Sword: QM, Oct 25, holds the
-		-- starting weapon instead, and the cut ones leave the list)
+		-- starting weapon instead, and the cut ones leave the list; duplicates from the old
+		-- spins count once)
 		local function migrate()
 			if not Weapons.exists(player:GetAttribute("Weapon")) then
 				player:SetAttribute("Weapon", START)
@@ -291,14 +191,6 @@ function Arsenal.start()
 	for _, player in Players:GetPlayers() do
 		joined(player)
 	end
-
-	Bosses.killed.Event:Connect(function(kind, players)
-		for _, player in players do
-			if player.Parent then
-				Arsenal.spin(player, kind)
-			end
-		end
-	end)
 end
 
 return Arsenal

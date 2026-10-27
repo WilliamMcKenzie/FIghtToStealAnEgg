@@ -1,7 +1,11 @@
 -- The cactus vendor (QM, Oct 27: LassoAPet's Carl). Server/Map builds his stall from each
 -- Vendor object in the map, with a still Carl in it so he shows in Studio's Edit mode; here
 -- each client swaps that Carl for one that idles, turns to watch you when you're near and
--- hops hello when you Talk. Talk does nothing else yet (his job comes later).
+-- hops hello when you Talk. He sells weapons (QM, Oct 27): Talk fires Vendor.talked, which
+-- the shop popup listens to (it buys through the BuyWeapon RemoteFunction, Server/Arsenal;
+-- what's for sale is Shared/Weapons' forSale(), with each Config.Weapons Price).
+--
+--   Vendor.talked   -- RBXScriptSignal: fires when the player Talks to a vendor
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -13,6 +17,10 @@ local Cactus = require(Shared.Animals.Cactus)
 
 local player = Players.LocalPlayer
 local settings = Config.Vendor
+
+local Vendor = {}
+local talked = Instance.new("BindableEvent")
+Vendor.talked = talked.Event
 
 local live = {} -- [stall] = { carl, spot, scale, rootY, yaw, hop }
 
@@ -44,6 +52,7 @@ local function add(stall)
 	if prompt then
 		prompt.Triggered:Connect(function()
 			v.hop = settings.Hop
+			talked:Fire()
 		end)
 	end
 	stall.AncestryChanged:Connect(function()
@@ -100,4 +109,4 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 end)
 
-return nil
+return Vendor
