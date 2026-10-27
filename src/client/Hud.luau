@@ -13,7 +13,8 @@
 -- Index's white icons get their outline here; the rest have theirs drawn in.
 --
 -- The boss bar follows the nearest awake boss in workspace.Bosses and hides when there's none.
--- Under the red sits QM's trail bar, cut to wherever the red was TRAIL_LAG seconds ago,
+-- It's QM's old bar rebuilt natively (Oct 27: HudKit's BossRed, BossTrail and BossEmpty
+-- looks, the weld texture where their dots were). Under the red sits the trail bar, cut to wherever the red was TRAIL_LAG seconds ago,
 -- so a hit drops the red and exposes the trail, which follows it down half a second on.
 --
 -- It's all real objects in StarterGui > Hud > Root for QM to edit in Studio (client/Ui):
@@ -35,15 +36,9 @@ local RegionBlocker = require(game:GetService("ReplicatedStorage"):WaitForChild(
 
 local Hud = {}
 
-local IMAGES = {
-	BossBarFill = "rbxassetid://139297500668654",
-	BossBarBack = "rbxassetid://88593547866423",
-	BossBarTrail = "rbxassetid://110382419429261", -- QM's TRAIL 1
-}
+local BAR_W, BAR_H = 646, 66 -- the boss bar (design px)
 local DESIGN_HEIGHT = 1080
-local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local TEXT = 47 -- (QM, Oct 26: 2px up)
-local OUTLINE = Color3.fromRGB(4, 4, 53)
 local ITALIC = HudKit.ITALIC
 local BLACK = HudKit.BLACK
 local fig = HudKit.fig
@@ -52,40 +47,6 @@ local TRAIL_LAG = 0.5 -- seconds the trail bar lags behind the red (QM, Oct 24)
 local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight starts (QM, Oct 25)
 
 local player = Players.LocalPlayer
-
-local function text(parent, name, props)
-	local label, fresh = Ui.make(parent, name, "TextLabel")
-	if not fresh then
-		return label
-	end
-	local stroke = Instance.new("UIStroke")
-	stroke.Name = "Outline"
-	stroke.Color = OUTLINE
-	stroke.Thickness = 3
-	stroke.LineJoinMode = Enum.LineJoinMode.Round
-	stroke.Parent = label
-	label.BackgroundTransparency = 1
-	label.FontFace = FONT
-	label.TextSize = TEXT
-	label.TextColor3 = Color3.new(1, 1, 1)
-	for k, v in props do
-		label[k] = v
-	end
-	return label
-end
-
--- IMAGES[art] as `name`
-local function image(parent, name, art, props)
-	local img, fresh = Ui.make(parent, name, "ImageLabel")
-	if fresh then
-		img.BackgroundTransparency = 1
-		img.Image = IMAGES[art]
-		for k, v in props do
-			img[k] = v
-		end
-	end
-	return img
-end
 
 function Hud.start()
 	local gui = Ui.screen("Hud", {
@@ -119,11 +80,21 @@ function Hud.start()
 	if fresh then
 		bar.BackgroundTransparency = 1
 		bar.AnchorPoint = Vector2.new(0.5, 0)
-		bar.Position = UDim2.new(0.5, 0, 0, 44)
-		bar.Size = UDim2.fromOffset(646, 91)
+		bar.Position = UDim2.new(0.5, 0, 0, 56)
+		bar.Size = UDim2.fromOffset(BAR_W, BAR_H)
 		bar.Visible = not Ui.live -- (shown in Studio to edit; in Play only in a fight)
 	end
-	image(bar, "BossBarBack", "BossBarBack", { Size = UDim2.fromScale(1, 1) })
+	-- (the old bar's images, baked before it was native)
+	for _, old in { "BossBarBack", "BossBarFill", "BossBarTrail" } do
+		local found = bar:FindFirstChild(old, true)
+		if found and found:IsA("ImageLabel") then
+			found:Destroy()
+		end
+	end
+	if bar.Size.Y.Offset ~= BAR_H then
+		bar.Position, bar.Size = UDim2.new(0.5, 0, 0, 56), UDim2.fromOffset(BAR_W, BAR_H)
+	end
+	HudKit.back(bar, "BossEmpty", { Name = "BossBarBack" })
 	local trailClip
 	trailClip, fresh = Ui.make(bar, "TrailClip", "Frame")
 	if fresh then
@@ -131,7 +102,8 @@ function Hud.start()
 		trailClip.ClipsDescendants = true
 		trailClip.Size = UDim2.fromScale(1, 1)
 	end
-	local trailImage = image(trailClip, "BossBarTrail", "BossBarTrail", { Size = UDim2.fromOffset(646, 91) })
+	trailClip.ZIndex = 2
+	local trailImage = HudKit.back(trailClip, "BossTrail", { Name = "BossBarTrail", Size = UDim2.fromOffset(BAR_W, BAR_H), ZIndex = 2 })
 	local clip
 	clip, fresh = Ui.make(bar, "Clip", "Frame")
 	if fresh then
@@ -139,14 +111,19 @@ function Hud.start()
 		clip.ClipsDescendants = true
 		clip.Size = UDim2.fromScale(1, 1)
 	end
-	image(clip, "BossBarFill", "BossBarFill", { Size = UDim2.fromOffset(646, 91) })
-	local bossName = text(bar, "BossName", {
+	clip.ZIndex = 3
+	HudKit.back(clip, "BossRed", { Name = "BossBarFill", Size = UDim2.fromOffset(BAR_W, BAR_H), ZIndex = 3 })
+	-- (QM's design: black outlined, over the bar's top edge)
+	local bossName = HudKit.label(bar, "BossName", {
 		Text = "BOSS",
+		TextSize = TEXT,
+		TextXAlignment = Enum.TextXAlignment.Center,
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0, -6),
+		Position = UDim2.new(0.5, 0, 0, -4),
 		Size = UDim2.fromOffset(600, 50),
-		ZIndex = 3,
+		ZIndex = 5,
 	})
+	bossName.Outline.Thickness = 4
 
 
 	-- ---- QM's NewUI ---------------------------------------------------------------------

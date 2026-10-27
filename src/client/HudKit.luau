@@ -55,6 +55,11 @@ HudKit.LOOKS = {
 		tile = { 223.5, 0.8 },
 		outline = 8,
 	},
+	-- the boss bar (QM, Oct 27: their old bar's design, the weld texture for its dots): the
+	-- red health over the trail over the dark empty bar, which carries the outline
+	BossRed = { top = rgb("ee3b2f"), bottom = rgb("bf2219"), bevel = { 0.55, 0.7, nil, rgb("6e0000"), 10 }, tile = { 230, 0.75, "Weld" }, corner = 14 },
+	BossTrail = { top = rgb("fff3d6"), bottom = rgb("ffc27a"), tile = { 230, 0.85, "Weld" }, corner = 14 },
+	BossEmpty = { top = rgb("3d0d0b"), bottom = rgb("1f0504"), tile = { 230, 0.85, "Weld" }, outline = 9, corner = 14 },
 	Panel = { fill = rgb("323232"), border = { Color3.new(0, 0, 0), 6, 0.5 }, tile = { 223.5, 0.9 }, outline = 8, corner = 20 },
 	Card = { fill = Color3.new(1, 1, 1), border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
 }
