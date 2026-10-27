@@ -9,4 +9,5 @@ return {
 	PowerIcon = "",
 	CashIcon = "",
 	RobuxIcon = "",
+	WeldTile = "", -- assets/ui/WeldTile.png
 }

@@ -27,7 +27,6 @@ local HOVER_GROW = 1.08 -- a button grows this much under the mouse (QM: snappy)
 local HOVER_DARK = Color3.fromRGB(205, 205, 205) -- its back's tint then
 local HOVER_TIME = 0.08
 local STUDS_PER_TILE = 4
-local WELD_IMAGE = "rbxassetid://10509843977" -- the classic Weld surface (as Shared/Rig uses)
 
 HudKit.FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 HudKit.ITALIC = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic)
@@ -36,8 +35,9 @@ HudKit.BLACK = Color3.new(0, 0, 0)
 -- the Figma rectangles' looks. top/bottom: a top-to-bottom gradient (Figma: from at 15.9%);
 -- across: a left-to-right one; tile: the texture's tile size in Figma (px), its
 --   transparency, and which: Roblox's classic stud decal (Figma's stud tile holds about
---   STUDS_PER_TILE studs across) or the classic Weld surface (QM, Oct 27: the red and orange
---   buttons' diamonds);
+--   STUDS_PER_TILE studs across) or Weld: the faint diamond lattice on the red and orange
+--   buttons (assets/ui/WeldTile.png, dark lines on clear so it only darkens; the classic Weld
+--   image is opaque grey and washed the colours out, QM Oct 27);
 -- bevel: the inset light (top left) and shade (bottom right) and their transparency;
 -- border: an inside border's colour and width; outline: the black one round it; corner: radius
 local function rgb(hex)
@@ -47,9 +47,9 @@ local BUTTON = { tile = { 89.4, 0.8 }, outline = 8, corner = 5 }
 HudKit.LOOKS = {
 	Green = { top = rgb("caff00"), bottom = rgb("0aff00"), bevel = { 0.5, 0.5 }, base = BUTTON },
 	Blue = { top = rgb("00f8ff"), bottom = rgb("00afff"), bevel = { 0.5, 0.5 }, base = BUTTON },
-	Red = { top = rgb("ff0000"), bottom = rgb("d90000"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
-	Orange = { top = rgb("ff963c"), bottom = rgb("ef8832"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
-	Amber = { top = rgb("ffa100"), bottom = rgb("ffa100"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
+	Red = { top = rgb("ff0000"), bottom = rgb("d90000"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 58, 0.85, "Weld" } },
+	Orange = { top = rgb("ff963c"), bottom = rgb("ef8832"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 58, 0.85, "Weld" } },
+	Amber = { top = rgb("ffa100"), bottom = rgb("ffa100"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 58, 0.85, "Weld" } },
 	GreenEdged = { top = rgb("caff00"), bottom = rgb("0aff00"), border = { rgb("caff02"), 5 }, base = BUTTON },
 	PinkEdged = { top = rgb("ff00f2"), bottom = rgb("c300ff"), border = { rgb("ee51f9"), 5 }, base = BUTTON },
 	Dark = { fill = Color3.new(0, 0, 0), alpha = 0.6, base = BUTTON },
@@ -174,7 +174,7 @@ function HudKit.back(parent, look, props)
 		studs.BackgroundTransparency = 1
 		local weld = spec.tile[3] == "Weld"
 		local size = math.max(fig(if weld then spec.tile[1] else spec.tile[1] / STUDS_PER_TILE), 2)
-		studs.Image = if weld then WELD_IMAGE else Studs.IMAGE
+		studs.Image = if weld then HudImages.WeldTile or "" else Studs.IMAGE
 		studs.ScaleType = Enum.ScaleType.Tile
 		studs.TileSize = UDim2.fromOffset(size, size)
 		studs.ImageTransparency = spec.tile[2]
