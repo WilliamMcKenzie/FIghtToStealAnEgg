@@ -1,4 +1,4 @@
--- Every weapon's and egg's icon (rendered by tools/render_weapon_icons.py and
+-- Every weapon's, egg's and pet's icon (rendered by tools/render_weapon_icons.py and
 -- tools/render_pet_icons.py at 128px, QM Oct 27: all UI pictures of weapons and eggs are
 -- these renders). Written by tools/item_icon_ids.py from the uploads' ids.json; don't edit.
 -- [id or kind] = "rbxassetid://..."
@@ -43,5 +43,23 @@ return {
 		Unicorn = "rbxassetid://134634389588659",
 	},
 	Pets = {
+		Boar = "rbxassetid://127197941555621",
+		Bunny = "rbxassetid://94663612233714",
+		Cactus = "rbxassetid://102442103364560",
+		Fish = "rbxassetid://98415947313698",
+		Horse = "rbxassetid://118491017701421",
+		IceGolem = "rbxassetid://106833872323098",
+		Icebringer = "rbxassetid://71247265356342",
+		Penguin = "rbxassetid://106745438661137",
+		Pig = "rbxassetid://136251945649476",
+		Pinto = "rbxassetid://114051337024720",
+		Rhino = "rbxassetid://115391132346712",
+		Sandworm = "rbxassetid://107782402936875",
+		Scorpion = "rbxassetid://78062612948910",
+		SnackYak = "rbxassetid://107597784189265",
+		Snake = "rbxassetid://113205449825345",
+		Snowman = "rbxassetid://87472002363088",
+		SpineLizard = "rbxassetid://79092445908452",
+		Unicorn = "rbxassetid://115730176244328",
 	},
 }

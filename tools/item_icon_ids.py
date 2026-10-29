@@ -10,7 +10,7 @@ def ids(path):
 
 
 out = [
-    "-- Every weapon's and egg's icon (rendered by tools/render_weapon_icons.py and",
+    "-- Every weapon's, egg's and pet's icon (rendered by tools/render_weapon_icons.py and",
     "-- tools/render_pet_icons.py at 128px, QM Oct 27: all UI pictures of weapons and eggs are",
     "-- these renders). Written by tools/item_icon_ids.py from the uploads' ids.json; don't edit.",
     "-- [id or kind] = \"rbxassetid://...\"",
