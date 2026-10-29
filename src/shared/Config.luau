@@ -561,6 +561,8 @@ return {
 	-- side it looks from, degrees (0 = from the south, looking north). Distance: studs from
 	-- you. Height: studs above your middle it aims at. Fov: field of view (Roblox's usual
 	-- is 70; lower looks flatter). InTime / OutTime: seconds easing in and back out.
+	-- the red outline on the boss you're locked into a fight with (client/BossView)
+	FightOutline = { Color = Color3.fromRGB(255, 40, 40), Transparency = 0 },
 	FightCam = { On = true, Pitch = 62, Yaw = 0, Distance = 80, Height = 0, Fov = 55, InTime = 0.6, OutTime = 0.6 },
 	-- a sleeping boss (client/BossView, QM Oct 25): settled low on the ground, its head
 	-- swelling a little with each snore. A Model with a pose in Poses lies down in it
