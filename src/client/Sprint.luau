@@ -24,6 +24,7 @@ local RideSounds = require(script.Parent.RideSounds)
 local SkyFlash = require(script.Parent.SkyFlash)
 local SpeedLines = require(script.Parent.SpeedLines)
 local SprintCam = require(script.Parent.SprintCam)
+local FightCam = require(script.Parent.FightCam)
 local SprintTrail = require(script.Parent.SprintTrail)
 
 local Sprint = {}
@@ -91,7 +92,8 @@ RunService:BindToRenderStep("Sprint", Enum.RenderPriority.Camera.Value + 3, func
 	RideSounds.setGallop(alive, speed / Pets.stats("Horse").Speed)
 
 	-- the camera: wider, and in closer on you (after the other cameras, like SlashCam)
-	local fov, zoom = SprintCam.update(dt, sprinting, speed)
+	-- (not in a boss fight: its camera stays put, so the sprint look eases out)
+	local fov, zoom = SprintCam.update(dt, sprinting and not FightCam.active(), speed)
 	camera.FieldOfView += fov - addedFov
 	addedFov = fov
 	local focus = camera.Focus.Position

@@ -555,6 +555,13 @@ return {
 		VignetteWidth = 0.28, -- how far in from each edge the red reaches, of the screen
 		VignetteAlpha = 0.25, -- its transparency at the very edge at a pulse's peak (0 = solid)
 	},
+	-- the boss fight camera (QM, Oct 29): locked into a fight, the camera looks steeply down
+	-- on you from high up, from a fixed side, and follows you; no turning or zooming it
+	-- (client/FightCam). Pitch: degrees down from level (90 = straight down). Yaw: which
+	-- side it looks from, degrees (0 = from the south, looking north). Distance: studs from
+	-- you. Height: studs above your middle it aims at. Fov: field of view (Roblox's usual
+	-- is 70; lower looks flatter). InTime / OutTime: seconds easing in and back out.
+	FightCam = { On = true, Pitch = 62, Yaw = 0, Distance = 55, Height = 0, Fov = 55, InTime = 0.6, OutTime = 0.6 },
 	-- a sleeping boss (client/BossView, QM Oct 25): settled low on the ground, its head
 	-- swelling a little with each snore. A Model with a pose in Poses lies down in it
 	-- instead (no sinking or swelling): eyes shut, breathing slowly, Zzz drifting up.
