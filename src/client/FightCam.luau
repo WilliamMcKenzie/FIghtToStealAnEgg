@@ -1,7 +1,8 @@
 -- The boss fight camera (QM, Oct 29): while you're locked into a boss's fight (your
 -- LockedIn attribute), the camera sits high above you, looking steeply down at a fixed
 -- angle from a fixed side, and follows you. You can't turn or zoom it. It eases in when
--- the fight starts and back to your own camera when it ends. Config.FightCam.
+-- the fight starts and, when it ends, back to exactly the angle and distance your camera
+-- had before the fight. Config.FightCam.
 --
 -- The camera isn't taken over: each frame this blends whatever camera is active toward
 -- the fight shot, after Roblox's camera scripts, so handing back is seamless. Runs
@@ -23,6 +24,9 @@ local camera = workspace.CurrentCamera
 
 local w = 0 -- 0 (your own camera) .. 1 (the fight camera)
 local addedFov = 0 -- what this has added to the field of view
+-- your camera just before the fight, relative to you (world-aligned): Roblox's camera
+-- scripts steer from the camera's last CFrame, so without this they'd stay top-down
+local before = nil
 
 function FightCam.active()
 	return w > 0
@@ -38,6 +42,9 @@ RunService:BindToRenderStep("FightCam", Enum.RenderPriority.Camera.Value + 1, fu
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local on = cfg.On and root ~= nil and player:GetAttribute("LockedIn") ~= nil
 	if on then
+		if w <= 0 and root then
+			before = CFrame.new(root.Position):ToObjectSpace(camera.CFrame)
+		end
 		w = math.min(w + dt / cfg.InTime, 1)
 	else
 		w = math.max(w - dt / cfg.OutTime, 0)
@@ -47,6 +54,10 @@ RunService:BindToRenderStep("FightCam", Enum.RenderPriority.Camera.Value + 1, fu
 	camera.FieldOfView += fov - addedFov
 	addedFov = fov
 	if w <= 0 or not root then
+		if w <= 0 and before and root then
+			camera.CFrame = CFrame.new(root.Position) * before
+			before = nil
+		end
 		return
 	end
 
@@ -55,7 +66,12 @@ RunService:BindToRenderStep("FightCam", Enum.RenderPriority.Camera.Value + 1, fu
 	-- (yaw 0: the camera sits to the south, +Z, looking north)
 	local back = Vector3.new(math.sin(yaw) * math.cos(pitch), math.sin(pitch), math.cos(yaw) * math.cos(pitch))
 	local shot = CFrame.lookAt(at + back * cfg.Distance, at)
-	camera.CFrame = camera.CFrame:Lerp(shot, smooth(w))
+	local own = camera.CFrame
+	if not on and before then
+		-- easing out: head back to where your camera was before the fight
+		own = CFrame.new(root.Position) * before
+	end
+	camera.CFrame = own:Lerp(shot, smooth(w))
 	camera.Focus = camera.Focus:Lerp(CFrame.new(at), smooth(w))
 end)
 
