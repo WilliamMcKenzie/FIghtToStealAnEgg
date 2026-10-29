@@ -12,10 +12,7 @@
 -- Also hands the /boss chat command to the server (BossRequest), and B does the same;
 -- /reboss goes as RebossRequest
 -- (a key that works whatever chat the place uses).
--- While you're locked into a boss's fight (your LockedIn attribute = its Biome), that boss
--- gets a red outline (QM, Oct 29): a Highlight, gone when the fight ends. Config.FightOutline.
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TextChatService = game:GetService("TextChatService")
@@ -139,34 +136,6 @@ local function zed(view, i)
 	task.delay(ZZZ.Life, gui.Destroy, gui)
 end
 
--- the red outline on the boss you're fighting (see the top)
-local player = Players.LocalPlayer
-local function outline(body, view)
-	local biome = player:GetAttribute("LockedIn")
-	local on = biome ~= nil and body:GetAttribute("Biome") == biome
-	if on and not view.outline then
-		local cfg = Config.FightOutline
-		local h = Instance.new("Highlight")
-		h.Name = "FightOutline"
-		h.FillTransparency = 1
-		h.OutlineColor = cfg.Color
-		h.OutlineTransparency = cfg.Transparency
-		h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-		h.Adornee = view.animal.model
-		h.Parent = view.animal.model
-		view.outline = h
-	elseif not on and view.outline then
-		view.outline:Destroy()
-		view.outline = nil
-	end
-end
-local function outlines()
-	for body, view in views do
-		outline(body, view)
-	end
-end
-player:GetAttributeChangedSignal("LockedIn"):Connect(outlines)
-
 local function add(body)
 	if not body:IsA("BasePart") then
 		return
@@ -286,10 +255,6 @@ local function add(body)
 		view.burrow = c and c.Burrow and { cfg = c.Burrow, radius = body:GetAttribute("Radius") or 4 }
 	end
 	views[body] = view
-	outline(body, view)
-	body:GetAttributeChangedSignal("Biome"):Connect(function()
-		outline(body, view)
-	end)
 	body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
 		if health < view.health then
