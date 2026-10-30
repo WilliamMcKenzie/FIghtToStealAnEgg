@@ -5,9 +5,10 @@ The roster and each attack's windup: /mnt/project-files/boss-roster/design.md (Q
   python3 tools/render_boss.py [Name ...]    # draws previews/bosses/<name>.png and .gif
 """
 
+import os
 import sys
 
-from boss_forge import Model, bob, wave, write_sleep
+from boss_forge import ROOT, Model, bob, wave, write_sleep
 
 DARK = (30, 22, 34)  # eyes and mouths, as the Cactus Boss's
 WHITE = (250, 246, 236)
@@ -1224,10 +1225,41 @@ SLEEPS = {
 }
 
 
+# bosses QM has since redrawn in Blockbench (designs/bosses/<Name>.bbmodel): their blocks and
+# bones come from the drawing, their animations (and hit marks) still from here. Blockbench
+# drops the hit marks, and re-saving an older file flips its animation keys' X and Y turns,
+# so their animations aren't read back from the drawing.
+BLOCKBENCH = {"BlizzardOwl"}  # (QM's new owl, Oct 30: brows, black eyes with red pupils, bigger wing tips)
+
+
+def from_blockbench(m):
+    import tempfile
+
+    import bbmodel_to_luau
+    import boss_luau
+
+    bbmodel_to_luau.ORDER = "ZYX"
+    src = os.path.join(ROOT, "designs", "bosses", m.name + ".bbmodel")
+    with tempfile.TemporaryDirectory() as tmp:
+        out = os.path.join(tmp, m.name + "Model.luau")
+        bbmodel_to_luau.main(src, out)
+        path = boss_luau.path
+        boss_luau.path = lambda name: out
+        try:
+            drawn = boss_luau.load(m.name)
+        finally:
+            boss_luau.path = path
+    assert not any(any(r) for r in drawn.rests.values()), m.name + ": bones turned at rest aren't supported"
+    m.bones, m.parts = drawn.bones, drawn.parts
+    m.note += "\nIts blocks and bones are QM's drawing, designs/bosses/" + m.name + ".bbmodel; its animations are here."
+
+
 def models():
     out = []
     for b in BUILDERS:
         m = b()
+        if m.name in BLOCKBENCH:
+            from_blockbench(m)
         if m.name in SLEEPS:
             m.sleep(**SLEEPS[m.name])
         out.append(m)
