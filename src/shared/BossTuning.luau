@@ -6,8 +6,12 @@
 --              Only the look: their hitbox and attack reach stay Config's
 --   Boss       (filled in by the client) the boss out now, and the Size to put in its
 --              Config.Bosses entry for this scale
---   Distance, Pitch, Yaw, Height, Fov   the boss fight camera (Config.FightCam: Distance is
---              the zoom, studs from you)
+--   Fixed      the boss fight camera holds still over the arena's middle, zoomed so its
+--              width fits the screen (off: it follows you, Distance studs away)
+--   Fit        with Fixed, how much of the screen's width the arena takes (1 = edge to
+--              edge, 1.1 = a little room either side, 0.9 = a little cut off)
+--   Distance, Pitch, Yaw, Height, Fov   the rest of the boss fight camera (Config.FightCam:
+--              Distance is the zoom when it follows you, studs from you)
 --
 -- Tick PrintConfig to print the values to the Output, ready to paste into Config (or to
 -- send to Claude).
@@ -22,7 +26,7 @@ local Config = require(script.Parent.Config)
 local BossTuning = {}
 
 local NAME = "BossTuning"
-local CAMERA = { "Distance", "Pitch", "Yaw", "Height", "Fov" }
+local CAMERA = { "Fixed", "Fit", "Distance", "Pitch", "Yaw", "Height", "Fov" }
 
 function BossTuning.create()
 	local old = workspace:FindFirstChild(NAME)
@@ -54,7 +58,7 @@ function BossTuning.camera()
 	c = table.clone(c)
 	for _, name in CAMERA do
 		local value = folder:GetAttribute(name)
-		if typeof(value) == "number" then
+		if typeof(value) == typeof(c[name]) then
 			c[name] = value
 		end
 	end
@@ -71,7 +75,8 @@ function BossTuning.print()
 	local c = BossTuning.camera()
 	local parts = {}
 	for _, name in CAMERA do
-		table.insert(parts, string.format("%s = %.4g", name, c[name]))
+		local value = if typeof(c[name]) == "number" then string.format("%.4g", c[name]) else tostring(c[name])
+		table.insert(parts, name .. " = " .. value)
 	end
 	local lines = { "-- BossTuning", "FightCam: " .. table.concat(parts, ", ") }
 	local folder = workspace:FindFirstChild(NAME)
