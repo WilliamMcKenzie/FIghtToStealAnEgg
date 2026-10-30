@@ -932,7 +932,7 @@ return {
 					Shot = { Color = Color3.fromRGB(255, 110, 50), Count = 3, Spread = 25, Speed = 45, Homing = 0, Launch = 0, Range = 70, Slack = 0, Size = 1.5 },
 				},
 				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 24, Radius = 8, Airtime = 1.3, Height = 26, Damage = 70, Style = "Fire" },
-				{ Kind = "Leap", Every = 8, Range = 120, Windup = 0.8, Airtime = 1.3, Height = 40, Radius = 20, Damage = 90, Anim = "leap" },
+				{ Kind = "Leap", Every = 8, Range = 120, Windup = 0.8, Airtime = 1.3, Height = 40, Radius = 25, Damage = 90, Anim = "leap" },
 			},
 		},
 
