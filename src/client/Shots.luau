@@ -241,7 +241,10 @@ function Shots.fire(character, id, yaw, seed)
 	local y = (if hips then hips.Y else root.Position.Y) + Config.Shots.Height
 	local origin = Vector3.new(root.Position.X, y, root.Position.Z)
 	sound(w.Shot.FireSound, w.Shot.FireVolume, root) -- (once a volley, not once a shot)
-	for _, shot in Projectiles.spawn(id, origin, yaw, seed) do
+	-- (in a boss fight it flies till it leaves the arena, as on the server)
+	local shooter = Players:GetPlayerFromCharacter(character)
+	local room = shooter and Projectiles.room(shooter:GetAttribute("LockedIn"))
+	for _, shot in Projectiles.spawn(id, origin, yaw, seed, room) do
 		local d = build(w.Shot)
 		d.shot, d.s = shot, w.Shot
 		table.insert(active, d)

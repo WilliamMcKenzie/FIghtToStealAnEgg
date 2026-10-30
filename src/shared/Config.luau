@@ -2263,7 +2263,7 @@ return {
 			Rarity = "Common",
 			Damage = 1.2,
 			Price = 500,
-			Shot = { Cooldown = 0.45, Range = 45 },
+			Shot = { Cooldown = 0.45 },
 		},
 		Staff = { -- (a plain staff, no element: QM, Oct 25)
 			Name = "Staff",
@@ -2327,7 +2327,6 @@ return {
 			Shot = {
 				Cooldown = 0.8,
 				Count = 3,
-				Range = 75,
 				Spread = 16,
 				TrailLength = 0.2,
 				TrailTransparency = 0.6,
@@ -2451,7 +2450,6 @@ return {
 			Shot = {
 				Cooldown = 0.2,
 				Count = 2,
-				Range = 60,
 				Spread = 8,
 				TrailColor = Color3.fromRGB(51, 255, 0),
 				TrailLength = 0.3,
@@ -2467,7 +2465,6 @@ return {
 			Shot = {
 				Cooldown = 0.4,
 				Pierce = 1,
-				Range = 65,
 				Size = 3,
 				Spread = 5,
 				TrailColor = Color3.fromRGB(230, 30, 50),
@@ -2522,6 +2519,10 @@ return {
 		Radius = 0.6, -- a shot's own width for hitting (studs), times its Size
 		Slack = 1.5, -- studs added to every target's width for shots (QM: more forgiving; height never counts)
 		Trust = 12, -- studs: how far the shooter's own spot may be from the server's (Server/Combat)
+		-- no range on bows and staffs (QM, Oct 30, as in Archero): in a boss fight they shoot
+		-- the nearest enemy anywhere in the arena, and a shot flies until it hits or leaves the
+		-- arena. Outside a fight (training yards) they reach this far instead
+		Reach = 90, -- studs
 		StillOnly = true, -- bows and staffs only shoot while you stand still (QM, Oct 26, Archero); melee always swings
 		-- the held bow pulses on each shot, as in Kingdom Crushers' Shoot (QM, Oct 26): it snaps
 		-- small as it fires, swells big toward the next shot, and settles if none comes.
@@ -2536,7 +2537,7 @@ return {
 		Ranged = {
 			Look = "Arrow", -- (the one arrow every Ranged weapon shoots; boss ones have their own)
 			Cooldown = 0.6, -- seconds between shots
-			Range = 55, -- studs it flies
+			Range = 400, -- studs it flies at most: only a cleanup cap now (QM, Oct 30: no range, like Archero)
 			Speed = 80, -- studs a second (every bow: QM, Oct 25)
 			Size = 1.8, -- the arrow's size (and how wide it hits) (QM: every bow the Shortbow's)
 			Count = 1, -- shots at once...
@@ -2559,7 +2560,7 @@ return {
 		Magic = {
 			Look = "Orb", -- Orb (every staff), Petal (boss weapons)
 			Cooldown = 0.7,
-			Range = 50,
+			Range = 400, -- (a cleanup cap, as for bows)
 			Speed = 55,
 			Size = 1, -- the whole orb (and how wide it hits)
 			Count = 1,

@@ -1,6 +1,6 @@
 -- Your weapon (the sword to start; bosses drop more: Server/Arsenal): it's always
 -- out, and it attacks by itself (QM, Oct 24, Archero-style). Melee weapons slash as
--- below; Ranged and Magic ones shoot at the nearest target in their Range (client/Shots
+-- below; Ranged and Magic ones shoot at the nearest target (anywhere in a boss arena, else within Config.Shots.Reach) (client/Shots
 -- draws the shots, the server runs them for the damage), but only while you stand still.
 -- While a boss (or a training mob or dummy) is within AimRange the torso turns toward it, eased (not snapped), and
 -- whenever one is within AttackRange and the cooldown allows, it slashes along that aim:
@@ -23,6 +23,7 @@ local SlashFx = require(Shared.SlashFx)
 local SlashTuning = require(Shared.SlashTuning)
 local WorldColors = require(Shared.WorldColors)
 local Weapons = require(Shared.Weapons.Weapons)
+local Projectiles = require(Shared.Projectiles)
 local Riding = require(script.Riding)
 local Shots = require(script.Shots)
 local SlashCam = require(script.SlashCam)
@@ -141,7 +142,8 @@ end
 -- the nearest thing to hit within `range` of the character (flat distance to its edge):
 -- a boss (workspace.Bosses), or a training mob or dummy (workspace.Mobs) in a ground
 -- you've unlocked
-local function nearestBoss(root, range)
+-- (room: only bodies inside these bounds, { x0, z0, x1, z1 }: a boss fight's arena)
+local function nearestBoss(root, range, room)
 	local best, bestDist = nil, range
 	for _, name in { "Bosses", "Mobs" } do
 		local folder = workspace:FindFirstChild(name)
@@ -154,6 +156,10 @@ local function nearestBoss(root, range)
 				and not body:GetAttribute("Intro")
 				and not body:GetAttribute("Burrowed") -- (tunnelling underground)
 				and (ground == nil or player:GetAttribute("Train" .. ground) ~= false)
+				and (
+					room == nil
+					or (body.Position.X >= room[1] and body.Position.Z >= room[2] and body.Position.X <= room[3] and body.Position.Z <= room[4])
+				)
 			then
 				local d = ((body.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude
 					- (body:GetAttribute("Radius") or 0)
@@ -194,8 +200,15 @@ RunService.Heartbeat:Connect(function(dt)
 	local id = tool and tool:GetAttribute("Weapon")
 	local c = settings(tool)
 	local range = if id then Weapons.range(id, c) else c.AttackRange
+	-- (bows and staffs have no range, QM Oct 30, Archero: in a boss fight, the nearest
+	-- enemy anywhere in the arena; elsewhere, anything within Config.Shots.Reach)
+	local room = nil
+	if id and Weapons.get(id).Shot then
+		room = Projectiles.room(player:GetAttribute("LockedIn"))
+		range = if room then math.huge else Config.Shots.Reach
+	end
 	local facing = yawOf(root.CFrame.LookVector)
-	local target = nearestBoss(root, math.max(c.AimRange, range + 8))
+	local target = nearestBoss(root, math.max(c.AimRange, range + 8), room)
 	TargetRing.set(target) -- (the red ring under what you're aiming at)
 	local want = if target then yawOf((target.Position - root.Position) * Vector3.new(1, 0, 1)) else facing
 	aimYaw = want
@@ -204,7 +217,7 @@ RunService.Heartbeat:Connect(function(dt)
 	if not id or os.clock() < ready then
 		return
 	end
-	local inRange = nearestBoss(root, range)
+	local inRange = nearestBoss(root, range, room)
 	if not inRange then
 		return
 	end
