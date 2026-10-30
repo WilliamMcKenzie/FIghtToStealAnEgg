@@ -28,6 +28,7 @@ local Pens = require(script.Pens)
 local PetInventory = require(script.PetInventory)
 local Regen = require(script.Regen)
 local Regions = require(script.Regions)
+require(script.SprintAbility) -- (the SprintPets' sprints: burrowing, flying, smashing, bombs)
 local Training = require(script.Training)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play

@@ -63,7 +63,9 @@
 --         the last orb's out or the bombs have landed; so does calling its Minions.
 --
 -- Only players locked into its fight (LockedIn = its biome) are hit, so someone passing
--- through is never caught. All of it is server parts in workspace.BossFx. A pet bigger
+-- through is never caught. A sprint ability (Server/SprintAbility: the player's
+-- SprintAbility attribute) dodges too: burrowed, nothing hits you; flying, only homing
+-- Magic shots do (QM, Oct 30). All of it is server parts in workspace.BossFx. A pet bigger
 -- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
@@ -135,11 +137,18 @@ local function fighter(player)
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if root and humanoid and humanoid.Health > 0 then
 		local extra = Pets.stats(player:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
-		return { root = root, humanoid = humanoid, extra = extra }
+		return { root = root, humanoid = humanoid, extra = extra, player = player }
 	end
 	return nil
 end
 BossAttacks.fighter = fighter
+
+-- whether this fighter's sprint ability dodges a hit (homing: a homing Magic shot's)
+local function dodges(f, homing)
+	local ability = f.player and f.player:GetAttribute("SprintAbility")
+	return ability == "Burrow" or (ability == "Fly" and not homing)
+end
+BossAttacks.dodges = dodges
 
 -- every living root of a player in this biome's fight; for a training mob (its `biome` is
 -- its own b, Server/Training) just whoever it's angry with, its b.foes
@@ -184,7 +193,7 @@ local function blast(biome, centre, radius, damage, hit)
 		if hit and hit[f.humanoid] then
 			continue
 		end
-		if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra then
+		if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra and not dodges(f) then
 			if hit then
 				hit[f.humanoid] = true
 			end
@@ -423,7 +432,7 @@ local function swipe(body, b, a, pos, toward)
 			end
 			for _, f in fighters(b.biome) do
 				-- (solid: right up against it, inside the crescent, counts too)
-				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra, true) then
+				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra, true) and not dodges(f) then
 					f.humanoid:TakeDamage(a.Damage)
 				end
 			end
@@ -677,7 +686,7 @@ function BossAttacks.move(body, b, dt, pos)
 		for _, f in fighters(b.biome) do
 			if not m.hit[f.humanoid] then
 				local off = flat(f.root.Position - at)
-				if off.Magnitude <= b.c.Radius + 1 + f.extra then
+				if off.Magnitude <= b.c.Radius + 1 + f.extra and not dodges(f) then
 					m.hit[f.humanoid] = true
 					f.humanoid:TakeDamage(m.damage)
 				end
@@ -760,12 +769,20 @@ RunService.Heartbeat:Connect(function(dt)
 			local m = magic[i]
 			local targets = byBiome[m.biome]
 			if not targets then
-				targets = {}
+				targets = { homing = {}, plain = {} }
 				for _, f in fighters(m.biome) do
-					table.insert(targets, { body = f.root, pos = f.root.Position, radius = PLAYER_RADIUS + f.extra, f = f })
+					local t = { body = f.root, pos = f.root.Position, radius = PLAYER_RADIUS + f.extra, f = f }
+					if not dodges(f, true) then
+						table.insert(targets.homing, t)
+					end
+					if not dodges(f, false) then
+						table.insert(targets.plain, t)
+					end
 				end
 				byBiome[m.biome] = targets
 			end
+			-- (a flier is only there to a homing shot; a burrower to none)
+			targets = if (m.shot.homing or 0) > 0 then targets.homing else targets.plain
 			for _, t in Projectiles.step(m.shot, dt, targets) do
 				t.f.humanoid:TakeDamage(m.damage)
 			end
@@ -780,7 +797,7 @@ RunService.Heartbeat:Connect(function(dt)
 		s.travelled += step
 		local hit = false
 		for _, f in fighters(s.biome) do
-			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + 1.5 + f.extra then
+			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + 1.5 + f.extra and not dodges(f) then
 				f.humanoid:TakeDamage(s.damage)
 				hit = true
 				break

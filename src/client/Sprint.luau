@@ -4,11 +4,16 @@
 -- you're straight back to its usual speed. This sets your WalkSpeed: your pet's
 -- (Shared/Pets), x the wade (client/Liquid), x the sprint.
 --
--- While you sprint, LassoAPet's riding feel, as it is there: speed lines on the screen
--- (SpeedLines), the view widening and pulling in on you (SprintCam), a white trail off
--- you (SprintTrail), the whoosh and a rush of wind (RideSounds), and on each sprint tier
--- a camera bounce, a speed burst and the sky flashing white (SkyFlash). The gallop loop
--- plays whenever you ride.
+-- While you sprint, LassoAPet's riding feel: speed lines on the screen (SpeedLines), the
+-- view widening and pulling in on you (SprintCam), a white trail off you (SprintTrail),
+-- the whoosh and a rush of wind (RideSounds). The gallop loop plays whenever you ride.
+-- (QM, Oct 30: no more camera bounce, speed burst and sky flash on each sprint tier.)
+--
+-- A pet with a sprint ability (Config.SprintPets: the Sandworm's burrow, the fliers'
+-- flight, the whales' and Rhino's smash, the Volcano Tortoise's bombs) gets those once
+-- instead, the moment its sprint starts, and the server's told (Server/SprintAbility),
+-- which runs it till you stop, or ends it (SprintEnd: a Smash ran into something) and
+-- you ride on another Sprint.Delay to start it again. client/SprintAbility draws it.
 --
 --   Sprint.sprinting() -> true while you sprint (from the build-up on)
 
@@ -35,8 +40,24 @@ local camera = workspace.CurrentCamera
 local moving = 0 -- seconds ridden without stopping
 local boost = 1 -- x your pet's speed: 1 .. Config.Sprint.Speed
 local sprinting = false
-local wasSprinting, lastTier = false, 0
+local wasSprinting = false
+local abilityOn = false -- told the server our sprint ability's on
 local addedFov = 0 -- the sprint's degrees on the camera's field of view, last frame
+
+local abilityRemote = ReplicatedStorage:WaitForChild("SprintAbility")
+
+local function setAbility(on)
+	if on ~= abilityOn then
+		abilityOn = on
+		abilityRemote:FireServer(on)
+	end
+end
+
+-- (a Smash ran into something: the sprint's over, ride on to start it again)
+ReplicatedStorage:WaitForChild("SprintEnd").OnClientEvent:Connect(function()
+	moving, boost, sprinting = 0, 1, false
+	abilityOn = false
+end)
 
 function Sprint.sprinting()
 	return sprinting
@@ -80,15 +101,21 @@ RunService:BindToRenderStep("Sprint", Enum.RenderPriority.Camera.Value + 3, func
 	-- the feel of it
 	SpeedLines.update(if sprinting then Config.SpeedLines.Speed else 0, dt) -- (full on any sprint, whatever the pet's speed)
 	SprintTrail.update(if alive then character else nil, sprinting, speed)
-	local tier = if sprinting then SprintCam.tier(speed) else 0
+	local special = alive and Config.SprintPets[player:GetAttribute("Pet") or "Horse"] ~= nil
 	if sprinting and not wasSprinting then
 		RideSounds.play("sprint_whoosh", 0.32)
-	elseif sprinting and tier > lastTier then
-		RideSounds.play("sprint_tier", 0.5)
-		SkyFlash.flash()
+		if special then
+			-- (the sprint ability kicks in: the speed burst, once)
+			RideSounds.play("sprint_tier", 0.5)
+			SkyFlash.flash()
+			if not FightCam.active() then
+				SprintCam.pulse()
+			end
+		end
 	end
-	wasSprinting, lastTier = sprinting, tier
-	RideSounds.setSprintWind(sprinting, SprintCam.tierLoudness(tier))
+	setAbility(sprinting and special)
+	wasSprinting = sprinting
+	RideSounds.setSprintWind(sprinting, 1)
 	RideSounds.setGallop(alive, speed / Pets.stats("Horse").Speed)
 
 	-- the camera: wider, and in closer on you (after the other cameras, like SlashCam)

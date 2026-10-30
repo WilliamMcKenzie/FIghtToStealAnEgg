@@ -16,6 +16,10 @@
 --           the gallop,
 --           and the hips and knees take a riding pose (thighs forward and apart, shins
 --           back), overriding whatever the Animator plays on those joints
+-- A sprint ability (the player's SprintAbility attribute, Server/SprintAbility) moves the
+-- pet and rider together: Fly lifts them Config.SprintAbility.Fly.Height up, Burrow sinks
+-- them out of sight under the floor, Smash grows the pet (its Grow). The rider's own
+-- character stays where it is (it's only drawn up or down).
 -- Transforms are written in PreSimulation (after the Animator), like SwingPose's, and the
 -- rider's is worked out relative to the HumanoidRootPart, so where physics then puts the
 -- character doesn't matter. They aren't replicated, so each client does this for every
@@ -27,6 +31,7 @@ local RunService = game:GetService("RunService")
 local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared.Config)
 local Pets = require(Shared.Pets)
 
 local Riding = {}
@@ -74,6 +79,7 @@ local function newPet(character, kind, root)
 	weld.Part1 = base
 	weld.Parent = base
 	horse.model.Parent = workspace
+	horse.height = horse.model:GetExtentsSize().Y -- (how deep a burrow has to go)
 	return horse, weld
 end
 
@@ -104,7 +110,7 @@ local function mount(character)
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 	end
 	local kind = petOf(character)
-	local m = { kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil }
+	local m = { kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil, lift = 0, grow = 1 }
 	m.horse, m.weld = newPet(character, kind, root)
 	mounts[character] = m
 	return m
@@ -141,8 +147,34 @@ RunService.PreSimulation:Connect(function(dt)
 			m.horse.model:Destroy()
 			m.kind = kind
 			m.horse, m.weld = newPet(character, kind, m.root)
+			m.grow = 1
 		end
 		local root, horse = m.root, m.horse
+
+		-- a sprint ability: up in the air, under the floor, or bigger (eased in and out)
+		local owner = Players:GetPlayerFromCharacter(character)
+		local ability = owner and owner:GetAttribute("SprintAbility")
+		local abilities = Config.SprintAbility
+		local lift, grow = 0, 1
+		if ability == "Fly" then
+			lift = abilities.Fly.Height
+		elseif ability == "Burrow" then
+			lift = -(horse.height + 6) -- (the rider too)
+		elseif ability == "Smash" then
+			grow = abilities.Smash.Grow
+		end
+		local ease = 1 - math.exp(-dt * 3 / abilities.Fly.Rise)
+		m.lift += (lift - m.lift) * ease
+		if math.abs(m.lift - lift) < 0.02 then
+			m.lift = lift
+		end
+		if m.grow ~= grow then
+			m.grow += (grow - m.grow) * math.min(dt * 12, 1)
+			if math.abs(m.grow - grow) < 0.01 then
+				m.grow = grow
+			end
+			horse:setScale(m.grow)
+		end
 
 		-- speed and turning, for the horse's gaits and lean
 		local velocity = root.AssemblyLinearVelocity * Vector3.new(1, 0, 1)
@@ -158,7 +190,7 @@ RunService.PreSimulation:Connect(function(dt)
 		-- the horse at the ground under the character, its seat under the character (in the
 		-- HumanoidRootPart's frame: the weld keeps it there, facing where the character faces)
 		local seat = horse.seat * horse.size * horse.scale
-		local place = CFrame.new(-seat.X, -(root.Size.Y / 2 + m.humanoid.HipHeight), -seat.Z)
+		local place = CFrame.new(-seat.X, -(root.Size.Y / 2 + m.humanoid.HipHeight) + m.lift, -seat.Z)
 		if m.weld.C0 ~= place then
 			m.weld.C0 = place
 		end
@@ -210,6 +242,12 @@ function Riding.gait(character)
 	local clock = horse.clocks and horse.clocks.gallop
 	local cycle = if gallop and clock and gallop.length > 0 then clock / gallop.length else nil
 	return cycle, horse.speed or 0
+end
+
+-- the pet under this character (its Horse-like object: .model, .scale), or nil
+function Riding.pet(character)
+	local m = mounts[character]
+	return m and m.horse
 end
 
 -- the height of the rider's hips (for things drawn at the rider, like the slash)

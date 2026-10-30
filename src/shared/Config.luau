@@ -1913,6 +1913,62 @@ return {
 	-- the controls, or held up against something: under StopAt of your speed) drops you
 	-- straight back. LassoAPet's sprint is 2x; this game's is 1.3x (QM).
 	Sprint = { On = true, Speed = 1.3, Delay = 1.5, Ramp = 1.2, StopAt = 0.4 },
+	-- Sprint abilities (QM, Oct 30; client/SprintAbility draws them, Server/SprintAbility
+	-- runs them): these pets' sprint is a special move instead. It starts once, the moment
+	-- you've ridden Sprint.Delay seconds without stopping (whatever your speed), with the
+	-- camera bounce, the sky flash and the tier-up whoosh (no other pet gets those any
+	-- more: QM), and lasts till you stop.
+	--   Burrow  under the floor: nothing can hit you (LassoAPet's Sandworm: its sand
+	--           mounds and dirt spray, in Sand / Sand2)
+	--   Fly     Height studs up, rising over Rise seconds: melee, bombs, slams and plain
+	--           shots all miss you; only homing magic (a Magic shot with Homing) still hits
+	--   Smash   Grow x bigger, a white outline and LassoAPet's charge wind (the Rhino's):
+	--           running into an enemy hits it for Damage x your slash's damage and knocks
+	--           it Knockback studs back over KnockTime seconds (a boss BossKnock x that),
+	--           and ends the sprint (another Sprint.Delay of riding to start it again)
+	--   Bombs   an orange outline, and a bomb dropped every Every seconds: each goes
+	--           off Fuse seconds later, hitting every enemy within Radius for Damage x your
+	--           slash's damage (orange and yellow in turn)
+	SprintPets = {
+		Sandworm = "Burrow",
+		Rockworm = "Burrow", -- (the Sandworm's recolour)
+		Firebird = "Fly",
+		Phoenix = "Fly",
+		MysticOwl = "Fly",
+		SpiritLoong = "Fly",
+		CrimsonDrake = "Fly",
+		RoyalEagle = "Fly",
+		Rhino = "Smash",
+		LavaWhale = "Smash", -- (a whale like the Whale and Abyss Whale)
+		Whale = "Smash",
+		AbyssWhale = "Smash",
+		VolcanoTortoise = "Bombs",
+	},
+	SprintAbility = {
+		Burrow = {
+			-- (the Sandworm's the Sandworm boss's sand; the Rockworm's dark rock)
+			Sand = { Sandworm = Color3.fromRGB(226, 190, 128), Rockworm = Color3.fromRGB(90, 70, 65) },
+			Sand2 = { Sandworm = Color3.fromRGB(196, 156, 96), Rockworm = Color3.fromRGB(60, 45, 45) },
+			Mound = 1.3, -- x LassoAPet's mounds
+		},
+		Fly = { Height = 10, Rise = 0.4 },
+		Smash = {
+			Grow = 1.2,
+			Outline = Color3.fromRGB(255, 255, 255),
+			Damage = 3,
+			Reach = 2, -- studs past the two bodies' edges that still count as running into it
+			Knockback = 18,
+			KnockTime = 0.3,
+			BossKnock = 0.5,
+		},
+		Bombs = {
+			Outline = Color3.fromRGB(255, 140, 30),
+			Every = 0.15, -- (it runs about 200 studs/s: one every ~30 studs)
+			Fuse = 0.9,
+			Radius = 8,
+			Damage = 1,
+		},
+	},
 	-- The rest is LassoAPet's riding feel, ported as it is (its own Config values). Where it
 	-- measured speeds in studs/s against "a horse's sprint", here that's the Horse's speed
 	-- x Sprint.Speed (worked out in code), and the tiers are multiples of it.
@@ -1926,17 +1982,18 @@ return {
 	-- The sprint camera (client/SprintCam): sprinting, the view widens to Fov degrees (a
 	-- fisheye-like stretch at the edges) and the camera comes in to Zoom x its usual
 	-- distance, easing in over InTime seconds and back over OutTime; x your speed over a
-	-- horse's sprint, between MinScale and MaxScale. Breaking into a higher sprint tier
+	-- horse's sprint, between MinScale and MaxScale. A SprintPets pet's sprint starting
 	-- bounces the camera's distance: in to Bounce.In x, out to Bounce.Out x, then settling.
 	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5, MinScale = 0.5, MaxScale = 1.8, Bounce = { In = 0.7, InTime = 0.1, Out = 1.2, OutTime = 0.15, SettleTime = 0.4 } },
 	-- Sprint tiers, in horse's sprints (LassoAPet's 180, 360 and 440 studs/s over its horse's
-	-- 88): breaking into one replays the whoosh, bounces the camera, flashes the sky and
-	-- steps the wind louder (up to 2x).
+	-- 88). Breaking into one used to bounce the camera, flash the sky and play the tier-up
+	-- whoosh; QM, Oct 30: no more (only a SprintPets pet's sprint does that, once). They're
+	-- unused now.
 	SprintTiers = { 2.05, 4.1, 5 },
 	-- A white trail off you while you sprint (client/SprintTrail): Life seconds long at a
 	-- horse's sprint, longer the faster you go, up to MaxLife.
 	SprintTrail = { On = false, Life = 0.12, MaxLife = 0.6, Transparency = 0.55 }, -- (off: QM, Oct 27)
-	-- The sky flashes white on each sprint tier-up, fading back over Time seconds
+	-- The sky flashes white as a SprintPets pet's sprint starts, fading back over Time seconds
 	-- (client/SkyFlash). Start: its see-through at the flash. Distance: studs round the camera.
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 

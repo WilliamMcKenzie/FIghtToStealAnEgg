@@ -282,6 +282,7 @@ function Training.start(map)
 					if not hold then
 						pos += move
 					end
+					pos = Combat.pushed(body, pos, dt) -- (knocked back by a Smash sprint)
 					-- (it stays in its yard)
 					pos = Vector3.new(
 						math.clamp(pos.X, m.x - m.half, m.x + m.half),
