@@ -55,7 +55,7 @@ local LEFT_W = 1600 -- the sections' box
 local BOX_TOP, BOX_H = 323, 800
 local RIGHT_X = 1680
 local RIGHT_W = W - 40 - RIGHT_X
-local CARD_H = 620 -- the picked pet's card
+local CARD_H = 560 -- the picked pet's card
 -- a section: the biome picture on its left, the collage, the bar under it
 local PAD = 22
 local PICTURE_W = 400
@@ -429,7 +429,7 @@ local function build(root)
 	local frame = HudKit.back(card, "Dark", {
 		Name = "PictureBox",
 		Position = UDim2.fromOffset(fig(60), fig(40)),
-		Size = UDim2.new(1, -fig(120), 0, fig(300)),
+		Size = UDim2.new(1, -fig(120), 0, fig(260)),
 		ZIndex = 3,
 	})
 	local picture
@@ -451,8 +451,8 @@ local function build(root)
 			TextColor3 = l[3],
 			TextXAlignment = Enum.TextXAlignment.Center,
 			TextScaled = true,
-			Position = UDim2.fromOffset(fig(20), fig(360 + (i - 1) * 82)),
-			Size = UDim2.new(1, -fig(40), 0, fig(82)),
+			Position = UDim2.fromOffset(fig(20), fig(310 + (i - 1) * 76)),
+			Size = UDim2.new(1, -fig(40), 0, fig(76)),
 			ZIndex = 4,
 		})
 		if not t:FindFirstChildOfClass("UITextSizeConstraint") then
@@ -486,8 +486,8 @@ local function build(root)
 	for i, r in { { "PowerReward", "PowerGainIcon", "+60" }, { "CashReward", "CashGainIcon", "$1K" } } do
 		local slot = HudKit.back(claim, "Dark", {
 			Name = r[1],
-			Position = UDim2.new(0.5, (i == 1) and -fig(190) or fig(20), 0, fig(70)),
-			Size = UDim2.fromOffset(fig(170), fig(170)),
+			Position = UDim2.new(0.5, (i == 1) and -fig(175) or fig(15), 0, fig(68)),
+			Size = UDim2.fromOffset(fig(160), fig(160)),
 			ZIndex = 4,
 		})
 		art(slot, "Icon", {
