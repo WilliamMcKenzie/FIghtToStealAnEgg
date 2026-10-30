@@ -37,16 +37,42 @@ local function folder()
 end
 
 local function kill(body)
+	local e = live[body]
 	live[body] = nil
 	Combat.remove(body)
+	-- (the last of a Shield boss's troops down: it can be hurt again)
+	if e and e.boss and e.boss.Parent then
+		local left = false
+		for _, other in live do
+			if other.boss == e.boss then
+				left = true
+			end
+		end
+		if not left then
+			e.boss:SetAttribute("Shielded", nil)
+		end
+	end
 	body:SetAttribute("Health", 0) -- (clients play its death)
 	task.delay(0.6, body.Destroy, body)
 end
 
-local function spawnOne(m, biome, bounds, at, yaw)
+-- its model and size: a pet's (Scale x its riding size), or a model of its own (Size x its
+-- drawing; its StandIn pet till that's made)
+local function look(m)
+	local own = Shared.Animals:FindFirstChild(m.Model .. "Model")
 	local class = Pets.class(m.Model)
-	local size = class.size * (m.Scale or 1)
-	local box = Horse.extent(class.data) * size
+	if class then
+		return m.Model, class.size * (m.Scale or 1), class.data
+	elseif own then
+		return m.Model, m.Size or 1, require(own)
+	end
+	local stand = Pets.class(m.StandIn[1])
+	return m.StandIn[1], stand.size * m.StandIn[2], stand.data
+end
+
+local function spawnOne(m, biome, bounds, at, yaw, boss)
+	local model, size, data = look(m)
+	local box = Horse.extent(data) * size
 	local radius = m.Radius or math.max(math.sqrt(box.X * box.Z) / 2, 1.5)
 	local body = Instance.new("Part")
 	body.Name = "Minion"
@@ -54,7 +80,7 @@ local function spawnOne(m, biome, bounds, at, yaw)
 	body.Transparency = 1
 	body.Size = Vector3.new(radius * 2, 4, radius * 2)
 	body.CFrame = CFrame.new(at + Vector3.new(0, 2, 0)) * CFrame.Angles(0, yaw, 0)
-	body:SetAttribute("Model", m.Model)
+	body:SetAttribute("Model", model)
 	body:SetAttribute("ModelSize", size)
 	body:SetAttribute("Name", m.Name or Pets.name(m.Model))
 	body:SetAttribute("Health", m.Health)
@@ -73,6 +99,7 @@ local function spawnOne(m, biome, bounds, at, yaw)
 		bounds = bounds,
 		yaw = yaw,
 		radius = radius,
+		boss = if m.Shield then boss else nil, -- (it shields this boss while it lives)
 		-- (not biting till it's landed)
 		wait = drop,
 		b = { c = { Attacks = m.Attacks, Radius = radius }, biome = biome },
@@ -115,7 +142,11 @@ function Minions.call(boss, b)
 			at = Vector3.new(math.clamp(at.X, x0, x1), 0, math.clamp(at.Z, z0, z1))
 		end
 		-- (facing outward, the way it's about to go)
-		spawnOne(m, b.biome, b.bounds, at, math.atan2(-math.cos(angle), -math.sin(angle)))
+		spawnOne(m, b.biome, b.bounds, at, math.atan2(-math.cos(angle), -math.sin(angle)), boss)
+	end
+	-- (a Shield: it can't be hurt till they're all down, raid style: client/BossView's bubble)
+	if m.Shield then
+		boss:SetAttribute("Shielded", true)
 	end
 end
 

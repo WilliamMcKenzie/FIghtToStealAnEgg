@@ -129,9 +129,20 @@ local function hurt(body, amount)
 	end
 end
 
+-- the model it's drawn as and its size: its own, or (till its model's made) its StandIn,
+-- { pet model, size }, an existing pet scaled up (QM, Oct 30: new bosses playable at once)
+local function look(c)
+	if Shared.Animals:FindFirstChild(c.Model .. "Model") or not c.StandIn then
+		return c.Model, c.Size
+	end
+	return c.StandIn[1], c.StandIn[2]
+end
+Bosses.look = look
+
 local function make(kind, at, yaw)
 	local c = Config.Bosses[kind]
-	local box = extent(c.Model) * c.Size
+	local model, modelSize = look(c)
+	local box = extent(model) * modelSize
 	local size = Vector3.new(c.Radius * 2, box.Y, c.Radius * 2)
 	local body = Instance.new("Part")
 	body.Name = kind .. "Boss"
@@ -142,8 +153,8 @@ local function make(kind, at, yaw)
 	body.Size = size
 	body.CFrame = CFrame.new(at + Vector3.new(0, size.Y / 2, 0)) * CFrame.Angles(0, yaw, 0)
 	body:SetAttribute("Kind", kind)
-	body:SetAttribute("Model", c.Model)
-	body:SetAttribute("ModelSize", c.Size)
+	body:SetAttribute("Model", model)
+	body:SetAttribute("ModelSize", modelSize)
 	body:SetAttribute("Name", c.Name or c.Model)
 	body:SetAttribute("Health", c.Health)
 	body:SetAttribute("MaxHealth", c.Health)
@@ -163,6 +174,7 @@ local function make(kind, at, yaw)
 			or body:GetAttribute("Asleep")
 			or body:GetAttribute("Intro")
 			or body:GetAttribute("Burrowed")
+			or body:GetAttribute("Shielded")
 		then
 			return
 		end
@@ -504,7 +516,12 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		-- (its attacks, Server/BossAttacks: a slam's wind-up holds it still)
 		local hold = b.biome ~= nil and BossAttacks.update(body, b, dt, BossAttacks.fighters(b.biome))
-		if target then
+		-- (mid-charge, mid-leap or blinking: its attack moves it, not its legs)
+		local moved = BossAttacks.move(body, b, dt, pos)
+		if moved then
+			pos = moved
+			b.calm = 0
+		elseif target then
 			b.calm = 0
 			local offset = (target.Position - pos) * Vector3.new(1, 0, 1)
 			turnToward(b, offset, dt)

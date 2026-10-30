@@ -45,6 +45,12 @@ local STYLES = {
 		Fill = Color3.fromRGB(255, 255, 255), -- the bomb, its trail and its splash alike
 		Outline = Color3.fromRGB(150, 146, 156),
 	},
+	-- (QM, Oct 30: the other bosses' bombs, each in its region's colours)
+	Snow = { Fill = Color3.fromRGB(240, 250, 255), Outline = Color3.fromRGB(120, 170, 220) },
+	Lava = { Fill = Color3.fromRGB(255, 170, 60), Outline = Color3.fromRGB(150, 40, 20) },
+	Coin = { Fill = Color3.fromRGB(255, 214, 70), Outline = Color3.fromRGB(170, 110, 20) },
+	Spore = { Fill = Color3.fromRGB(255, 160, 220), Outline = Color3.fromRGB(150, 70, 140) },
+	Fire = { Fill = Color3.fromRGB(255, 120, 60), Outline = Color3.fromRGB(120, 20, 30) },
 }
 
 local folder = Instance.new("Folder")

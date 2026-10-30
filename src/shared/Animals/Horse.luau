@@ -13,7 +13,7 @@
 --   horse:setSaddled(true)        -- no saddle on this design; kept for callers
 --   horse:getNeck()               -- { cframe, radius } for a lasso loop around the neck
 --   horse:setScale(s)             -- grow or shrink the whole horse about its feet (pop-ins)
---   horse:playOnce(name)          -- play one of its other animations once over the blend
+--   horse:playOnce(name, rate)    -- play one of its other animations once over the blend
 --                                 -- (the Loong's "special" fire breath)
 --
 -- Every other animal (Pinto, Pig, Fish, Rhino, Unicorn) shares all of this and
@@ -190,7 +190,7 @@ function Horse:update(dt, speed, turn)
 	local once = self.once
 	local wOnce = 0
 	if once then
-		once.t += dt
+		once.t += dt * once.rate
 		local length = self.data.animations[once.name].length
 		if once.t >= length then
 			self.once, once = nil, nil
@@ -284,10 +284,11 @@ end
 function Horse:setSaddled(_saddled) end
 
 -- Plays one of this animal's own animations (not idle, walk or gallop) once, over
--- whatever it's doing; ignored if it has no animation of that name.
-function Horse:playOnce(name)
+-- whatever it's doing; ignored if it has no animation of that name. rate: how fast
+-- (a boss's attack plays so its `hit` lands as the attack does: client/BossView).
+function Horse:playOnce(name, rate)
 	if self.data.animations[name] then
-		self.once = { name = name, t = 0 }
+		self.once = { name = name, t = 0, rate = rate or 1 }
 	end
 end
 
