@@ -271,8 +271,9 @@ def anims(spec):
                     t, v = k[0], list(k[1:])
                     if ch == "rotation":
                         v = [math.radians(a) for a in v]
-                    keys.append("{ %s }" % ", ".join(fmt(x) for x in [t] + v))
-                out.append("\t\t\t\t\t%s = { smooth = %s, keys = { %s } }," % (ch, smooth, ", ".join(keys)))
+                    keys.append("{%s}" % ",".join(fmt(x) for x in [t] + v))
+                # (packed: Studio refuses a script over 200k characters, and a big school hits that)
+                out.append("\t\t\t\t\t%s = { smooth = %s, keys = { %s } }," % (ch, smooth, ",".join(keys)))
             out.append("\t\t\t\t},")
         out.append("\t\t\t},")
         out.append("\t\t},")
