@@ -1,5 +1,5 @@
 # Rough solo progression sim for the Oct 27 balance pass (Config.luau numbers copied in by hand).
-# python3 tools/balance_sim.py [eggs per boss cycle]. Lava pets are made up (its eggs are Horses for now).
+# python3 tools/balance_sim.py [eggs per boss cycle]. Lava pets are LassoAPet's Volcano ones (cash on this curve).
 import math, random, sys
 P = dict(Scale=10, Damage=0.65, Speed=0.054, Max=2)
 def pdmg(S): return 1+P['Damage']*math.log(1+S/P['Scale'])
@@ -15,7 +15,7 @@ EGGS = dict(
  Meadow={"Pinto":(.35,15,15),"Pig":(.25,9,15),"Bunny":(.25,12,15),"Fish":(.13,24,45),"Rhino":(.08,90,120),"Unicorn":(.05,450,3600)},
  Desert={"Cactus":(.3,18,15),"Scorpion":(.3,60,60),"Sandworm":(.2,180,75),"SpineLizard":(.2,240,90),"Snake":(.025,750,7200)},
  Ice={"Penguin":(.3,45,15),"Boar":(.25,91,15),"Snowman":(.22,180,60),"IceGolem":(.12,760,300),"Icebringer":(.02,2000,7200)},
- Lava={"L1":(.3,150,15),"L2":(.3,300,30),"L3":(.2,600,60),"L4":(.15,2500,300),"L5":(.02,6000,7200)})
+ Lava={"Firebird":(.42,300,15),"RockHog":(.18,600,60),"FireLobster":(.17,650,60),"VolcanoTortoise":(.1,800,60),"Rockworm":(.13,1800,1200),"LavaWhale":(.03,4500,1200),"Phoenix":(.03,12000,43200)})
 EGGS_PER_CYCLE=int(sys.argv[1]) if len(sys.argv)>1 else 3
 def run(seed, verbose=False, REBIRTH=10_000_000):
   rnd=random.Random(seed)

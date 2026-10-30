@@ -377,7 +377,7 @@ local function show(owner, e, area)
 		local rarity = Config.Pets[e.k] and Config.Pets[e.k].Rarity
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.Name = "HatchEgg"
-		prompt:SetAttribute("ObjectColor", rarity and Config.Rarities[rarity] and Config.Rarities[rarity].Fill) -- (its pet's rarity colour: client/PromptUi)
+		prompt:SetAttribute("ObjectColor", rarity and Config.Rarities[rarity] and Config.Rarities[rarity].text) -- (its pet's rarity colour: client/PromptUi)
 		prompt.ObjectText = Pets.name(e.k) .. " Egg"
 		prompt.ActionText = "Hatch"
 		prompt.KeyboardKeyCode = Enum.KeyCode.F

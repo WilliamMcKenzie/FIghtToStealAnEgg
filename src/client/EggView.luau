@@ -8,6 +8,7 @@
 -- fight's over (Vanish) it shrinks away.
 -- A nest's egg has its name and rarity floating over it (QM, Oct 27: "Rhino Egg" in white,
 -- "Epic" under it in its rarity's colour), there once it's popped in, gone as it vanishes.
+-- (QM, Oct 30: the rarity drawn as the Weapon Shop's, Shared/RarityLook: Mythic and up move.)
 
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,6 +18,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Egg = require(Shared.Eggs.Egg)
 local Pets = require(Shared.Pets)
+local RarityLook = require(Shared.RarityLook)
 local OnScreen = require(script.Parent.OnScreen)
 
 local TWITCH = Config.Eggs.Twitch
@@ -76,13 +78,13 @@ local function line(parent, text, colour, y, height)
 	stroke.LineJoinMode = Enum.LineJoinMode.Round
 	stroke.Parent = label
 	label.Parent = parent
+	return label
 end
 
 -- "Rhino Egg" over "Epic" (its rarity's colour), over a nest's egg
 local function nestLabel(box, kind)
 	local pet = Config.Pets[kind]
 	local rarity = pet and pet.Rarity or "Common"
-	local colours = Config.Rarities[rarity] or Config.Rarities.Common
 	local board = Instance.new("BillboardGui")
 	board.Name = "EggLabel"
 	board.Size = UDim2.fromScale(LABEL_SIZE.X, LABEL_SIZE.Y)
@@ -92,7 +94,8 @@ local function nestLabel(box, kind)
 	board.AlwaysOnTop = true
 	board.Adornee = box
 	line(board, Pets.name(kind) .. " Egg", Color3.new(1, 1, 1), 0, 0.52)
-	line(board, rarity, colours.Fill, 0.52, 0.48)
+	local label = line(board, rarity, Color3.new(1, 1, 1), 0.52, 0.48)
+	RarityLook.paint(label, rarity)
 	board.Parent = box
 	return board
 end

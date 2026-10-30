@@ -6,7 +6,7 @@ return {
 	-- Rig.luau / Studs.luau: studs as stud Textures for now (no stud MaterialVariants yet)
 	StudMaterial = false,
 	FineStuds = {},
-	AnimalScale = {},
+	AnimalScale = { RockHog = 1.5, VolcanoTortoise = 2.5, LavaWhale = 2.5, Phoenix = 2 }, -- (LassoAPet's)
 	StudTransparency = 0.5, -- every stud Texture (floor, walls, sword, horse): 0.5 = half strength (QM, Oct 24)
 
 	-- every world colour, by the ColorKey attribute on the parts (and checker Textures)
@@ -757,12 +757,12 @@ return {
 		-- (QM, Oct 25: real eggs, LassoAPet's: Shared/Eggs/<Kind>EggModel, one per animal.)
 		-- Each nest lays one of its biome's kinds, by these weights (LassoAPet's spawn odds:
 		-- each biome's Herd there). A new animal: its egg model, Pets above, then here.
-		-- The biomes past the Tundra are still to come (QM): Horse eggs until then.
+		-- The biomes past the Lava Valley are still to come (QM): Horse eggs until then.
 		Kinds = {
 			Meadow = { Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
 			Desert = { Cactus = 0.3, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
 			Ice = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, Icebringer = 0.02 },
-			Lava = { Horse = 1 },
+			Lava = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (LassoAPet's Volcano)
 			Dungeon = { Horse = 1 },
 			Castle = { Horse = 1 },
 			Forest = { Horse = 1 },
@@ -771,7 +771,7 @@ return {
 		Scale = { Nest = 1.3, Carried = 0.6, Pen = 0.9 }, -- times the egg's drawing (about 4 studs tall)
 		-- a nest's egg is also this x bigger by its pet's rarity (QM, Oct 27: a Legendary's
 		-- much bigger than a Common's)
-		RarityScale = { Common = 1, Uncommon = 1.1, Rare = 1.25, Epic = 1.45, Legendary = 1.75, Mythic = 2 },
+		RarityScale = { Common = 1, Uncommon = 1.1, Rare = 1.25, Epic = 1.45, Legendary = 1.75, Mythic = 2, Divine = 2.2, Celestial = 2.4 },
 		Twitch = { 3, 8 }, -- seconds between an egg's AFK twitches (random in this range)
 		Reward = { Meadow = 100, Desert = 600, Ice = 3000, Lava = 15000, Dungeon = 60000, Forest = 60000, Castle = 250000, Ocean = 250000 },
 		PenShows = 24, -- most eggs sat in a pen
@@ -805,22 +805,24 @@ return {
 		Every = 1,
 	},
 
-	-- rarities (QM, Oct 25): a name's colours by its animal's rarity, a bright fill with a
-	-- dark stroke of the same hue (QM picked Rare's; the rest follow it)
+	-- rarities (QM's Weapon Shop Figma, Oct 27; pets use them too since Oct 30): each one's
+	-- card back gradient, bottom to top (reaching the top colour `at` of the way up), and
+	-- its text colour. From Mythic up they `move` (QM, Oct 27: after their Pickaxe Shop's
+	-- Divine, Cosmic, Celestial, Void and Omega cards): a card's back turns with a sheen
+	-- across it, and a band of `text2` sweeps across the rarity's name (Shared/RarityLook
+	-- paints and animates the text). Common is white to grey with a grey outline.
 	Rarities = {
-		Common = { Fill = Color3.fromRGB(235, 235, 235), Stroke = Color3.fromRGB(70, 70, 70) },
-		Uncommon = { Fill = Color3.fromRGB(150, 255, 120), Stroke = Color3.fromRGB(28, 104, 18) },
-		Rare = { Fill = Color3.fromRGB(138, 243, 255), Stroke = Color3.fromRGB(0, 88, 106) }, -- #8AF3FF, #00586A (QM)
-		Epic = { Fill = Color3.fromRGB(214, 156, 255), Stroke = Color3.fromRGB(78, 20, 118) },
-		Legendary = { Fill = Color3.fromRGB(255, 214, 94), Stroke = Color3.fromRGB(122, 74, 0) },
-		Mythic = { Fill = Color3.fromRGB(255, 122, 156), Stroke = Color3.fromRGB(110, 10, 42) },
-		-- (QM, Oct 27: higher tiers for weapons, in this order; the Weapon Shop's cards for
-		-- them have moving gradients, client/WeaponShop)
-		Divine = { Fill = Color3.fromRGB(160, 220, 255), Stroke = Color3.fromRGB(30, 60, 140) },
-		Celestial = { Fill = Color3.fromRGB(255, 200, 80), Stroke = Color3.fromRGB(110, 60, 0) },
-		Cosmic = { Fill = Color3.fromRGB(225, 110, 255), Stroke = Color3.fromRGB(60, 10, 110) },
-		Void = { Fill = Color3.fromRGB(130, 80, 255), Stroke = Color3.fromRGB(20, 0, 50) },
-		Omega = { Fill = Color3.fromRGB(160, 255, 110), Stroke = Color3.fromRGB(15, 80, 30) },
+		Common = { text = Color3.new(1, 1, 1), text2 = Color3.fromRGB(135, 135, 135), stroke = Color3.fromRGB(70, 70, 70) },
+		Uncommon = { bottom = Color3.fromHex("7aff2c"), top = Color3.fromHex("ccff25"), at = 0.736, text = Color3.fromHex("00ff00") },
+		Rare = { bottom = Color3.fromHex("36a8ff"), top = Color3.fromHex("00f0ff"), at = 1, text = Color3.fromHex("00b7ff") },
+		Epic = { bottom = Color3.fromHex("d950ff"), top = Color3.fromHex("fe4aff"), at = 1, text = Color3.fromHex("d300ff") },
+		Legendary = { bottom = Color3.fromHex("ff4c56"), top = Color3.fromHex("fbb8bb"), at = 1, text = Color3.fromHex("ff0004") },
+		Mythic = { bottom = Color3.fromHex("ff2f6e"), top = Color3.fromHex("ffa6c4"), at = 1, text = Color3.fromHex("ff1f5a"), text2 = Color3.fromHex("ffc2d4"), move = true },
+		Divine = { bottom = Color3.fromHex("9a6bff"), top = Color3.fromHex("dcf6ff"), at = 1, text = Color3.fromHex("9fe8ff"), text2 = Color3.fromHex("3d7bff"), move = true },
+		Celestial = { bottom = Color3.fromHex("e39a35"), top = Color3.fromHex("fff3cf"), at = 1, text = Color3.fromHex("ffd34a"), text2 = Color3.fromHex("a8620c"), move = true },
+		Cosmic = { bottom = Color3.fromHex("b04cff"), top = Color3.fromHex("ffa3f0"), at = 1, text = Color3.fromHex("e070ff"), text2 = Color3.fromHex("4a0a9a"), move = true },
+		Void = { bottom = Color3.fromHex("6a2cd8"), top = Color3.fromHex("cdb2ff"), at = 1, text = Color3.fromHex("5a3ae0"), text2 = Color3.fromHex("12004a"), move = true },
+		Omega = { bottom = Color3.fromHex("4ed46a"), top = Color3.fromHex("eaffd8"), at = 1, text = Color3.fromHex("b4ff6a"), text2 = Color3.fromHex("2fae3a"), move = true },
 	},
 
 	-- the Backpack (QM, Oct 25: client/Backpack, Server/PetInventory): the pets you own
@@ -862,44 +864,61 @@ return {
 			Horse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 3600, -- Meadow
 			Cactus = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 7200, -- Desert
 			Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 7200, SnackYak = 3600, -- Tundra
+			Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 1200, LavaWhale = 1200, Phoenix = 43200, -- Lava (LassoAPet's Volcano)
 		},
 	},
 
 	-- pets (QM, Oct 25: LassoAPet's, with their rarity, cash a second and egg odds). The
 	-- pet you ride is all your health and speed (Shared/Pets works them out, PetStats
 	-- below); its name shows over you in its rarity's colours (Rarities above).
+	-- Rarity climbs with the biome (QM, Oct 30): each biome's pets keep LassoAPet's order
+	-- (Uncommon, Rare, Epic, Legendary there) but start higher the further in it is, so the
+	-- Meadow's best is Epic and the Lava Valley's Celestial:
+	--   Meadow  Common .. Epic        (LassoAPet's one tier down; the Rhino Rare, the Unicorn Epic)
+	--   Desert  Rare .. Mythic        (one tier up)
+	--   Tundra  Epic .. Divine        (two up)
+	--   Lava    Legendary .. Celestial (three up)
 	--   Rarity  its rarity
 	--   Cash    cash a second it earns in your pen (LassoAPet's PetIncome, the Tundra's
-	--           after its income curve; Config.Income)
+	--           after its income curve; the Lava's on tools/balance_sim.py's curve, as
+	--           LassoAPet's Volcano came after its Ocean; Config.Income)
 	--   Tier    its size tier (LassoAPet's PetTiers): 1 reads as big as the Horse, each
-	--           tier PetStats.TierGrowth x bigger
+	--           tier PetStats.TierGrowth x bigger (and x AnimalScale, top of the file)
 	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
 	--           (a guess from how fast each ran in LassoAPet)
 	Pets = {
 		Horse = { Rarity = "Common", Cash = 3, Tier = 1, Lean = 0, Speed = 1 },
 		-- Meadow
-		Pig = { Rarity = "Uncommon", Cash = 9, Tier = 1, Lean = 0.5, Speed = 0.8 },
-		Bunny = { Rarity = "Uncommon", Cash = 12, Tier = 1, Lean = -0.6, Speed = 1.2 },
-		Pinto = { Rarity = "Uncommon", Cash = 15, Tier = 1, Lean = -0.2, Speed = 1.1 },
-		Fish = { Rarity = "Rare", Cash = 24, Tier = 1, Lean = 0.6, Speed = 0.6 },
-		Rhino = { Rarity = "Epic", Cash = 90, Tier = 2, Lean = 0.6, Speed = 1.35 },
-		Unicorn = { Rarity = "Legendary", Cash = 450, Tier = 2, Lean = -0.4, Speed = 1.8 },
+		Pig = { Rarity = "Common", Cash = 9, Tier = 1, Lean = 0.5, Speed = 0.8 },
+		Bunny = { Rarity = "Common", Cash = 12, Tier = 1, Lean = -0.6, Speed = 1.2 },
+		Pinto = { Rarity = "Common", Cash = 15, Tier = 1, Lean = -0.2, Speed = 1.1 },
+		Fish = { Rarity = "Uncommon", Cash = 24, Tier = 1, Lean = 0.6, Speed = 0.6 },
+		Rhino = { Rarity = "Rare", Cash = 90, Tier = 2, Lean = 0.6, Speed = 1.35 },
+		Unicorn = { Rarity = "Epic", Cash = 450, Tier = 2, Lean = -0.4, Speed = 1.8 },
 		-- Desert
-		Cactus = { Rarity = "Uncommon", Cash = 18, Tier = 1, Lean = 0.2, Speed = 1.31 },
-		Scorpion = { Rarity = "Rare", Cash = 60, Tier = 1, Lean = 0, Speed = 1.77 },
-		Sandworm = { Rarity = "Epic", Cash = 180, Tier = 2, Lean = 0.5, Speed = 1.7 },
-		SpineLizard = { Rarity = "Epic", Cash = 240, Tier = 2, Lean = -0.5, Speed = 1.97 },
-		Snake = { Rarity = "Legendary", Cash = 750, Tier = 3, Lean = -0.3, Speed = 2.8 },
+		Cactus = { Rarity = "Rare", Cash = 18, Tier = 1, Lean = 0.2, Speed = 1.31 },
+		Scorpion = { Rarity = "Epic", Cash = 60, Tier = 1, Lean = 0, Speed = 1.77 },
+		Sandworm = { Rarity = "Legendary", Cash = 180, Tier = 2, Lean = 0.5, Speed = 1.7 },
+		SpineLizard = { Rarity = "Legendary", Cash = 240, Tier = 2, Lean = -0.5, Speed = 1.97 },
+		Snake = { Rarity = "Mythic", Cash = 750, Tier = 3, Lean = -0.3, Speed = 2.8 },
 		-- Tundra
-		Penguin = { Rarity = "Uncommon", Cash = 45, Tier = 1, Lean = 0.3, Speed = 2.355 },
-		Boar = { Rarity = "Uncommon", Cash = 91, Tier = 1, Lean = -0.2, Speed = 2.517 },
-		Snowman = { Rarity = "Rare", Cash = 180, Tier = 1, Lean = 0.4, Speed = 2.678 },
-		IceGolem = { Rarity = "Epic", Cash = 760, Tier = 2, Lean = 0.4, Speed = 2.86 },
-		SnackYak = { Rarity = "Epic", Cash = 9000, Tier = 2, Lean = 0.5, Speed = 3 }, -- (a Robux pet in LassoAPet: in no egg)
-		Icebringer = { Rarity = "Legendary", Cash = 2000, Tier = 3, Lean = 0.2, Speed = 3.8 },
+		Penguin = { Rarity = "Epic", Cash = 45, Tier = 1, Lean = 0.3, Speed = 2.355 },
+		Boar = { Rarity = "Epic", Cash = 91, Tier = 1, Lean = -0.2, Speed = 2.517 },
+		Snowman = { Rarity = "Legendary", Cash = 180, Tier = 1, Lean = 0.4, Speed = 2.678 },
+		IceGolem = { Rarity = "Mythic", Cash = 760, Tier = 2, Lean = 0.4, Speed = 2.86 },
+		SnackYak = { Rarity = "Mythic", Cash = 9000, Tier = 2, Lean = 0.5, Speed = 3 }, -- (a Robux pet in LassoAPet: in no egg)
+		Icebringer = { Rarity = "Divine", Cash = 2000, Tier = 3, Lean = 0.2, Speed = 3.8 },
+		-- Lava (LassoAPet's Volcano)
+		Firebird = { Rarity = "Legendary", Cash = 300, Tier = 2, Lean = -0.4, Speed = 5.11 },
+		RockHog = { Rarity = "Mythic", Cash = 600, Tier = 2, Lean = 0.3, Speed = 6.56 },
+		FireLobster = { Rarity = "Mythic", Cash = 650, Tier = 2, Lean = 0.4, Speed = 6.43 },
+		VolcanoTortoise = { Rarity = "Mythic", Cash = 800, Tier = 2, Lean = 0.8, Speed = 6.17 },
+		Rockworm = { Rarity = "Divine", Cash = 1800, Tier = 2, Lean = 0.3, Speed = 7.12 },
+		LavaWhale = { Rarity = "Divine", Cash = 4500, Tier = 4, Lean = 0.7, Speed = 6.83 },
+		Phoenix = { Rarity = "Celestial", Cash = 12000, Tier = 3, Lean = -0.3, Speed = 7.2 },
 	},
-	-- a pet's health and speed (Shared/Pets): set by its rarity, not its biome (QM, Oct 25:
-	-- they're mostly a status signal; later biomes' pets earn more, not fight better).
+	-- a pet's health and speed (Shared/Pets): set by its rarity (QM, Oct 25: mostly a status
+	-- signal; since Oct 30 rarity climbs with the biome, so later pets get a little tougher).
 	-- Within a rarity, more health means less speed (Lean), and a bigger body is easier to
 	-- hit, so it gets more health: x (its hitbox / the Horse's) ^ Hitbox. Its hitbox is
 	-- half its footprint (the square root of its box's width x length), in studs.
@@ -911,6 +930,8 @@ return {
 			Epic = { Health = 150, Speed = 29.6 },
 			Legendary = { Health = 175, Speed = 31 },
 			Mythic = { Health = 200, Speed = 32.5 },
+			Divine = { Health = 230, Speed = 34 },
+			Celestial = { Health = 260, Speed = 35.5 },
 		},
 		Lean = 0.25, -- Lean 1: +25% health, -25% speed (Lean -1 the other way)
 		-- Speed (QM, Oct 26): each pet's own, LassoAPet's: MountSpeed studs/s x its Speed in
@@ -1010,8 +1031,9 @@ return {
 	-- kill you: while one's biting you, Server/Regen doesn't heal you.
 	-- Each mob is a random pet from its biome's eggs (Config.Eggs.Kinds, any with odds; QM,
 	-- Oct 26), drawn at the pet's own size; Mob and Size are only for a ground whose eggs
-	-- are still the Horse placeholder (Lava, for now). Pet (and Name) put one pet in a ground
-	-- instead: the Desert's cactus monsters (QM, Oct 27).
+	-- are still the Horse placeholder. Pet (and Name) put one pet in a ground instead: the
+	-- Desert's cactus monsters (QM, Oct 27), the Lava's Rock Hogs (the Lava Whale and the
+	-- Phoenix are far too big for a yard).
 	-- Grow (QM, Oct 27): each ground's yard is the map's trainSize plus this many Tiles
 	-- of side length, a tile more each tier up.
 	Training = {
@@ -1050,8 +1072,7 @@ return {
 			Lava = {
 				Cost = 2000000,
 				Grow = 3,
-				Mob = "RockHog",
-				Size = 1.98, -- (LassoAPet's Rock Hog: tier 2, AnimalScale 1.5)
+				Pet = "RockHog",
 				Health = 20000,
 				Count = 4,
 				Strength = 45,
