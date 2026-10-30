@@ -84,6 +84,8 @@ HudKit.LOOKS = {
 	GreyPlain = { top = rgb("a6a6a6"), bottom = rgb("6e6e6e"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
 	YellowPlain = { top = rgb("ffec3d"), bottom = rgb("f2b705"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
 	GreenPlain = { top = rgb("00ff11"), bottom = rgb("00d92b"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
+	-- (Equip Best: Green's colours on the close button's (Red's) studs and bevel, QM)
+	GreenWeld = { top = rgb("caff00"), bottom = rgb("0aff00"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
 	-- the Growing Eggs popup (QM's Figma EggsPopup, Oct 27; client/EggsPanel)
 	TanHeader = {
 		across = { rgb("fac086"), rgb("e5ab74"), rgb("d09561") },
