@@ -291,7 +291,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.2, Reach = 12, Arc = 100, Windup = 0.8, Damage = 22 },
+				{ Kind = "Swipe", Every = 2.2, Reach = 20, Arc = 120, Windup = 0.9, Damage = 22 },
 			},
 		},
 		GiantRafflesia = {
@@ -338,7 +338,7 @@ return {
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.4, Reach = 14, Arc = 140, Windup = 0.85, Damage = 22 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 20, Arc = 140, Windup = 0.95, Damage = 22 },
 				-- (QM, Oct 30: each Meadow boss teaches one move. Horn down, a wind-up,
 				-- then it charges: step off the side; no floor warning, QM Oct 30)
 				{ Kind = "Charge", Every = 5, Range = 70, Windup = 1, Speed = 70, Width = 18, Damage = 12, Anim = "charge" },
@@ -357,7 +357,7 @@ return {
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.4, Reach = 22, Arc = 50, Windup = 0.9, Damage = 24 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 34, Arc = 50, Width = 20, Windup = 1, Damage = 24 },
 				-- (its snapping bite: a red circle in front fills, then the jaws come down)
 				{ Kind = "Slam", Every = 3.5, Range = 14, Radius = 12, Windup = 0.9, Damage = 14, Anim = "slam" },
 			},
@@ -378,7 +378,7 @@ return {
 			-- green cactus bombs at everyone (Server/BossAttacks' Lob, drawn by client/Bombs):
 			-- each lands Airtime seconds later where you stood when it was thrown, so keep moving)
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 16, Arc = 180, Windup = 0.9, Damage = 34 },
+				{ Kind = "Swipe", Every = 2.6, Reach = 32, Arc = 180, Windup = 1.1, Damage = 34 },
 				{
 					Kind = "Lob",
 					Every = 3.5, -- seconds between volleys
@@ -499,7 +499,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.4, Reach = 16, Arc = 150, Windup = 0.85, Damage = 50 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 28, Arc = 150, Windup = 1, Damage = 50 },
 				-- (tusks down, a hoof scrapes, then it charges: QM Oct 30)
 				{ Kind = "Charge", Every = 5, Range = 90, Windup = 1.1, Speed = 75, Width = 30, Damage = 34, Anim = "charge" },
 			},
@@ -519,7 +519,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 22, Arc = 220, Windup = 1.1, Damage = 75 },
+				{ Kind = "Swipe", Every = 3, Reach = 32, Arc = 230, Windup = 1.2, Damage = 75 },
 				-- (head reared back, then a gout of fireballs ahead of it: QM Oct 30, no rectangles)
 				{
 					Kind = "Magic",
@@ -557,9 +557,9 @@ return {
 			Strength = 6,
 			Respawn = 25,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 14, Arc = 100, Windup = 0.7, Damage = 26, Swings = 2, Anim = "pinch" },
+				{ Kind = "Swipe", Every = 2.6, Reach = 24, Arc = 110, Windup = 0.8, Damage = 26, Swings = 2, Anim = "pinch" },
 				-- (the tail stab: a long thin swipe straight out ahead)
-				{ Kind = "Swipe", Every = 3.5, Reach = 40, Arc = 24, Width = 30, Windup = 0.8, Damage = 22, Anim = "stab", Then = 3 },
+				{ Kind = "Swipe", Every = 3.5, Reach = 48, Arc = 24, Width = 40, Windup = 0.9, Damage = 22, Anim = "stab", Then = 3 },
 				{
 					Kind = "Magic",
 					Linked = true, -- (after each stab)
@@ -588,7 +588,7 @@ return {
 			Strength = 20,
 			Respawn = 30,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 16, Arc = 160, Windup = 0.9, Damage = 50 },
+				{ Kind = "Swipe", Every = 2.6, Reach = 28, Arc = 160, Windup = 1, Damage = 50 },
 				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.7, Airtime = 1.1, Height = 30, Radius = 18, Damage = 34, Anim = "leap", Then = 4 },
 				{ Kind = "Slam", Every = 4, Range = 10, Radius = 16, Windup = 0.9, Damage = 34, Anim = "slam" },
 				{
@@ -660,7 +660,7 @@ return {
 			Strength = 60,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 12, Arc = 300, Windup = 1, Damage = 70 },
+				{ Kind = "Swipe", Every = 3, Reach = 22, Arc = 300, Windup = 1.1, Damage = 70 },
 				{ Kind = "Leap", Every = 6, Range = 100, Windup = 0.6, Airtime = 0.9, Height = 26, Radius = 19, Damage = 50, Hops = 3, Anim = "leap", Then = 3 },
 				{
 					Kind = "Magic",
@@ -705,7 +705,7 @@ return {
 			Strength = 60,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 16, Arc = 180, Windup = 1, Damage = 75 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 180, Windup = 1.1, Damage = 75 },
 				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 13, Airtime = 1.4, Height = 48, Damage = 40, Style = "Lava", Cast = 0.8, Anim = "erupt" },
 				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 46 },
 			},
@@ -741,9 +741,9 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 14, Arc = 120, Windup = 0.8, Damage = 55, Swings = 2 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 30, Arc = 120, Windup = 0.9, Damage = 55, Swings = 2 },
 				-- (the big sword cleave: QM, a swipe like any melee)
-				{ Kind = "Swipe", Every = 4, Reach = 26, Arc = 170, Windup = 1.1, Damage = 80, Anim = "cleave" },
+				{ Kind = "Swipe", Every = 4, Reach = 44, Arc = 170, Windup = 1.3, Damage = 80, Anim = "cleave" },
 				{ Kind = "Charge", Every = 6, Range = 100, Windup = 0.8, Speed = 80, Width = 26, Damage = 60, Anim = "charge" },
 			},
 			Minions = {
@@ -823,7 +823,7 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2, Reach = 14, Arc = 80, Windup = 0.7, Damage = 100 },
+				{ Kind = "Swipe", Every = 2, Reach = 28, Arc = 110, Windup = 0.9, Damage = 100 },
 				{ Kind = "Charge", Every = 4, Range = 100, Windup = 0.7, Speed = 90, Width = 24, Damage = 65, Anim = "charge", Then = 3 },
 				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 38.5, Radius = 11, Airtime = 1.2, Height = 35, Damage = 45, Style = "Coin", Cast = 0.5, Anim = "spit" },
 			},
@@ -845,7 +845,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3.6, Reach = 18, Arc = 150, Windup = 0.8, Damage = 75, Swings = 3 },
+				{ Kind = "Swipe", Every = 3.6, Reach = 30, Arc = 150, Windup = 0.85, Damage = 75, Swings = 3 },
 				{ Kind = "Charge", Every = 6, Range = 120, Windup = 1, Speed = 85, Width = 28, Damage = 90, Anim = "charge" },
 				{ Kind = "Slam", Every = 4, Range = 14, Radius = 18, Windup = 0.8, Damage = 90, Anim = "slam" },
 			},
@@ -884,7 +884,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 1.8, Reach = 16, Arc = 110, Windup = 0.7, Damage = 85 },
+				{ Kind = "Swipe", Every = 1.8, Reach = 24, Arc = 120, Windup = 0.8, Damage = 85 },
 				{ Kind = "Blink", Every = 4.5, Fade = 0.6, Near = 30, Far = 55, Anim = "screech", Then = 3 },
 				{
 					Kind = "Magic",
@@ -917,7 +917,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 20, Arc = 220, Windup = 1.1, Damage = 130 },
+				{ Kind = "Swipe", Every = 3, Reach = 34, Arc = 220, Windup = 1.2, Damage = 130 },
 				-- (fire breath: three gouts of fireballs)
 				{
 					Kind = "Magic",
@@ -1031,7 +1031,7 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 12, Arc = 270, Windup = 1, Damage = 100 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 270, Windup = 1.1, Damage = 100 },
 				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.6, Airtime = 1, Height = 28, Radius = 17, Damage = 70, Anim = "leap", Then = 3 },
 				{ Kind = "Bombs", Linked = true, Every = 5, Count = 8, Around = true, Scatter = 8, Radius = 8, Windup = 1.2, Damage = 60, Cast = 0.5, Anim = "puff" },
 				{
@@ -1060,7 +1060,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 16, Arc = 110, Windup = 0.85, Damage = 75, Swings = 2 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 28, Arc = 120, Windup = 0.95, Damage = 75, Swings = 2 },
 				{ Kind = "Charge", Every = 5, Range = 110, Windup = 0.9, Speed = 80, Width = 40, Damage = 90, Anim = "charge" },
 				{ Kind = "Slam", Every = 4, Range = 14, Radius = 20, Windup = 0.9, Damage = 90, Anim = "slam" },
 				{
@@ -1091,7 +1091,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 10, Arc = 330, Windup = 1, Damage = 120 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 18, Arc = 330, Windup = 1.1, Damage = 120 },
 				{
 					Kind = "Magic",
 					Every = 4,
@@ -1128,7 +1128,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 1.4, Reach = 18, Arc = 110, Windup = 0.8, Damage = 90, Anim = "bite" },
+				{ Kind = "Swipe", Every = 1.4, Reach = 30, Arc = 120, Windup = 0.9, Damage = 90, Anim = "bite" },
 				{
 					Kind = "Magic",
 					Linked = true, -- (fired as it surfaces, by its Burrow: Server/Bosses)
@@ -1199,12 +1199,13 @@ return {
 		Windup = 0.5, -- seconds from the telegraph appearing to the hit (bosses set longer)
 		Arc = 120,
 		-- where it sits (QM, Oct 30: out in front, never over the enemy itself): a swipe of
-		-- Narrow degrees or less is centred on its front edge, like yours; Wrap or more on its
+		-- Narrow degrees or less is centred Ahead of the way to its front edge; Wrap or more on its
 		-- middle (it goes most of the way round); in between, in between
 		Narrow = 140,
 		Wrap = 220,
+		Ahead = 0.5, -- (a narrow one's centre: this share of the way out to its front edge)
 		Clear = 1, -- studs its inner edge stays off the enemy's body
-		Thick = 0.6, -- thickness, of its radius (less if that would reach the body; Width overrides)
+		Thick = 0.65, -- thickness, of its radius (less if that would reach the body; Width overrides)
 		Ends = 0.75, -- (fat ends: it reads as an area, not a streak)
 		Belly = 0.4,
 		Skew = 1,

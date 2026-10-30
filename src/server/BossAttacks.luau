@@ -366,11 +366,11 @@ local function swipe(body, b, a, pos, toward)
 	animate(body, a, windup)
 	root(b, windup * swings + 0.15)
 	b.yaw, b.facing = yaw, yaw
-	-- where its centre sits: on its front edge for a narrow swipe (like yours, out ahead),
+	-- where its centre sits: toward its front edge for a narrow swipe (like yours, out ahead),
 	-- back to its middle for one that wraps most of the way round it
 	local rb = b.c.Radius
 	local arc = a.Arc or S.Arc
-	local ahead = rb * math.clamp((S.Wrap - arc) / (S.Wrap - S.Narrow), 0, 1)
+	local ahead = rb * S.Ahead * math.clamp((S.Wrap - arc) / (S.Wrap - S.Narrow), 0, 1)
 	local radius = rb + a.Reach - ahead
 	-- (as thick as it can be with its inner edge still clear of its body all along: the
 	-- inner radius r must keep ahead^2 + r^2 + 2 ahead r cos(half) >= (rb + Clear)^2, for
