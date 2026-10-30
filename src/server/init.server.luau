@@ -57,6 +57,29 @@ local remote = Instance.new("RemoteEvent")
 remote.Name = "Slash"
 remote.Parent = ReplicatedStorage
 
+-- The rider's own body never touches the world (QM, Oct 30: a burrowing rider fell through
+-- the map). client/Riding draws the body up on the saddle, down under the floor with a
+-- burrow or up in the air with a flight, by its joints; a torso drawn into the floor
+-- dragged the whole character down through it. Only the HumanoidRootPart (the Humanoid's
+-- own collider, never moved) collides now: every other part is in RiderBody, which
+-- collides with nothing.
+local PhysicsService = game:GetService("PhysicsService")
+PhysicsService:RegisterCollisionGroup("RiderBody")
+for _, group in PhysicsService:GetRegisteredCollisionGroups() do
+	PhysicsService:CollisionGroupSetCollidable("RiderBody", group.name, false)
+end
+local function riderBody(character)
+	local function set(part)
+		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+			part.CollisionGroup = "RiderBody"
+		end
+	end
+	for _, part in character:GetDescendants() do
+		set(part)
+	end
+	character.DescendantAdded:Connect(set) -- (accessories, the weapon)
+end
+
 -- Everyone rides (client/Riding.luau): their pet's health and speed (QM, Oct 25: nothing
 -- else adds to them), and no jumping
 local function ride(character)
@@ -76,6 +99,10 @@ local function joined(player)
 	-- keeps it), Cash starts at 0 (no saving yet)
 	player:SetAttribute("Cash", player:GetAttribute("Cash") or 0)
 	player.CharacterAdded:Connect(ride)
+	player.CharacterAdded:Connect(riderBody)
+	if player.Character then
+		riderBody(player.Character)
+	end
 	player:GetAttributeChangedSignal("Pet"):Connect(function()
 		if player.Character then
 			ride(player.Character)
