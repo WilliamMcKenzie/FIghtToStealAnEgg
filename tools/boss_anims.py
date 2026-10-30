@@ -155,6 +155,35 @@ def king_crab(m):
     return {"slam": slam, "charge": charge}
 
 
+def shark_boss(m):
+    # breach (0.8s windup, the red circle filling): under the floor it thrashes, tail beating
+    # faster and faster with its nose tipping up, then at the hit it surges up through the
+    # circle nose first, upright with its jaws wide, and hangs there a moment as it falls level
+    tail = [(0, 0, 0, 0)] + [(0.1 * i, 0, (1 if i % 2 else -1) * (14 + 3 * i), 0) for i in range(1, 8)] + [
+        (0.8, 0, 0, 0), (1.0, 0, 18, 0), (1.2, 0, -18, 0), (1.6, 0, 0, 0)]
+    breach = {"length": 1.6, "hit": 0.8, "tracks": {
+        "root": {"r": [(0, 0, 0, 0), (0.6, 16, 0, 0), (0.8, 72, 0, 0), (1.05, 64, 0, 0), (1.6, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.6, 0, -0.3, 0), (0.8, 0, 1.6, 0.4), (1.05, 0, 1.5, 0.3), (1.6, 0, 0, 0)]},
+        "Jaw": {"r": [(0, 0, 0, 0), (0.6, 10, 0, 0), (0.8, 38, 0, 0), (1.1, 34, 0, 0), (1.6, 0, 0, 0)]},
+        "Tail": {"r": tail},
+        "TailFin": {"r": [(t, x, y * 0.7, z) for t, x, y, z in tail]},
+        "FinL": {"r": [(0, 0, 0, 0), (0.6, 0, 0, -20), (0.8, 0, 0, 30), (1.1, 0, 0, 24), (1.6, 0, 0, 0)]},
+        "FinR": {"r": [(0, 0, 0, 0), (0.6, 0, 0, 20), (0.8, 0, 0, -30), (1.1, 0, 0, -24), (1.6, 0, 0, 0)]},
+    }}
+    # bite (0.8s windup, the swipe's): it draws back, nose up and jaws gaping wider, then at
+    # the hit lunges forward and snaps them shut, shakes its head, and swims back
+    bite = {"length": 1.4, "hit": 0.8, "tracks": {
+        "root": {"r": [(0, 0, 0, 0), (0.65, 14, 0, 0), (0.8, -10, 0, 0), (0.95, -6, 0, 0), (1.4, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.65, 0, 0.25, 0.8), (0.8, 0, 0, -1.6), (0.95, 0, 0, -1.4), (1.4, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.8, 0, 0, 0), (0.9, 0, 12, 0), (1.0, 0, -12, 0), (1.1, 0, 8, 0), (1.25, 0, 0, 0)]},
+        "Jaw": {"r": [(0, 0, 0, 0), (0.5, 26, 0, 0), (0.7, 40, 0, 0), (0.8, 0, 0, 0), (1.1, 0, 0, 0), (1.4, 0, 0, 0)]},
+        "Tail": {"r": [(0, 0, 0, 0), (0.65, 0, 20, 0), (0.75, 0, -26, 0), (0.85, 0, 22, 0), (1.0, 0, -12, 0), (1.4, 0, 0, 0)]},
+        "FinL": {"r": [(0, 0, 0, 0), (0.65, 0, 0, -16), (0.8, 0, 0, 22), (1.4, 0, 0, 0)]},
+        "FinR": {"r": [(0, 0, 0, 0), (0.65, 0, 0, 16), (0.8, 0, 0, -22), (1.4, 0, 0, 0)]},
+    }}
+    return {"breach": breach, "bite": bite}
+
+
 ANIMS = {
     "MajesticUnicorn": majestic_unicorn,
     "VenusFlytrap": venus_flytrap,
@@ -162,6 +191,7 @@ ANIMS = {
     "LavaWyrm": lava_wyrm,
     "VolcanoTortoise": volcano_tortoise,
     "KingCrab": king_crab,
+    "SharkBoss": shark_boss,
 }
 
 
