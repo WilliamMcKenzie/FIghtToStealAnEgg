@@ -987,7 +987,7 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Line", Every = 4, Range = 200, Windup = 1, Width = 10, Length = 16, Segments = 6, Gap = 0.15, Count = 2, Spread = 30, Damage = 65, Anim = "roots" },
+				{ Kind = "Line", Every = 4, Range = 200, Windup = 1, Width = 10, Length = 16, Segments = 6, Gap = 0.15, Count = 2, Spread = 30, Damage = 65, Anim = "roots", Style = "Root" },
 				{
 					Kind = "Magic",
 					Every = 2.5,

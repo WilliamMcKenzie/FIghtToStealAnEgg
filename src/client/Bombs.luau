@@ -12,7 +12,8 @@
 -- squares radiate out to the blast's edge, each fading where it was put. Every square is a
 -- pooled BillboardGui on one anchored part, so a volley costs no parts or models.
 --
--- A Style is how a bomb looks (STYLES below): its squares' fill and outline colours.
+-- A Style is how a bomb looks (STYLES below): its squares' fill and outline colours. Every
+-- other red circle a boss puts down splashes like a landing bomb too (BossSplash).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -51,6 +52,8 @@ local STYLES = {
 	Coin = { Fill = Color3.fromRGB(255, 214, 70), Outline = Color3.fromRGB(170, 110, 20) },
 	Spore = { Fill = Color3.fromRGB(255, 160, 220), Outline = Color3.fromRGB(150, 70, 140) },
 	Fire = { Fill = Color3.fromRGB(255, 120, 60), Outline = Color3.fromRGB(120, 20, 30) },
+	Root = { Fill = Color3.fromRGB(160, 120, 75), Outline = Color3.fromRGB(70, 110, 50) }, -- (the Elder Treant's roots)
+	Ink = { Fill = Color3.fromRGB(90, 70, 130), Outline = Color3.fromRGB(30, 20, 50) },
 }
 
 local folder = Instance.new("Folder")
@@ -213,6 +216,12 @@ ReplicatedStorage:WaitForChild("BossBomb").OnClientEvent:Connect(function(info)
 		dropped = os.clock(),
 		style = s,
 	})
+end)
+
+-- every other red circle (Server/BossAttacks: slams, leap landings, roots, bombs that
+-- aren't flung) splashes the same way the moment it goes off
+ReplicatedStorage:WaitForChild("BossSplash").OnClientEvent:Connect(function(at, radius, style)
+	task.spawn(splash, at, radius, STYLES[style] or STYLES.Cactus)
 end)
 
 RunService.RenderStepped:Connect(function(dt)

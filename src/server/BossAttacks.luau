@@ -100,6 +100,12 @@ local bombRemote = Instance.new("RemoteEvent")
 bombRemote.Name = "BossBomb"
 bombRemote.Parent = ReplicatedStorage
 
+-- (every red circle that goes off splashes like a bomb landing: (centre, radius, style),
+-- client/Bombs)
+local splashRemote = Instance.new("RemoteEvent")
+splashRemote.Name = "BossSplash"
+splashRemote.Parent = ReplicatedStorage
+
 -- (everyone plays a boss's attack animation as it winds up: (body, anim name, windup))
 local animRemote = Instance.new("RemoteEvent")
 animRemote.Name = "BossAnim"
@@ -205,7 +211,7 @@ end
 
 -- a flat red circle on the ground that fills over `windup`, then hurts everyone in the
 -- fight inside it
-local function circle(biome, centre, radius, windup, damage, hit)
+local function circle(biome, centre, radius, windup, damage, hit, style)
 	local y = groundAt(centre) + FLOOR_Y
 	local function disc(name, r, transparency)
 		local p = Instance.new("Part")
@@ -232,6 +238,8 @@ local function circle(biome, centre, radius, windup, damage, hit)
 		:Play()
 	task.delay(windup, function()
 		blast(biome, centre, radius, damage, hit)
+		-- (QM, Oct 30: something has to happen there: the bombs' splash, client/Bombs)
+		splashRemote:FireAllClients(Vector3.new(centre.X, y - FLOOR_Y, centre.Z), radius, style)
 		rim.Transparency = 0.2
 		fill:Destroy()
 		TweenService
@@ -242,14 +250,14 @@ local function circle(biome, centre, radius, windup, damage, hit)
 end
 
 -- a row of red circles Width across, from `from` Length studs along `dir`, filling over
--- `windup`; then everyone in the fight on one takes damage, once (`hit`: shared by every
--- row of the same attack, so overlapping rows hit once too)
-local function row(biome, from, dir, width, length, windup, damage, hit)
+-- `windup`; then everyone in the fight on one takes damage, once per row (`hit`: the
+-- circles overlap), and each splashes in `style` (client/Bombs)
+local function row(biome, from, dir, width, length, windup, damage, hit, style)
 	local radius = width / 2
 	local n = math.max(1, math.round(length / (width * 0.8)))
 	local step = length / n
 	for k = 1, n do
-		circle(biome, from + dir * (step * (k - 0.5)), radius, windup, damage, hit)
+		circle(biome, from + dir * (step * (k - 0.5)), radius, windup, damage, hit, style)
 	end
 end
 
@@ -456,18 +464,19 @@ local function perform(body, b, i, a)
 		end
 	elseif a.Kind == "Bombs" then
 		for _, f in list do
-			circle(b.biome, flat(f.root.Position), a.Radius, a.Windup, a.Damage)
+			circle(b.biome, flat(f.root.Position), a.Radius, a.Windup, a.Damage, nil, a.Style)
 		end
 		for k = 1, a.Count or 0 do
 			-- (Around: in a ring round itself instead, like a fairy ring; else round you)
 			if a.Around then
 				local angle = k / a.Count * 2 * math.pi + math.random() * 0.3
 				local out = b.c.Radius + a.Radius + math.random() * (a.Scatter or 10)
-				circle(b.biome, pos + Vector3.new(math.cos(angle), 0, math.sin(angle)) * out, a.Radius, a.Windup, a.Damage)
+				local spot = pos + Vector3.new(math.cos(angle), 0, math.sin(angle)) * out
+				circle(b.biome, spot, a.Radius, a.Windup, a.Damage, nil, a.Style)
 			else
 				local f = list[math.random(1, #list)]
 				local off = Vector3.new(math.random() * 2 - 1, 0, math.random() * 2 - 1) * a.Scatter
-				circle(b.biome, flat(f.root.Position) + off, a.Radius, a.Windup, a.Damage)
+				circle(b.biome, flat(f.root.Position) + off, a.Radius, a.Windup, a.Damage, nil, a.Style)
 			end
 		end
 	elseif a.Kind == "Lob" then
@@ -523,7 +532,7 @@ go = function(body, b, i, list)
 		end
 		animate(body, a, a.Windup)
 		b.still = a.Windup + 0.25
-		circle(b.biome, pos + toward * (b.c.Radius + a.Radius * 0.55), a.Radius, a.Windup, a.Damage)
+		circle(b.biome, pos + toward * (b.c.Radius + a.Radius * 0.55), a.Radius, a.Windup, a.Damage, nil, a.Style)
 		if a.Then then
 			task.delay(a.Windup, go, body, b, a.Then)
 		end
@@ -558,7 +567,6 @@ go = function(body, b, i, list)
 		b.still = a.Windup + 0.25
 		local count = math.max(1, a.Count or 1)
 		local segments = math.max(1, a.Segments or 1)
-		local hit = {}
 		for k = 1, count do
 			local angle = if count > 1 then math.rad((k - (count + 1) / 2) * (a.Spread or 20)) else 0
 			local dir = CFrame.Angles(0, angle, 0):VectorToWorldSpace(toward)
@@ -574,7 +582,8 @@ go = function(body, b, i, list)
 					a.Length,
 					a.Windup + seg * (a.Gap or 0.15),
 					a.Damage,
-					hit
+					{},
+					a.Style
 				)
 			end
 		end
@@ -596,7 +605,7 @@ go = function(body, b, i, list)
 		end
 		animate(body, a, a.Windup)
 		b.still = a.Windup + a.Airtime + 0.3
-		circle(b.biome, to, a.Radius, a.Windup + a.Airtime, a.Damage)
+		circle(b.biome, to, a.Radius, a.Windup + a.Airtime, a.Damage, nil, a.Style)
 		b.move = {
 			kind = "Leap",
 			start = now + a.Windup,
