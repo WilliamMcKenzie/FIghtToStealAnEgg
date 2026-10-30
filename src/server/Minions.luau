@@ -144,8 +144,9 @@ function Minions.call(boss, b)
 		-- (facing outward, the way it's about to go)
 		spawnOne(m, b.biome, b.bounds, at, math.atan2(-math.cos(angle), -math.sin(angle)), boss)
 	end
-	-- (its call: an animation of its own, if it has one)
+	-- (its call: an animation of its own, if it has one; it stands still till they've landed)
 	BossAttacks.animate(boss, m, 0)
+	BossAttacks.root(b, (m.Drop or 0.8) + 0.4)
 	-- (a Shield: it can't be hurt till they're all down, raid style: client/BossView's bubble)
 	if m.Shield then
 		boss:SetAttribute("Shielded", true)
@@ -190,7 +191,7 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		local hold = BossAttacks.update(body, e.b, dt, BossAttacks.fighters(e.biome))
 		local offset = (target.root.Position - pos) * Vector3.new(1, 0, 1)
-		local want = math.atan2(-offset.X, -offset.Z)
+		local want = if (e.b.rooted or 0) > 0 then e.yaw else math.atan2(-offset.X, -offset.Z)
 		e.yaw += ((want - e.yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * 6))
 		local gap = distance - e.radius - target.extra - 1
 		if not hold and gap > 0 then

@@ -440,7 +440,8 @@ local function burrowStep(body, b, dt, target, pos)
 	end
 	local leaving = b.calm > Config.BossCalmDown
 	if w.state == "Emerge" or w.state == "Up" then
-		if target then
+		-- (once it's spitting, it holds its aim)
+		if target and not w.spat then
 			turnToward(b, flat(target.Position - pos), dt)
 		end
 		if w.state == "Emerge" then
@@ -524,7 +525,10 @@ RunService.Heartbeat:Connect(function(dt)
 		elseif target then
 			b.calm = 0
 			local offset = (target.Position - pos) * Vector3.new(1, 0, 1)
-			turnToward(b, offset, dt)
+			-- (rooted mid-volley or mid-summon: it doesn't turn after you either)
+			if (b.rooted or 0) <= 0 then
+				turnToward(b, offset, dt)
+			end
 			if not hold and distance - c.Radius > c.StopAt then
 				local step = math.min(c.Speed * dt, distance - c.Radius - c.StopAt)
 				-- (it walks where it faces, so it curves round rather than sliding sideways)

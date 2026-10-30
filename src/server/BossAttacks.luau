@@ -51,6 +51,8 @@
 --   Anim: an animation of its model played as the attack winds up, sped up or slowed so
 --         its `hit` time lands just as the attack does (the BossAnim remote: client/
 --         BossView). Magic, Lob and Bombs can take a Cast (seconds) to wind up first.
+--   Magic, Lob, Bombs, Shot and Nova root it (no walking, no turning) from the Cast till
+--         the last orb's out or the bombs have landed; so does calling its Minions.
 --
 -- Only players locked into its fight (LockedIn = its biome) are hit, so someone passing
 -- through is never caught. All of it is server parts in workspace.BossFx. A pet bigger
@@ -280,6 +282,14 @@ local function animate(body, a, windup)
 	end
 end
 BossAttacks.animate = animate
+
+-- rooted for `seconds`: it neither walks nor turns (QM Oct 30: a boss stands its ground while
+-- its bombs are in the air, its troops are dropping in or its magic's going out)
+local function root(b, seconds)
+	b.rooted = math.max(b.rooted or 0, seconds)
+	b.still = math.max(b.still or 0, seconds)
+end
+BossAttacks.root = root
 
 local function fire(biome, from, dir, a)
 	local ball = Instance.new("Part")
@@ -557,6 +567,13 @@ go = function(body, b, i, list)
 		-- (Magic, Lob, Bombs, Shot, Nova: a Cast to wind up first, if it has one)
 		local castTime = a.Cast or 0
 		animate(body, a, castTime)
+		-- (rooted from its wind-up till the last of it's out: bombs landed, a burst's last orb)
+		local busy = if a.Kind == "Lob"
+			then a.Airtime
+			elseif a.Kind == "Bombs" then a.Windup
+			elseif a.Kind == "Magic" then (math.max(1, a.Burst or 1) - 1) * (a.BurstGap or 0.3)
+			else 0
+		root(b, castTime + busy + 0.3)
 		if castTime > 0 then
 			b.still = math.max(b.still or 0, castTime + 0.1)
 			task.delay(castTime, perform, body, b, i, a)
@@ -629,9 +646,11 @@ function BossAttacks.move(body, b, dt, pos)
 end
 
 function BossAttacks.update(body, b, dt, list)
+	b.rooted = math.max(0, (b.rooted or 0) - dt)
 	local attacks = b.c.Attacks
 	if not attacks then
-		return false
+		b.still = math.max(0, (b.still or 0) - dt)
+		return b.still > 0
 	end
 	b.timers = b.timers or {}
 	b.still = math.max(0, (b.still or 0) - dt)
