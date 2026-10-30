@@ -310,6 +310,7 @@ function Hud.start()
 			Size = UDim2.fromOffset(fig(230), fig(72)),
 			ZIndex = 3,
 		})
+		require(script.Parent.GainPopups).init(row, c.name, counters[c.name], c.color, c.band)
 		if c.name == "Power" then
 			local add = button(row, "AddPowerButton", 64, 64, {
 				Position = UDim2.fromOffset(fig(77), fig(107)),
