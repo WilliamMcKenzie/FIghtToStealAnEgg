@@ -2097,6 +2097,15 @@ return {
 		},
 		Names = { Ice = "Tundra", Lava = "Lava Valley", Castle = "Red Castle", Forest = "Magic Circle", Ocean = "Ocean Trench" }, -- (what players see, where it isn't the key)
 		Shadow = 20, -- studs its shadow spreads across the floor before it's gone
+		-- a locked region sits in the dark (QM Oct 30: like the far-off haze): a see-through
+		-- navy box over its bounds, from behind its blocker to the far side, up just over
+		-- the 30-stud walls; it fades away for a player once they own the region
+		Dark = {
+			Color = Color3.fromRGB(0, 18, 52),
+			Transparency = 0.45, -- (0: solid navy, 1: no shade)
+			Height = 30.6, -- studs over the floor (the wall caps are at 30)
+			Fade = 0.8, -- seconds it takes to lift once bought
+		},
 	},
 
 	-- what Strength does (Shared/Power, QM Oct 25): it scales your damage and, a little,

@@ -3,11 +3,14 @@
 -- and its shadow). Here: once you own the region (your Region<Name> attribute; a training
 -- ground's blocker, Train<Name>: the model's Owns attribute) it's taken out of your world,
 -- so only you walk through; until then its Buy buttons ask Server/Regions (BuyRegion), and
--- a little shake says you can't afford it yet.
+-- a little shake says you can't afford it yet. The dark over the region (the blocker's Dark
+-- part) goes with it, lifting over Config.Regions.Dark.Fade when you buy it.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 
 local player = Players.LocalPlayer
 local map = workspace:WaitForChild("Map")
@@ -43,11 +46,32 @@ local function press(button, region, training)
 	end)
 end
 
+-- the region's dark lifting (a copy, so the blocker itself can go at once)
+local function lift(model)
+	local dark = model:FindFirstChild("Dark")
+	if not dark then
+		return
+	end
+	local copy = dark:Clone()
+	copy.Parent = workspace
+	local info = TweenInfo.new(Config.Regions.Dark.Fade, Enum.EasingStyle.Quad)
+	local tween = TweenService:Create(copy, info, { Transparency = 1 })
+	tween.Completed:Connect(function()
+		copy:Destroy()
+	end)
+	tween:Play()
+end
+
+local ready = false -- (owned at join: no fade)
+
 local function refresh()
 	for model, owns in all do
 		local owned = player:GetAttribute(owns) == true
 		if owned and not hidden[model] then
 			hidden[model] = true
+			if ready then
+				lift(model)
+			end
 			model.Parent = nil
 		elseif not owned and hidden[model] then
 			hidden[model] = nil
@@ -67,6 +91,7 @@ for _, model in if blockers then blockers:GetChildren() else {} do
 	end
 end
 refresh()
+ready = true
 player.AttributeChanged:Connect(function(name)
 	if string.sub(name, 1, 6) == "Region" or string.sub(name, 1, 5) == "Train" then
 		refresh()
