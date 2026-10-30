@@ -144,6 +144,8 @@ function Minions.call(boss, b)
 		-- (facing outward, the way it's about to go)
 		spawnOne(m, b.biome, b.bounds, at, math.atan2(-math.cos(angle), -math.sin(angle)), boss)
 	end
+	-- (its call: an animation of its own, if it has one)
+	BossAttacks.animate(boss, m, 0)
 	-- (a Shield: it can't be hurt till they're all down, raid style: client/BossView's bubble)
 	if m.Shield then
 		boss:SetAttribute("Shielded", true)
