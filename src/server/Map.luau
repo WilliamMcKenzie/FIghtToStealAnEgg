@@ -1091,7 +1091,7 @@ gates = function(parent, blockers)
 		marker.Parent = parent
 		local blocker = RegionBlocker.build(marker, function(px, pz)
 			return MapFile.groundAt(MapData, px, pz)
-		end, bounds)
+		end)
 		if blocker then
 			blocker.Parent = blockers
 		end
