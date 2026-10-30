@@ -9,5 +9,5 @@ return Horse.variant("SpiritLoong", SpiritLoongModel, "Cosmic", {
 	seat = Vector3.new(0, 7, -1.2),
 	neck = { center = Vector3.new(0, 4.8, -7.2), radius = 2.6 },
 	seatBone = "saddle",
-	size = 0.929, -- (42 studs long)
+	size = 0.929, -- (its longest side 42 studs)
 })

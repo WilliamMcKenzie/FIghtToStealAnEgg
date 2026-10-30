@@ -22,6 +22,13 @@ local IDS = {
 	GiantRafflesia_Wart_Petal4 = 124018537708046,
 	GiantRafflesia_Wart_Petal5 = 78180364957226,
 	GiantRafflesia_Well_Flower = 88148812378304,
+	AncientTreant_Leaf_ArmL = 72520559240156, -- (the Ancient Treant, a Magic Circle pet: QM Oct 30; its ids from LassoAPet's)
+	AncientTreant_Leaf_ArmR = 138556975636001,
+	AncientTreant_Leaf_neck = 135473395019785,
+	AncientTreant_Bark_ArmL = 100405580096422,
+	AncientTreant_Bark_ArmR = 91526866992805,
+	AncientTreant_Bark_root = 115478703668645,
+	AncientTreant_Moss_root = 93576707636543,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then
