@@ -1,9 +1,10 @@
 -- How a sprint ability looks (QM, Oct 30; Config.SprintPets, Server/SprintAbility), on
 -- every rider whose SprintAbility attribute is on. client/Riding lifts, sinks or grows
 -- the pet itself; this adds the rest:
---   Burrow  LassoAPet's Sandworm burrow over where you are (client/BurrowFx: sand mounds
---           pushing up and sinking away behind you, dirt spraying), a burst of sand as you
---           dive in and come back up
+--   Burrow  LassoAPet's Sandworm burrow over where you are (client/BurrowFx: mounds
+--           pushing up and sinking away behind you, dirt spraying), a burst as you dive in
+--           and come back up, all in the colour of the ground you're under, as LassoAPet's
+--           (QM, Oct 30; the pet's Sand / Sand2 where there's no ground under you to read)
 --   Smash   a white outline and LassoAPet's charge wind (its Rhino's: sharp wind sheets
 --           parting round the head, speed lines streaming past the body)
 --   Bombs   an orange outline (the bombs themselves: client/Bombs, PetBomb)
@@ -255,6 +256,29 @@ local function clear(s)
 	end
 end
 
+local groundParams = RaycastParams.new()
+groundParams.FilterType = Enum.RaycastFilterType.Exclude
+groundParams.RespectCanCollide = true
+
+-- the ground's colour right under this rider, and a shade darker (into `into`), or false
+local function groundColors(character, into)
+	local root = character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return false
+	end
+	groundParams.FilterDescendantsInstances = { character, workspace:FindFirstChild("BurrowFx") }
+	local hit = workspace:Raycast(root.Position, Vector3.new(0, -60, 0), groundParams)
+	if not (hit and hit.Instance:IsA("BasePart")) then
+		return false
+	end
+	local color = if hit.Instance == workspace.Terrain
+		then workspace.Terrain:GetMaterialColor(hit.Material)
+		else hit.Instance.Color
+	into[1] = color
+	into[2] = color:Lerp(Color3.new(0, 0, 0), 0.18)
+	return true
+end
+
 local function groundUnder(character)
 	local root = character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -299,6 +323,7 @@ RunService.RenderStepped:Connect(function()
 				local ground = groundUnder(character)
 				local pk = player:GetAttribute("Pet")
 				s.sand = { cfg.Burrow.Sand[pk] or cfg.Burrow.Sand.Sandworm, cfg.Burrow.Sand2[pk] or cfg.Burrow.Sand2.Sandworm }
+				groundColors(character, s.sand)
 				if ground then
 					BurrowFx.burst(ground, pet.height or 6, s.sand[1])
 				end
@@ -313,6 +338,7 @@ RunService.RenderStepped:Connect(function()
 			end
 		end
 		if s.mound then
+			groundColors(character, s.sand) -- (the mound reads these as it pushes each one up)
 			local ground = groundUnder(character)
 			if ground then
 				s.mound:place(ground)
@@ -323,6 +349,7 @@ RunService.RenderStepped:Connect(function()
 		if not seen[character] then
 			if s.kind == "Burrow" and character.Parent then
 				local ground = groundUnder(character)
+				groundColors(character, s.sand)
 				if ground then
 					BurrowFx.burst(ground, 6, s.sand[1]) -- (back up out of the ground)
 				end

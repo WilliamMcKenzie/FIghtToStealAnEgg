@@ -4,7 +4,11 @@
 
 local Horse = require(script.Parent.Horse)
 local Rockworm = require(script.Parent.Rockworm)
-local BoneWyrmModel = require(script.Parent.BoneWyrmModel)
+local SandwormModel = require(script.Parent.SandwormModel)
+-- (QM, Oct 30: it moves just as the Sandworm does: the Sandworm's animations on its own
+-- model, which has the same bones at the same pivots)
+local BoneWyrmModel = table.clone(require(script.Parent.BoneWyrmModel))
+BoneWyrmModel.animations = SandwormModel.animations
 
 return Horse.variant("BoneWyrm", BoneWyrmModel, "Cosmic", {
 	seat = Vector3.new(0, 4.45, 1.6),

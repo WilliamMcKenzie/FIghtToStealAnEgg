@@ -64,6 +64,38 @@ local TIPPED = {
 -- the HumanoidRootPart, and its tumbling spin with it. If it's still in a tipped-over
 -- state somehow, it's stood back up. (The pet's welded to the HumanoidRootPart, so it
 -- stays upright too.)
+--
+-- Steering (QM, Oct 30: riding felt drifty, like a racecar). Roblox's Humanoid eases into
+-- its speed and turns its body round over a moment, which at a pet's speed slides you
+-- sideways through every turn. Instead, on the ground your own pet goes exactly where you
+-- push at exactly its WalkSpeed (client/Sprint), and stops dead when you let go; it turns
+-- to face that way almost at once (Config.Steer.Turn a second). In the air (a hop) the
+-- Humanoid's own control carries on.
+local function steer(root, humanoid, dt)
+	local cfg = Config.Steer
+	if not cfg.On then
+		return
+	end
+	if humanoid.AutoRotate then
+		humanoid.AutoRotate = false
+	end
+	local move = humanoid.MoveDirection * Vector3.new(1, 0, 1)
+	if move.Magnitude > 0.05 then
+		move = move.Unit
+		local look = root.CFrame.LookVector
+		local yaw = math.atan2(-look.X, -look.Z)
+		local want = math.atan2(-move.X, -move.Z)
+		yaw += ((want - yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * cfg.Turn))
+		root.CFrame = CFrame.new(root.Position) * CFrame.Angles(0, yaw, 0)
+	else
+		move = Vector3.zero
+	end
+	if humanoid.FloorMaterial ~= Enum.Material.Air then
+		local v = root.AssemblyLinearVelocity
+		root.AssemblyLinearVelocity = Vector3.new(0, v.Y, 0) + move * humanoid.WalkSpeed
+	end
+end
+
 local function keepUpright(root, humanoid)
 	if root.CFrame.UpVector.Y < 0.999 then
 		local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
@@ -194,6 +226,7 @@ RunService.PreSimulation:Connect(function(dt)
 		local root, horse = m.root, m.horse
 		if character == Players.LocalPlayer.Character then
 			keepUpright(root, m.humanoid)
+			steer(root, m.humanoid, dt)
 		end
 
 		-- a sprint ability: up in the air, under the floor, or bigger (eased in and out)
@@ -209,7 +242,8 @@ RunService.PreSimulation:Connect(function(dt)
 			m.leapT += dt
 			lift = leap.Height * math.min(math.floor(m.leapT / leap.StepTime) + 1, leap.Steps) / leap.Steps
 		elseif ability == "Burrow" then
-			lift = -(horse.height + 6) -- (the rider too)
+			-- (deep enough for all of it: the pet, and the rider on its seat with their weapon)
+			lift = -(math.max(horse.height, horse.seat.Y * horse.size * horse.scale) + 10)
 		elseif ability == "Smash" then
 			grow = abilities.Smash.Grow
 		elseif ability == "Crabwalk" then
@@ -309,6 +343,12 @@ function Riding.gait(character)
 	local clock = horse.clocks and horse.clocks.gallop
 	local cycle = if gallop and clock and gallop.length > 0 then clock / gallop.length else nil
 	return cycle, horse.speed or 0
+end
+
+-- how far a sprint ability has drawn this rider up (or, burrowed, down), studs
+function Riding.lift(character)
+	local m = mounts[character]
+	return m and m.lift or 0
 end
 
 -- the pet under this character (its Horse-like object: .model, .scale), or nil

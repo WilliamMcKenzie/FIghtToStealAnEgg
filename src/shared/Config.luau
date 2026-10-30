@@ -1916,6 +1916,10 @@ return {
 	-- the controls, or held up against something: under StopAt of your speed) drops you
 	-- straight back. LassoAPet's sprint is 2x; this game's is 1.3x (QM).
 	Sprint = { On = true, Speed = 1.3, Delay = 1.5, Ramp = 1.2, StopAt = 0.4 },
+	-- Steering (QM, Oct 30: riding felt drifty; client/Riding): on the ground you go exactly
+	-- where you push at full speed and stop dead, turning to face it at Turn (a rate: 30 is
+	-- all but instant, lower is smoother).
+	Steer = { On = true, Turn = 30 },
 	-- Hopping (QM, Oct 30; client/Hop): riding into something solid up to Height studs tall
 	-- (a fence: 4) within Ahead studs past your pet's hitbox, it hops over, Clear studs
 	-- higher than it, with Push studs/s more forward. Taller walls stop you as before.
