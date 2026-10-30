@@ -4,7 +4,7 @@
 -- everything with that key whenever one changes, so you can tune colours in the
 -- Properties panel during Play (in the Client view). Tick PrintColors to print the
 -- current set as a Config.WorldColors block for the Output (paste it into Config, or to
--- Claude). StudTransparency there fades every stud Texture the same way.
+-- Claude). (The studs' fade is workspace.StudStyle now: Shared/StudStyle.)
 -- On start everything is painted from Config, so a saved place can't keep stale colours.
 --
 --   WorldColors.create()  -- server, once
@@ -15,7 +15,6 @@ local Config = require(script.Parent.Config)
 local WorldColors = {}
 
 local NAME = "WorldColors"
-local STUD_IMAGE = "rbxassetid://7447638591"
 
 function WorldColors.create()
 	local old = workspace:FindFirstChild(NAME)
@@ -27,7 +26,6 @@ function WorldColors.create()
 	for key, color in Config.WorldColors do
 		folder:SetAttribute(key, color)
 	end
-	folder:SetAttribute("StudTransparency", Config.StudTransparency)
 	folder:SetAttribute("PrintColors", false)
 	folder.Parent = workspace
 	WorldColors.paintAll(folder)
@@ -61,7 +59,6 @@ end
 -- everything, from the folder's current values (the server does this on start, so the
 -- world always wears Config's colours however the place was saved)
 function WorldColors.paintAll(folder)
-	local stud = folder:GetAttribute("StudTransparency")
 	for _, thing in workspace:GetDescendants() do
 		local key = thing:GetAttribute("ColorKey")
 		local color = key and folder:GetAttribute(key)
@@ -73,8 +70,6 @@ function WorldColors.paintAll(folder)
 			elseif thing:IsA("Beam") then
 				thing.Color = ColorSequence.new(color)
 			end
-		elseif stud and thing:IsA("Texture") and thing.Texture == STUD_IMAGE then
-			thing.Transparency = stud
 		end
 	end
 end
@@ -116,14 +111,7 @@ function WorldColors.watch()
 		if key == "PrintColors" then
 			if value then
 				printAll(folder)
-				print("StudTransparency = " .. tostring(folder:GetAttribute("StudTransparency")))
 				folder:SetAttribute("PrintColors", false)
-			end
-		elseif key == "StudTransparency" and typeof(value) == "number" then
-			for _, thing in workspace:GetDescendants() do
-				if thing:IsA("Texture") and thing.Texture == STUD_IMAGE then
-					thing.Transparency = value
-				end
 			end
 		elseif typeof(value) == "Color3" then
 			paint(key, value)
