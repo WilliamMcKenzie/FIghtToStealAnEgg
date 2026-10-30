@@ -1886,6 +1886,10 @@ return {
 		PerDamage = 0.1, -- (at 0 Strength a Kendo Stick hit deals 10: Strength 2 trains 2, as before)
 		Grounds = {
 			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
+			-- each ground's Mobs take turns filling its Count (QM, Oct 30): Pet (its model, at
+			-- Scale x its riding size), Name, Mode and Attacks (else the ground's own). Mode is
+			-- how an angry one moves: Melee (default) runs at you, Range keeps Keep studs off
+			-- and casts, Flee runs away from you and lobs bombs back.
 			Meadow = {
 				Cost = 300,
 				Grow = 0,
@@ -1894,36 +1898,100 @@ return {
 				Strength = 2,
 				Speed = 4,
 				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 6 } }, -- (boss: 10 a second)
+				Mobs = { { Pet = "Pig" }, { Pet = "Fish" } },
 			},
 			Desert = {
 				Cost = 8000,
 				Grow = 1,
-				Pet = "Cactus",
-				Name = "Cactus Monster",
 				Health = 1500,
-				Count = 5,
+				Count = 6,
 				Strength = 5,
 				Speed = 2.5,
 				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 10 } }, -- (boss: 16)
+				Mobs = {
+					{ Pet = "Cactus", Name = "Cactus Monster" },
+					{
+						Pet = "Scorpion",
+						Mode = "Range",
+						Keep = 14,
+						Attacks = {
+							{
+								Kind = "Magic",
+								Every = 2.4,
+								Like = "Staff",
+								Damage = 9,
+								Height = 3,
+								Cast = 0.3,
+								Shot = { Color = Color3.fromRGB(232, 190, 116), Count = 1, Size = 1.2, Speed = 34, Homing = 40, Launch = 0, Range = 60, Slack = 0 }, -- sand
+							},
+						},
+					},
+				},
 			},
 			Ice = {
 				Cost = 150000,
 				Grow = 2,
 				Health = 6000,
-				Count = 4,
+				Count = 6,
 				Strength = 15,
 				Speed = 3,
 				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 16 } }, -- (boss: 26)
+				Mobs = {
+					{ Pet = "Boar" },
+					{
+						Pet = "Snowman",
+						Mode = "Range",
+						Keep = 15,
+						Attacks = {
+							{
+								Kind = "Magic",
+								Every = 2.6,
+								Like = "Staff",
+								Damage = 10,
+								Height = 4,
+								Cast = 0.3,
+								Shot = { Color = Color3.fromRGB(235, 245, 255), Count = 2, Spread = 20, Size = 1.2, Speed = 36, Homing = 30, Launch = 0, Range = 60, Slack = 0 }, -- snow
+							},
+						},
+					},
+					{
+						Pet = "Penguin",
+						Mode = "Flee",
+						Attacks = {
+							{ Kind = "Lob", Every = 3, Count = 0, Scatter = 6, Radius = 5, Airtime = 1.2, Height = 14, Damage = 22 },
+						},
+					},
+				},
 			},
 			Lava = {
 				Cost = 2000000,
 				Grow = 3,
-				Pet = "RockHog",
 				Health = 20000,
 				Count = 4,
 				Strength = 45,
 				Speed = 3.5,
 				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 24 } }, -- (boss: 40)
+				Mobs = {
+					{ Pet = "RockHog", Name = "Fire Boar", Scale = 0.6 }, -- (QM: the yard's too small for them full size)
+					{
+						Pet = "Firebird",
+						Mode = "Range",
+						Keep = 16,
+						Attacks = {
+							{
+								Kind = "Magic",
+								Every = 2.4,
+								Like = "Staff",
+								Damage = 16,
+								Height = 5,
+								Burst = 2,
+								BurstGap = 0.3,
+								Cast = 0.3,
+								Shot = { Color = Color3.fromRGB(255, 130, 40), Count = 1, Size = 1.3, Speed = 38, Homing = 40, Launch = 0, Range = 60, Slack = 0 }, -- fire
+							},
+						},
+					},
+				},
 			},
 		},
 		Respawn = 4,

@@ -59,7 +59,8 @@
 -- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
---         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too)
+--         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too, with
+--         biome = b itself and b.foes = whoever they're fighting)
 --   BossAttacks.fighter(player) -> { root, humanoid, extra } or nil, if they're alive
 --   BossAttacks.burst(body, b)  -- every Magic attack's Burst now (a boss that fires on its
 --         own cycle, not their timers: the Sandworm's Burrow, Server/Bosses)
@@ -120,8 +121,12 @@ local function fighter(player)
 end
 BossAttacks.fighter = fighter
 
--- every living root of a player in this biome's fight
+-- every living root of a player in this biome's fight; for a training mob (its `biome` is
+-- its own b, Server/Training) just whoever it's angry with, its b.foes
 local function fighters(biome)
+	if type(biome) == "table" then
+		return biome.foes or {}
+	end
 	local out = {}
 	for _, player in Players:GetPlayers() do
 		if player:GetAttribute("LockedIn") == biome then

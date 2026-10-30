@@ -248,9 +248,18 @@ function Shots.fire(character, id, yaw, seed)
 	end
 end
 
+-- a boss's attack i, or a training mob's (its ground's Mobs, by its Slot: Server/Training)
+local function attackOf(body, i)
+	local c = Config.Bosses[body:GetAttribute("Kind")]
+	local g = Config.Training.Grounds[body:GetAttribute("Ground")]
+	if not c and g and g.Mobs and body:GetAttribute("Slot") then
+		c = g.Mobs[(body:GetAttribute("Slot") - 1) % #g.Mobs + 1]
+	end
+	return c and c.Attacks and c.Attacks[i]
+end
+
 function Shots.boss(body, i, yaw, seed, origin)
-	local c = body and Config.Bosses[body:GetAttribute("Kind")]
-	local a = c and c.Attacks and c.Attacks[i]
+	local a = body and attackOf(body, i)
 	if not (a and typeof(origin) == "Vector3") then
 		return
 	end
@@ -265,18 +274,20 @@ function Shots.boss(body, i, yaw, seed, origin)
 		end
 		local d = build(look)
 		d.shot, d.s, d.biome = shot, look, body:GetAttribute("Biome") or false
+		-- (a training mob's only hit whoever it's fighting)
+		d.target = body:GetAttribute("Target") and Players:GetPlayerByUserId(body:GetAttribute("Target"))
 		table.insert(active, d)
 	end
 end
 
--- what a boss's shot can hit here: every living player in its fight
-local function players(biome)
+-- what a boss's shot can hit here: every living player in its fight (or just `only`)
+local function players(biome, only)
 	local list = {}
-	for _, p in Players:GetPlayers() do
+	for _, p in if only then { only } else Players:GetPlayers() do
 		local character = p.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if root and humanoid and humanoid.Health > 0 and p:GetAttribute("LockedIn") == biome then
+		if root and humanoid and humanoid.Health > 0 and (only or p:GetAttribute("LockedIn") == biome) then
 			local extra = Pets.stats(p:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
 			table.insert(list, { body = root, pos = root.Position, radius = PLAYER_RADIUS + extra })
 		end
@@ -315,7 +326,9 @@ RunService.RenderStepped:Connect(function(dt)
 		local a = active[i]
 		local shot = a.shot
 		local hits = list
-		if a.biome ~= nil then
+		if a.target then
+			hits = players(nil, a.target)
+		elseif a.biome ~= nil then
 			fights[a.biome] = fights[a.biome] or players(a.biome)
 			hits = fights[a.biome]
 		end
