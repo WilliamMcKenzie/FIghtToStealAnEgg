@@ -8,5 +8,5 @@ local AbyssWhaleModel = require(script.Parent.AbyssWhaleModel)
 return Horse.variant("AbyssWhale", AbyssWhaleModel, "Void", {
 	seat = Vector3.new(0, 6.4, 1.2),
 	neck = { center = Vector3.new(0, 4.5, -6.5), radius = 3.8 },
-	size = 1.52, -- (44 studs long)
+	size = 1.52, -- (its longest side 44 studs)
 })

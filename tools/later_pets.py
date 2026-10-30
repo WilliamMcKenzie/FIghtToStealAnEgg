@@ -5,13 +5,13 @@ pets with eggs, in the elegant style of meadow/desert, recolor some maybe when a
   Abandoned Dungeon (Dungeon)   Dungeon Rat, Slime, Cave Spider, Bone Steed, Mimic, Bone Wyrm
   Red Castle (Castle)           War Boar, Royal Steed, Chess Knight, Royal Peacock, Living Armor,
                                 Crimson Drake, Royal Eagle
-  Magic Circle (Forest)         Shroom, Spirit Fox, Spirit Deer, Living Birch, Mystic Owl,
+  Magic Circle (Forest)         Shroom, Spirit Fox, Spirit Deer, Ancient Treant, Mystic Owl,
                                 Crystal Tortoise, Spirit Loong
   Ocean Trench (Ocean)          Squid, Seahorse, King Crab, Fish School, Whale, Abyss Whale
 
 Most are an existing pet recoloured and tweaked (parts added, dropped or resized); the
 Slime, Mimic, Chess Knight, Shroom and Seahorse are new, and the Squid, Fish School, Whale
-and Living Birch are LassoAPet's as they are (QM's picks, Oct 30). The biggest are sized by
+and Ancient Treant are LassoAPet's as they are (QM's picks, Oct 30). The biggest are sized by
 their longest side (fit=), so they still fit the regular arenas. Each pet's egg is drawn
 in the same layered style as the others (tools/later_eggs.py).
 
@@ -255,11 +255,22 @@ def whale():
     return None
 
 
-@pet("LivingBirch", "LassoAPet's Living Birch: a white birch trunk with dark bands, a face,\n"
-     "-- leafy hands, stubby legs and a chunky autumn canopy. You ride on top of the canopy.",
-     seat=(0, 17.3, 0), neck=((0, 9.6, 0), 2.0))
-def living_birch():
-    return None
+@pet("AncientTreant", "LassoAPet's Ancient Treant grown in the Magic Circle (QM: recoloured to fit\n"
+     "-- it): slate-blue bark, a violet canopy, a teal moss beard, glowing eyes and glowing fruit\n"
+     "-- hanging from the canopy. Its trunk, beard, arms and canopy are meshes in\n"
+     "-- ReplicatedStorage.AnimalMeshes (tools/animal_meshes.luau). You ride on the canopy.",
+     base="AncientTreant", seat=(0, 32.0, 0), seatBone="neck", neck=((0, 20.2, 0), 5.1), fit=28)
+def ancient_treant():
+    m = Model.load(os.path.join(BASES, "AncientTreantModel.luau"), meshes="keep")
+    m.recolor({(60, 160, 60): (140, 100, 234), (96, 170, 60): (56, 196, 168), (126, 84, 52): (70, 84, 130),
+               (84, 54, 36): (48, 56, 94), (160, 112, 70): (96, 110, 160), (44, 28, 22): (22, 22, 44)})
+    for s_, side in ((-1, "L"), (1, "R")):
+        m.add("Eye" + side, "root", (1.8, 1.4, 0.1), (s_ * 2.2, 19.7, -4.15), MAGIC, neon=True)
+    # glowing fruit under the canopy's edge
+    for i, (x, z) in enumerate(((-7.5, -5.5), (6.5, -6.5), (8.5, 2.5), (-8.0, 4.0), (1.0, 7.5))):
+        m.add("Fruit%d" % i, "neck", (1.1, 1.1, 1.1), (x, 21.2, z), MAGIC, neon=True)
+        m.add("Stalk%d" % i, "neck", (0.2, 1.2, 0.2), (x, 22.3, z), (96, 110, 160))
+    return m
 
 
 # ---- tweaked pets ------------------------------------------------------------------------
@@ -605,7 +616,7 @@ def write_all(only=None):
         if spec.get("fit"):
             # its size: its longest side is fit studs (QM, Oct 30: even the big ones have to
             # be playable in the regular arenas)
-            lo, hi = (m or Model.load(kind)).box()
+            lo, hi = (m or Model.load(kind, meshes="keep")).box()
             spec["size"] = round(spec["fit"] / max(h - l for l, h in zip(lo, hi)), 3)
         if m is not None:
             source = spec["base"] or "new"
@@ -645,7 +656,7 @@ def write_class(kind, spec):
     if spec.get("seatBone"):
         pts.append('\tseatBone = "%s",' % spec["seatBone"])
     if spec.get("size"):
-        pts.append("\tsize = %g,%s" % (spec["size"], " -- (%g studs long)" % spec["fit"] if spec.get("fit") else ""))
+        pts.append("\tsize = %g,%s" % (spec["size"], " -- (its longest side %g studs)" % spec["fit"] if spec.get("fit") else ""))
     if spec.get("size_of"):
         pts.append("\tsize = %s.size * %g," % spec["size_of"])
     for k in ("seatOnNeck", "gallopOnly"):

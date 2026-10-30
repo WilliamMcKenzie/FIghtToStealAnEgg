@@ -953,10 +953,10 @@ return {
 			Minions = {
 				At = 0.5,
 				Count = 4,
-				Model = "LivingBirch",
+				Model = "AncientTreant",
 				StandIn = { "Cactus", 1.4 },
 				Size = 1.4,
-				Scale = 1.2, -- (x the Living Birch pet: about the old Treant's height)
+				Scale = 1.1, -- (x the Ancient Treant pet)
 				Name = "Sapling",
 				Health = 200000,
 				Speed = 14,
@@ -1620,7 +1620,7 @@ return {
 			Lava = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (LassoAPet's Volcano)
 			Dungeon = { DungeonRat = 0.4, Slime = 0.22, CaveSpider = 0.16, BoneSteed = 0.12, Mimic = 0.07, BoneWyrm = 0.03 },
 			Castle = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02 },
-			Forest = { Shroom = 0.35, SpiritFox = 0.22, SpiritDeer = 0.15, LivingBirch = 0.13, MysticOwl = 0.08, CrystalTortoise = 0.05, SpiritLoong = 0.02 },
+			Forest = { Shroom = 0.35, SpiritFox = 0.22, SpiritDeer = 0.15, AncientTreant = 0.13, MysticOwl = 0.08, CrystalTortoise = 0.05, SpiritLoong = 0.02 },
 			Ocean = { Squid = 0.38, Seahorse = 0.22, KingCrab = 0.17, FishSchool = 0.12, Whale = 0.08, AbyssWhale = 0.03 },
 		},
 		Scale = { Nest = 1.3, Carried = 0.6, Pen = 0.9 }, -- times the egg's drawing (about 4 studs tall)
@@ -1721,7 +1721,7 @@ return {
 			Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 7200, SnackYak = 3600, -- Tundra
 			Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 1200, LavaWhale = 1200, Phoenix = 43200, -- Lava (LassoAPet's Volcano)
 			DungeonRat = 30, Slime = 60, CaveSpider = 120, BoneSteed = 300, Mimic = 1800, BoneWyrm = 21600, -- Abandoned Dungeon
-			Shroom = 30, SpiritFox = 60, SpiritDeer = 120, LivingBirch = 300, MysticOwl = 1200, CrystalTortoise = 2400, SpiritLoong = 21600, -- Magic Circle
+			Shroom = 30, SpiritFox = 60, SpiritDeer = 120, AncientTreant = 300, MysticOwl = 1200, CrystalTortoise = 2400, SpiritLoong = 21600, -- Magic Circle
 			WarBoar = 60, RoyalSteed = 90, ChessKnight = 300, RoyalPeacock = 600, LivingArmor = 2400, CrimsonDrake = 3600, RoyalEagle = 43200, -- Red Castle
 			Squid = 60, Seahorse = 120, KingCrab = 600, FishSchool = 900, Whale = 3600, AbyssWhale = 43200, -- Ocean Trench
 		},
@@ -1789,7 +1789,7 @@ return {
 		Shroom = { Rarity = "Mythic", Cash = 1500, Tier = 2, Lean = 0.4, Speed = 7.2 },
 		SpiritFox = { Rarity = "Mythic", Cash = 2400, Tier = 2, Lean = -0.6, Speed = 8.2 },
 		SpiritDeer = { Rarity = "Divine", Cash = 5000, Tier = 2, Lean = -0.5, Speed = 8.4 },
-		LivingBirch = { Rarity = "Divine", Cash = 7000, Tier = 2, Lean = 0.5, Speed = 7.5 }, -- (LassoAPet's, for the Treant: QM)
+		AncientTreant = { Rarity = "Divine", Cash = 7000, Tier = 2, Lean = 0.6, Speed = 7.4 }, -- (LassoAPet's, for the Treant: QM; its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
 		MysticOwl = { Rarity = "Celestial", Cash = 14000, Tier = 2, Lean = -0.2, Speed = 7.6 },
 		CrystalTortoise = { Rarity = "Celestial", Cash = 18000, Tier = 2, Lean = 0.8, Speed = 7.2 },
 		SpiritLoong = { Rarity = "Cosmic", Cash = 60000, Tier = 3, Lean = -0.3, Speed = 8.6 },

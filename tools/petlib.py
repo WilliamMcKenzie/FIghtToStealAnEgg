@@ -62,8 +62,9 @@ class Model:
     # ---- reading -----------------------------------------------------------------------
     @classmethod
     def load(cls, path, meshes=False):
-        """meshes: True drops any MeshPart (otherwise it's an error: they can't be recoloured
-        or reshaped here, and the game draws pets from blocks)."""
+        """meshes: True drops any MeshPart, "keep" keeps them (they can be recoloured and
+        moved, but not reshaped: luau() writes their mesh names back), otherwise they're an
+        error."""
         if not os.path.isabs(path):
             path = os.path.join(ANIMALS, path + "Model.luau")
         src = open(path).read()
@@ -91,9 +92,12 @@ class Model:
                 if re.search(r"\b" + flag + r" = true", e):
                     p[flag] = True
             if re.search(r"\bmesh = ", e):
-                if meshes:
+                if meshes == "keep":
+                    p["mesh"] = re.search(r'mesh = "([^"]+)"', e).group(1)
+                elif meshes:
                     continue
-                raise ValueError("meshes aren't supported: " + path)
+                else:
+                    raise ValueError("meshes aren't supported: " + path)
             if len(p["cf"]) == 3:
                 p["cf"] = p["cf"] + [1, 0, 0, 0, 1, 0, 0, 0, 1]
             parts.append(p)
@@ -239,8 +243,9 @@ class Model:
         out.append("\tparts = {")
         for p in self.parts:
             flags = "".join(", %s = true" % f for f in ("plain", "neon", "hidden") if p.get(f))
-            out.append('\t\t{ name = "%s", bone = "%s", class = "%s", size = Vector3.new(%s), cframe = CFrame.new(%s), color = Color3.fromRGB(%s)%s },' % (
-                p["name"], p["bone"], p["class"], ", ".join(fmt(v) for v in p["size"]),
+            mesh = ', mesh = "%s"' % p["mesh"] if p.get("mesh") else ""
+            out.append('\t\t{ name = "%s", bone = "%s", class = "%s"%s, size = Vector3.new(%s), cframe = CFrame.new(%s), color = Color3.fromRGB(%s)%s },' % (
+                p["name"], p["bone"], p["class"], mesh, ", ".join(fmt(v) for v in p["size"]),
                 ", ".join(fmt(v) for v in p["cf"]), ", ".join(str(int(round(v))) for v in p["color"]), flags))
         out.append("\t},")
         out.append("\t-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor")
