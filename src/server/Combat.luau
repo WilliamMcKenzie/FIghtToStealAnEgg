@@ -14,6 +14,8 @@
 --                                      Strength: adds Strength (and updates Power)
 --   Combat.refresh(player)           -- updates Power after Strength is set directly
 --   Combat.damage(player) -> number
+--   Combat.alive(player) -> boolean  -- false once their Health hits 0 (QM, Oct 30: no
+--                                      attacking from beyond the grave)
 --
 -- Every hit on every target rolls its own damage: the base times a random
 -- Config.Slash.RollMin..RollMax, rounded to a whole number (at least 1), so the damage
@@ -42,6 +44,14 @@ end
 
 function Combat.remove(body)
 	targets[body] = nil
+end
+
+-- every attack checks this: a dead player's slashes, new shots and shots still in the air
+-- deal nothing. It reads Health, not the Dead state, so a revive (the Phoenix's, when it
+-- lands) that puts Health back above 0 brings attacking back with it.
+function Combat.alive(player)
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	return humanoid ~= nil and humanoid.Health > 0
 end
 
 function Combat.damage(player)
@@ -87,7 +97,7 @@ end
 -- side, plus slack for the target's width)
 function Combat.slash(player, yaw, c)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root then
+	if not root or not Combat.alive(player) then -- (died during the wind-up)
 		return
 	end
 	local look = CFrame.Angles(0, yaw, 0).LookVector
@@ -128,7 +138,7 @@ local MAX_FLYING = 300
 -- server's spot flew a little to the side of the ones drawn, missing what they hit there)
 function Combat.shoot(player, id, yaw, seed, origin)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root or #flying > MAX_FLYING then
+	if not root or #flying > MAX_FLYING or not Combat.alive(player) then
 		return
 	end
 	local from = root.Position
@@ -147,6 +157,12 @@ end
 RunService.Heartbeat:Connect(function(dt)
 	if #flying == 0 then
 		return
+	end
+	-- (a dead shooter's shots still in the air fizzle out)
+	for i = #flying, 1, -1 do
+		if not Combat.alive(flying[i].player) then
+			table.remove(flying, i)
+		end
 	end
 	local list = {}
 	for body, handler in targets do

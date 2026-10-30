@@ -123,7 +123,10 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 	if typeof(yaw) ~= "number" or yaw ~= yaw or math.abs(yaw) > 10 then
 		return
 	end
-	-- (only with a melee weapon equipped, at most as often as it swings)
+	-- (only with a melee weapon equipped, at most as often as it swings, and only alive)
+	if not Combat.alive(player) then
+		return
+	end
 	local id = player:GetAttribute("Weapon")
 	if Weapons.get(id).Type ~= "Melee" then
 		return
@@ -154,6 +157,9 @@ shoot.OnServerEvent:Connect(function(player, yaw, seed, origin)
 		return
 	end
 	seed = if typeof(seed) == "number" and seed == seed then math.floor(seed) % 2 ^ 30 else 0
+	if not Combat.alive(player) then
+		return -- (no shooting from beyond the grave)
+	end
 	local id = player:GetAttribute("Weapon")
 	local w = Weapons.get(id)
 	if not w.Shot then

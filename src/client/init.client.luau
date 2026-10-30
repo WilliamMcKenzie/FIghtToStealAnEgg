@@ -186,7 +186,10 @@ end
 RunService.Heartbeat:Connect(function(dt)
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
-	if not root then
+	-- (dead, Health 0: no aiming and no attacks until you respawn, or a revive puts
+	-- Health back, QM Oct 30)
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not root or not humanoid or humanoid.Health <= 0 then
 		TargetRing.set(nil)
 		return
 	end
@@ -217,8 +220,7 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 	if Weapons.get(id).Shot then
 		-- (Archero: bows and staffs hold fire while you're moving, and shoot as soon as you stop)
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if Config.Shots.StillOnly and humanoid and humanoid.MoveDirection.Magnitude > 0.1 then
+		if Config.Shots.StillOnly and humanoid.MoveDirection.Magnitude > 0.1 then
 			return
 		end
 		-- (shots go straight at it, not along the eased aim)
