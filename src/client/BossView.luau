@@ -22,6 +22,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Horse = require(Shared.Animals.Horse)
+local BossTuning = require(Shared.BossTuning)
 local BurrowFx = require(script.Parent.BurrowFx)
 local DamageNumbers = require(script.Parent.DamageNumbers)
 local OnScreen = require(script.Parent.OnScreen)
@@ -43,6 +44,9 @@ local function kindOf(body)
 	local model, size, tint = body:GetAttribute("Model"), body:GetAttribute("ModelSize") or 1, body:GetAttribute("Tint")
 	if not model then
 		return nil
+	end
+	if body.Parent and body.Parent.Name == "Bosses" and body.Parent.Parent == workspace then
+		size *= BossTuning.scale() -- (workspace.BossTuning's BossScale: Shared/BossTuning)
 	end
 	local key = model .. " " .. size .. " " .. tostring(tint)
 	if kinds[key] == nil then
@@ -263,7 +267,7 @@ local function add(body)
 		view.burrow = c and c.Burrow and { cfg = c.Burrow, radius = body:GetAttribute("Radius") or 4 }
 	end
 	views[body] = view
-	body:GetAttributeChangedSignal("Health"):Connect(function()
+	view.healthChanged = body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
 		if health < view.health then
 			view.hitAt = os.clock()
@@ -286,6 +290,10 @@ local function remove(body)
 		if view.drop and view.drop.shadow then
 			view.drop.shadow:Destroy()
 		end
+		if view.shield then
+			view.shield:Destroy()
+		end
+		view.healthChanged:Disconnect()
 		view.animal.model:Destroy()
 		views[body] = nil
 	end
@@ -302,6 +310,42 @@ for _, name in { "Bosses", "Mobs", "PenPets" } do
 	end)
 end
 
+-- workspace.BossTuning (Shared/BossTuning): a new BossScale redraws the bosses out now at
+-- it, and its Boss line says which is out and the Config Size that scale comes to
+local function tuned()
+	local tuning, bossFolder = BossTuning.folder(), workspace:FindFirstChild("Bosses")
+	if not (tuning and bossFolder) then
+		return
+	end
+	local k = BossTuning.scale()
+	local out = {}
+	for _, body in bossFolder:GetChildren() do
+		local c = Config.Bosses[body:GetAttribute("Kind")]
+		if c then
+			local size = (body:GetAttribute("ModelSize") or 1) * k
+			local which = if c.StandIn and body:GetAttribute("Model") ~= c.Model then "StandIn size" else "Size"
+			table.insert(out, string.format("%s: %s = %.3g", body:GetAttribute("Kind"), which, size))
+		end
+	end
+	tuning:SetAttribute("Boss", table.concat(out, "; "))
+end
+task.spawn(function()
+	local tuning = workspace:WaitForChild("BossTuning")
+	local bossFolder = workspace:WaitForChild("Bosses")
+	tuning:GetAttributeChangedSignal("BossScale"):Connect(function()
+		for _, body in bossFolder:GetChildren() do
+			if views[body] and not views[body].diedAt then
+				remove(body)
+				add(body)
+			end
+		end
+		tuned()
+	end)
+	bossFolder.ChildAdded:Connect(tuned)
+	bossFolder.ChildRemoved:Connect(tuned)
+	tuned()
+end)
+
 -- a boss's Magic shot (Server/BossAttacks' BossShot): a Pulse attack pulses its head
 task.spawn(function()
 	ReplicatedStorage:WaitForChild("BossShot").OnClientEvent:Connect(function(body, i)
@@ -313,6 +357,45 @@ task.spawn(function()
 		end
 	end)
 end)
+
+-- a boss's attack winding up (Server/BossAttacks' BossAnim): its model plays the attack's
+-- animation, sped up or slowed so the animation's `hit` lands as the attack does
+task.spawn(function()
+	ReplicatedStorage:WaitForChild("BossAnim").OnClientEvent:Connect(function(body, name, windup)
+		local view = views[body]
+		local anim = view and view.animal.data.animations[name]
+		if not anim then
+			return
+		end
+		local rate = if anim.hit and windup and windup > 0 then math.clamp(anim.hit / windup, 0.35, 3) else 1
+		view.animal:playOnce(name, rate)
+	end)
+end)
+
+-- a Shield boss's bubble while its troops live (Server/Minions): a big soft force field ball
+local SHIELD_COLOR = Color3.fromRGB(255, 120, 120)
+local function shieldFrame(body, view, ground)
+	local on = body:GetAttribute("Shielded") == true and not view.diedAt
+	if on and not view.shield then
+		local ball = Instance.new("Part")
+		ball.Name = "Shield"
+		ball.Shape = Enum.PartType.Ball
+		ball.Anchored, ball.CanCollide, ball.CanQuery, ball.CanTouch = true, false, false, false
+		ball.CastShadow = false
+		ball.Material = Enum.Material.ForceField
+		ball.Color = SHIELD_COLOR
+		ball.Parent = workspace
+		view.shield = ball
+	elseif not on and view.shield then
+		view.shield:Destroy()
+		view.shield = nil
+	end
+	if view.shield then
+		local size = math.max(body.Size.X, body.Size.Y) * 1.25
+		view.shield.Size = Vector3.one * size
+		view.shield.CFrame = CFrame.new(ground + Vector3.new(0, body.Size.Y / 2, 0))
+	end
+end
 
 -- The server moves each body (anchored) a step at a time, and its moves arrive here a few
 -- frames apart and unevenly: drawn straight there, a model would stutter
@@ -484,6 +567,37 @@ RunService.RenderStepped:Connect(function(dt)
 				view.landAt = nil
 			end
 		end
+		-- a Leap (Server/BossAttacks): up in an arc from LeapAt for LeapTime seconds
+		local leapAt = body:GetAttribute("LeapAt")
+		if leapAt then
+			local t = (workspace:GetServerTimeNow() - leapAt) / (body:GetAttribute("LeapTime") or 1)
+			if t > 0 and t < 1 then
+				ground += Vector3.new(0, (body:GetAttribute("LeapHeight") or 20) * 4 * t * (1 - t), 0)
+				view.leaping = true
+			elseif t >= 1 and view.leaping then
+				-- (landed: a puff and a squash)
+				view.leaping = nil
+				view.landAt = now
+				BurrowFx.burst(ground, body:GetAttribute("Radius") or 4, Color3.fromRGB(200, 196, 190))
+			end
+		end
+		-- a Blink: shrinks away where it was, pops up where it's gone (Server/BossAttacks)
+		local blinkAt = body:GetAttribute("BlinkAt")
+		if blinkAt then
+			local t = (workspace:GetServerTimeNow() - blinkAt) / (body:GetAttribute("BlinkTime") or 1)
+			if t >= 0 and t < 1 then
+				view.blinking = true
+				if t >= 0.5 then
+					view.shown = body.CFrame -- (straight there, no sliding over)
+					ground = body.Position - Vector3.new(0, body.Size.Y / 2, 0)
+				end
+				animal:setScale(math.max(math.abs(1 - 2 * t), 0.05))
+			elseif view.blinking then
+				view.blinking = nil
+				animal:setScale(1)
+			end
+		end
+		shieldFrame(body, view, ground)
 		if view.hatchPop then
 			-- out of the egg in an arc, growing to full size, landing on the spot (LassoAPet's)
 			local t = (workspace:GetServerTimeNow() - view.hatchPop) / HATCH.JumpTime

@@ -139,7 +139,7 @@ function Combat.shoot(player, id, yaw, seed, origin)
 		end
 	end
 	local damage = Combat.damage(player) * Weapons.get(id).Damage
-	for _, shot in Projectiles.spawn(id, from, yaw, seed) do
+	for _, shot in Projectiles.spawn(id, from, yaw, seed, Projectiles.room(player:GetAttribute("LockedIn"))) do
 		table.insert(flying, { shot = shot, player = player, damage = damage })
 	end
 end

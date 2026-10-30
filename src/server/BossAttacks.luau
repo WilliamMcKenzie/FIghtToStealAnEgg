@@ -2,11 +2,15 @@
 -- RotMG-style "bombs" with floor indicators, then all of it). Each boss's Attacks in
 -- Config.Bosses is a list of these, each on its own timer:
 --
---   Contact { Every, Reach, Damage, Gentle }: everyone in the fight within Reach studs of
---         its edge and inside its front cone (Config.BossMelee.Cone, QM Oct 27: circle
---         behind it and its melee misses) takes Damage, at most every Every seconds (QM,
---         Oct 24: all bosses, for now). Gentle ones never take anyone below 1 health (unused: QM, Oct 26 wants the
---         training mobs to be able to kill you).
+--   Swipe { Every, Reach, Arc, Width, Windup, Swings, Damage, Anim, Then }: its melee (QM,
+--         Oct 30: no more hurting you just by touching you). Once you're within Reach studs
+--         of its edge it stops and faces you, a red crescent shaped like the swipe (Arc
+--         degrees round, out to Reach past its edge, Width thick: Reach + half its Radius
+--         if nil) fills on the ground over Windup (Config.EnemySwipe's if nil), then the
+--         swipe goes through it and everyone on it takes Damage. Swings: that many in a row,
+--         back and forth, each with its own telegraph. Clients draw it from the EnemySwipe
+--         remote (client/Swipes); the shape is Shared/SlashFx's, rolled from one seed on
+--         both sides. A leftover Contact { Every, Reach, Damage } is a plain Swipe.
 --   Slam  { Every, Range, Radius, Windup, Damage }: when a fighter is within Range, it
 --         stops, a red circle grows in front of it for Windup seconds, then everything
 --         inside takes Damage. Step out of the circle.
@@ -29,12 +33,38 @@
 --         within Radius. Clients draw the bomb and its red landing ring, which fills from
 --         the middle out as it comes down (client/Bombs, from the BossBomb remote).
 --
+--   Charge { Every, Range, Windup, Width, Length, Speed, Damage, Anim }: it stops and a red
+--         rectangle Width wide runs Length studs from it toward its target, filling over
+--         Windup; then it dashes down it at Speed, hurting everyone it runs into once (the
+--         Majestic Unicorn's horn, the Elder Boar's tusks: QM, Oct 30, Archero's chargers).
+--   Line  { Every, Range, Windup, Width, Length, Count, Spread, Segments, Gap, From, Damage,
+--         Anim, Then }: Count red rectangles fanned Spread degrees apart toward its target,
+--         filling over Windup, then everyone on one is hit (tail stabs, ice lances, fire
+--         breath, roots, beams). From "Target" centres each on where you stand instead of
+--         starting at its edge. Segments more lay end to end beyond the first, each going
+--         off Gap seconds after the one before: roots creeping out at you.
+--   Leap  { Every, Range, Windup, Airtime, Height, Radius, Damage, Hops, Anim, Then }: it
+--         crouches for Windup, then jumps onto where its target stood when it crouched,
+--         Airtime seconds in the air (Height studs up, client/BossView); a red circle Radius
+--         wide fills there till it lands and hurts. Hops: that many jumps in a row.
+--   Blink { Every, Fade, Near, Far, Anim, Then }: it shrinks away and pops up somewhere else
+--         in its arena (Near..Far studs from its target) over Fade seconds (client/BossView).
+--   Any of them can name Then = the index of another of its attacks, set off the moment
+--         this one lands (a ring of shards when a Leap lands, a volley after a Blink).
+--         An attack with Linked = true only ever goes off as another's Then.
+--   Anim: an animation of its model played as the attack winds up, sped up or slowed so
+--         its `hit` time lands just as the attack does (the BossAnim remote: client/
+--         BossView). Magic, Lob and Bombs can take a Cast (seconds) to wind up first.
+--   Magic, Lob, Bombs, Shot and Nova root it (no walking, no turning) from the Cast till
+--         the last orb's out or the bombs have landed; so does calling its Minions.
+--
 -- Only players locked into its fight (LockedIn = its biome) are hit, so someone passing
 -- through is never caught. All of it is server parts in workspace.BossFx. A pet bigger
 -- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
---         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too)
+--         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too, with
+--         biome = b itself and b.foes = whoever they're fighting)
 --   BossAttacks.fighter(player) -> { root, humanoid, extra } or nil, if they're alive
 --   BossAttacks.burst(body, b)  -- every Magic attack's Burst now (a boss that fires on its
 --         own cycle, not their timers: the Sandworm's Burrow, Server/Bosses)
@@ -46,6 +76,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Pets = require(Shared:WaitForChild("Pets"))
+local SlashFx = require(Shared:WaitForChild("SlashFx"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Config = require(Shared:WaitForChild("Config"))
 local HORSE_HITBOX = Pets.stats("Horse").Hitbox
@@ -64,6 +95,16 @@ local FLOOR_Y = 0.15
 local bombRemote = Instance.new("RemoteEvent")
 bombRemote.Name = "BossBomb"
 bombRemote.Parent = ReplicatedStorage
+
+-- (everyone plays a boss's attack animation as it winds up: (body, anim name, windup))
+local animRemote = Instance.new("RemoteEvent")
+animRemote.Name = "BossAnim"
+animRemote.Parent = ReplicatedStorage
+
+-- (every client draws an enemy's swipe: its telegraph, then the slash: client/Swipes)
+local swipeRemote = Instance.new("RemoteEvent")
+swipeRemote.Name = "EnemySwipe"
+swipeRemote.Parent = ReplicatedStorage
 
 local shots = {} -- [part] = { dir, speed, travelled, range, damage, radius, biome }
 local magic = {} -- { { shot, damage, biome } }: Magic attacks' shots in the air
@@ -90,8 +131,12 @@ local function fighter(player)
 end
 BossAttacks.fighter = fighter
 
--- every living root of a player in this biome's fight
+-- every living root of a player in this biome's fight; for a training mob (its `biome` is
+-- its own b, Server/Training) just whoever it's angry with, its b.foes
 local function fighters(biome)
+	if type(biome) == "table" then
+		return biome.foes or {}
+	end
 	local out = {}
 	for _, player in Players:GetPlayers() do
 		if player:GetAttribute("LockedIn") == biome then
@@ -185,6 +230,83 @@ local function circle(biome, centre, radius, windup, damage)
 	end)
 end
 
+-- a flat red rectangle on the ground Width wide, from `from` Length studs along `dir`,
+-- filling from its near end over `windup`; then (with damage) everyone in the fight on it
+-- takes damage. -> nothing; the parts tidy themselves away
+local function rectangle(biome, from, dir, width, length, windup, damage)
+	local mid = from + dir * (length / 2)
+	local y = groundAt(mid) + FLOOR_Y
+	local facing = CFrame.lookAt(Vector3.new(mid.X, y, mid.Z), Vector3.new(mid.X, y, mid.Z) + dir)
+	local function plate(name, long, transparency)
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch = true, false, false, false
+		p.Material = Enum.Material.Neon
+		p.Color = RED
+		p.Transparency = transparency
+		p.Size = Vector3.new(width, 0.2, long)
+		p.Parent = fx
+		return p
+	end
+	local rim = plate("Warning", length, 0.75)
+	rim.CFrame = facing
+	-- (the fill grows from its near end out to the far one)
+	local near = facing * CFrame.new(0, 0.02, length / 2)
+	local fill = plate("WarningFill", 0.2, 0.45)
+	fill.CFrame = near * CFrame.new(0, 0, -0.1)
+	TweenService
+		:Create(fill, TweenInfo.new(windup, Enum.EasingStyle.Linear), {
+			Size = Vector3.new(width, 0.2, length),
+			CFrame = near * CFrame.new(0, 0, -length / 2),
+		})
+		:Play()
+	task.delay(windup, function()
+		if damage then
+			for _, f in fighters(biome) do
+				local off = flat(f.root.Position - from)
+				local along = off:Dot(dir)
+				local side = (off - dir * along).Magnitude
+				local pad = 1 + f.extra
+				if along >= -pad and along <= length + pad and side <= width / 2 + pad then
+					f.humanoid:TakeDamage(damage)
+				end
+			end
+		end
+		rim.Transparency = 0.2
+		fill:Destroy()
+		TweenService:Create(rim, TweenInfo.new(0.25), { Transparency = 1 }):Play()
+		task.delay(0.3, rim.Destroy, rim)
+	end)
+end
+
+-- a spot inside its arena (Radius in from the edges; near home for a /boss boss)
+local function inArena(b, p)
+	if not b.bounds then
+		return p
+	end
+	local r = b.c.Radius + 4
+	local x0, x1 = math.min(b.bounds[1], b.bounds[3]) + r, math.max(b.bounds[1], b.bounds[3]) - r
+	local z0, z1 = math.min(b.bounds[2], b.bounds[4]) + r, math.max(b.bounds[2], b.bounds[4]) - r
+	return Vector3.new(math.clamp(p.X, x0, x1), p.Y, math.clamp(p.Z, z0, z1))
+end
+
+-- plays its attack's animation on every client, timed to hit `windup` seconds from now
+local function animate(body, a, windup)
+	if a.Anim then
+		animRemote:FireAllClients(body, a.Anim, windup or 0)
+	end
+end
+BossAttacks.animate = animate
+
+-- rooted for `seconds`: it neither walks nor turns (QM Oct 30: a boss stands its ground while
+-- its bombs are in the air, its troops are dropping in or its magic's going out)
+local function root(b, seconds)
+	b.rooted = math.max(b.rooted or 0, seconds)
+	b.still = math.max(b.still or 0, seconds)
+	b.facing = nil -- (a Swipe sets the way it holds while rooted; anything else, as it is)
+end
+BossAttacks.root = root
+
 local function fire(biome, from, dir, a)
 	local ball = Instance.new("Part")
 	ball.Name = "Shot"
@@ -251,13 +373,354 @@ function BossAttacks.burst(body, b)
 	end
 end
 
--- (the cos of half its melee cone: a fighter at most this far off its facing gets hit)
-local coneCos = math.cos(math.rad(Config.BossMelee.Cone / 2))
+local function alive(body)
+	return body.Parent ~= nil and (body:GetAttribute("Health") or 0) > 0
+end
+
+local function serverNow()
+	return workspace:GetServerTimeNow()
+end
+
+-- a Swipe (or an old Contact): it faces `toward` and holds still while each swing's red
+-- crescent fills, then hits everyone on it
+local function swipe(body, b, a, pos, toward)
+	local S = Config.EnemySwipe
+	local windup = a.Windup or S.Windup
+	local swings = math.max(1, a.Swings or 1)
+	local yaw = math.atan2(-toward.X, -toward.Z)
+	animate(body, a, windup)
+	root(b, windup * swings + 0.15)
+	b.yaw, b.facing = yaw, yaw
+	local look = {
+		Radius = b.c.Radius + a.Reach,
+		Arc = a.Arc or S.Arc,
+		Width = a.Width or (a.Reach + b.c.Radius * 0.5),
+	}
+	local c = table.clone(S)
+	for k, v in look do
+		c[k] = v
+	end
+	local origin = CFrame.new(pos.X, groundAt(pos), pos.Z) * CFrame.Angles(0, yaw, 0)
+	local start = serverNow()
+	local dir = if math.random() < 0.5 then 1 else -1
+	for k = 1, swings do
+		local seed = math.random(0, 2 ^ 30 - 1)
+		local o = SlashFx.outline(c, seed)
+		local at = start + (k - 1) * windup
+		swipeRemote:FireAllClients({
+			body = body,
+			origin = origin,
+			look = look,
+			seed = seed,
+			dir = dir,
+			start = at,
+			windup = windup,
+		})
+		task.delay(k * windup, function(d)
+			if not alive(body) then
+				return
+			end
+			for _, f in fighters(b.biome) do
+				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra) then
+					f.humanoid:TakeDamage(a.Damage)
+				end
+			end
+		end, dir)
+		dir = -dir
+	end
+end
+
+local go -- (go(body, b, i): an attack going off now; Then chains through it)
+
+-- what an attack does once it's wound up (the ones that don't move it)
+local function perform(body, b, i, a)
+	if not alive(body) then
+		return
+	end
+	local list = fighters(b.biome)
+	local pos = flat(body.Position)
+	local target = nearest(pos, list)
+	if not target then
+		return
+	end
+	local toward = flat(target.root.Position - pos)
+	toward = if toward.Magnitude > 0.01 then toward.Unit else flat(body.CFrame.LookVector).Unit
+	if a.Kind == "Shot" then
+		for k = 1, a.Count do
+			local angle = math.rad((k - (a.Count + 1) / 2) * a.Spread)
+			fire(b.biome, pos + toward * b.c.Radius, CFrame.Angles(0, angle, 0):VectorToWorldSpace(toward), a)
+		end
+	elseif a.Kind == "Magic" then
+		for k = 1, math.max(1, a.Burst or 1) do
+			task.delay((k - 1) * (a.BurstGap or 0.3), cast, body, b, i, a)
+		end
+	elseif a.Kind == "Nova" then
+		local spin = math.random() * math.pi
+		for k = 1, a.Count do
+			local angle = spin + k / a.Count * 2 * math.pi
+			local dir = Vector3.new(math.cos(angle), 0, math.sin(angle))
+			fire(b.biome, pos + dir * b.c.Radius, dir, a)
+		end
+	elseif a.Kind == "Bombs" then
+		for _, f in list do
+			circle(b.biome, flat(f.root.Position), a.Radius, a.Windup, a.Damage)
+		end
+		for k = 1, a.Count or 0 do
+			-- (Around: in a ring round itself instead, like a fairy ring; else round you)
+			if a.Around then
+				local angle = k / a.Count * 2 * math.pi + math.random() * 0.3
+				local out = b.c.Radius + a.Radius + math.random() * (a.Scatter or 10)
+				circle(b.biome, pos + Vector3.new(math.cos(angle), 0, math.sin(angle)) * out, a.Radius, a.Windup, a.Damage)
+			else
+				local f = list[math.random(1, #list)]
+				local off = Vector3.new(math.random() * 2 - 1, 0, math.random() * 2 - 1) * a.Scatter
+				circle(b.biome, flat(f.root.Position) + off, a.Radius, a.Windup, a.Damage)
+			end
+		end
+	elseif a.Kind == "Lob" then
+		-- (out of its top, toward each spot)
+		local top = body.Position + Vector3.new(0, body.Size.Y * 0.3, 0)
+		local function fling(spot)
+			local dir = flat(spot - pos)
+			local from = top + (if dir.Magnitude > 0.01 then dir.Unit * b.c.Radius * 0.5 else Vector3.zero)
+			lob(b.biome, from, spot, a)
+		end
+		for _, f in list do
+			fling(flat(f.root.Position))
+		end
+		for _ = 1, a.Count or 0 do
+			local f = list[math.random(1, #list)]
+			local angle = math.random() * 2 * math.pi
+			local out = a.Radius + math.random() * (a.Scatter - a.Radius)
+			local off = Vector3.new(math.cos(angle), 0, math.sin(angle)) * out
+			fling(flat(f.root.Position) + off)
+		end
+	end
+	if a.Then and b.c.Attacks[a.Then] then
+		go(body, b, a.Then)
+	end
+end
+
+-- an attack going off now (its windup first, if it has one): a timer's run out, or another's
+-- Then. -> false if it can't yet (its target's out of its Range), so its timer waits
+go = function(body, b, i, list)
+	local a = b.c.Attacks[i]
+	list = list or fighters(b.biome)
+	local pos = flat(body.Position)
+	local target, distance = nearest(pos, list)
+	if not (a and target and alive(body)) then
+		return false
+	end
+	local edge = distance - b.c.Radius
+	local toward = flat(target.root.Position - pos)
+	toward = if toward.Magnitude > 0.01 then toward.Unit else Vector3.new(0, 0, -1)
+	local now = serverNow()
+	b.hops = b.hops or {}
+	if a.Kind == "Swipe" or a.Kind == "Contact" then
+		if edge - target.extra > a.Reach then
+			return false
+		end
+		swipe(body, b, a, pos, toward)
+		if a.Then then
+			task.delay((a.Windup or Config.EnemySwipe.Windup) * math.max(1, a.Swings or 1), go, body, b, a.Then)
+		end
+	elseif a.Kind == "Slam" then
+		if edge > a.Range then
+			return false
+		end
+		animate(body, a, a.Windup)
+		b.still = a.Windup + 0.25
+		circle(b.biome, pos + toward * (b.c.Radius + a.Radius * 0.55), a.Radius, a.Windup, a.Damage)
+		if a.Then then
+			task.delay(a.Windup, go, body, b, a.Then)
+		end
+	elseif a.Kind == "Charge" then
+		if edge > (a.Range or 60) then
+			return false
+		end
+		-- (it faces you, then runs the rectangle: from its middle, past where you stand)
+		b.yaw = math.atan2(-toward.X, -toward.Z)
+		local length = a.Length or (distance + 15)
+		local width = a.Width or b.c.Radius * 2
+		local time = length / a.Speed
+		animate(body, a, a.Windup)
+		b.still = a.Windup + time + 0.4
+		rectangle(b.biome, pos, toward, width, length + b.c.Radius, a.Windup, nil)
+		b.move = {
+			kind = "Dash",
+			start = now + a.Windup,
+			from = pos,
+			dir = toward,
+			length = length,
+			speed = a.Speed,
+			width = width,
+			damage = a.Damage,
+			hit = {},
+			after = a.Then,
+		}
+	elseif a.Kind == "Line" then
+		if edge > (a.Range or 80) then
+			return false
+		end
+		animate(body, a, a.Windup)
+		b.still = a.Windup + 0.25
+		local count = math.max(1, a.Count or 1)
+		local segments = math.max(1, a.Segments or 1)
+		for k = 1, count do
+			local angle = if count > 1 then math.rad((k - (count + 1) / 2) * (a.Spread or 20)) else 0
+			local dir = CFrame.Angles(0, angle, 0):VectorToWorldSpace(toward)
+			local from = if a.From == "Target"
+				then flat(target.root.Position) - dir * (a.Length / 2)
+				else pos + dir * (b.c.Radius * 0.6)
+			for seg = 0, segments - 1 do
+				rectangle(
+					b.biome,
+					from + dir * (seg * a.Length),
+					dir,
+					a.Width,
+					a.Length,
+					a.Windup + seg * (a.Gap or 0.15),
+					a.Damage
+				)
+			end
+		end
+		if a.Then then
+			task.delay(a.Windup, go, body, b, a.Then)
+		end
+	elseif a.Kind == "Leap" then
+		local hopping = (b.hops[i] or 0) > 0
+		if not hopping and edge > (a.Range or 80) then
+			return false
+		end
+		if not hopping then
+			b.hops[i] = a.Hops or 1
+		end
+		local to = inArena(b, flat(target.root.Position))
+		local off = flat(to - pos)
+		if off.Magnitude > 0.01 then
+			b.yaw = math.atan2(-off.X, -off.Z)
+		end
+		animate(body, a, a.Windup)
+		b.still = a.Windup + a.Airtime + 0.3
+		circle(b.biome, to, a.Radius, a.Windup + a.Airtime, a.Damage)
+		b.move = {
+			kind = "Leap",
+			start = now + a.Windup,
+			from = pos,
+			to = to,
+			airtime = a.Airtime,
+			index = i,
+			after = a.Then,
+		}
+		body:SetAttribute("LeapHeight", a.Height or 20)
+		body:SetAttribute("LeapTime", a.Airtime)
+		body:SetAttribute("LeapAt", now + a.Windup)
+	elseif a.Kind == "Blink" then
+		-- (somewhere Near..Far from its target, inside its arena)
+		local best, bestScore = pos, math.huge
+		for _ = 1, 16 do
+			local angle = math.random() * 2 * math.pi
+			local out = (a.Near or 30) + math.random() * ((a.Far or 50) - (a.Near or 30))
+			local p = inArena(b, flat(target.root.Position) + Vector3.new(math.cos(angle), 0, math.sin(angle)) * out)
+			local d = flat(p - target.root.Position).Magnitude
+			local score = math.max(0, (a.Near or 30) - d) + math.max(0, 15 - flat(p - pos).Magnitude)
+			if score < bestScore then
+				best, bestScore = p, score
+			end
+		end
+		animate(body, a, a.Fade)
+		b.still = a.Fade + 0.2
+		b.move = { kind = "Blink", start = now + a.Fade / 2, done = now + a.Fade, to = best, after = a.Then }
+		body:SetAttribute("BlinkTime", a.Fade)
+		body:SetAttribute("BlinkAt", now)
+	else
+		-- (Magic, Lob, Bombs, Shot, Nova: a Cast to wind up first, if it has one)
+		local castTime = a.Cast or 0
+		animate(body, a, castTime)
+		-- (rooted from its wind-up till the last of it's out: bombs landed, a burst's last orb)
+		local busy = if a.Kind == "Lob"
+			then a.Airtime
+			elseif a.Kind == "Bombs" then a.Windup
+			elseif a.Kind == "Magic" then (math.max(1, a.Burst or 1) - 1) * (a.BurstGap or 0.3)
+			else 0
+		root(b, castTime + busy + 0.3)
+		if castTime > 0 then
+			b.still = math.max(b.still or 0, castTime + 0.1)
+			task.delay(castTime, perform, body, b, i, a)
+		else
+			perform(body, b, i, a)
+		end
+	end
+	return true
+end
+
+-- a Charge's dash, a Leap's flight or a Blink, this frame: where it is now, or nil if it's
+-- not doing one (Server/Bosses moves it there and doesn't walk or turn it meanwhile)
+function BossAttacks.move(body, b, dt, pos)
+	local m = b.move
+	if not m then
+		return nil
+	end
+	local now = serverNow()
+	if now < m.start then
+		return pos -- (winding up: holding still, facing the way it'll go)
+	end
+	local y = pos.Y
+	if m.kind == "Dash" then
+		local t = now - m.start
+		local along = math.min(m.length, t * m.speed)
+		local at = inArena(b, m.from + m.dir * along)
+		for _, f in fighters(b.biome) do
+			if not m.hit[f.humanoid] then
+				local off = flat(f.root.Position - at)
+				if off.Magnitude <= b.c.Radius + 1 + f.extra then
+					m.hit[f.humanoid] = true
+					f.humanoid:TakeDamage(m.damage)
+				end
+			end
+		end
+		if along >= m.length then
+			b.move = nil
+			b.still = math.min(b.still or 0, 0.4)
+			if m.after then
+				go(body, b, m.after)
+			end
+		end
+		return Vector3.new(at.X, y, at.Z)
+	elseif m.kind == "Leap" then
+		local k = math.clamp((now - m.start) / m.airtime, 0, 1)
+		local at = m.from:Lerp(m.to, k)
+		if k >= 1 then
+			b.move = nil
+			if m.after then
+				go(body, b, m.after)
+			end
+			-- (more hops to go: the next one soon, wherever you've got to)
+			b.hops[m.index] = math.max(0, (b.hops[m.index] or 1) - 1)
+			if b.hops[m.index] > 0 then
+				b.timers[m.index] = 0.25
+				b.still = 0
+			end
+		end
+		return Vector3.new(at.X, y, at.Z)
+	elseif m.kind == "Blink" then
+		if now >= m.done then
+			b.move = nil
+			if m.after then
+				go(body, b, m.after)
+			end
+		end
+		return Vector3.new(m.to.X, y, m.to.Z)
+	end
+	return nil
+end
 
 function BossAttacks.update(body, b, dt, list)
+	b.rooted = math.max(0, (b.rooted or 0) - dt)
 	local attacks = b.c.Attacks
 	if not attacks then
-		return false
+		b.still = math.max(0, (b.still or 0) - dt)
+		return b.still > 0
 	end
 	b.timers = b.timers or {}
 	b.still = math.max(0, (b.still or 0) - dt)
@@ -266,91 +729,23 @@ function BossAttacks.update(body, b, dt, list)
 	if not target then
 		return b.still > 0
 	end
-	local edge = distance - b.c.Radius
 	for i, a in attacks do
-		-- (staggered starts, so they don't all go at once)
-		b.timers[i] = (b.timers[i] or a.Every * (0.5 + i * 0.25)) - dt
-		if b.timers[i] > 0 or b.still > 0 then
+		if a.Linked then
 			continue
 		end
-		local toward = flat(target.root.Position - pos)
-		toward = if toward.Magnitude > 0.01 then toward.Unit else Vector3.new(0, 0, -1)
-		if a.Kind == "Contact" then
-			-- too close and it hurts: everyone within Reach of its edge and in front of it,
-			-- every Every seconds
-			local hit = false
-			local facing = flat(body.CFrame.LookVector).Unit
-			for _, f in list do
-				local off = flat(f.root.Position - pos)
-				local inFront = off.Magnitude < 0.01 or facing:Dot(off.Unit) >= coneCos
-				if inFront and off.Magnitude - b.c.Radius - f.extra <= a.Reach then
-					local damage = if a.Gentle then math.min(a.Damage, f.humanoid.Health - 1) else a.Damage
-					if damage > 0 then
-						f.humanoid:TakeDamage(damage)
-					end
-					hit = true
-				end
-			end
-			if hit then
+		-- (staggered starts, so they don't all go at once)
+		b.timers[i] = (b.timers[i] or a.Every * (0.5 + i * 0.25)) - dt
+		if b.timers[i] > 0 or b.still > 0 or b.move then
+			continue
+		end
+		if go(body, b, i, list) then
+			-- (a Leap's further hops set their own short timer)
+			if not (a.Kind == "Leap" and (b.hops[i] or 0) > 0 and b.timers[i] > 0) then
 				b.timers[i] = a.Every
-			end
-		elseif a.Kind == "Slam" then
-			if edge <= a.Range then
-				b.timers[i] = a.Every
-				b.still = a.Windup + 0.25
-				circle(b.biome, pos + toward * (b.c.Radius + a.Radius * 0.55), a.Radius, a.Windup, a.Damage)
-			end
-		elseif a.Kind == "Shot" then
-			b.timers[i] = a.Every
-			for k = 1, a.Count do
-				local angle = math.rad((k - (a.Count + 1) / 2) * a.Spread)
-				fire(b.biome, pos + toward * b.c.Radius, CFrame.Angles(0, angle, 0):VectorToWorldSpace(toward), a)
-			end
-		elseif a.Kind == "Magic" then
-			b.timers[i] = a.Every
-			for k = 1, math.max(1, a.Burst or 1) do
-				task.delay((k - 1) * (a.BurstGap or 0.3), cast, body, b, i, a)
-			end
-		elseif a.Kind == "Nova" then
-			b.timers[i] = a.Every
-			local spin = math.random() * math.pi
-			for k = 1, a.Count do
-				local angle = spin + k / a.Count * 2 * math.pi
-				local dir = Vector3.new(math.cos(angle), 0, math.sin(angle))
-				fire(b.biome, pos + dir * b.c.Radius, dir, a)
-			end
-		elseif a.Kind == "Bombs" then
-			b.timers[i] = a.Every
-			for _, f in list do
-				circle(b.biome, flat(f.root.Position), a.Radius, a.Windup, a.Damage)
-			end
-			for _ = 1, a.Count do
-				local f = list[math.random(1, #list)]
-				local off = Vector3.new(math.random() * 2 - 1, 0, math.random() * 2 - 1) * a.Scatter
-				circle(b.biome, flat(f.root.Position) + off, a.Radius, a.Windup, a.Damage)
-			end
-		elseif a.Kind == "Lob" then
-			b.timers[i] = a.Every
-			-- (out of its top, toward each spot)
-			local top = body.Position + Vector3.new(0, body.Size.Y * 0.3, 0)
-			local function fling(spot)
-				local dir = flat(spot - pos)
-				local from = top + (if dir.Magnitude > 0.01 then dir.Unit * b.c.Radius * 0.5 else Vector3.zero)
-				lob(b.biome, from, spot, a)
-			end
-			for _, f in list do
-				fling(flat(f.root.Position))
-			end
-			for _ = 1, a.Count or 0 do
-				local f = list[math.random(1, #list)]
-				local angle = math.random() * 2 * math.pi
-				local out = a.Radius + math.random() * (a.Scatter - a.Radius)
-				local off = Vector3.new(math.cos(angle), 0, math.sin(angle)) * out
-				fling(flat(f.root.Position) + off)
 			end
 		end
 	end
-	return b.still > 0
+	return b.still > 0 or b.move ~= nil
 end
 
 RunService.Heartbeat:Connect(function(dt)

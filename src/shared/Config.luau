@@ -283,7 +283,7 @@ return {
 			Health = 200,
 			Cash = 50, -- to each player who beat it
 			Speed = 10,
-			StopAt = 1, -- (walks right into you: its Contact reaches 4)
+			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 11,
 			Turn = 4,
 			Strength = 2,
@@ -291,7 +291,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+				{ Kind = "Swipe", Every = 1.6, Reach = 6, Arc = 90, Damage = 16 },
 			},
 		},
 		GiantRafflesia = {
@@ -338,7 +338,10 @@ return {
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+				{ Kind = "Swipe", Every = 1.8, Reach = 7, Arc = 140, Damage = 16 },
+				-- (QM, Oct 30: each Meadow boss teaches one floor warning. Horn down, a red
+				-- rectangle runs out at you, then it charges down it: step off the side)
+				{ Kind = "Charge", Every = 5, Range = 70, Windup = 1, Speed = 70, Width = 18, Damage = 12, Anim = "charge" },
 			},
 		},
 		VenusFlytrap = {
@@ -354,7 +357,9 @@ return {
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+				{ Kind = "Swipe", Every = 1.7, Reach = 9, Arc = 70, Damage = 16 },
+				-- (its snapping bite: a red circle in front fills, then the jaws come down)
+				{ Kind = "Slam", Every = 3.5, Range = 14, Radius = 12, Windup = 0.9, Damage = 14, Anim = "slam" },
 			},
 		},
 		CactusBoss = {
@@ -364,7 +369,7 @@ return {
 			Health = 4000,
 			Cash = 500, -- to each player who beat it
 			Speed = 11,
-			StopAt = 1, -- (walks right into you: its Contact reaches 4)
+			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 22,
 			Turn = 3.5,
 			Strength = 6,
@@ -373,7 +378,7 @@ return {
 			-- green cactus bombs at everyone (Server/BossAttacks' Lob, drawn by client/Bombs):
 			-- each lands Airtime seconds later where you stood when it was thrown, so keep moving)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 16 },
+				{ Kind = "Swipe", Every = 2.2, Reach = 6, Arc = 200, Damage = 26 },
 				{
 					Kind = "Lob",
 					Every = 3.5, -- seconds between volleys
@@ -404,7 +409,7 @@ return {
 				DropFrom = 60, -- studs up they start
 				Dust = Color3.fromRGB(226, 190, 128),
 				Attacks = {
-					{ Kind = "Contact", Every = 1.2, Reach = 3, Damage = 7 },
+					{ Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 110, Damage = 10 },
 				},
 			},
 		},
@@ -486,7 +491,7 @@ return {
 			Health = 30000,
 			Cash = 5000, -- to each player who beat it
 			Speed = 9,
-			StopAt = 1, -- (walks right into you: its Contact reaches 4)
+			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 20,
 			Turn = 3,
 			Strength = 20,
@@ -494,7 +499,9 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 26 },
+				{ Kind = "Swipe", Every = 2, Reach = 7, Arc = 150, Damage = 40 },
+				-- (tusks down, a hoof scrapes, then it charges down its red rectangle: QM Oct 30)
+				{ Kind = "Charge", Every = 5, Range = 90, Windup = 1.1, Speed = 75, Width = 30, Damage = 34, Anim = "charge" },
 			},
 		},
 		LavaWyrm = {
@@ -504,7 +511,7 @@ return {
 			Health = 200000,
 			Cash = 40000, -- to each player who beat it
 			Speed = 8,
-			StopAt = 1, -- (walks right into you: its Contact reaches 4)
+			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 17,
 			Turn = 2.5,
 			Strength = 60,
@@ -512,7 +519,596 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 40 },
+				{ Kind = "Swipe", Every = 2.6, Reach = 10, Arc = 240, Damage = 60 },
+				-- (head reared back, then a long rectangle of fire breath ahead of it: QM Oct 30)
+				{ Kind = "Line", Every = 4.5, Range = 60, Windup = 1, Width = 14, Length = 70, Damage = 50, Anim = "breath" },
+			},
+		},
+		-- QM, Oct 30: three bosses in every region, after Archero's (the Sandworm's way), in our
+		-- style. Each new one names its own Model (designs/bosses, the boss modeller's) and a
+		-- StandIn = { pet, size } drawn until that model's made. Rings of orbs are Magic with
+		-- Spread 360 x (Count - 1) / Count, Launch and Homing 0. Numbers follow the balance
+		-- curve: Desert 4k health, Tundra 30k, Lava 200k, Dungeon and Magic Circle 1.5M, Red
+		-- Castle and Ocean 10M.
+
+		-- Desert: Archero's scorpion. A long tail stab down a thin rectangle, then three poison barbs
+		ScorpionKing = {
+			Name = "Scorpion King",
+			Model = "ScorpionKing",
+			StandIn = { "Scorpion", 3.2 },
+			Size = 3.2,
+			Health = 4000,
+			Cash = 500,
+			Speed = 12,
+			StopAt = 6,
+			Radius = 18,
+			Turn = 3.5,
+			Strength = 6,
+			Respawn = 25,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.2, Reach = 6, Arc = 100, Damage = 20, Swings = 2, Anim = "pinch" },
+				{ Kind = "Line", Every = 3.5, Range = 50, Windup = 0.8, Width = 7, Length = 55, Damage = 22, Anim = "stab", Then = 3 },
+				{
+					Kind = "Magic",
+					Linked = true, -- (after each stab)
+					Every = 3.5,
+					Like = "Staff",
+					Damage = 12,
+					Height = 6,
+					Pulse = true,
+					Shot = { Color = Color3.fromRGB(150, 230, 90), Count = 3, Spread = 40, Speed = 45, Homing = 0, Launch = 0, Range = 90, Slack = 0, Size = 1.3 },
+				},
+			},
+		},
+
+		-- Tundra: Archero's stone golem. Leaps onto you; landing throws a ring of ice shards
+		FrostGolem = {
+			Name = "Frost Golem",
+			Model = "FrostGolem",
+			StandIn = { "IceGolem", 1.8 },
+			Size = 3.2,
+			Health = 30000,
+			Cash = 5000,
+			Speed = 8,
+			StopAt = 1,
+			Radius = 15,
+			Turn = 3,
+			Strength = 20,
+			Respawn = 30,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.2, Reach = 7, Arc = 160, Damage = 40 },
+				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.7, Airtime = 1.1, Height = 30, Radius = 18, Damage = 34, Anim = "leap", Then = 4 },
+				{ Kind = "Slam", Every = 4, Range = 10, Radius = 16, Windup = 0.9, Damage = 34, Anim = "slam" },
+				{
+					Kind = "Magic",
+					Linked = true, -- (the ring of shards as it lands)
+					Every = 5,
+					Like = "Staff",
+					Damage = 18,
+					Height = 4,
+					Shot = { Color = Color3.fromRGB(170, 225, 255), Count = 10, Spread = 324, Speed = 38, Homing = 0, Launch = 0, Range = 80, Slack = 0, Size = 1.4 },
+				},
+			},
+		},
+
+		-- Tundra: a hovering snow owl. Snowballs lobbed at everyone, a fan of ice lances, feathers
+		BlizzardOwl = {
+			Name = "Blizzard Owl",
+			Model = "BlizzardOwl",
+			StandIn = { "Penguin", 3.6 },
+			Size = 3.2,
+			Health = 30000,
+			Cash = 5000,
+			Speed = 9,
+			StopAt = 25, -- (keeps its distance)
+			Radius = 12,
+			Turn = 4,
+			Strength = 20,
+			Respawn = 30,
+			Attacks = {
+				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 22, Radius = 7, Airtime = 1.3, Height = 20, Damage = 24, Style = "Snow", Cast = 0.5, Anim = "throw" },
+				{ Kind = "Line", Every = 5, Range = 70, Windup = 0.8, Width = 6, Length = 60, Count = 3, Spread = 22, Damage = 28, Anim = "flap" },
+				{
+					Kind = "Magic",
+					Every = 3,
+					Like = "Staff",
+					Damage = 14,
+					Height = 6,
+					Burst = 2,
+					BurstGap = 0.35,
+					Pulse = true,
+					Shot = { Color = Color3.fromRGB(235, 245, 255), Count = 5, Spread = 60, Speed = 42, Homing = 20, Launch = 0, Range = 90, Slack = 0 },
+				},
+			},
+		},
+
+		-- Lava: Archero's slimes. Three hops in a row at you, a ring of fireballs on each landing,
+		-- and little slimes drop in at half health
+		MagmaSlime = {
+			Name = "Magma Slime",
+			Model = "MagmaSlime",
+			StandIn = { "RockHog", 3 },
+			Size = 3.4,
+			Health = 200000,
+			Cash = 40000,
+			Speed = 7,
+			StopAt = 1,
+			Radius = 16,
+			Turn = 3,
+			Strength = 60,
+			Respawn = 35,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.6, Reach = 6, Arc = 300, Damage = 55 },
+				{ Kind = "Leap", Every = 6, Range = 100, Windup = 0.6, Airtime = 0.9, Height = 26, Radius = 19, Damage = 50, Hops = 3, Anim = "leap", Then = 3 },
+				{
+					Kind = "Magic",
+					Linked = true,
+					Every = 6,
+					Like = "Staff",
+					Damage = 26,
+					Height = 4,
+					Shot = { Color = Color3.fromRGB(255, 130, 40), Count = 8, Spread = 315, Speed = 34, Homing = 0, Launch = 0, Range = 70, Slack = 0, Size = 1.5 },
+				},
+			},
+			Minions = {
+				At = 0.5,
+				Count = 4,
+				Model = "MagmaSlime",
+				StandIn = { "RockHog", 1.4 },
+				Size = 1, -- (its own model, small: Server/Minions)
+				Name = "Magma Blob",
+				Health = 20000,
+				Speed = 16,
+				Strength = 20,
+				Spread = 12,
+				Drop = 0.8,
+				DropFrom = 60,
+				Dust = Color3.fromRGB(90, 60, 50),
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 100, Damage = 26 } },
+			},
+		},
+
+		-- Lava: the Volcano Tortoise pet grown huge. Slow; lava bombs out of its shell, eruptions
+		-- under everyone, and rock hogs at half health
+		VolcanoTortoise = {
+			Name = "Volcano Tortoise",
+			Model = "VolcanoTortoise",
+			Size = 5,
+			Health = 200000,
+			Cash = 40000,
+			Speed = 5,
+			StopAt = 1,
+			Radius = 18,
+			Turn = 2,
+			Strength = 60,
+			Respawn = 35,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.4, Reach = 8, Arc = 180, Damage = 60 },
+				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 26, Radius = 8, Airtime = 1.4, Height = 30, Damage = 40, Style = "Lava", Cast = 0.8, Anim = "erupt" },
+				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 46 },
+			},
+			Minions = {
+				At = 0.5,
+				Count = 3,
+				Model = "RockHog",
+				Name = "Rock Hog",
+				Scale = 1.6,
+				Health = 40000,
+				Speed = 15,
+				Strength = 20,
+				Spread = 12,
+				Drop = 0.8,
+				DropFrom = 60,
+				Dust = Color3.fromRGB(90, 60, 50),
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 120, Damage = 28 } },
+			},
+		},
+
+		-- Dungeon: Archero's skeleton king. A sword cleave, a charge, skeletons at half health
+		BoneWarden = {
+			Name = "Bone Warden",
+			Model = "BoneWarden",
+			StandIn = { "IceGolem", 1.8 },
+			Size = 3.4,
+			Health = 1500000,
+			Cash = 250000,
+			Speed = 10,
+			StopAt = 1,
+			Radius = 14,
+			Turn = 3.5,
+			Strength = 180,
+			Respawn = 35,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.4, Reach = 9, Arc = 130, Damage = 45, Swings = 2 },
+				{ Kind = "Line", Every = 3.5, Range = 18, Windup = 0.9, Width = 34, Length = 26, Damage = 70, Anim = "cleave" },
+				{ Kind = "Charge", Every = 6, Range = 100, Windup = 0.8, Speed = 80, Width = 26, Damage = 60, Anim = "charge" },
+			},
+			Minions = {
+				At = 0.5,
+				Count = 4,
+				Model = "Skeleton",
+				StandIn = { "Snowman", 1.3 },
+				Size = 2,
+				Name = "Skeleton",
+				Health = 200000,
+				Speed = 16,
+				Strength = 60,
+				Spread = 12,
+				Drop = 0.8,
+				DropFrom = 60,
+				Dust = Color3.fromRGB(104, 126, 146),
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 5, Arc = 90, Damage = 35 } },
+			},
+		},
+
+		-- Dungeon: Archero's floating eye. Rooted mid-arena; beams that ripple out at you, rings of orbs
+		DungeonWatcher = {
+			Name = "Dungeon Watcher",
+			Model = "DungeonWatcher",
+			StandIn = { "Fish", 5 },
+			Size = 3.2,
+			Health = 1500000,
+			Cash = 250000,
+			Speed = 0,
+			Centre = true,
+			StopAt = 1,
+			Radius = 14,
+			Turn = 2.5,
+			TurnRate = 70,
+			Strength = 180,
+			Respawn = 35,
+			Attacks = {
+				{ Kind = "Line", Every = 4, Range = 200, Windup = 1, Width = 8, Length = 22, Segments = 5, Gap = 0.18, Count = 3, Spread = 25, Damage = 65, Anim = "stare" },
+				{
+					Kind = "Magic",
+					Every = 3,
+					Like = "Staff",
+					Damage = 40,
+					Height = 6,
+					Burst = 2,
+					BurstGap = 0.6,
+					Pulse = true,
+					Shot = { Color = Color3.fromRGB(90, 255, 130), Count = 12, Spread = 330, Speed = 30, Homing = 0, Launch = 0, Range = 110, Slack = 0, Size = 1.4 },
+				},
+			},
+		},
+
+		-- Dungeon: a treasure chest that bites. Chomping charges, gold coins lobbed at you
+		TreasureMimic = {
+			Name = "Treasure Mimic",
+			Model = "TreasureMimic",
+			StandIn = { "Pig", 5.5 },
+			Size = 4.4,
+			Health = 1500000,
+			Cash = 250000,
+			Speed = 11,
+			StopAt = 1,
+			Radius = 15,
+			Turn = 4,
+			Strength = 180,
+			Respawn = 35,
+			Attacks = {
+				{ Kind = "Swipe", Every = 1.6, Reach = 8, Arc = 80, Damage = 85 },
+				{ Kind = "Charge", Every = 4, Range = 100, Windup = 0.7, Speed = 90, Width = 24, Damage = 65, Anim = "charge", Then = 3 },
+				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 24, Radius = 7, Airtime = 1.2, Height = 22, Damage = 45, Style = "Coin", Cast = 0.5, Anim = "spit" },
+			},
+		},
+
+		-- Red Castle, the raid: Bandos-style. At 70% it raises a shield and calls three guards; it
+		-- can't be hurt till they're all down
+		CrimsonKnight = {
+			Name = "Crimson Knight",
+			Model = "CrimsonKnight",
+			StandIn = { "IceGolem", 2 },
+			Size = 3,
+			Health = 10000000,
+			Cash = 1500000,
+			Speed = 9,
+			StopAt = 1,
+			Radius = 15,
+			Turn = 3,
+			Strength = 500,
+			Respawn = 40,
+			Attacks = {
+				{ Kind = "Swipe", Every = 3, Reach = 11, Arc = 150, Damage = 60, Swings = 3 },
+				{ Kind = "Charge", Every = 6, Range = 120, Windup = 1, Speed = 85, Width = 28, Damage = 90, Anim = "charge" },
+				{ Kind = "Slam", Every = 4, Range = 14, Radius = 18, Windup = 0.8, Damage = 90, Anim = "slam" },
+			},
+			Minions = {
+				At = 0.7,
+				Count = 3,
+				Shield = true, -- (Server/Minions: the knight can't be hurt while any stands)
+				Anim = "summon", -- (its lance raised as they drop in)
+				Model = "CastleGuard",
+				StandIn = { "IceGolem", 0.9 },
+				Size = 1.6,
+				Name = "Castle Guard",
+				Health = 1500000,
+				Speed = 15,
+				Strength = 150,
+				Spread = 14,
+				Drop = 0.8,
+				DropFrom = 60,
+				Dust = Color3.fromRGB(156, 22, 42),
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 6, Arc = 120, Damage = 50 } },
+			},
+		},
+
+		-- Red Castle: Archero's bats. Blinks round the arena, then a sonic ring; red circles under you
+		BloodBat = {
+			Name = "Blood Bat",
+			Model = "BloodBat",
+			StandIn = { "Firebird", 2.8 },
+			Size = 3.2,
+			Health = 10000000,
+			Cash = 1500000,
+			Speed = 12,
+			StopAt = 15,
+			Radius = 14,
+			Turn = 4,
+			Strength = 500,
+			Respawn = 40,
+			Attacks = {
+				{ Kind = "Swipe", Every = 1.3, Reach = 6, Arc = 110, Damage = 70 },
+				{ Kind = "Blink", Every = 4.5, Fade = 0.6, Near = 30, Far = 55, Anim = "screech", Then = 3 },
+				{
+					Kind = "Magic",
+					Linked = true,
+					Every = 4.5,
+					Like = "Staff",
+					Damage = 55,
+					Height = 6,
+					Burst = 2,
+					BurstGap = 0.4,
+					Pulse = true,
+					Shot = { Color = Color3.fromRGB(255, 70, 90), Count = 14, Spread = 334, Speed = 36, Homing = 0, Launch = 0, Range = 100, Slack = 0, Size = 1.3 },
+				},
+				{ Kind = "Bombs", Every = 6, Count = 3, Scatter = 20, Radius = 9, Windup = 1.2, Damage = 80 },
+			},
+		},
+
+		-- Red Castle: a dragon. Fire breath fanned three ways, fireballs, a wing-borne leap
+		CastleWyvern = {
+			Name = "Castle Wyvern",
+			Model = "CastleWyvern",
+			StandIn = { "Phoenix", 3.2 },
+			Size = 3.2,
+			Health = 10000000,
+			Cash = 1500000,
+			Speed = 10,
+			StopAt = 6,
+			Radius = 20,
+			Turn = 3,
+			Strength = 500,
+			Respawn = 40,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.4, Reach = 9, Arc = 220, Damage = 110 },
+				{ Kind = "Line", Every = 4.5, Range = 70, Windup = 1, Width = 10, Length = 65, Count = 3, Spread = 25, Damage = 90, Anim = "breath" },
+				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 24, Radius = 8, Airtime = 1.3, Height = 26, Damage = 70, Style = "Fire" },
+				{ Kind = "Leap", Every = 8, Range = 120, Windup = 0.8, Airtime = 1.3, Height = 40, Radius = 20, Damage = 90, Anim = "leap" },
+			},
+		},
+
+		-- Magic Circle: Archero's teleporting mage. Never walks up to you; blinks away and casts
+		RuneMage = {
+			Name = "Rune Mage",
+			Model = "RuneMage",
+			StandIn = { "Snowman", 3.3 },
+			Size = 3.4,
+			Health = 1500000,
+			Cash = 250000,
+			Speed = 6,
+			StopAt = 30,
+			Radius = 10,
+			Turn = 4,
+			Strength = 180,
+			Respawn = 35,
+			Attacks = {
+				{ Kind = "Blink", Every = 5, Fade = 0.6, Near = 35, Far = 60, Then = 2 },
+				{
+					Kind = "Magic",
+					Every = 2.5,
+					Like = "Staff",
+					Damage = 40,
+					Height = 6,
+					Burst = 3,
+					BurstGap = 0.3,
+					Pulse = true,
+					Cast = 0.4,
+					Anim = "cast",
+					Shot = { Color = Color3.fromRGB(249, 168, 255), Count = 3, Spread = 30, Speed = 45, Homing = 40, Launch = 10, Range = 100, Slack = 0, Size = 1.3 },
+				},
+				{ Kind = "Bombs", Every = 6, Count = 4, Scatter = 22, Radius = 9, Windup = 1.3, Damage = 60 },
+			},
+		},
+
+		-- Magic Circle: Archero's tree. Rooted mid-arena; roots erupt in rows creeping out at you,
+		-- seeds, and saplings at half health
+		ElderTreant = {
+			Name = "Elder Treant",
+			Model = "ElderTreant",
+			StandIn = { "VenusFlytrap", 2.6 },
+			Size = 3,
+			Health = 1500000,
+			Cash = 250000,
+			Speed = 0,
+			Centre = true,
+			StopAt = 1,
+			Radius = 15,
+			Turn = 2.5,
+			TurnRate = 80,
+			Strength = 180,
+			Respawn = 35,
+			Attacks = {
+				{ Kind = "Line", Every = 4, Range = 200, Windup = 1, Width = 10, Length = 16, Segments = 6, Gap = 0.15, Count = 2, Spread = 30, Damage = 65, Anim = "roots" },
+				{
+					Kind = "Magic",
+					Every = 2.5,
+					Like = "RafflesiaBloom",
+					Damage = 40,
+					Height = 6,
+					Shot = { Homing = 60, Launch = 30, Range = 100, Slack = 0 },
+				},
+			},
+			Minions = {
+				At = 0.5,
+				Count = 4,
+				Model = "LivingBirch",
+				StandIn = { "Cactus", 1.4 },
+				Size = 1.4,
+				Scale = 1.2, -- (x the Living Birch pet: about the old Treant's height)
+				Name = "Sapling",
+				Health = 200000,
+				Speed = 14,
+				Strength = 60,
+				Spread = 12,
+				Drop = 0.8,
+				DropFrom = 60,
+				Dust = Color3.fromRGB(56, 196, 168),
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 110, Damage = 35 } },
+			},
+		},
+
+		-- Magic Circle: a giant mushroom. Leaps, rings of spore circles round itself, spore spray
+		ToadstoolKing = {
+			Name = "Toadstool King",
+			Model = "ToadstoolKing",
+			StandIn = { "Cactus", 3 },
+			Size = 3.4,
+			Health = 1500000,
+			Cash = 250000,
+			Speed = 8,
+			StopAt = 1,
+			Radius = 14,
+			Turn = 3,
+			Strength = 180,
+			Respawn = 35,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.4, Reach = 6, Arc = 270, Damage = 85 },
+				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.6, Airtime = 1, Height = 28, Radius = 17, Damage = 70, Anim = "leap", Then = 3 },
+				{ Kind = "Bombs", Linked = true, Every = 5, Count = 8, Around = true, Scatter = 8, Radius = 8, Windup = 1.2, Damage = 60, Cast = 0.5, Anim = "puff" },
+				{
+					Kind = "Magic",
+					Every = 3,
+					Like = "Staff",
+					Damage = 40,
+					Height = 5,
+					Pulse = true,
+					Shot = { Color = Color3.fromRGB(255, 160, 220), Count = 5, Spread = 70, Speed = 40, Homing = 30, Launch = 10, Range = 90, Slack = 0 },
+				},
+			},
+		},
+
+		-- Ocean: LassoAPet's King Crab grown huge. Scuttling charges, a claw slam, bubbles
+		KingCrab = {
+			Name = "King Crab",
+			Model = "KingCrab",
+			Size = 9,
+			Health = 10000000,
+			Cash = 1500000,
+			Speed = 10,
+			StopAt = 1,
+			Radius = 22,
+			Turn = 3,
+			Strength = 500,
+			Respawn = 40,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.4, Reach = 7, Arc = 110, Damage = 60, Swings = 2 },
+				{ Kind = "Charge", Every = 5, Range = 110, Windup = 0.9, Speed = 80, Width = 40, Damage = 90, Anim = "charge" },
+				{ Kind = "Slam", Every = 4, Range = 14, Radius = 20, Windup = 0.9, Damage = 90, Anim = "slam" },
+				{
+					Kind = "Magic",
+					Every = 3,
+					Like = "Staff",
+					Damage = 50,
+					Height = 5,
+					Burst = 3,
+					BurstGap = 0.3,
+					Shot = { Color = Color3.fromRGB(140, 200, 236), Count = 1, Size = 1.6, SizeMax = 1.5, Speed = 40, Homing = 50, Launch = 60, Range = 100, Slack = 0 },
+				},
+			},
+		},
+
+		-- Ocean: a pufferfish lord. Puffs up and bursts a ring of spines; charges
+		PufferLord = {
+			Name = "Puffer Lord",
+			Model = "PufferLord",
+			StandIn = { "Fish", 5 },
+			Size = 3.4,
+			Health = 10000000,
+			Cash = 1500000,
+			Speed = 10,
+			StopAt = 1,
+			Radius = 15,
+			Turn = 3.5,
+			Strength = 500,
+			Respawn = 40,
+			Attacks = {
+				{ Kind = "Swipe", Every = 2.4, Reach = 5, Arc = 330, Damage = 100 },
+				{
+					Kind = "Magic",
+					Every = 4,
+					Like = "Staff",
+					Damage = 60,
+					Height = 5,
+					Burst = 2,
+					BurstGap = 0.5,
+					Cast = 1,
+					Anim = "puff",
+					Shot = { Color = Color3.fromRGB(255, 230, 140), Count = 16, Spread = 337.5, Speed = 34, Homing = 0, Launch = 0, Range = 100, Slack = 0, Size = 1.2 },
+				},
+				{ Kind = "Charge", Every = 6, Range = 110, Windup = 0.9, Speed = 85, Width = 26, Damage = 90, Anim = "charge" },
+			},
+		},
+
+		-- Ocean: a kraken rooted mid-arena. Tentacles slam down long rectangles at you, ink
+		-- orbs, crabs at half health
+		Kraken = {
+			Name = "Kraken",
+			Model = "Kraken",
+			StandIn = { "LavaWhale", 2.6 },
+			Size = 3.6,
+			Health = 10000000,
+			Cash = 1500000,
+			Speed = 0,
+			Centre = true,
+			StopAt = 1,
+			Radius = 18,
+			Turn = 2.5,
+			TurnRate = 70,
+			Strength = 500,
+			Respawn = 40,
+			Attacks = {
+				{ Kind = "Line", Every = 3.5, Range = 200, Windup = 1, Width = 12, Length = 80, Count = 2, Spread = 40, Damage = 90, Anim = "slam" },
+				{
+					Kind = "Magic",
+					Every = 3,
+					Like = "Staff",
+					Damage = 55,
+					Height = 6,
+					Burst = 3,
+					BurstGap = 0.35,
+					Cast = 0.5,
+					Anim = "ink",
+					Shot = { Color = Color3.fromRGB(70, 50, 110), Count = 3, Spread = 40, Speed = 38, Homing = 40, Launch = 20, Range = 110, Slack = 0, Size = 1.5 },
+				},
+			},
+			Minions = {
+				At = 0.5,
+				Count = 4,
+				Model = "KingCrab",
+				StandIn = { "Fish", 1.5 },
+				Size = 2.5, -- (KingCrabModel's own drawing)
+				Scale = 2.5, -- (or as the King Crab pet, once the Ocean has one)
+				Name = "Trench Crab",
+				Health = 1500000,
+				Speed = 15,
+				Strength = 150,
+				Spread = 14,
+				Drop = 0.8,
+				DropFrom = 60,
+				Dust = Color3.fromRGB(140, 200, 236),
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 5, Arc = 100, Damage = 50 } },
 			},
 		},
 	},
@@ -520,9 +1116,15 @@ return {
 	-- re-rolls them all)
 	BossPools = {
 		Meadow = { "MotherHen", "GiantRafflesia", "MajesticUnicorn", "VenusFlytrap" },
-		Desert = { "CactusBoss", "Sandworm" },
-		Ice = { "ElderBoar" },
-		Lava = { "LavaWyrm" },
+		Desert = { "CactusBoss", "Sandworm", "ScorpionKing" },
+		Ice = { "ElderBoar", "FrostGolem", "BlizzardOwl" },
+		Lava = { "LavaWyrm", "MagmaSlime", "VolcanoTortoise" },
+		-- (QM, Oct 30: three in every region; Server/Bosses draws a StandIn pet for one whose
+		-- model isn't made yet)
+		Dungeon = { "BoneWarden", "DungeonWatcher", "TreasureMimic" },
+		Castle = { "CrimsonKnight", "BloodBat", "CastleWyvern" },
+		Forest = { "RuneMage", "ElderTreant", "ToadstoolKing" },
+		Ocean = { "KingCrab", "PufferLord", "Kraken" },
 	},
 	-- healing out of a fight (QM, Oct 26; Server/Regen): once you go Delay seconds without
 	-- taking damage you heal Rate of your max health a second until full; any hit restarts
@@ -531,15 +1133,64 @@ return {
 		Delay = 10,
 		Rate = 0.1, -- 10% of max health a second
 	},
-	-- boss melee only hits in front (QM, Oct 27: circle round a boss and you dodge it).
-	-- Contact attacks (Server/BossAttacks) hit only fighters within Cone degrees (the whole
-	-- wedge, centred on its facing), and bosses turn at most TurnRate degrees a second
+	-- boss melee only hits in front (QM, Oct 27: circle round a boss and you dodge it):
+	-- its Swipe's Arc (Config.EnemySwipe), and bosses turn at most TurnRate degrees a second
 	-- (Server/Bosses; a boss's own TurnRate overrides it). A Horse (44 studs/s) circling
 	-- Mother Hen's reach (about 15 studs out) sweeps about 170 degrees a second, so it
 	-- outruns 120; a Fish (about 26 studs/s) can't, until it hugs closer.
 	BossMelee = {
-		Cone = 100,
 		TurnRate = 120,
+	},
+	-- every enemy's melee (QM, Oct 30): a swipe like the player's, after a red telegraph in
+	-- its shape fills on the ground for Windup seconds, so you can step out of it. Each
+	-- attack's Swipe sets its Reach, Arc and Damage (Server/BossAttacks); these are the
+	-- rest of its look, the same keys as Config.Slash (Shared/SlashFx), plus the
+	-- telegraph's (client/Swipes, styled like the bombs' landing rings: client/Bombs).
+	EnemySwipe = {
+		Windup = 0.5, -- seconds from the telegraph appearing to the hit
+		Arc = 120,
+		Ends = 0.75, -- (fat ends: it reads as an area, not a streak)
+		Belly = 0.4,
+		Skew = 1,
+		OuterSegments = 5,
+		InnerSegments = 3,
+		Jitter = 0.6,
+		RadiusJitter = 0.03,
+		MaxStrip = 0.06,
+		Variety = {
+			Arc = { 0.95, 1.05 },
+			Radius = { 0.97, 1.03 },
+			Width = { 0.9, 1.1 },
+			Belly = { 0.7, 1.3 },
+			Skew = { 0.8, 1.25 },
+			Ends = { 0.85, 1.15 },
+			OuterSegments = { 0.8, 1.2 },
+			InnerSegments = { 0.67, 1.34 },
+			Jitter = { 0.7, 1.3 },
+			RadiusJitter = { 0.5, 1.5 },
+		},
+		-- the swipe itself (white, like yours)
+		Height = 1.2, -- studs above the ground
+		Color = Color3.fromRGB(255, 255, 255),
+		Opacity = 0.35,
+		Glow = 0.8,
+		Sweep = 0.12,
+		Ease = 3,
+		Hold = 0.1,
+		Fade = 0.2,
+		Trail = 1.15,
+		Pop = 1.1,
+		-- the telegraph (red, filling from its inner edge out to the outer by the hit)
+		Warn = Color3.fromRGB(255, 50, 35),
+		Lift = 0.15, -- studs above the ground
+		Outline = 0.15, -- transparency of its outline (all round)
+		OutlineWidth = 0.4, -- studs
+		FadeBands = 4, -- inside the outer edge, faint red to clear going in
+		FadeEdge = 0.6,
+		FadeDepth = 0.6, -- of its thickness
+		Fill = 0.5, -- transparency of the fill
+		Edge = 0.15, -- the fill's leading edge
+		EdgeWidth = 0.35, -- studs
 	},
 	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home and leaves
 	-- a boss arriving (QM, Oct 25: they only appear once you steal an egg): the camera of
@@ -565,7 +1216,9 @@ return {
 	-- side it looks from, degrees (0 = from the south, looking north). Distance: studs from
 	-- you. Height: studs above your middle it aims at. Fov: field of view (Roblox's usual
 	-- is 70; lower looks flatter). InTime / OutTime: seconds easing in and back out.
-	FightCam = { On = true, Pitch = 62, Yaw = 0, Distance = 80, Height = 0, Fov = 55, InTime = 0.6, OutTime = 0.6 },
+	-- Fixed (QM, Oct 30): held over the arena's middle instead, back far enough that the
+	-- arena's width times Fit fills the screen (Distance unused then).
+	FightCam = { On = true, Fixed = true, Fit = 1, Pitch = 62, Yaw = 0, Distance = 80, Height = 0, Fov = 55, InTime = 0.6, OutTime = 0.6 },
 	-- a sleeping boss (client/BossView, QM Oct 25): settled low on the ground, its head
 	-- swelling a little with each snore. A Model with a pose in Poses lies down in it
 	-- instead (no sinking or swelling): eyes shut, breathing slowly, Zzz drifting up.
@@ -958,21 +1611,22 @@ return {
 		-- (QM, Oct 25: real eggs, LassoAPet's: Shared/Eggs/<Kind>EggModel, one per animal.)
 		-- Each nest lays one of its biome's kinds, by these weights (LassoAPet's spawn odds:
 		-- each biome's Herd there). A new animal: its egg model, Pets above, then here.
-		-- The biomes past the Lava Valley are still to come (QM): Horse eggs until then.
+		-- The biomes past the Lava Valley (QM, Oct 30) lay the later pets (tools/later_pets.py),
+		-- on odds shaped like the Lava Valley's.
 		Kinds = {
 			Meadow = { Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
 			Desert = { Cactus = 0.3, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
 			Ice = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, Icebringer = 0.02 },
 			Lava = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (LassoAPet's Volcano)
-			Dungeon = { Horse = 1 },
-			Castle = { Horse = 1 },
-			Forest = { Horse = 1 },
-			Ocean = { Horse = 1 },
+			Dungeon = { DungeonRat = 0.4, Slime = 0.22, CaveSpider = 0.16, BoneSteed = 0.12, Mimic = 0.07, BoneWyrm = 0.03 },
+			Castle = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02 },
+			Forest = { Shroom = 0.35, SpiritFox = 0.22, SpiritDeer = 0.15, LivingBirch = 0.13, MysticOwl = 0.08, CrystalTortoise = 0.05, SpiritLoong = 0.02 },
+			Ocean = { Squid = 0.38, Seahorse = 0.22, KingCrab = 0.17, FishSchool = 0.12, Whale = 0.08, AbyssWhale = 0.03 },
 		},
 		Scale = { Nest = 1.3, Carried = 0.6, Pen = 0.9 }, -- times the egg's drawing (about 4 studs tall)
 		-- a nest's egg is also this x bigger by its pet's rarity (QM, Oct 27: a Legendary's
 		-- much bigger than a Common's)
-		RarityScale = { Common = 1, Uncommon = 1.1, Rare = 1.25, Epic = 1.45, Legendary = 1.75, Mythic = 2, Divine = 2.2, Celestial = 2.4 },
+		RarityScale = { Common = 1, Uncommon = 1.1, Rare = 1.25, Epic = 1.45, Legendary = 1.75, Mythic = 2, Divine = 2.2, Celestial = 2.4, Cosmic = 2.6, Void = 2.8, Omega = 3 },
 		Twitch = { 3, 8 }, -- seconds between an egg's AFK twitches (random in this range)
 		Reward = { Meadow = 100, Desert = 600, Ice = 3000, Lava = 15000, Dungeon = 60000, Forest = 60000, Castle = 250000, Ocean = 250000 },
 		PenShows = 24, -- most eggs sat in a pen
@@ -1066,6 +1720,10 @@ return {
 			Cactus = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 7200, -- Desert
 			Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 7200, SnackYak = 3600, -- Tundra
 			Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 1200, LavaWhale = 1200, Phoenix = 43200, -- Lava (LassoAPet's Volcano)
+			DungeonRat = 30, Slime = 60, CaveSpider = 120, BoneSteed = 300, Mimic = 1800, BoneWyrm = 21600, -- Abandoned Dungeon
+			Shroom = 30, SpiritFox = 60, SpiritDeer = 120, LivingBirch = 300, MysticOwl = 1200, CrystalTortoise = 2400, SpiritLoong = 21600, -- Magic Circle
+			WarBoar = 60, RoyalSteed = 90, ChessKnight = 300, RoyalPeacock = 600, LivingArmor = 2400, CrimsonDrake = 3600, RoyalEagle = 43200, -- Red Castle
+			Squid = 60, Seahorse = 120, KingCrab = 600, FishSchool = 900, Whale = 3600, AbyssWhale = 43200, -- Ocean Trench
 		},
 	},
 
@@ -1079,10 +1737,13 @@ return {
 	--   Desert  Rare .. Mythic        (one tier up)
 	--   Tundra  Epic .. Divine        (two up)
 	--   Lava    Legendary .. Celestial (three up)
+	--   Abandoned Dungeon, Magic Circle   Mythic .. Cosmic (the fork's first biomes)
+	--   Red Castle, Ocean Trench          Divine .. Void   (its last)
 	--   Rarity  its rarity
 	--   Cash    cash a second it earns in your pen (LassoAPet's PetIncome, the Tundra's
 	--           after its income curve; the Lava's on tools/balance_sim.py's curve, as
-	--           LassoAPet's Volcano came after its Ocean; Config.Income)
+	--           LassoAPet's Volcano came after its Ocean; the later biomes' about 4x per biome
+	--           on from there; Config.Income)
 	--   Tier    its size tier (LassoAPet's PetTiers): 1 reads as big as the Horse, each
 	--           tier PetStats.TierGrowth x bigger (and x AnimalScale, top of the file)
 	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
@@ -1117,6 +1778,36 @@ return {
 		Rockworm = { Rarity = "Divine", Cash = 1800, Tier = 2, Lean = 0.3, Speed = 7.12 },
 		LavaWhale = { Rarity = "Divine", Cash = 4500, Tier = 4, Lean = 0.7, Speed = 6.83 },
 		Phoenix = { Rarity = "Celestial", Cash = 12000, Tier = 3, Lean = -0.3, Speed = 7.2 },
+		-- Abandoned Dungeon (tools/later_pets.py; QM, Oct 30: new pets for the later biomes)
+		DungeonRat = { Rarity = "Mythic", Cash = 1500, Tier = 2, Lean = -0.4, Speed = 7.6 },
+		Slime = { Rarity = "Mythic", Cash = 2400, Tier = 2, Lean = 0.6, Speed = 7.2 },
+		CaveSpider = { Rarity = "Divine", Cash = 5000, Tier = 2, Lean = -0.5, Speed = 8.2 },
+		BoneSteed = { Rarity = "Divine", Cash = 7000, Tier = 2, Lean = -0.2, Speed = 8 },
+		Mimic = { Rarity = "Celestial", Cash = 16000, Tier = 2, Lean = 0.6, Speed = 7.4 },
+		BoneWyrm = { Rarity = "Cosmic", Cash = 60000, Tier = 2, Lean = 0.3, Speed = 8.6 },
+		-- Magic Circle
+		Shroom = { Rarity = "Mythic", Cash = 1500, Tier = 2, Lean = 0.4, Speed = 7.2 },
+		SpiritFox = { Rarity = "Mythic", Cash = 2400, Tier = 2, Lean = -0.6, Speed = 8.2 },
+		SpiritDeer = { Rarity = "Divine", Cash = 5000, Tier = 2, Lean = -0.5, Speed = 8.4 },
+		LivingBirch = { Rarity = "Divine", Cash = 7000, Tier = 2, Lean = 0.5, Speed = 7.5 }, -- (LassoAPet's, for the Treant: QM)
+		MysticOwl = { Rarity = "Celestial", Cash = 14000, Tier = 2, Lean = -0.2, Speed = 7.6 },
+		CrystalTortoise = { Rarity = "Celestial", Cash = 18000, Tier = 2, Lean = 0.8, Speed = 7.2 },
+		SpiritLoong = { Rarity = "Cosmic", Cash = 60000, Tier = 3, Lean = -0.3, Speed = 8.6 },
+		-- Red Castle
+		WarBoar = { Rarity = "Divine", Cash = 8000, Tier = 2, Lean = 0.5, Speed = 8.4 },
+		RoyalSteed = { Rarity = "Divine", Cash = 12000, Tier = 2, Lean = -0.3, Speed = 9.2 },
+		ChessKnight = { Rarity = "Celestial", Cash = 25000, Tier = 2, Lean = 0.2, Speed = 8.6 },
+		RoyalPeacock = { Rarity = "Celestial", Cash = 32000, Tier = 2, Lean = -0.4, Speed = 8.8 },
+		LivingArmor = { Rarity = "Cosmic", Cash = 70000, Tier = 3, Lean = 0.8, Speed = 8.6 },
+		CrimsonDrake = { Rarity = "Cosmic", Cash = 100000, Tier = 3, Lean = 0, Speed = 9.4 },
+		RoyalEagle = { Rarity = "Void", Cash = 300000, Tier = 3, Lean = -0.4, Speed = 10 },
+		-- Ocean Trench
+		Squid = { Rarity = "Divine", Cash = 8000, Tier = 2, Lean = 0.2, Speed = 8.4 }, -- (the Squid, Fish School and Whale: LassoAPet's, QM's picks)
+		Seahorse = { Rarity = "Divine", Cash = 12000, Tier = 2, Lean = -0.3, Speed = 8.8 },
+		KingCrab = { Rarity = "Celestial", Cash = 25000, Tier = 2, Lean = 0.6, Speed = 8.6 },
+		FishSchool = { Rarity = "Celestial", Cash = 35000, Tier = 2, Lean = -0.4, Speed = 9.6 },
+		Whale = { Rarity = "Cosmic", Cash = 90000, Tier = 3, Lean = 0.7, Speed = 9 },
+		AbyssWhale = { Rarity = "Void", Cash = 300000, Tier = 4, Lean = 0.7, Speed = 9.4 },
 	},
 	-- a pet's health and speed (Shared/Pets): set by its rarity (QM, Oct 25: mostly a status
 	-- signal; since Oct 30 rarity climbs with the biome, so later pets get a little tougher).
@@ -1133,6 +1824,9 @@ return {
 			Mythic = { Health = 200, Speed = 32.5 },
 			Divine = { Health = 230, Speed = 34 },
 			Celestial = { Health = 260, Speed = 35.5 },
+			Cosmic = { Health = 290, Speed = 37 },
+			Void = { Health = 320, Speed = 38.5 },
+			Omega = { Health = 350, Speed = 40 },
 		},
 		Lean = 0.25, -- Lean 1: +25% health, -25% speed (Lean -1 the other way)
 		-- Speed (QM, Oct 26): each pet's own, LassoAPet's: MountSpeed studs/s x its Speed in
@@ -1226,7 +1920,7 @@ return {
 	-- (Strength grows into the millions by the Lava Valley: Config.Power's log curve keeps
 	-- what it does in check.)
 	-- Mobs fight back (QM, Oct 26): hit one and it turns on you, follows you round its yard
-	-- at Chase x its Speed and bites with its Attacks (Server/BossAttacks' Contact, like
+	-- at Chase x its Speed and swipes with its Attacks (Server/BossAttacks' Swipe, like
 	-- the bosses), until you've left its yard, died, or not hit it for Calm seconds. They
 	-- hit for real (QM, Oct 26), about 40% of their biome boss's damage a second, and can
 	-- kill you: while one's biting you, Server/Regen doesn't heal you.
@@ -1241,6 +1935,10 @@ return {
 		PerDamage = 0.1, -- (at 0 Strength a Kendo Stick hit deals 10: Strength 2 trains 2, as before)
 		Grounds = {
 			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
+			-- each ground's Mobs take turns filling its Count (QM, Oct 30): Pet (its model, at
+			-- Scale x its riding size), Name, Mode and Attacks (else the ground's own). Mode is
+			-- how an angry one moves: Melee (default) runs at you, Range keeps Keep studs off
+			-- and casts, Flee runs away from you and lobs bombs back.
 			Meadow = {
 				Cost = 300,
 				Grow = 0,
@@ -1248,37 +1946,101 @@ return {
 				Count = 4,
 				Strength = 2,
 				Speed = 4,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 6 } }, -- (boss: 10 a second)
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 3, Arc = 100, Damage = 8 } }, -- (boss: 10 a second)
+				Mobs = { { Pet = "Pig" }, { Pet = "Fish" } },
 			},
 			Desert = {
 				Cost = 8000,
 				Grow = 1,
-				Pet = "Cactus",
-				Name = "Cactus Monster",
 				Health = 1500,
-				Count = 5,
+				Count = 6,
 				Strength = 5,
 				Speed = 2.5,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 10 } }, -- (boss: 16)
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 3, Arc = 110, Damage = 13 } }, -- (boss: 16)
+				Mobs = {
+					{ Pet = "Cactus", Name = "Cactus Monster" },
+					{
+						Pet = "Scorpion",
+						Mode = "Range",
+						Keep = 14,
+						Attacks = {
+							{
+								Kind = "Magic",
+								Every = 2.4,
+								Like = "Staff",
+								Damage = 9,
+								Height = 3,
+								Cast = 0.3,
+								Shot = { Color = Color3.fromRGB(232, 190, 116), Count = 1, Size = 1.2, Speed = 34, Homing = 40, Launch = 0, Range = 60, Slack = 0 }, -- sand
+							},
+						},
+					},
+				},
 			},
 			Ice = {
 				Cost = 150000,
 				Grow = 2,
 				Health = 6000,
-				Count = 4,
+				Count = 6,
 				Strength = 15,
 				Speed = 3,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 16 } }, -- (boss: 26)
+				Attacks = { { Kind = "Swipe", Every = 2, Reach = 4, Arc = 140, Damage = 22 } }, -- (boss: 26)
+				Mobs = {
+					{ Pet = "Boar" },
+					{
+						Pet = "Snowman",
+						Mode = "Range",
+						Keep = 15,
+						Attacks = {
+							{
+								Kind = "Magic",
+								Every = 2.6,
+								Like = "Staff",
+								Damage = 10,
+								Height = 4,
+								Cast = 0.3,
+								Shot = { Color = Color3.fromRGB(235, 245, 255), Count = 2, Spread = 20, Size = 1.2, Speed = 36, Homing = 30, Launch = 0, Range = 60, Slack = 0 }, -- snow
+							},
+						},
+					},
+					{
+						Pet = "Penguin",
+						Mode = "Flee",
+						Attacks = {
+							{ Kind = "Lob", Every = 3, Count = 0, Scatter = 6, Radius = 5, Airtime = 1.2, Height = 14, Damage = 22 },
+						},
+					},
+				},
 			},
 			Lava = {
 				Cost = 2000000,
 				Grow = 3,
-				Pet = "RockHog",
 				Health = 20000,
 				Count = 4,
 				Strength = 45,
 				Speed = 3.5,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 24 } }, -- (boss: 40)
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 4, Arc = 130, Damage = 32 } }, -- (boss: 40)
+				Mobs = {
+					{ Pet = "RockHog", Name = "Fire Boar", Scale = 0.6 }, -- (QM: the yard's too small for them full size)
+					{
+						Pet = "Firebird",
+						Mode = "Range",
+						Keep = 16,
+						Attacks = {
+							{
+								Kind = "Magic",
+								Every = 2.4,
+								Like = "Staff",
+								Damage = 16,
+								Height = 5,
+								Burst = 2,
+								BurstGap = 0.3,
+								Cast = 0.3,
+								Shot = { Color = Color3.fromRGB(255, 130, 40), Count = 1, Size = 1.3, Speed = 38, Homing = 40, Launch = 0, Range = 60, Slack = 0 }, -- fire
+							},
+						},
+					},
+				},
 			},
 		},
 		Respawn = 4,
@@ -1501,7 +2263,7 @@ return {
 			Rarity = "Common",
 			Damage = 1.2,
 			Price = 500,
-			Shot = { Cooldown = 0.45, Range = 45 },
+			Shot = { Cooldown = 0.45 },
 		},
 		Staff = { -- (a plain staff, no element: QM, Oct 25)
 			Name = "Staff",
@@ -1565,7 +2327,6 @@ return {
 			Shot = {
 				Cooldown = 0.8,
 				Count = 3,
-				Range = 75,
 				Spread = 16,
 				TrailLength = 0.2,
 				TrailTransparency = 0.6,
@@ -1689,7 +2450,6 @@ return {
 			Shot = {
 				Cooldown = 0.2,
 				Count = 2,
-				Range = 60,
 				Spread = 8,
 				TrailColor = Color3.fromRGB(51, 255, 0),
 				TrailLength = 0.3,
@@ -1705,7 +2465,6 @@ return {
 			Shot = {
 				Cooldown = 0.4,
 				Pierce = 1,
-				Range = 65,
 				Size = 3,
 				Spread = 5,
 				TrailColor = Color3.fromRGB(230, 30, 50),
@@ -1760,6 +2519,10 @@ return {
 		Radius = 0.6, -- a shot's own width for hitting (studs), times its Size
 		Slack = 1.5, -- studs added to every target's width for shots (QM: more forgiving; height never counts)
 		Trust = 12, -- studs: how far the shooter's own spot may be from the server's (Server/Combat)
+		-- no range on bows and staffs (QM, Oct 30, as in Archero): in a boss fight they shoot
+		-- the nearest enemy anywhere in the arena, and a shot flies until it hits or leaves the
+		-- arena. Outside a fight (training yards) they reach this far instead
+		Reach = 90, -- studs
 		StillOnly = true, -- bows and staffs only shoot while you stand still (QM, Oct 26, Archero); melee always swings
 		-- the held bow pulses on each shot, as in Kingdom Crushers' Shoot (QM, Oct 26): it snaps
 		-- small as it fires, swells big toward the next shot, and settles if none comes.
@@ -1774,7 +2537,7 @@ return {
 		Ranged = {
 			Look = "Arrow", -- (the one arrow every Ranged weapon shoots; boss ones have their own)
 			Cooldown = 0.6, -- seconds between shots
-			Range = 55, -- studs it flies
+			Range = 400, -- studs it flies at most: only a cleanup cap now (QM, Oct 30: no range, like Archero)
 			Speed = 80, -- studs a second (every bow: QM, Oct 25)
 			Size = 1.8, -- the arrow's size (and how wide it hits) (QM: every bow the Shortbow's)
 			Count = 1, -- shots at once...
@@ -1797,7 +2560,7 @@ return {
 		Magic = {
 			Look = "Orb", -- Orb (every staff), Petal (boss weapons)
 			Cooldown = 0.7,
-			Range = 50,
+			Range = 400, -- (a cleanup cap, as for bows)
 			Speed = 55,
 			Size = 1, -- the whole orb (and how wide it hits)
 			Count = 1,

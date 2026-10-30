@@ -11,6 +11,7 @@ local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local BossTuning = require(Shared.BossTuning)
 local Pets = require(Shared.Pets)
 local Power = require(Shared.Power)
 local SlashTuning = require(Shared.SlashTuning)
@@ -30,6 +31,7 @@ local Regions = require(script.Regions)
 local Training = require(script.Training)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
+BossTuning.create() -- workspace.BossTuning: live boss scale and fight camera, the same
 -- workspace.FightBarrierStyle: the red fight barriers' quasicrystal knobs (beside
 -- SlashTuning; client/FightBarrierFx), kept with the place when it's there, made here when
 -- it isn't

@@ -2,14 +2,17 @@
 -- (Server/Combat) and every client runs the same ones to draw them (client/Shots), so
 -- nothing about a shot is replicated but the trigger (who, which weapon, which way).
 --
--- A shot flies flat from the rider, at its weapon's Speed, until it's gone its Range or
+-- A shot flies flat from the rider, at its weapon's Speed, until it's gone its Range, left
+-- its room (a boss fight's arena: players' shots have no range, QM Oct 30, Archero) or
 -- hit as many targets as it may (1 + Pierce). A Magic shot with Homing bends toward the
 -- nearest target ahead of it (within its HomingCone) by up to Homing degrees a
 -- second: enough to curve onto a target that's moving, not enough to turn round. Targets
 -- are flat circles: { body, pos, radius } (a boss's or mob's body and its Radius), so a
 -- shot hits whatever height it flies at; Config.Shots.Slack widens every one a little.
 --
---   Projectiles.spawn(id, origin, yaw, seed) -> { shot, ... }   -- a weapon's volley
+--   Projectiles.spawn(id, origin, yaw, seed, room) -> { shot, ... } -- a weapon's volley
+--                                                         -- (room: bounds it dies leaving, or nil)
+--   Projectiles.room(biome) -> { x0, z0, x1, z1 } or nil -- a biome's arena (Shared/MapData)
 --   Projectiles.volley(s, magic, origin, yaw, seed) -> { shot, ... } -- the same from a Shot
 --                                                         -- table itself (magic: it Launches)
 --   Projectiles.bossShot(a) -> s   -- a boss's "Magic" attack's Shot (Server/BossAttacks):
@@ -20,6 +23,7 @@
 
 local Config = require(script.Parent.Config)
 local Weapons = require(script.Parent.Weapons.Weapons)
+local MapData = require(script.Parent.MapData)
 
 local Projectiles = {}
 
@@ -52,12 +56,34 @@ function Projectiles.bossShot(a)
 	return s
 end
 
-function Projectiles.spawn(id, origin, yaw, seed)
+-- (a fight's arena is its biome's map area, as FightCam frames it)
+local rooms = {}
+function Projectiles.room(biome)
+	if not biome then
+		return nil
+	end
+	if rooms[biome] == nil then
+		rooms[biome] = false
+		for _, area in MapData.Areas do
+			if area.Name == biome and area.Bounds then
+				local b = area.Bounds
+				rooms[biome] = { math.min(b[1], b[3]), math.min(b[2], b[4]), math.max(b[1], b[3]), math.max(b[2], b[4]) }
+			end
+		end
+	end
+	return rooms[biome] or nil
+end
+
+function Projectiles.spawn(id, origin, yaw, seed, room)
 	local w = Weapons.get(id) -- (with any live tuning: Weapons.tune)
 	if not w.Shot then
 		return {}
 	end
-	return Projectiles.volley(w.Shot, w.Type == "Magic", origin, yaw, seed, id)
+	local shots = Projectiles.volley(w.Shot, w.Type == "Magic", origin, yaw, seed, id)
+	for _, shot in shots do
+		shot.room = room
+	end
+	return shots
 end
 
 function Projectiles.volley(s, magic, origin, yaw, seed, id)
@@ -165,7 +191,8 @@ function Projectiles.step(shot, dt, targets)
 		end
 	end
 	shot.pos = to
-	if shot.left <= 1e-3 then
+	local r = shot.room
+	if shot.left <= 1e-3 or (r and (to.X < r[1] or to.Z < r[2] or to.X > r[3] or to.Z > r[4])) then
 		shot.dead = true
 	end
 	return out

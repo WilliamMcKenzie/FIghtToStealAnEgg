@@ -30,6 +30,8 @@
 -- plane (look vector = forward), dir = 1 swings left to right, -1 right to left. `follow`
 -- (optional) returns the centre's position each frame, so the slash moves with the player.
 -- handle.leadCFrame() gives the leading edge (for the sword riding it).
+-- SlashFx.outline(c, seed), .edges and .contains: the same crescent without drawing it
+-- (enemies' swipes: client/Swipes draws its red telegraph, Server/BossAttacks hits with it).
 
 local RunService = game:GetService("RunService")
 
@@ -173,14 +175,47 @@ end
 
 -- The slash's parts and its step(dt) (returns true once it's finished and gone), without
 -- running it: SlashFx.play runs it every frame, and a Studio preview can step it to any t.
-function SlashFx.new(origin, dir, c, follow, seed)
+-- One slash's outline, rolled from its seed: { c (its rolled look), poly, at (strip cuts) }.
+-- The same seed always gives the same outline, on the server too (an enemy's swipe is hit
+-- tested against exactly what its telegraph and slash draw: SlashFx.contains).
+function SlashFx.outline(c, seed)
 	local rng = Random.new(seed)
 	c = SlashFx.roll(c, rng)
 	local poly = {
 		outer = corners(c, c.OuterSegments, 0, rng),
 		inner = corners(c, c.InnerSegments, 0.5, rng),
 	}
-	local at = cuts(c, poly)
+	return { c = c, poly = poly, at = cuts(c, poly) }
+end
+
+-- the outline's outer and inner points and radial at u (0..1 along the swing), in the
+-- slash frame, at `radius` (its Radius if nil)
+function SlashFx.edges(o, u, dir, radius)
+	return shape(o.c, o.poly, u, dir, radius or o.c.Radius)
+end
+
+-- is `point` (in the slash frame, flat) on the crescent, give or take `pad` studs?
+function SlashFx.contains(o, dir, point, pad)
+	local c = o.c
+	local d = Vector3.new(point.X, 0, point.Z).Magnitude
+	if d < 1e-3 then
+		return false
+	end
+	local half = math.rad(c.Arc) / 2
+	local a = math.atan2(point.X, -point.Z) * dir
+	local u = (a + half) / (2 * half)
+	local slack = pad / (d * 2 * half)
+	if u < -slack or u > 1 + slack then
+		return false
+	end
+	local outer, inner = shape(c, o.poly, math.clamp(u, 0, 1), dir, c.Radius)
+	return d <= outer.Magnitude + pad and d >= inner.Magnitude - pad
+end
+
+function SlashFx.new(origin, dir, c, follow, seed)
+	local o = SlashFx.outline(c, seed)
+	c = o.c
+	local poly, at = o.poly, o.at
 	local steps = #at - 1
 	local part = Instance.new("Part")
 	part.Name = "Slash"

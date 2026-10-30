@@ -14,8 +14,12 @@
 -- with its Attacks (Config.Training.Grounds, run by Server/BossAttacks like a boss's),
 -- hard enough to kill you (QM, Oct 26), until you leave the yard, die, or stop hitting it
 -- for Config.Training.Calm seconds. Each mob is a random pet from its biome's eggs
--- (Config.Eggs.Kinds), as big as when you ride it, or the ground's own Pet (the Desert's
--- cactus monsters: QM, Oct 27). Higher grounds are bigger: Config.Training's Grow.
+-- (Config.Eggs.Kinds), as big as when you ride it, or (QM, Oct 30) its ground's Mobs taking
+-- turns: Meadow pigs and fish, Desert cactus monsters and scorpions that keep their
+-- distance casting sand, Tundra boars, snowmen casting snow and penguins that run from you
+-- lobbing bombs, Lava fire boars (0.6x) and firebirds casting fire. A mob's Magic and bombs
+-- only ever hit whoever it's angry with (its b.foes). Higher grounds are bigger:
+-- Config.Training's Grow.
 --
 --   Training.start(map)   -- once, after Map.ensure()
 
@@ -42,6 +46,19 @@ function Training.unlocked(player, name)
 	return g ~= nil and (g.Cost <= 0 or player:GetAttribute("Train" .. name) == true)
 end
 
+-- where a fleeing mob runs to: of a few spots round its yard, the one furthest from `from`
+local function fleeSpot(m, from)
+	local best, far = nil, -1
+	for _ = 1, 8 do
+		local p = Vector3.new(m.x + m.rng:NextNumber(-m.half, m.half), 0, m.z + m.rng:NextNumber(-m.half, m.half))
+		local d = ((p - from) * Vector3.new(1, 0, 1)).Magnitude
+		if d > far then
+			best, far = p, d
+		end
+	end
+	return best
+end
+
 -- the pets a biome's eggs hatch (any with odds), or none while they're only the Horse
 -- placeholder
 local function petsOf(biome)
@@ -59,14 +76,19 @@ local function petsOf(biome)
 	return list
 end
 
-local function spawnMob(name, x, z, half)
+local function spawnMob(name, x, z, half, slot)
 	local g = Config.Training.Grounds[name]
 	local rng = Random.new()
 	-- what it looks like: one of the biome's pets, as big as when you ride it
 	local model, size, label, tint = g.Mob, g.Size, g.Name or g.Mob, g.Tint
 	local radius = g.Radius or Config.Training.MobRadius
+	local def = g.Mobs and g.Mobs[(slot - 1) % #g.Mobs + 1] or {}
 	local pets = petsOf(name)
-	if #pets > 0 then
+	if def.Pet then
+		local scale = def.Scale or 1
+		model, size, label, tint = def.Pet, Pets.class(def.Pet).size * scale, def.Name or Pets.name(def.Pet), nil
+		radius = math.max(Pets.stats(def.Pet).Hitbox * scale, 1.5)
+	elseif #pets > 0 then
 		local kind = pets[rng:NextInteger(1, #pets)]
 		model, size, label, tint = kind, Pets.class(kind).size, g.Name or Pets.name(kind), nil
 		radius = math.max(Pets.stats(kind).Hitbox, 1.5)
@@ -87,6 +109,8 @@ local function spawnMob(name, x, z, half)
 	body:SetAttribute("MaxHealth", g.Health)
 	body:SetAttribute("Radius", radius)
 	body:SetAttribute("Ground", name)
+	body:SetAttribute("Slot", slot) -- (client/Shots finds its Magic by it)
+	local attacks = def.Attacks or g.Attacks
 	local m = {
 		ground = name,
 		x = x,
@@ -97,8 +121,10 @@ local function spawnMob(name, x, z, half)
 		g = g,
 		rng = rng,
 		radius = radius,
-		b = { c = { Attacks = g.Attacks, Radius = radius } }, -- (for BossAttacks.update)
+		def = def,
+		b = { c = { Attacks = attacks, Radius = radius }, foes = {} }, -- (for BossAttacks.update)
 	}
+	m.b.biome = m.b -- (its attacks hit only its foes: BossAttacks' fighters)
 	mobs[body] = m
 	Combat.add(body, function(player, damage)
 		if not mobs[body] or not Training.unlocked(player, name) then
@@ -106,8 +132,9 @@ local function spawnMob(name, x, z, half)
 		end
 		Combat.train(player, damage, g.Strength)
 		-- (it turns on whoever hit it last)
-		if g.Attacks then
+		if attacks then
 			m.target, m.angry = player, Config.Training.Calm
+			body:SetAttribute("Target", player.UserId)
 		end
 		local health = math.max(0, body:GetAttribute("Health") - damage)
 		body:SetAttribute("Health", health)
@@ -115,7 +142,7 @@ local function spawnMob(name, x, z, half)
 			mobs[body] = nil
 			Combat.remove(body)
 			task.delay(0.6, body.Destroy, body)
-			task.delay(Config.Training.Respawn, spawnMob, name, x, z, half)
+			task.delay(Config.Training.Respawn, spawnMob, name, x, z, half, slot)
 		end
 	end)
 	body.Parent = folder
@@ -168,8 +195,8 @@ function Training.start(map)
 		if g and zone then
 			local half = base.TrainSize / 2 + (g.Grow or 0) * Config.Training.Tile / 2 - 6
 			if g.Count then
-				for _ = 1, g.Count do
-					spawnMob(name, x, z, half)
+				for slot = 1, g.Count do
+					spawnMob(name, x, z, half, slot)
 				end
 			end
 			local dummies = zone:FindFirstChild("Dummies")
@@ -210,16 +237,49 @@ function Training.start(map)
 				local away = f and math.max(math.abs(f.root.Position.X - m.x), math.abs(f.root.Position.Z - m.z))
 				if not f or m.angry <= 0 or away > m.half + 12 then
 					m.target, m.goal, m.wait = nil, nil, m.rng:NextNumber(1, 3)
-					m.b.timers, m.b.still = nil, nil
+					m.b.timers, m.b.still, m.b.foes, m.flee = nil, nil, {}, nil
+					body:SetAttribute("Target", nil)
 				else
-					local hold = BossAttacks.update(body, m.b, dt, { f })
+					m.b.foes = { f }
+					local hold = BossAttacks.update(body, m.b, dt, m.b.foes)
 					local pos = body.Position
 					local offset = (f.root.Position - pos) * Vector3.new(1, 0, 1)
 					local gap = offset.Magnitude - m.radius - f.extra - 1
-					local want = math.atan2(-offset.X, -offset.Z)
-					m.yaw += ((want - m.yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * 6))
-					if not hold and gap > 0 then
-						pos += offset.Unit * math.min(m.g.Speed * Config.Training.Chase * dt, gap)
+					local step = m.g.Speed * Config.Training.Chase * dt
+					local mode = m.def.Mode
+					-- which way it heads: at you (Melee), to Keep studs off (Range), or away (Flee)
+					local move = Vector3.zero
+					if mode == "Flee" then
+						m.fleeIn = (m.fleeIn or 0) - dt
+						if not m.flee or m.fleeIn <= 0 or ((m.flee - pos) * Vector3.new(1, 0, 1)).Magnitude < 1 then
+							m.flee, m.fleeIn = fleeSpot(m, f.root.Position), 0.8
+						end
+						local to = (m.flee - pos) * Vector3.new(1, 0, 1)
+						if to.Magnitude > 0.01 then
+							move = to.Unit * math.min(step, to.Magnitude)
+						end
+					elseif mode == "Range" then
+						local keep = m.def.Keep or 14
+						if gap > keep + 3 then
+							move = offset.Unit * math.min(step, gap - keep)
+						elseif gap < keep - 3 and offset.Magnitude > 0.01 then
+							move = -offset.Unit * step
+						end
+					elseif gap > 0 then
+						move = offset.Unit * math.min(step, gap)
+					end
+					-- (it faces you, except running away, when it faces where it's going)
+					local look = if mode == "Flee" and move.Magnitude > 0.01 then move else offset
+					local want = math.atan2(-look.X, -look.Z)
+					-- (winding up a Swipe it turns to face it; any other hold, it stays as it is)
+					local face = if (m.b.rooted or 0) > 0 then m.b.facing else nil
+					if face or not hold then
+						want = face or want
+						local rate = if face then 14 else 6
+						m.yaw += ((want - m.yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * rate))
+					end
+					if not hold then
+						pos += move
 					end
 					-- (it stays in its yard)
 					pos = Vector3.new(
