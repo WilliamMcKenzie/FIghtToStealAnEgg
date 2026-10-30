@@ -8,6 +8,8 @@ return {
 	FineStuds = {},
 	AnimalScale = { RockHog = 1.5, VolcanoTortoise = 2.5, LavaWhale = 2.5, Phoenix = 2 }, -- (LassoAPet's)
 	StudTransparency = 0.5, -- every stud Texture (floor, walls, sword, horse): 0.5 = half strength (QM, Oct 24)
+	-- workspace.StudStyle's knobs for a place that has none yet (Shared/StudStyle; QM's picks, Oct 30)
+	StudStyle = { GroundTransparency = 0.5, GroundTileScale = 1, Transparency = 0.4, TileScale = 2 },
 
 	-- every world colour, by the ColorKey attribute on the parts (and checker Textures)
 	-- that wear it. Live-tunable in Play through workspace.WorldColors (Shared/WorldColors).

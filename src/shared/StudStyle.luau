@@ -6,8 +6,8 @@
 -- Change them in the Properties panel in Edit mode (the Map Baker plugin repaints the
 -- place) or during Play (server or client view): every stud Texture follows at once, and
 -- new ones (pets, eggs, weapons) take them too. They're kept with the place, like
--- FightBarrierStyle, so your values win over Config.StudTransparency, which only seeds a
--- place that has none.
+-- FightBarrierStyle, so your values win over Config.StudStyle, which only seeds a place
+-- that has none.
 -- A Texture's StudScale attribute is the tile scale it wears now (none = 1), so it's
 -- rescaled from what it is, however it was built or scaled since.
 --
@@ -22,13 +22,18 @@ StudStyle.NAME = "StudStyle"
 StudStyle.IMAGE = "rbxassetid://7447638591" -- the classic stud decal every stud Texture uses
 StudStyle.KNOBS = { "GroundTransparency", "GroundTileScale", "Transparency", "TileScale" }
 
-local function seed()
-	local module = script.Parent and script.Parent:FindFirstChild("Config")
-	local ok, config = pcall(require, module)
-	if ok and type(config) == "table" and type(config.StudTransparency) == "number" then
-		return config.StudTransparency
+local DEFAULTS = { GroundTransparency = 0.5, GroundTileScale = 1, Transparency = 0.4, TileScale = 2 }
+
+-- (Config.StudStyle's value for a knob, as a place with none starts)
+local seeds = nil
+local function seed(name)
+	if not seeds then
+		local module = script.Parent and script.Parent:FindFirstChild("Config")
+		local ok, config = pcall(require, module)
+		seeds = if ok and type(config) == "table" and type(config.StudStyle) == "table" then config.StudStyle else {}
 	end
-	return 0.5
+	local value = seeds[name]
+	return if type(value) == "number" then value else DEFAULTS[name]
 end
 
 local function style()
@@ -42,7 +47,7 @@ local function knob(name, default)
 end
 
 function StudStyle.transparency()
-	return knob("Transparency", seed())
+	return knob("Transparency", seed("Transparency"))
 end
 
 function StudStyle.ensure()
@@ -52,12 +57,9 @@ function StudStyle.ensure()
 		s.Name = StudStyle.NAME
 		s.Parent = workspace
 	end
-	-- (a place from before the split keeps its one Transparency for the ground too)
-	local transparency = knob("Transparency", seed())
-	local defaults = { GroundTransparency = transparency, GroundTileScale = 1, Transparency = transparency, TileScale = 1 }
 	for _, name in StudStyle.KNOBS do
 		if typeof(s:GetAttribute(name)) ~= "number" then
-			s:SetAttribute(name, defaults[name])
+			s:SetAttribute(name, seed(name))
 		end
 	end
 	return s
@@ -94,8 +96,8 @@ function StudStyle.apply(texture, ground)
 	if ground == nil then
 		ground = isGround(texture)
 	end
-	texture.Transparency = if ground then knob("GroundTransparency", StudStyle.transparency()) else StudStyle.transparency()
-	local want = math.max(knob(if ground then "GroundTileScale" else "TileScale", 1), 0.01)
+	texture.Transparency = if ground then knob("GroundTransparency", seed("GroundTransparency")) else StudStyle.transparency()
+	local want = math.max(knob(if ground then "GroundTileScale" else "TileScale", seed(if ground then "GroundTileScale" else "TileScale")), 0.01)
 	local have = texture:GetAttribute("StudScale")
 	have = if typeof(have) == "number" and have > 0 then have else 1
 	if math.abs(want - have) < 1e-6 then
