@@ -67,7 +67,7 @@ local function face(wall, normalId, title, cost)
 	gui.Face = normalId
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	-- (a narrow wall, a training corridor's: drawn finer, so its price and button fit)
-	local pixels = if wall.Size.X * PIXELS < 400 then PIXELS * 1.6 / 0.6 else PIXELS -- (QM Oct 30: the training ones 40% smaller)
+	local pixels = if wall.Size.X < 60 then PIXELS / 0.6 else PIXELS -- (QM Oct 30: the training ones, 48 studs wide, 40% smaller; arena gates are 74+)
 	gui.PixelsPerStud = pixels
 	gui.LightInfluence = 0
 	gui.MaxDistance = 400
