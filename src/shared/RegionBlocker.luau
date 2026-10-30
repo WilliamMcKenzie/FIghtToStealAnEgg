@@ -17,7 +17,7 @@ local RegionBlocker = {}
 
 local REGIONS = Config.Regions
 local COIN = "rbxassetid://128139739160102" -- assets/ui/CashIcon.png: the HUD's cash, cropped
-local PIXELS = 10 -- the faces: pixels per stud (text stops at 100 pixels: 10 studs)
+local PIXELS = 10 / 0.6 -- the faces: pixels per stud (QM Oct 30: everything on them 40% smaller than at 10)
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local INK = Color3.fromRGB(14, 12, 16)
 
