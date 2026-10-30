@@ -26,14 +26,14 @@ local FILL_TRANSPARENCY = 0.5 -- the fill growing out from the middle
 local EDGE_TRANSPARENCY = 0.15 -- its leading edge
 local EDGE_WIDTH = 0.05 -- of the radius
 local LIFT = 0.15 -- studs above the ground
-local SIZE = 0.55 -- the bomb's width (studs) as it leaves and lands
+local SIZE = 0.88 -- the bomb's width (studs) as it leaves and lands
 local SWELL = 2 -- how much bigger it is at the top of its flight (Kingdom's: 3x, so
 -- about twice a trail square there)
 local SPIN = 900 -- degrees a second at the top of its flight (none at either end)
 local OUTLINE = 0.13 -- the edge, of a square's width (the same on every square)
 local TRAIL_EVERY = 0.1 -- seconds between the squares dropped behind it
-local TRAIL_SIZE = 0.9 -- studs
-local SPLASH_SIZE = 1 -- studs
+local TRAIL_SIZE = 1.44 -- studs
+local SPLASH_SIZE = 1.6 -- studs
 local SPLASH_SPOKES = 7 -- squares in each ring of the splash
 local SPLASH_STEP = 1.6 -- studs further out each ring goes
 local SPLASH_EVERY = 0.03 -- seconds between rings
