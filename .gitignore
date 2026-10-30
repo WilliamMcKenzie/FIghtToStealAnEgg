@@ -10,3 +10,5 @@
 __pycache__/
 tools/studio/_*.luau
 tools/node_modules/
+# boss animation previews (tools/render_boss.py): big, kept in the project files instead
+previews/bosses/*.gif
