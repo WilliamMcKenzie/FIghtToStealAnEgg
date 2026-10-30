@@ -2,6 +2,7 @@
 -- hand: change its design there and run python3 tools/boss_designs.py BlizzardOwl.
 -- Units are studs, rest pose, feet on Y = 0, facing -Z.
 -- Blizzard Owl: Tundra boss, hovers. Bones: root, WingL, WingR.
+-- Its blocks and bones are QM's drawing, designs/bosses/BlizzardOwl.bbmodel; its animations are here.
 
 return {
 	bones = {
@@ -15,22 +16,22 @@ return {
 		{ name = "Speck0", bone = "root", class = "Part", size = Vector3.new(0.9, 0.35, 0.2), cframe = CFrame.new(-1.4, 6.2, -3.35, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
 		{ name = "Speck1", bone = "root", class = "Part", size = Vector3.new(0.9, 0.35, 0.2), cframe = CFrame.new(1.4, 6.2, -3.35, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
 		{ name = "Speck2", bone = "root", class = "Part", size = Vector3.new(0.9, 0.35, 0.2), cframe = CFrame.new(0, 5.2, -3.35, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
-		{ name = "EyeL", bone = "root", class = "Part", size = Vector3.new(1.8, 1.8, 0.1), cframe = CFrame.new(-1.45, 8.7, -3.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 190, 50), plain = true },
-		{ name = "PupilL", bone = "root", class = "Part", size = Vector3.new(0.9, 1.1, 0.1), cframe = CFrame.new(-1.3, 8.6, -3.72, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34), plain = true },
-		{ name = "BrowL", bone = "root", class = "Part", size = Vector3.new(2.6, 0.55, 0.3), cframe = CFrame.new(-1.35, 10.05, -3.65, 0.96126, 0.27564, 0, -0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
+		{ name = "EyeL", bone = "root", class = "Part", size = Vector3.new(1.8, 1.8, 0.1), cframe = CFrame.new(-1.45, 8.7, -3.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(0, 0, 0), plain = true },
+		{ name = "PupilL", bone = "root", class = "Part", size = Vector3.new(0.9, 1.1, 0.1), cframe = CFrame.new(-1.3, 8.6, -3.72, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 0, 0), plain = true },
+		{ name = "BrowL", bone = "root", class = "Part", size = Vector3.new(2.8, 0.55, 0.3), cframe = CFrame.new(-1.25387, 9.62244, -3.65, 0.96126, 0.27564, 0, -0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
 		{ name = "TuftL", bone = "root", class = "WedgePart", size = Vector3.new(1.4, 2.2, 1.6), cframe = CFrame.new(-2.6, 12.3, -0.8, 0.9703, 0.24192, 0, -0.24192, 0.9703, 0, 0, 0, 1), color = Color3.fromRGB(240, 244, 250) },
 		{ name = "TalonL", bone = "root", class = "Part", size = Vector3.new(0.9, 0.6, 1.3), cframe = CFrame.new(-1.3, 3.65, -1.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 168, 40) },
-		{ name = "WingL", bone = "WingL", class = "Part", size = Vector3.new(0.9, 6.2, 4.6), cframe = CFrame.new(-3.95, 7.2, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 244, 250) },
-		{ name = "WingTipL", bone = "WingL", class = "Part", size = Vector3.new(0.95, 1.6, 4.6), cframe = CFrame.new(-3.95, 4.4, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
-		{ name = "EyeR", bone = "root", class = "Part", size = Vector3.new(1.8, 1.8, 0.1), cframe = CFrame.new(1.45, 8.7, -3.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 190, 50), plain = true },
-		{ name = "PupilR", bone = "root", class = "Part", size = Vector3.new(0.9, 1.1, 0.1), cframe = CFrame.new(1.3, 8.6, -3.72, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34), plain = true },
-		{ name = "BrowR", bone = "root", class = "Part", size = Vector3.new(2.6, 0.55, 0.3), cframe = CFrame.new(1.35, 10.05, -3.65, 0.96126, -0.27564, 0, 0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
+		{ name = "EyeR", bone = "root", class = "Part", size = Vector3.new(1.8, 1.8, 0.1), cframe = CFrame.new(1.45, 8.7, -3.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(0, 0, 0), plain = true },
+		{ name = "PupilR", bone = "root", class = "Part", size = Vector3.new(0.9, 1.1, 0.1), cframe = CFrame.new(1.3, 8.6, -3.72, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 0, 0), plain = true },
+		{ name = "BrowR", bone = "root", class = "Part", size = Vector3.new(2.8, 0.55, 0.3), cframe = CFrame.new(1.25387, 9.62244, -3.65, 0.96126, -0.27564, 0, 0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
 		{ name = "TuftR", bone = "root", class = "WedgePart", size = Vector3.new(1.4, 2.2, 1.6), cframe = CFrame.new(2.6, 12.3, -0.8, 0.9703, -0.24192, 0, 0.24192, 0.9703, 0, 0, 0, 1), color = Color3.fromRGB(240, 244, 250) },
 		{ name = "TalonR", bone = "root", class = "Part", size = Vector3.new(0.9, 0.6, 1.3), cframe = CFrame.new(1.3, 3.65, -1.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 168, 40) },
-		{ name = "WingR", bone = "WingR", class = "Part", size = Vector3.new(0.9, 6.2, 4.6), cframe = CFrame.new(3.95, 7.2, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 244, 250) },
-		{ name = "WingTipR", bone = "WingR", class = "Part", size = Vector3.new(0.95, 1.6, 4.6), cframe = CFrame.new(3.95, 4.4, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
 		{ name = "Beak", bone = "root", class = "WedgePart", size = Vector3.new(1, 1.1, 0.9), cframe = CFrame.new(0, 7.75, -3.9, 1, 0, 0, 0, -1, 0, 0, 0, -1), color = Color3.fromRGB(250, 168, 40) },
 		{ name = "Tail", bone = "root", class = "WedgePart", size = Vector3.new(3, 0.8, 2), cframe = CFrame.new(0, 4.6, 3.8, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(120, 160, 220) },
+		{ name = "WingL", bone = "WingL", class = "Part", size = Vector3.new(0.9, 6.2, 4.6), cframe = CFrame.new(-3.95, 7.2, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 244, 250) },
+		{ name = "WingTipL", bone = "WingL", class = "Part", size = Vector3.new(1.15, 1.7, 4.8), cframe = CFrame.new(-3.95, 4.35, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
+		{ name = "WingR", bone = "WingR", class = "Part", size = Vector3.new(0.9, 6.2, 4.6), cframe = CFrame.new(3.95, 7.2, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 244, 250) },
+		{ name = "WingTipR", bone = "WingR", class = "Part", size = Vector3.new(1.15, 1.7, 4.8), cframe = CFrame.new(3.95, 4.35, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 160, 220) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs.
 	-- hit: seconds in where an attack strikes (Server/BossAttacks' Anim lands it on the attack)
