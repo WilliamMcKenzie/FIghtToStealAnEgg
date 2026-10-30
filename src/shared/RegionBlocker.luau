@@ -18,16 +18,7 @@ local PIXELS = 10 -- the faces: pixels per stud (text stops at 100 pixels: 10 st
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local INK = Color3.fromRGB(14, 12, 16)
 
-local SUFFIXES = { "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc" }
-function RegionBlocker.abbreviate(n)
-	local i = 1
-	while n >= 1000 and i < #SUFFIXES do
-		n /= 1000
-		i += 1
-	end
-	local s = if n < 10 and i > 1 then string.format("%.1f", n) else tostring(math.floor(n))
-	return (string.gsub(s, "%.0$", "")) .. SUFFIXES[i]
-end
+RegionBlocker.abbreviate = require(script.Parent.Abbrev).format
 
 local function text(parent, props)
 	local label = Instance.new("TextLabel")

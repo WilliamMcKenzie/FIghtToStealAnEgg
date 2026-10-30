@@ -36,7 +36,7 @@ local HudKit = require(script.Parent.HudKit)
 local Hotbar = require(script.Parent.Hotbar)
 local Ui = require(script.Parent.Ui)
 local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config"))
-local RegionBlocker = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("RegionBlocker"))
+local Abbrev = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Abbrev"))
 
 local Hud = {}
 
@@ -335,7 +335,7 @@ function Hud.start()
 
 	local function count(name)
 		local function show()
-			counters[name].Text = RegionBlocker.abbreviate(player:GetAttribute(name) or 0)
+			counters[name].Text = Abbrev(player:GetAttribute(name) or 0)
 		end
 		show()
 		player:GetAttributeChangedSignal(name):Connect(show)
@@ -361,7 +361,7 @@ function Hud.start()
 		offline.Text = string.format(
 			'You earn <font color="%s">$%s</font>/Day offline! 😈',
 			OFFLINE_GREEN,
-			RegionBlocker.abbreviate(day)
+			Abbrev(day)
 		)
 	end
 	earn()
@@ -374,7 +374,7 @@ function Hud.start()
 			return
 		end
 		local pop = label(root, "OfflinePaidPop", {
-			Text = "+$" .. RegionBlocker.abbreviate(amount),
+			Text = "+$" .. Abbrev(amount),
 			TextXAlignment = Enum.TextXAlignment.Center,
 			TextColor3 = Color3.fromHex(OFFLINE_GREEN),
 			TextSize = 110,

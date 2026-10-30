@@ -30,6 +30,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local MapData = require(ReplicatedStorage.Shared.MapData)
 local Pets = require(ReplicatedStorage.Shared.Pets)
+local Abbrev = require(ReplicatedStorage.Shared.Abbrev)
 local Combat = require(script.Parent.Combat)
 local BossAttacks = require(script.Parent.BossAttacks)
 
@@ -208,7 +209,7 @@ function Training.start(map)
 			if gate and g.Cost > 0 then
 				local prompt = Instance.new("ProximityPrompt")
 				prompt.Name = "Unlock"
-				prompt.ActionText = "Unlock ($" .. tostring(g.Cost) .. ")"
+				prompt.ActionText = "Unlock ($" .. Abbrev(g.Cost) .. ")"
 				prompt.ObjectText = (Config.Regions.Names[name] or name) .. " Training"
 				prompt.HoldDuration = 0.4
 				prompt.MaxActivationDistance = 14
