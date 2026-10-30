@@ -49,6 +49,40 @@ local LEGS = {
 	{ "LeftAnkle", "LeftFoot", 0, 0, 0 },
 }
 local HIP_UP = 0.35 -- the LowerTorso's centre sits this far above the seat
+local TIPPED = {
+	Enum.HumanoidStateType.FallingDown,
+	Enum.HumanoidStateType.Ragdoll,
+	Enum.HumanoidStateType.Physics,
+	Enum.HumanoidStateType.PlatformStanding,
+	Enum.HumanoidStateType.Seated,
+	Enum.HumanoidStateType.Climbing,
+	Enum.HumanoidStateType.Swimming,
+}
+
+-- Your own character (the one this client moves) always stands straight up, turning only
+-- round the vertical: any tilt (a shove, a bump into a pen pet or a fence) is taken off
+-- the HumanoidRootPart, and its tumbling spin with it. If it's still in a tipped-over
+-- state somehow, it's stood back up. (The pet's welded to the HumanoidRootPart, so it
+-- stays upright too.)
+local function keepUpright(root, humanoid)
+	if root.CFrame.UpVector.Y < 0.999 then
+		local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
+		if look.Magnitude < 1e-3 then -- (tipped right onto its nose: use its up instead)
+			look = root.CFrame.UpVector * Vector3.new(1, 0, 1)
+		end
+		if look.Magnitude < 1e-3 then
+			look = Vector3.new(0, 0, -1)
+		end
+		root.CFrame = CFrame.lookAt(root.Position, root.Position + look.Unit)
+	end
+	local spin = root.AssemblyAngularVelocity
+	if math.abs(spin.X) + math.abs(spin.Z) > 1e-3 then
+		root.AssemblyAngularVelocity = Vector3.new(0, spin.Y, 0)
+	end
+	if table.find(TIPPED, humanoid:GetState()) then
+		humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+	end
+end
 
 local mounts = {} -- [character] = { horse, kind, root, humanoid, joint, legs, yaw }
 
@@ -110,6 +144,12 @@ local function mount(character)
 	-- state itself on the client that drives this character)
 	if character == Players.LocalPlayer.Character then
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+		-- (and never tipped over: QM, Oct 30, a ridden pet ended up upside down and stuck.
+		-- These are the states a knock or a shove puts a Humanoid into; with them off it
+		-- can only stand, run and fall. keepUpright below catches anything else.)
+		for _, state in TIPPED do
+			humanoid:SetStateEnabled(state, false)
+		end
 	end
 	local kind = petOf(character)
 	local m = { kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil, lift = 0, grow = 1, turn = 0, leapT = 0, fall = 0 }
@@ -152,6 +192,9 @@ RunService.PreSimulation:Connect(function(dt)
 			m.grow = 1
 		end
 		local root, horse = m.root, m.horse
+		if character == Players.LocalPlayer.Character then
+			keepUpright(root, m.humanoid)
+		end
 
 		-- a sprint ability: up in the air, under the floor, or bigger (eased in and out)
 		local owner = Players:GetPlayerFromCharacter(character)
