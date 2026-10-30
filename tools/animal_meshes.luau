@@ -22,6 +22,19 @@ local IDS = {
 	GiantRafflesia_Wart_Petal4 = 124018537708046,
 	GiantRafflesia_Wart_Petal5 = 78180364957226,
 	GiantRafflesia_Well_Flower = 88148812378304,
+	Bat_Fur_neck = 81329754956163, -- (LassoAPet's Bat: the Blood Bat boss, QM Oct 30)
+	Bat_Fur_root = 140436210691479,
+	Bat_Wing_WingL = 96644882542231,
+	Bat_Wing_WingL2 = 138337495224235,
+	Bat_Wing_WingR = 101191126037721,
+	Bat_Wing_WingR2 = 76684957771569,
+	AncientTreant_Leaf_ArmL = 72520559240156, -- (LassoAPet's Ancient Treant: the Elder Treant boss, QM Oct 30)
+	AncientTreant_Leaf_ArmR = 138556975636001,
+	AncientTreant_Leaf_neck = 135473395019785,
+	AncientTreant_Bark_ArmL = 100405580096422,
+	AncientTreant_Bark_ArmR = 91526866992805,
+	AncientTreant_Bark_root = 115478703668645,
+	AncientTreant_Moss_root = 93576707636543,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then

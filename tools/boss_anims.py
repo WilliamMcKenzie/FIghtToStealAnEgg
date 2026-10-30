@@ -176,6 +176,103 @@ def scorpion_king(m):
     return {"stab": stab, "pinch": pinch}
 
 
+def blood_bat(m):
+    # screech (0.6s windup): it rises with its wings flung wide and its head thrown back,
+    # then at the hit snaps its head forward and screams, wings cupped forward, shaking
+    shake = [(0.6 + 0.07 * i, 0, 0, (5 if i % 2 else -5) * (1 - i / 10)) for i in range(10)]
+    return {"screech": {"length": 1.5, "hit": 0.6, "tracks": {
+        "root": {"p": [(0, 0, 0, 0), (0.5, 0, 0.8, 0.3), (0.6, 0, 0.3, -0.3), (1.0, 0, 0.2, -0.2), (1.5, 0, 0, 0)],
+                 "r": [(0, 0, 0, 0), (0.5, 10, 0, 0)] + shake + [(1.5, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.5, 28, 0, 0), (0.6, -16, 0, 0), (1.1, -12, 0, 0), (1.5, 0, 0, 0)]},
+        "WingL": {"r": [(0, 0, 0, 0), (0.5, 0, 20, -38), (0.6, 0, -34, 10), (1.1, 0, -28, 8), (1.5, 0, 0, 0)]},
+        "WingR": {"r": [(0, 0, 0, 0), (0.5, 0, -20, 38), (0.6, 0, 34, -10), (1.1, 0, 28, -8), (1.5, 0, 0, 0)]},
+        "WingL2": {"r": [(0, 0, 0, 0), (0.5, 0, 0, -16), (0.6, 0, -30, 0), (1.1, 0, -24, 0), (1.5, 0, 0, 0)]},
+        "WingR2": {"r": [(0, 0, 0, 0), (0.5, 0, 0, 16), (0.6, 0, 30, 0), (1.1, 0, 24, 0), (1.5, 0, 0, 0)]},
+    }}}
+
+
+def flip(a, b, c, d):
+    """The hand turned over between a and b, held to c, back by d."""
+    return {"r": [(0, 0, 0, 0), (a, 0, 0, 0), (b, 180, 0, 0), (c, 180, 0, 0), (d, 0, 0, 0)]}
+
+
+def crimson_knight(m):
+    # the Asura's sword is in its left hand, blade up while the arm hangs: its swings turn the
+    # left shoulder, and the hand turns over (flip) so the blade runs on along the arm
+    # charge (1.0s windup): he crouches low, leaning in with his sword drawn back, then at
+    # the hit runs down the red lane, sword levelled in front
+    run = cycle(m, "gallop", ["LegFL", "LegFR", "left_calve", "right_calve"], 1.0, 2.0)
+    charge = {"length": 2.3, "hit": 1.0, "tracks": merge(run, {
+        "legs": {"p": [(0, 0, 0, 0), (0.8, 0, -0.6, 0), (1.0, 0, -0.3, 0), (2.0, 0, -0.3, 0), (2.3, 0, 0, 0)]},
+        "body": {"r": [(0, 0, 0, 0), (0.8, -18, 0, 0), (1.0, -24, 0, 0), (2.0, -22, 0, 0), (2.3, 0, 0, 0)]},
+        "left_shoulder": {"r": [(0, 0, 0, 0), (0.8, -40, 0, -10), (1.0, 80, 0, 0), (2.0, 76, 0, 0), (2.3, 0, 0, 0)]},
+        "left_hand": flip(0.8, 1.0, 2.0, 2.3),
+        "right_shoulder": {"r": [(0, 0, 0, 0), (0.8, 30, 0, 0), (1.0, -30, 0, 0), (2.0, -26, 0, 0), (2.3, 0, 0, 0)]},
+    })}
+    # slam (0.8s windup): the sword goes up over his head in both hands, then at the hit
+    # crashes down in front of him as he drops onto bent knees
+    slam = {"length": 1.6, "hit": 0.8, "tracks": {
+        "left_shoulder": {"r": [(0, 0, 0, 0), (0.6, 168, 0, 18), (0.7, 172, 0, 18), (0.8, 52, 0, 12), (1.1, 48, 0, 10), (1.6, 0, 0, 0)]},
+        "left_hand": flip(0.3, 0.5, 1.2, 1.5),
+        "right_shoulder": {"r": [(0, 0, 0, 0), (0.6, 160, 0, -30), (0.7, 164, 0, -30), (0.8, 50, 0, -20), (1.1, 46, 0, -18), (1.6, 0, 0, 0)]},
+        "body": {"r": [(0, 0, 0, 0), (0.6, 10, 0, 0), (0.8, -20, 0, 0), (1.1, -18, 0, 0), (1.6, 0, 0, 0)]},
+        "legs": {"p": [(0, 0, 0, 0), (0.6, 0, 0.2, 0), (0.8, 0, -0.8, 0), (1.1, 0, -0.7, 0), (1.6, 0, 0, 0)]},
+    }}
+    # summon (1.0s windup): he raises his sword straight up to the sky, looking up, then at
+    # the hit drives it point down into the floor, kneeling (his guards drop in)
+    summon = {"length": 2.2, "hit": 1.0, "tracks": {
+        "left_shoulder": {"r": [(0, 0, 0, 0), (0.7, 178, 0, 6), (0.9, 180, 0, 4), (1.0, 40, 0, 20), (1.6, 40, 0, 20), (2.2, 0, 0, 0)]},
+        "left_hand": flip(0.3, 0.6, 1.7, 2.1),
+        "body": {"r": [(0, 0, 0, 0), (0.7, 8, 0, 0), (1.0, -24, 0, 0), (1.6, -22, 0, 0), (2.2, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.7, 22, 0, 0), (1.0, -10, 0, 0), (1.6, -8, 0, 0), (2.2, 0, 0, 0)]},
+        "legs": {"p": [(0, 0, 0, 0), (0.9, 0, 0.1, 0), (1.0, 0, -1.1, 0), (1.6, 0, -1.0, 0), (2.2, 0, 0, 0)]},
+    }}
+    return {"charge": charge, "slam": slam, "summon": summon}
+
+
+def castle_wyvern(m):
+    # breath (1.0s windup): it rears its head up and back, jaw parting, wings half spread,
+    # then at the hit thrusts its head forward and down the red lane with its jaws wide,
+    # shuddering as it holds the flame, and folds back
+    shudder = [(1.0 + 0.1 * i, 0, 0, (3 if i % 2 else -3)) for i in range(9)]
+    breath = {"length": 2.4, "hit": 1.0, "tracks": {
+        "neck": {"r": [(0, 0, 0, 0), (0.85, 30, 0, 0), (1.0, -18, 0, 0)] + shudder[1:] + [(2.4, 0, 0, 0)]},
+        "Jaw": {"r": [(0, 0, 0, 0), (0.85, -12, 0, 0), (1.0, -34, 0, 0), (1.8, -32, 0, 0), (2.4, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.85, 6, 0, 0), (1.0, -4, 0, 0), (1.8, -3, 0, 0), (2.4, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.85, 0, 0.3, 0.6), (1.0, 0, 0, -0.4), (1.8, 0, 0, -0.3), (2.4, 0, 0, 0)]},
+        "WingL": {"r": [(0, 0, 0, 0), (0.85, 0, 0, -34), (1.0, 0, 0, -20), (1.8, 0, 0, -20), (2.4, 0, 0, 0)]},
+        "WingR": {"r": [(0, 0, 0, 0), (0.85, 0, 0, 34), (1.0, 0, 0, 20), (1.8, 0, 0, 20), (2.4, 0, 0, 0)]},
+    }}
+    # leap (0.8s windup, then about 1.3s in the air): it crouches with its wings raised
+    # high, springs at the hit with a downbeat, beats twice in the air and lands hard
+    beat = lambda k: [(0, 0, 0, 0), (0.7, 0, 0, -64 * k), (0.95, 0, 0, 26 * k), (1.25, 0, 0, -44 * k), (1.55, 0, 0, 26 * k),
+                      (1.85, 0, 0, -30 * k), (2.1, 0, 0, 10 * k), (2.6, 0, 0, 0)]
+    leap = {"length": 2.6, "hit": 0.8, "tracks": {
+        "root": {"p": [(0, 0, 0, 0), (0.7, 0, -1.2, 0), (0.8, 0, -0.6, 0), (1.0, 0, 1.4, 0), (2.0, 0, 1.0, 0), (2.15, 0, -0.9, 0),
+                       (2.6, 0, 0, 0)],
+                 "r": [(0, 0, 0, 0), (0.7, -8, 0, 0), (1.0, 12, 0, 0), (1.9, -6, 0, 0), (2.15, -4, 0, 0), (2.6, 0, 0, 0)]},
+        "WingL": {"r": beat(1)},
+        "WingR": {"r": beat(-1)},
+        "WingL2": {"r": [(t, x, y, z * 0.4) for t, x, y, z in beat(1)]},
+        "WingR2": {"r": [(t, x, y, z * 0.4) for t, x, y, z in beat(-1)]},
+        "Tail1": {"r": [(0, 0, 0, 0), (0.7, -10, 0, 0), (1.0, 14, 0, 0), (2.0, 8, 0, 0), (2.6, 0, 0, 0)]},
+    }}
+    return {"breath": breath, "leap": leap}
+
+
+def elder_treant(m):
+    # roots (1.0s windup): it leans back, heaving both branch arms high over its canopy, then
+    # at the hit slams them down into the floor in front (the roots burst up) and holds
+    roots = {"length": 2.0, "hit": 1.0, "tracks": {
+        "ArmL": {"r": [(0, 0, 0, 0), (0.8, 10, 0, -112), (0.9, 14, 0, -116), (1.0, 64, 0, -12), (1.5, 60, 0, -10), (2.0, 0, 0, 0)]},
+        "ArmR": {"r": [(0, 0, 0, 0), (0.8, 10, 0, 112), (0.9, 14, 0, 116), (1.0, 64, 0, 12), (1.5, 60, 0, 10), (2.0, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.8, 8, 0, 0), (1.0, -12, 0, 0), (1.5, -10, 0, 0), (2.0, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.8, 0, 0.6, 0), (1.0, 0, -0.9, 0), (1.5, 0, -0.8, 0), (2.0, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.8, 10, 0, 0), (1.0, -8, 0, 0), (1.5, -6, 0, 0), (2.0, 0, 0, 0)]},
+    }}
+    return {"roots": roots}
+
+
 def shark_boss(m):
     # breach (0.8s windup, the red circle filling): under the floor it thrashes, tail beating
     # faster and faster with its nose tipping up, then at the hit it surges up through the
@@ -214,6 +311,10 @@ ANIMS = {
     "KingCrab": king_crab,
     "SharkBoss": shark_boss,
     "ScorpionKing": scorpion_king,
+    "BloodBat": blood_bat,
+    "CrimsonKnight": crimson_knight,
+    "CastleWyvern": castle_wyvern,
+    "ElderTreant": elder_treant,
 }
 
 

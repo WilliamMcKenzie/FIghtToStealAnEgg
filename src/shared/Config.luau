@@ -835,7 +835,7 @@ return {
 			Name = "Crimson Knight",
 			Model = "CrimsonKnight",
 			StandIn = { "IceGolem", 2 },
-			Size = 3,
+			Size = 4.2, -- (LassoAPet's Asura, 10.9 studs tall: about 46 studs, QM Oct 30)
 			Health = 10000000,
 			Cash = 1500000,
 			Speed = 9,
@@ -874,7 +874,7 @@ return {
 			Name = "Blood Bat",
 			Model = "BloodBat",
 			StandIn = { "Firebird", 2.8 },
-			Size = 3.2,
+			Size = 3.2, -- (LassoAPet's Bat, hovering, 18 studs across the wings: about 58, QM Oct 30)
 			Health = 10000000,
 			Cash = 1500000,
 			Speed = 12,
@@ -907,7 +907,7 @@ return {
 			Name = "Castle Wyvern",
 			Model = "CastleWyvern",
 			StandIn = { "Phoenix", 3.2 },
-			Size = 3.2,
+			Size = 2.25, -- (LassoAPet's Rock Candy Dragon, 33 studs long: about 74, QM Oct 30)
 			Health = 10000000,
 			Cash = 1500000,
 			Speed = 10,
@@ -975,7 +975,7 @@ return {
 			Name = "Elder Treant",
 			Model = "ElderTreant",
 			StandIn = { "VenusFlytrap", 2.6 },
-			Size = 3,
+			Size = 1.75, -- (LassoAPet's Ancient Treant, 32 studs tall: about 56, QM Oct 30)
 			Health = 1500000,
 			Cash = 250000,
 			Speed = 0,
@@ -1571,48 +1571,56 @@ return {
 			ElderTreant = { -- (branches drooped, canopy sagging)
 				Bones = {
 					root = { 0, 0, 0, -0.03491, 0, 0 },
-					ArmL = { 0, 0, 0, 0, 0, 0.34907 },
-					ArmR = { 0, 0, 0, 0, 0, -0.34907 },
-					Canopy = { 0, -0.3, 0, -0.06981, 0, 0 },
+					ArmL = { 0, 0, 0, 0.06981, 0, 0.24435 },
+					ArmR = { 0, 0, 0, 0.06981, 0, -0.24435 },
+					neck = { 0, -0.5, 0, -0.13963, 0, 0 },
 				},
 				Breathe = {
-					Canopy = { 0, 0.15, 0, 0.01745, 0, 0 },
-				},
-				Shut = { "EyeL", "EyeR" },
-				Hide = {},
-			},
-			CrimsonKnight = { -- (asleep on his feet, leaning on his lance, helm drooped)
-				Bones = {
-					root = { 0, -0.3, 0, -0.06981, 0, 0 },
-					neck = { 0, -0.2, 0, -0.48869, 0, 0.10472 },
-					ArmL = { 0, 0, 0, 0.10472, 0, 0 },
-				},
-				Breathe = {
-					root = { 0, 0.1, 0, 0, 0, 0 },
-					neck = { 0, 0, 0, 0.05236, 0, 0 },
+					neck = { 0, 0.2, 0, 0.01745, 0, 0 },
 				},
 				Shut = {},
 				Hide = {},
 			},
+			CrimsonKnight = { -- (asleep on his feet, head drooped, sword lowered)
+				Bones = {
+					legs = { 0, -0.3, 0, 0, 0, 0 },
+					body = { 0, 0, 0, -0.13963, 0, 0 },
+					neck = { 0, -0.1, 0, -0.45379, 0, 0.06981 },
+					left_shoulder = { 0, 0, 0, 0.10472, 0, 0 },
+				},
+				Breathe = {
+					body = { 0, 0, 0, 0.02618, 0, 0 },
+					neck = { 0, 0, 0, 0.05236, 0, 0 },
+				},
+				Shut = { "GlowEyeL", "GlowEyeR" },
+				Hide = {},
+			},
 			BloodBat = { -- (landed, wrapped in its wings)
 				Bones = {
-					root = { 0, -3, 0, 0, 0, 0 },
-					WingL = { 0, 0, 0, 0, -0.87266, 1.309 },
-					WingR = { 0, 0, 0, 0, 0.87266, -1.309 },
+					root = { 0, -4, 0, 0, 0, 0 },
+					WingL = { 0, 0, 0, 0, -0.95993, 0.34907 },
+					WingR = { 0, 0, 0, 0, 0.95993, -0.34907 },
+					WingL2 = { 0, 0, 0, 0, -1.0472, 0 },
+					WingR2 = { 0, 0, 0, 0, 1.0472, 0 },
+					neck = { 0, -0.2, 0, -0.17453, 0, 0 },
 				},
 				Breathe = {
 					root = { 0, 0.1, 0, 0, 0, 0 },
 				},
 				Shut = { "EyeL", "EyeR" },
-				Hide = {},
+				Hide = { "PupilL", "PupilR" },
 			},
 			CastleWyvern = { -- (lying down, head on the ground, tail curled round, wings folded)
 				Bones = {
-					root = { 0, -1.8, 0, 0, 0, 0 },
-					neck = { 0, -1.4, 0.4, -0.41888, 0.5236, 0 },
-					Tail = { 0, 0, 0, 0, -0.87266, 0 },
-					WingL = { 0, 0, 0, 0, 0, 0.5236 },
-					WingR = { 0, 0, 0, 0, 0, -0.5236 },
+					root = { 0, -3.4, 0, 0, 0, 0 },
+					neck = { 0, -1.2, 0, -0.31416, 0.41888, 0 },
+					Tail1 = { 0, 0, 0, 0, -0.45379, 0 },
+					Tail2 = { 0, 0, 0, 0, -0.45379, 0 },
+					Tail3 = { 0, 0, 0, 0, -0.38397, 0 },
+					LegFL = { 0, 0, 0, -1.22173, 0, 0 },
+					LegFR = { 0, 0, 0, -1.22173, 0, 0 },
+					LegHL = { 0, 0, 0, 1.22173, 0, 0 },
+					LegHR = { 0, 0, 0, 1.22173, 0, 0 },
 				},
 				Breathe = {
 					root = { 0, 0.12, 0, 0, 0, 0 },
@@ -1620,7 +1628,21 @@ return {
 					WingR = { 0, 0, 0, 0, 0, 0.06981 },
 				},
 				Shut = { "EyeL", "EyeR" },
-				Hide = {},
+				Hide = { "PupilL", "PupilR" },
+			},
+			SharkBoss = { -- (resting on the floor, jaws shut, tail still)
+				Bones = {
+					root = { 0, -0.2, 0, 0, 0, 0 },
+					Tail = { 0, 0, 0, 0, 0.17453, 0 },
+					TailFin = { 0, 0, 0, 0, 0.13963, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.05, 0, 0, 0, 0 },
+					FinL = { 0, 0, 0, 0, 0, 0.06981 },
+					FinR = { 0, 0, 0, 0, 0, -0.06981 },
+				},
+				Shut = {},
+				Hide = { "Pupil" },
 			},
 			-- end of the bosses made in Python
 		},
