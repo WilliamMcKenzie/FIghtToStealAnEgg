@@ -91,7 +91,7 @@ local function bomb(player, at)
 		if player.Parent == nil then
 			return
 		end
-		for _, t in Combat.touching(at, cfg.Radius) do
+		for _, t in Combat.touching(at, cfg.Radius, player) do
 			Combat.hit(player, t.handler, damage(player, cfg.Damage))
 		end
 	end)
@@ -111,7 +111,7 @@ RunService.Heartbeat:Connect(function(dt)
 		elseif r.kind == "Smash" or r.kind == "Crabwalk" then
 			local cfg = Config.SprintAbility.Smash
 			local reach = Pets.stats(player:GetAttribute("Pet")).Hitbox * cfg.Grow + cfg.Reach
-			local hits = Combat.touching(pos, reach)
+			local hits = Combat.touching(pos, reach, player)
 			if #hits > 0 then
 				-- (harder the longer it's been charging)
 				local built = math.clamp((os.clock() - r.since) / cfg.Ramp, 0, 1)
