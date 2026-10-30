@@ -3,9 +3,11 @@
 -- riding without stopping); if their pet has an ability, it's on in their SprintAbility
 -- attribute till then, which everyone draws (client/SprintAbility) and the rest of the
 -- server reads:
---   Burrow, Fly  Server/BossAttacks lets the hits through or not (BossAttacks.dodges)
---   Smash        here: running into an enemy hits it, knocks it back (Combat.knock) and
---                ends the sprint (the SprintEnd remote tells the rider's client)
+--   Burrow, Fly, Leap  Server/BossAttacks lets the hits through or not (BossAttacks.dodges)
+--   Glow         Server/Regen heals faster
+--   Smash, Crabwalk  here: running into an enemy hits it, knocks it back (Combat.knock)
+--                and ends the sprint (the SprintEnd remote tells the rider's client)
+--   Frost        here: freezes the boss minions round you (Minions.freezeNear)
 --   Bombs        here: a bomb every Every seconds, going off Fuse seconds later (every
 --                client draws it from the PetBomb remote: client/Bombs)
 -- It's off again whenever the pet changes or the rider dies.
@@ -19,6 +21,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Pets = require(Shared:WaitForChild("Pets"))
 local Weapons = require(Shared:WaitForChild("Weapons"):WaitForChild("Weapons"))
 local Combat = require(script.Parent.Combat)
+local Minions = require(script.Parent.Minions)
 
 local SprintAbility = {}
 
@@ -102,7 +105,10 @@ RunService.Heartbeat:Connect(function(dt)
 			continue
 		end
 		local pos = root.Position
-		if r.kind == "Smash" then
+		if r.kind == "Frost" then
+			local cfg = Config.SprintAbility.Frost
+			Minions.freezeNear(pos, cfg.Radius, cfg.Freeze, cfg.Again)
+		elseif r.kind == "Smash" or r.kind == "Crabwalk" then
 			local cfg = Config.SprintAbility.Smash
 			local reach = Pets.stats(player:GetAttribute("Pet")).Hitbox * cfg.Grow + cfg.Reach
 			local hits = Combat.touching(pos, reach)

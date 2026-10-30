@@ -17,9 +17,11 @@
 --           and the hips and knees take a riding pose (thighs forward and apart, shins
 --           back), overriding whatever the Animator plays on those joints
 -- A sprint ability (the player's SprintAbility attribute, Server/SprintAbility) moves the
--- pet and rider together: Fly lifts them Config.SprintAbility.Fly.Height up, Burrow sinks
--- them out of sight under the floor, Smash grows the pet (its Grow). The rider's own
--- character stays where it is (it's only drawn up or down).
+-- pet and rider together: Fly lifts them Config.SprintAbility.Fly.Height up, Leap walks
+-- them up its steps of thin air (and they drop back down after, under its Gravity),
+-- Burrow sinks them out of sight under the floor, Smash and Crabwalk grow the pet (its
+-- Grow) and Crabwalk turns it sideways. The rider's own character stays where it is (it's
+-- only drawn up, down or turned).
 -- Transforms are written in PreSimulation (after the Animator), like SwingPose's, and the
 -- rider's is worked out relative to the HumanoidRootPart, so where physics then puts the
 -- character doesn't matter. They aren't replicated, so each client does this for every
@@ -110,7 +112,7 @@ local function mount(character)
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 	end
 	local kind = petOf(character)
-	local m = { kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil, lift = 0, grow = 1 }
+	local m = { kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil, lift = 0, grow = 1, turn = 0, leapT = 0, fall = 0 }
 	m.horse, m.weld = newPet(character, kind, root)
 	mounts[character] = m
 	return m
@@ -155,19 +157,39 @@ RunService.PreSimulation:Connect(function(dt)
 		local owner = Players:GetPlayerFromCharacter(character)
 		local ability = owner and owner:GetAttribute("SprintAbility")
 		local abilities = Config.SprintAbility
-		local lift, grow = 0, 1
+		local lift, grow, turn = 0, 1, 0
 		if ability == "Fly" then
 			lift = abilities.Fly.Height
+		elseif ability == "Leap" then
+			-- (a quick hop up onto each step in turn)
+			local leap = abilities.Leap
+			m.leapT += dt
+			lift = leap.Height * math.min(math.floor(m.leapT / leap.StepTime) + 1, leap.Steps) / leap.Steps
 		elseif ability == "Burrow" then
 			lift = -(horse.height + 6) -- (the rider too)
 		elseif ability == "Smash" then
 			grow = abilities.Smash.Grow
+		elseif ability == "Crabwalk" then
+			grow = abilities.Smash.Grow
+			turn = math.rad(abilities.Crabwalk.Turn)
 		end
-		local ease = 1 - math.exp(-dt * 3 / abilities.Fly.Rise)
-		m.lift += (lift - m.lift) * ease
+		if ability ~= "Leap" then
+			m.leapT = 0
+		end
+		if m.leaping and ability ~= "Leap" and m.lift > 0 then
+			-- (off the steps: it drops back down, faster and faster)
+			m.fall += abilities.Leap.Gravity * dt
+			m.lift = math.max(m.lift - m.fall * dt, lift)
+		else
+			m.fall = 0
+			local rate = if ability == "Leap" then 18 else 3 / abilities.Fly.Rise
+			m.lift += (lift - m.lift) * (1 - math.exp(-dt * rate))
+		end
 		if math.abs(m.lift - lift) < 0.02 then
 			m.lift = lift
 		end
+		m.leaping = ability == "Leap" or (m.leaping and m.lift > 0)
+		m.turn += (turn - m.turn) * (1 - math.exp(-dt * 12))
 		if m.grow ~= grow then
 			m.grow += (grow - m.grow) * math.min(dt * 12, 1)
 			if math.abs(m.grow - grow) < 0.01 then
@@ -190,7 +212,9 @@ RunService.PreSimulation:Connect(function(dt)
 		-- the horse at the ground under the character, its seat under the character (in the
 		-- HumanoidRootPart's frame: the weld keeps it there, facing where the character faces)
 		local seat = horse.seat * horse.size * horse.scale
-		local place = CFrame.new(-seat.X, -(root.Size.Y / 2 + m.humanoid.HipHeight) + m.lift, -seat.Z)
+		local place = CFrame.new(0, -(root.Size.Y / 2 + m.humanoid.HipHeight) + m.lift, 0)
+			* CFrame.Angles(0, m.turn, 0) -- (a Crabwalk's sideways scuttle)
+			* CFrame.new(-seat.X, 0, -seat.Z)
 		if m.weld.C0 ~= place then
 			m.weld.C0 = place
 		end

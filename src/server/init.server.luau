@@ -49,7 +49,7 @@ Hatchery.start() -- (stolen eggs in your hotbar, put down in your pen and hatche
 Eggs.start(map)
 Training.start(map)
 Regions.start()
-Regen.start() -- (healing after Config.Regen.Delay seconds without being hit)
+Regen.start() -- (always healing, at your pet's Regen)
 Data.start() -- (after Training: it loads over the grounds' defaults)
 Arsenal.start() -- (each player's weapon tool, and buying them from Carl)
 

@@ -1,7 +1,8 @@
--- Healing out of a fight (QM, Oct 26): after Config.Regen.Delay seconds without taking
--- damage, a player heals Config.Regen.Rate of their max health a second until full. Any
--- damage (bosses, mobs, anything that lowers Health) restarts the wait. Roblox's default
--- Health script (its slow regen) is removed from every character.
+-- Healing (QM, Oct 30: a constant thing, set by your pet): every living player heals their
+-- pet's Regen (health a second: Shared/Pets, Config.PetStats.Regen) all the time, in a
+-- fight or not, up to full. A sprint ability can speed it up (the player's SprintAbility
+-- attribute: Config.SprintAbility[it].Regen, the Snake's 2x). Roblox's default Health
+-- script (its slow regen) is removed from every character.
 --
 --   Regen.start()   -- once
 
@@ -9,45 +10,24 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Pets = require(Shared:WaitForChild("Pets"))
 
 local Regen = {}
 
-local tracked = {} -- humanoid -> { hurt = damage taken so far, hitAt = os.clock() of the last hit }
-
-local function track(character)
-	local humanoid = character:WaitForChild("Humanoid", 10)
-	if not humanoid then
-		return
-	end
+local function strip(character)
 	local default = character:WaitForChild("Health", 5)
 	if default and default:IsA("BaseScript") then
 		default:Destroy()
 	end
-	local t = { hurt = humanoid.MaxHealth - humanoid.Health, hitAt = os.clock() }
-	tracked[humanoid] = t
-	-- damage is what's missing from full going up (so a pet swap, which keeps your damage
-	-- while MaxHealth changes, isn't a hit)
-	humanoid.HealthChanged:Connect(function()
-		local hurt = humanoid.MaxHealth - humanoid.Health
-		if hurt > t.hurt + 1e-3 then
-			t.hitAt = os.clock()
-		end
-		t.hurt = hurt
-	end)
-	humanoid.Destroying:Connect(function()
-		tracked[humanoid] = nil
-	end)
-	humanoid.Died:Connect(function()
-		tracked[humanoid] = nil
-	end)
 end
 
 function Regen.start()
 	local function joined(player)
-		player.CharacterAdded:Connect(track)
+		player.CharacterAdded:Connect(strip)
 		if player.Character then
-			task.spawn(track, player.Character)
+			task.spawn(strip, player.Character)
 		end
 	end
 	Players.PlayerAdded:Connect(joined)
@@ -55,12 +35,13 @@ function Regen.start()
 		joined(player)
 	end
 	RunService.Heartbeat:Connect(function(dt)
-		local now = os.clock()
-		for humanoid, t in tracked do
-			local max = humanoid.MaxHealth
-			if humanoid.Health > 0 and humanoid.Health < max and now - t.hitAt >= Config.Regen.Delay then
-				humanoid.Health = math.min(max, humanoid.Health + max * Config.Regen.Rate * dt)
-				t.hurt = max - humanoid.Health
+		for _, player in Players:GetPlayers() do
+			local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+			if humanoid and humanoid.Health > 0 and humanoid.Health < humanoid.MaxHealth then
+				local rate = Pets.stats(player:GetAttribute("Pet") or "Horse").Regen
+				local ability = Config.SprintAbility[player:GetAttribute("SprintAbility") or ""]
+				rate *= ability and ability.Regen or 1
+				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + rate * dt)
 			end
 		end
 	end)
