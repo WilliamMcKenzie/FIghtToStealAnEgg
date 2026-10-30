@@ -1,5 +1,5 @@
--- MysticOwl: The Penguin as the Magic Circle's owl: night blue, a pale violet front,
--- gold beak and feet, ear tufts and big glowing eyes.
+-- MysticOwl: The Penguin as the Magic Circle's owl: tawny feathers with darker wings,
+-- a speckled cream front, a wide pale face with big amber eyes, ear tufts and a small beak.
 -- Made by tools/later_pets.py.
 
 local Horse = require(script.Parent.Horse)

@@ -1,5 +1,6 @@
 """Eggs for the later biomes' pets (tools/later_pets.py), in the same layered style as the
-others (designs/eggs/c_style): a pet made from another pet gets that pet's egg recoloured
+others (designs/eggs/c_style; LassoAPet's own pets keep their Lasso eggs, copied as they
+are): a pet made from another pet gets that pet's egg recoloured
 the same way (and the same tweaks); a new pet gets the plain layered egg in its colours with
 a few of its features (ears, eyes, a cap, spines...).
 
@@ -19,7 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from petlib import EGGS, Model, deg  # noqa: E402
 from later_pets import (BONE, BONE_DK, BONE_SH, CRIMSON, CRIMSON_DK, CRYPT, CRYPT_DK, DEEP, GHOST, GOLD,  # noqa: E402
-                        GOLD_DK, MAGIC, NAVY, ABYSS, STEEL, STEEL_DK, STEEL_LT, TEAL, TEAL_DK, PUPIL)
+                        GOLD_DK, MAGIC, NAVY, ABYSS, STEEL, STEEL_DK, STEEL_LT, TEAL_DK, PUPIL)
 
 EGG = {}
 
@@ -32,7 +33,10 @@ def egg(kind, base=None):
 
 
 def load(kind):
-    return Model.load(os.path.join(EGGS, kind + "EggModel.luau"))
+    path = os.path.join(EGGS, kind + "EggModel.luau")
+    if not os.path.exists(path):  # (LassoAPet's, kept only as a base: tools/bases)
+        path = os.path.join(HERE, "bases", kind + "EggModel.luau")
+    return Model.load(path)
 
 
 def plain(layers):
@@ -124,26 +128,6 @@ def _():
     return m
 
 
-@egg("Pufferfish", "Fish")
-def _():
-    m = load("Fish").recolor({(60, 140, 230): (250, 210, 70), (30, 90, 190): (220, 150, 40), (170, 215, 250): (255, 246, 214)})
-    m.drop("Dorsal.")
-    for i, (y, z) in enumerate(((3.25, 0), (2.75, -0.95), (1.3, -1.25))):
-        m.add("SpineFront%d" % i, "top" if y > 1.8 else "bottom", (0.15, 0.3, 0.3), (0, y, z), (255, 255, 255), "WedgePart")
-    for i, y in enumerate((0.7, 2.3)):
-        pair(m, "Spine%d" % i, "top" if y > 1.8 else "bottom", (0.15, 0.3, 0.3), (1.25, y, 0), (255, 255, 255), "WedgePart",
-             rot=lambda s: deg(0, 0, -s * 90))
-    return m
-
-
-@egg("Shark", "Fish")
-def _():
-    m = load("Fish").recolor({(60, 140, 230): (110, 126, 146), (30, 90, 190): (84, 98, 118), (170, 215, 250): (236, 240, 244)})
-    m.drop("Dorsal.")
-    m.add("Dorsal", "top", (0.25, 1.0, 1.0), (0, 3.6, 0.1), (84, 98, 118), "WedgePart")
-    return m
-
-
 @egg("WarBoar", "Boar")
 def _():
     m = load("Boar").recolor({(176, 108, 68): (92, 84, 92), (112, 66, 46): CRIMSON, (86, 60, 52): (50, 44, 52),
@@ -184,32 +168,38 @@ def _():
                                     (255, 188, 36): GOLD, (255, 132, 24): (250, 246, 236), (206, 34, 40): CRIMSON})
 
 
-@egg("Treant", "IceGolem")
+@egg("CrystalTortoise", "TreasureTurtle")
 def _():
-    return load("IceGolem").recolor({(82, 150, 226): (96, 66, 48), (160, 218, 250): (140, 100, 66), (252, 253, 255): TEAL,
-                                     (96, 222, 255): (110, 210, 120)})
+    m = load("TreasureTurtle").recolor({(34, 100, 44): (48, 64, 150), (60, 150, 60): (78, 104, 196),
+                                        (250, 222, 150): (112, 140, 222), (255, 196, 36): (MAGIC, {"neon": True})})
+    m.drop("Trunk.*|Frond.*|Coconut.*")
+    return m
 
 
-@egg("CrystalTortoise", "VolcanoTortoise")
+@egg("SpiritLoong", "Loong")
 def _():
-    return load("VolcanoTortoise").recolor({
-        (178, 150, 102): (88, 170, 150), (92, 50, 36): (52, 70, 160), (122, 66, 44): (96, 124, 214),
-        (112, 96, 90): (150, 220, 255), (92, 78, 74): (110, 180, 240), (255, 116, 24): MAGIC, (255, 186, 60): (220, 250, 255)})
-
-
-@egg("SpiritLoong", "Snake")
-def _():
-    return load("Snake").recolor({(240, 186, 72): (240, 248, 255), (252, 234, 186): TEAL, (168, 48, 78): (130, 80, 220),
-                                  (48, 196, 214): (MAGIC, {"neon": True})})
+    return load("Loong").recolor({(121, 146, 53): (228, 240, 255), (233, 197, 115): (176, 228, 244),
+                                  (255, 216, 21): (150, 100, 240), (227, 142, 22): (MAGIC, {"neon": True}),
+                                  (150, 28, 36): (52, 200, 196), (226, 214, 190): (200, 186, 250)})
 
 
 @egg("MysticOwl", "Penguin")
 def _():
-    m = load("Penguin").recolor({(34, 36, 50): (58, 66, 150), (246, 246, 248): (214, 206, 250), (255, 150, 40): GOLD,
-                                 (226, 110, 24): GOLD_DK})
-    pair(m, "Tuft", "top", (0.35, 0.6, 0.45), (0.38, 3.45, 0), (58, 66, 150), "WedgePart", rot=deg(0, 180, 0))
-    pair(m, "Eye", "top", (0.4, 0.4, 0.05), (0.33, 2.75, -0.93), (255, 230, 120), plain=True)
-    pair(m, "Pupil", "top", (0.2, 0.25, 0.03), (0.3, 2.73, -0.96), PUPIL, plain=True)
+    tawny, cream, rim = (160, 112, 70), (244, 228, 194), (120, 82, 52)
+    m = load("Penguin").recolor({(34, 36, 50): tawny, (246, 246, 248): cream, (255, 150, 40): (220, 170, 60),
+                                 (226, 110, 24): (170, 120, 40)})
+    m.paint("Flipper.*", (112, 76, 48))
+    m.paint("L4Front", tawny)
+    m.paint("L5Front", (240, 224, 196))
+    # its wide face: big amber eyes across the pale disc, the beak below, ear tufts on top
+    pair(m, "EyeRim", "top", (0.52, 0.42, 0.04), (0.43, 2.52, -0.92), rim, plain=True)
+    pair(m, "Eye", "top", (0.38, 0.32, 0.04), (0.43, 2.52, -0.95), (255, 168, 40), plain=True)
+    pair(m, "Pupil", "top", (0.18, 0.18, 0.03), (0.43, 2.52, -0.98), PUPIL, plain=True)
+    m.grow("Beak|BeakTip", 0.7)
+    m.move("Beak|BeakTip", (0, -0.36, -0.03))
+    pair(m, "Tuft", "top", (0.35, 0.6, 0.45), (0.38, 3.45, 0), tawny, "WedgePart", rot=deg(0, 180, 0))
+    for i, (x, y) in enumerate(((-0.4, 1.15), (0.4, 1.15), (0, 0.75), (-0.45, 0.45), (0.45, 0.45))):
+        m.add("Speck%d" % i, "bottom", (0.22, 0.07, 0.03), (x, y, -1.25 if y > 0.91 else -1.13), (176, 130, 80), plain=True)
     return m
 
 
@@ -283,24 +273,6 @@ def _():
         m.add("Crown%d" % i, "top", (0.18, 0.4 - i * 0.08, 0.3), (0, 3.38 - i * 0.04, z), fin, "WedgePart", rot=deg(0, 180, 0))
     pair(m, "Fin", "bottom", (0.08, 0.4, 0.5), (1.25, 1.3, 0.2), fin)
     m.add("Dorsal", "bottom", (0.12, 0.7, 0.4), (0, 1.1, 1.35), fin, "WedgePart", rot=deg(0, 180, 0))
-    return m
-
-
-@egg("Octopus")
-def _():
-    import math
-    skin, lt = (150, 70, 200), (204, 150, 236)
-    m = plain([skin, skin, skin, skin, skin, skin, skin])
-    for k in range(8):
-        a = math.radians(22.5 + 45 * k)
-        m.add("Arm%d" % k, "bottom", (0.32, 0.3, 0.6), (math.sin(a) * 1.1, 0.15, math.cos(a) * 1.1), skin,
-              rot=deg(0, math.degrees(a), 0))
-        m.add("ArmTip%d" % k, "bottom", (0.24, 0.24, 0.3), (math.sin(a) * 1.45, 0.3, math.cos(a) * 1.45), lt,
-              rot=deg(0, math.degrees(a), 0))
-    pair(m, "Eye", "top", (0.4, 0.42, 0.05), (0.38, 2.15, -1.13), (255, 255, 255), plain=True)
-    pair(m, "Pupil", "top", (0.3, 0.12, 0.03), (0.38, 2.12, -1.16), PUPIL, plain=True)
-    for i, (x, y, z) in enumerate(((-0.5, 2.7, -0.93), (0.3, 3.0, -0.53), (0.6, 2.6, -0.93))):
-        m.add("Spot%d" % i, "top", (0.22, 0.22, 0.05), (x, y, z), lt, plain=True)
     return m
 
 

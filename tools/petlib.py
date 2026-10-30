@@ -61,7 +61,9 @@ class Model:
 
     # ---- reading -----------------------------------------------------------------------
     @classmethod
-    def load(cls, path):
+    def load(cls, path, meshes=False):
+        """meshes: True drops any MeshPart (otherwise it's an error: they can't be recoloured
+        or reshaped here, and the game draws pets from blocks)."""
         if not os.path.isabs(path):
             path = os.path.join(ANIMALS, path + "Model.luau")
         src = open(path).read()
@@ -89,6 +91,8 @@ class Model:
                 if re.search(r"\b" + flag + r" = true", e):
                     p[flag] = True
             if re.search(r"\bmesh = ", e):
+                if meshes:
+                    continue
                 raise ValueError("meshes aren't supported: " + path)
             if len(p["cf"]) == 3:
                 p["cf"] = p["cf"] + [1, 0, 0, 0, 1, 0, 0, 0, 1]
@@ -213,6 +217,14 @@ class Model:
         if like:
             rx = re.compile(r"(\t\t\t\t)%s = \{\n(.*?)\n\t\t\t\t\},\n" % re.escape(like), re.S)
             self.animations = rx.sub(lambda m: m.group(0) + "%s%s = {\n%s\n\t\t\t\t},\n" % (m.group(1), name, m.group(2)), self.animations)
+        return self
+
+    def drop_bone(self, name):
+        """Remove a bone with its parts and animation tracks (it must have no child bones)."""
+        assert not any(b["parent"] == name for b in self.bones), name
+        self.bones = [b for b in self.bones if b["name"] != name]
+        self.parts = [p for p in self.parts if p["bone"] != name]
+        self.animations = re.sub(r"\t\t\t\t%s = \{\n.*?\n\t\t\t\t\},\n" % re.escape(name), "", self.animations, flags=re.S)
         return self
 
     # ---- writing -----------------------------------------------------------------------

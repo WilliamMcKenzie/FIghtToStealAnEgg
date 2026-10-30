@@ -8,4 +8,5 @@ local RoyalEagleModel = require(script.Parent.RoyalEagleModel)
 return Horse.variant("RoyalEagle", RoyalEagleModel, "Void", {
 	seat = Vector3.new(0, 4.5, 0.8),
 	neck = { center = Vector3.new(0, 6.9, -4.3), radius = 1.8 },
+	size = 1.357, -- (38 studs long)
 })

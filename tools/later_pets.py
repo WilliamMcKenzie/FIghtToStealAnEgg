@@ -4,13 +4,15 @@ pets with eggs, in the elegant style of meadow/desert, recolor some maybe when a
 
   Abandoned Dungeon (Dungeon)   Dungeon Rat, Slime, Cave Spider, Bone Steed, Mimic, Bone Wyrm
   Red Castle (Castle)           War Boar, Royal Steed, Chess Knight, Royal Peacock, Living Armor,
-                                Crimson Drake, Royal Griffin
-  Magic Circle (Forest)         Shroom, Spirit Fox, Spirit Deer, Treant, Mystic Owl,
+                                Crimson Drake, Royal Eagle
+  Magic Circle (Forest)         Shroom, Spirit Fox, Spirit Deer, Living Birch, Mystic Owl,
                                 Crystal Tortoise, Spirit Loong
-  Ocean Trench (Ocean)          Pufferfish, Seahorse, King Crab, Shark, Octopus, Abyss Whale
+  Ocean Trench (Ocean)          Squid, Seahorse, King Crab, Fish School, Whale, Abyss Whale
 
 Most are an existing pet recoloured and tweaked (parts added, dropped or resized); the
-Slime, Mimic, Chess Knight, Shroom, Seahorse and Octopus are new. Each pet's egg is drawn
+Slime, Mimic, Chess Knight, Shroom and Seahorse are new, and the Squid, Fish School, Whale
+and Living Birch are LassoAPet's as they are (QM's picks, Oct 30). The biggest are sized by
+their longest side (fit=), so they still fit the regular arenas. Each pet's egg is drawn
 in the same layered style as the others (tools/later_eggs.py).
 
 Run: python3 tools/later_pets.py
@@ -26,7 +28,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from petlib import ANIMALS, Model, anims, cycle, deg  # noqa: E402
 
-PETS = {}  # kind -> dict(model=fn, base=..., note=..., seat=..., neck=..., size=...)
+# LassoAPet's models used only as bases (not pets of this game): tools/bases/<Kind>Model.luau
+BASES = os.path.join(HERE, "bases")
+
+PETS = {}  # kind -> dict(build=fn, base=..., note=..., seat=..., neck=..., size= or fit=...)
 
 
 def pet(kind, note, base=None, **points):
@@ -99,7 +104,7 @@ def royal_peacock():
 
 
 @pet("LivingArmor", "The Icebringer as an empty suit of the castle's armour: steel plates over\n"
-     "-- crimson cloth, gold trim and red eyes glowing inside.", base="Icebringer", size=3)
+     "-- crimson cloth, gold trim and red eyes glowing inside.", base="Icebringer", fit=34)
 def living_armor():
     m = Model.load("Icebringer")
     m.recolor({(49, 162, 242): STEEL, (25, 118, 237): STEEL_DK, (170, 228, 248): STEEL_LT,
@@ -127,7 +132,7 @@ def crimson_drake():
 
 
 @pet("RoyalEagle", "The Phoenix as the castle's heraldic eagle: white and gold feathers on\n"
-     "-- a crimson body, no flame.", base="Phoenix")
+     "-- a crimson body, no flame.", base="Phoenix", fit=38)
 def royal_eagle():
     m = Model.load("Phoenix")
     m.recolor({(240, 72, 32): (250, 246, 236), (255, 232, 84): ((255, 220, 110), {"neon": None}),
@@ -136,56 +141,85 @@ def royal_eagle():
 
 
 # ---- Magic Circle ------------------------------------------------------------------------
-@pet("Treant", "The Ice Golem grown from the Magic Circle's trees: bark limbs, a turquoise\n"
-     "-- mossy cap and shoulders, and leafy shoots where its crystals were.", base="IceGolem")
-def treant():
-    m = Model.load("IceGolem")
-    m.recolor({(82, 150, 226): (96, 66, 48), (160, 218, 250): (140, 100, 66),
-               (252, 253, 255): TEAL, (96, 222, 255): (110, 210, 120)})
-    m.paint("Pupil.*", MAGIC, neon=True)
-    return m
-
-
-@pet("CrystalTortoise", "The Volcano Tortoise from the Magic Circle: a blue stone shell with a\n"
-     "-- crystal mound glowing where the volcano was, mossy turquoise skin.", base="VolcanoTortoise")
+@pet("CrystalTortoise", "The Treasure Turtle without its island, from the Magic Circle: a stepped\n"
+     "-- blue stone shell with glowing crystal scutes, a pale plastron and its teal skin.",
+     base="TreasureTurtle", seat=(0, 7.3, 0.3), neck=((0, 5.18, -8.4), 2.0), fit=28)
 def crystal_tortoise():
-    m = Model.load("VolcanoTortoise")
-    m.recolor({(178, 150, 102): (88, 170, 150), (150, 122, 82): (60, 136, 120), (236, 214, 170): (210, 240, 230),
-               (92, 50, 36): (52, 70, 160), (122, 66, 44): (96, 124, 214), (118, 78, 62): (112, 140, 222),
-               (112, 96, 90): (150, 220, 255), (92, 78, 74): (110, 180, 240),
-               (255, 116, 24): MAGIC, (191, 101, 44): (80, 170, 240), (255, 186, 60): (220, 250, 255)})
+    # (its smooth shell and sand are MeshParts: dropped, and the shell rebuilt in steps as
+    # Lasso first drew it, tools/pirate_turtle.py)
+    m = Model.load(os.path.join(BASES, "TreasureTurtleModel.luau"), meshes=True)
+    m.drop_bone("Palm")
+    stone, stone_lt, stone_dk = (78, 104, 196), (112, 140, 222), (48, 64, 150)
+    m.paint("Plastron", (200, 224, 240))
+    m.add("Rim", "root", (10.4, 0.8, 12.2), (0, 3.5, 0), stone_dk)
+    m.add("Shell1", "root", (9.8, 1.4, 11.6), (0, 4.5, 0), stone)
+    m.add("Shell2", "root", (8.4, 1.0, 10.0), (0, 5.6, 0), stone)
+    m.add("Shell3", "root", (6.4, 0.8, 7.8), (0, 6.4, 0), stone_lt)
+    m.add("ShellTop", "root", (4.0, 0.5, 5.0), (0, 7.0, 0.2), stone_lt)
+    # glowing crystal scutes: plates down each side, round the front and back, and on top
+    for i, z in enumerate((-3.6, 0, 3.6)):
+        for s_, side in ((-1, "L"), (1, "R")):
+            m.add("Scute%s%d" % (side, i), "root", (0.08, 0.8, 2.0), (s_ * 4.93, 4.5, z), MAGIC, neon=True)
+    for i, z in enumerate((-5.83, 5.83)):
+        m.add("ScuteEnd%d" % i, "root", (3.0, 0.8, 0.08), (0, 4.5, z), MAGIC, neon=True)
+    for i, (x, z) in enumerate(((-2.4, -2.9), (2.4, -2.9), (-2.4, 2.9), (2.4, 2.9))):
+        m.add("ScuteTop%d" % i, "root", (1.0, 0.08, 1.0), (x, 6.83, z), (150, 220, 255), neon=True)
+    m.add("Gem", "root", (1.0, 0.6, 1.0), (0, 7.5, 2.0), MAGIC, neon=True)
     return m
 
 
-@pet("SpiritLoong", "The Snake as the Magic Circle's spirit dragon: turquoise and white with\n"
-     "-- violet bands, glowing blue whiskers and crest.", base="Snake")
+@pet("SpiritLoong", "The Loong as the Magic Circle's spirit dragon: pearl white with a\n"
+     "-- turquoise mane and whiskers, violet bands and spines, and glowing eyes.",
+     base="Loong", seat=(0, 7, -1.2), seatBone="saddle", neck=((0, 4.8, -7.2), 2.6), fit=42)
 def spirit_loong():
-    m = Model.load("Snake")
-    m.recolor({(240, 186, 72): (240, 248, 255), (252, 234, 186): TEAL, (168, 48, 78): (130, 80, 220),
-               (48, 196, 214): (MAGIC, {"neon": True}), (212, 150, 70): (130, 80, 220),
-               (255, 214, 64): MAGIC})
+    m = Model.load(os.path.join(BASES, "LoongModel.luau"))
+    m.recolor({(121, 146, 53): (228, 240, 255), (130, 38, 41): (52, 200, 196), (255, 216, 21): (150, 100, 240),
+               (227, 142, 22): (MAGIC, {"neon": True}), (201, 189, 162): (200, 186, 250),
+               (233, 197, 115): (176, 228, 244), (210, 170, 119): (140, 200, 228),
+               (83, 66, 54): (96, 70, 190), (122, 106, 94): (130, 110, 220), (0, 255, 134): MAGIC})
     return m
 
 
-@pet("MysticOwl", "The Penguin as the Magic Circle's owl: night blue, a pale violet front,\n"
-     "-- gold beak and feet, ear tufts and big glowing eyes.", base="Penguin")
+@pet("MysticOwl", "The Penguin as the Magic Circle's owl: tawny feathers with darker wings,\n"
+     "-- a speckled cream front, a wide pale face with big amber eyes, ear tufts and a small beak.",
+     base="Penguin")
 def mystic_owl():
     m = Model.load("Penguin")
-    m.recolor({(40, 46, 64): (58, 66, 150), (250, 250, 250): (214, 206, 250), (255, 150, 30): GOLD,
-               (255, 140, 30): GOLD, (230, 100, 30): GOLD_DK, (255, 170, 40): (110, 120, 200),
-               (255, 200, 60): MAGIC})
-    m.paint("Eye.", (255, 230, 120))
-    m.grow("Eye.|Pupil.", (1.5, 1.5, 1))
-    lo, hi = m.box("Head|Crown")
-    for s, side in ((-1, "L"), (1, "R")):
-        m.add("Tuft" + side, "neck", (0.8, 1.4, 1.1), (s * 1.05, hi[1] + 0.7, -0.2), (58, 66, 150),
-              "WedgePart", rot=deg(0, 180, 0))
+    tawny, wing, cream, face, rim = (160, 112, 70), (112, 76, 48), (244, 228, 194), (240, 224, 196), (120, 82, 52)
+    m.recolor({(40, 46, 64): tawny, (250, 250, 250): cream, (255, 200, 60): cream,
+               (255, 150, 30): (220, 170, 60), (255, 140, 30): (200, 150, 50), (230, 100, 30): (170, 120, 40)})
+    m.paint("Flipper.*|Tail", wing)
+    m.drop("Cheek.|Eye.|Pupil.")
+    # a wider, rounder head with a pale facial disc as wide as it
+    m.find("Head")[0]["size"] = [4.6, 3.2, 3.4]
+    m.move("Head", (0, 0.1, 0))
+    m.find("Crown")[0]["size"] = [3.8, 0.6, 3.0]
+    m.move("Crown", (0, 0.3, 0))
+    m.add("Face", "neck", (4.4, 2.8, 0.1), (0, 8.1, -1.95), face)
+    m.add("Brow", "neck", (0.4, 1.4, 0.06), (0, 8.7, -2.02), rim, plain=True)
+    for s_, side in ((-1, "L"), (1, "R")):
+        x = s_ * 1.1
+        m.add("EyeRim" + side, "neck", (1.9, 1.9, 0.05), (x, 8.4, -2.02), rim, plain=True)
+        m.add("Eye" + side, "neck", (1.5, 1.5, 0.05), (x, 8.4, -2.06), (255, 168, 40), plain=True)
+        m.add("Pupil" + side, "neck", (0.8, 0.8, 0.04), (x, 8.4, -2.1), PUPIL, plain=True)
+        m.add("Glint" + side, "neck", (0.25, 0.25, 0.03), (x - 0.2, 8.65, -2.13), (255, 255, 255), plain=True)
+        m.add("Tuft" + side, "neck", (1.0, 1.6, 1.2), (s_ * 1.7, 10.5, -0.6), tawny, "WedgePart", rot=deg(0, 180, 0))
+        # pale bars across each wing
+        for i, y in enumerate((5.6, 4.6, 3.4)):
+            m.add("WingBar%s%d" % (side, i), "Wing" + side, (0.06, 0.25, 1.2), (s_ * 2.53, y, 0.1), cream, plain=True)
+    # a small hooked beak between the eyes
+    m.grow("Beak|BeakLow", 0.6, about=(0, 7.5, -1.95))
+    # speckles down its front
+    for i, (x, y, z) in enumerate(((-0.8, 3.4, -2.62), (0.8, 3.4, -2.62), (0, 2.8, -2.62), (-0.9, 2.1, -2.62),
+                                   (0.9, 2.1, -2.62), (0, 1.5, -2.62), (-0.8, 5.2, -2.02), (0.8, 5.2, -2.02))):
+        m.add("Speck%d" % i, "root", (0.5, 0.18, 0.04), (x, y, z), (176, 130, 80), plain=True)
     return m
 
 
 # ---- Ocean Trench -----------------------------------------------------------------------
 @pet("AbyssWhale", "The Lava Whale from the bottom of the trench: navy hide, a pale belly and\n"
-     "-- its glyphs glowing cyan like deep-sea lights.", base="LavaWhale")
+     "-- its glyphs glowing cyan like deep-sea lights. The trench's prize, bigger than the Whale.",
+     base="LavaWhale", fit=44)
 def abyss_whale():
     m = Model.load("LavaWhale")
     m.recolor({(182, 100, 62): NAVY, (246, 196, 140): (170, 210, 240), (255, 140, 30): ABYSS,
@@ -197,6 +231,35 @@ def abyss_whale():
      base=None, seat=(0, 4.3, -0.6), neck=((0, 3.0, -2.6), 2.4))
 def king_crab():
     return None  # (KingCrabModel as it is)
+
+
+# ---- LassoAPet's, as they are (their models, eggs and animations copied from Lasso) -------
+@pet("Squid", "LassoAPet's Squid (the Kraken's model in pink and orange). You ride on top of its\n"
+     "-- mantle, which is on the root bone (Lasso: the neck bone swung it off into thin air).",
+     seat=(0, 29.1, 3.9), neck=((0, 5.8, 0), 2.4), seatBone="root", seatOnNeck=True)
+def squid():
+    return None
+
+
+@pet("FishSchool", "LassoAPet's School of Fish: 25 little yellow tangs packed into a rough ball\n"
+     "-- behind a bigger lead fish. You ride on the backs of the top fish.",
+     seat=(0, 4.65, 0.4), neck=((0, 2.5, -4.6), 1.1))
+def fish_school():
+    return None
+
+
+@pet("Whale", "LassoAPet's Whale: a big blue sperm whale with a huge square head, a pale ridged\n"
+     "-- belly and cyan spiral glyphs. You ride on its back, behind the head.",
+     seat=(0, 6.4, 1.2), neck=((0, 4.5, -6.5), 3.8), fit=34)
+def whale():
+    return None
+
+
+@pet("LivingBirch", "LassoAPet's Living Birch: a white birch trunk with dark bands, a face,\n"
+     "-- leafy hands, stubby legs and a chunky autumn canopy. You ride on top of the canopy.",
+     seat=(0, 17.3, 0), neck=((0, 9.6, 0), 2.0))
+def living_birch():
+    return None
 
 
 # ---- tweaked pets ------------------------------------------------------------------------
@@ -288,47 +351,6 @@ def spirit_deer():
         m.add("AntlerTop" + side, "neck", (0.3, 0.9, 0.3), (x - s_ * 0.05, 12.65, -2.85), MAGIC, neon=True)
         for i, (y, z) in enumerate(((5.6, -1.4), (4.9, 0.3), (5.7, 1.6), (4.8, 2.4))):
             m.add("Spot%d%s" % (i, side), "root", (0.06, 0.55, 0.55), (s_ * 1.63, y, z), (255, 255, 255), plain=True)
-    return m
-
-
-@pet("Pufferfish", "The Fish puffed up: round and yellow with brown spots and white spines.",
-     base="Fish", seat=(0, 7.1, -0.54), neck=((0, 3.6, -3.51), 3.0))
-def pufferfish():
-    m = Model.load("Fish")
-    m.recolor({(60, 132, 232): (250, 210, 70), (36, 88, 184): (220, 150, 40), (222, 240, 255): (255, 246, 214)})
-    # fatter: the body and head taller and wider
-    m.grow("Body|Belly", (1.25, 1.3, 1.0), about=(0, 0, 0))
-    m.grow("Head|HeadBelly|Snout", (1.2, 1.2, 1.0), about=(0, 0, -4.3))
-    m.spread("Eye.|Pupil.|Mouth", (1.2, 1.2, 1.0), about=(0, 0, -4.3))
-    m.drop("Dorsal")
-    lo, hi = m.box("Body|Belly")
-    # spines: little wedges standing out of its top and sides
-    for i, z in enumerate((-1.8, 0, 1.8)):
-        m.add("SpineTop%d" % i, "root", (0.4, 1.0, 0.7), (0, hi[1] + 0.4, z), (255, 255, 255), "WedgePart")
-        for s_, side in ((-1, "L"), (1, "R")):
-            m.add("Spine%s%d" % (side, i), "root", (0.3, 0.8, 0.6), (s_ * (hi[0] + 0.4), 3.4, z), (255, 255, 255),
-                  "WedgePart", rot=deg(0, 0, -s_ * 90))
-            m.add("Spot%s%d" % (side, i), "root", (0.06, 0.6, 0.6), (s_ * (hi[0] + 0.03), 2.3 + (i % 2) * 1.6, z + 0.6),
-                  (170, 110, 50), plain=True)
-    return m
-
-
-@pet("Shark", "The Fish as a shark: grey with a white belly, a tall dorsal fin and teeth.",
-     base="Fish")
-def shark():
-    m = Model.load("Fish")
-    m.recolor({(60, 132, 232): (110, 126, 146), (36, 88, 184): (84, 98, 118), (222, 240, 255): (236, 240, 244),
-               (28, 40, 84): (40, 24, 30)})
-    m.drop("Eye.")
-    m.paint("Pupil.", (12, 12, 16))
-    m.grow("Pupil.", (1, 1.2, 1.3))
-    m.grow("Dorsal", (1, 1.6, 1.4), about=(0, 4.3, 3.98))
-    m.move("Dorsal", (0, 0, -4.6))
-    m.find("Dorsal")[0]["bone"] = "root"
-    m.grow("Mouth", (1, 2.2, 1))
-    for i, x in enumerate((-0.6, -0.2, 0.2, 0.6)):
-        m.add("Tooth%d" % i, "neck", (0.25, 0.35, 0.06), (x, 1.65, -7.09), (255, 255, 255), "WedgePart",
-              rot=deg(0, 0, 180), plain=True)
     return m
 
 
@@ -575,57 +597,16 @@ def seahorse():
     return m
 
 
-@pet("Octopus", "A deep violet octopus from the Ocean Trench: a big round mantle with pale\n"
-     "-- spots, wide eyes and eight curling arms that ripple as it walks.",
-     seat=(0, 7.6, 0.6), neck=((0, 3.4, -0.2), 3.0))
-def octopus():
-    skin, skin_lt, under = (150, 70, 200), (204, 150, 236), (236, 196, 240)
-    bones = [bone("root", None, (0, 2.6, 0)), bone("neck", "root", (0, 2.6, 0))]
-    arms = []
-    for k in range(8):
-        a = 22.5 + 45 * k
-        r = math.radians(a)
-        pivot = (1.7 * math.sin(r), 1.6, 1.7 * math.cos(r))
-        bones.append(bone("Arm%d" % k, "root", pivot, "CFrame.Angles(0, %s, 0)" % ("%.5f" % r)))
-        arms.append(("Arm%d" % k, pivot))
-    m = Model(bones, [], "")
-    m.add("Mantle", "neck", (4.6, 3.6, 4.8), (0, 4.4, 0.4), skin)
-    m.add("MantleTop", "neck", (3.8, 1.4, 4.0), (0, 6.6, 0.6), skin)
-    m.add("MantleBack", "neck", (3.2, 2.6, 1.2), (0, 5.2, 3.2), skin)
-    m.add("Skirt", "root", (4.2, 1.4, 4.2), (0, 2.0, 0), skin)
-    for i, (x, y, z) in enumerate(((-1.4, 5.6, 2.83), (1.0, 6.4, 2.6), (0.6, 4.6, 2.83))):
-        m.add("Spot%d" % i, "neck", (0.8, 0.8, 0.05), (x, y, z + 0.0), skin_lt, plain=True)
-    for s_, side in ((-1, "L"), (1, "R")):
-        m.add("Spot" + side, "neck", (0.05, 0.9, 0.9), (s_ * 2.33, 5.4, 1.4), skin_lt, plain=True)
-        m.add("Eye" + side, "neck", (1.3, 1.4, 0.05), (s_ * 1.05, 4.7, -2.02), (255, 255, 255), plain=True)
-        m.add("Pupil" + side, "neck", (0.9, 0.4, 0.03), (s_ * 1.05, 4.6, -2.06), PUPIL, plain=True)
-    for name, (px, py, pz) in arms:
-        # each arm laid out along +Z from its pivot; the bone's rest turns it outward
-        m.add(name + "A", name, (1.0, 0.9, 2.4), (px, 1.1, pz + 1.0), skin)
-        m.add(name + "B", name, (0.8, 0.7, 1.8), (px, 0.4, pz + 2.9), skin, rot=deg(-12, 0, 0))
-        m.add(name + "Tip", name, (0.6, 0.6, 0.8), (px, 0.9, pz + 3.9), skin_lt, rot=deg(-45, 0, 0))
-        m.add(name + "Under", name, (0.7, 0.05, 2.0), (px, 0.62, pz + 1.0), under, plain=True)
-    def ripple(L, a, h):
-        tr = {"root": {"position": cycle(L, [(0, 0, 0), (0, h, 0)])}}
-        for k in range(8):
-            ph = k % 2
-            keys = cycle(L, [(-a, 0, 0), (a, 0, 0)] if ph else [(a, 0, 0), (-a, 0, 0)])
-            tr["Arm%d" % k] = {"rotation": keys}
-        tr["neck"] = {"rotation": cycle(L, [(3, 0, 0), (-3, 0, 0)])}
-        return tr
-    m.animations = anims({
-        "idle": (2.4, ripple(2.4, 6, 0.3)),
-        "walk": (0.8, ripple(0.8, 16, 0.5)),
-        "gallop": (0.5, ripple(0.5, 24, 1.0)),
-    })
-    return m
-
-
 def write_all(only=None):
     for kind, spec in PETS.items():
         if only and kind not in only:
             continue
         m = spec["build"]()
+        if spec.get("fit"):
+            # its size: its longest side is fit studs (QM, Oct 30: even the big ones have to
+            # be playable in the regular arenas)
+            lo, hi = (m or Model.load(kind)).box()
+            spec["size"] = round(spec["fit"] / max(h - l for l, h in zip(lo, hi)), 3)
         if m is not None:
             source = spec["base"] or "new"
             m.write(os.path.join(ANIMALS, kind + "Model.luau"),
@@ -661,8 +642,10 @@ def write_class(kind, spec):
             s = line.strip()
             if s.startswith("seat =") or s.startswith("neck ="):
                 pts.append("\t" + s)
+    if spec.get("seatBone"):
+        pts.append('\tseatBone = "%s",' % spec["seatBone"])
     if spec.get("size"):
-        pts.append("\tsize = %g," % spec["size"])
+        pts.append("\tsize = %g,%s" % (spec["size"], " -- (%g studs long)" % spec["fit"] if spec.get("fit") else ""))
     if spec.get("size_of"):
         pts.append("\tsize = %s.size * %g," % spec["size_of"])
     for k in ("seatOnNeck", "gallopOnly"):
