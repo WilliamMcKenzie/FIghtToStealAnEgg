@@ -2881,6 +2881,551 @@
         "Transparency": 1,
         "ZIndex": 4
        }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIPadding",
+         "name": "UIPadding",
+         "props": {
+          "PaddingBottom": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          },
+          "PaddingLeft": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          },
+          "PaddingRight": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          },
+          "PaddingTop": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIListLayout",
+         "name": "UIListLayout",
+         "props": {
+          "FillDirection": {
+           "e": "FillDirection",
+           "t": "EnumItem",
+           "v": "Horizontal"
+          },
+          "Padding": {
+           "t": "UDim",
+           "v": [
+            0,
+            -7
+           ]
+          },
+          "SortOrder": {
+           "e": "SortOrder",
+           "t": "EnumItem",
+           "v": "LayoutOrder"
+          },
+          "VerticalAlignment": {
+           "e": "VerticalAlignment",
+           "t": "EnumItem",
+           "v": "Center"
+          }
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "Outline",
+           "props": {
+            "Thickness": 4
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "Amount",
+         "props": {
+          "AutomaticSize": {
+           "e": "AutomaticSize",
+           "t": "EnumItem",
+           "v": "X"
+          },
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Italic"
+           ]
+          },
+          "LayoutOrder": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            0,
+            0,
+            26
+           ]
+          },
+          "Text": "+120",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "TextSize": 22,
+          "TextXAlignment": {
+           "e": "TextXAlignment",
+           "t": "EnumItem",
+           "v": "Left"
+          },
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainIcon",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 9
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainOutline1",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              0
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainOutline2",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              3
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainOutline3",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              4
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainOutline4",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              3
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainOutline5",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              0
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainOutline6",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              -3
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainOutline7",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -4
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "PowerGainOutline8",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://124462507147384",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              -3
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Icon",
+         "props": {
+          "BackgroundTransparency": 1,
+          "LayoutOrder": 2,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            29,
+            0,
+            29
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        }
+       ],
+       "class": "CanvasGroup",
+       "name": "GainTemplate",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0,
+          0.5
+         ]
+        },
+        "AutomaticSize": {
+         "e": "AutomaticSize",
+         "t": "EnumItem",
+         "v": "X"
+        },
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          162,
+          0,
+          50
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          0,
+          0,
+          37
+         ]
+        },
+        "Transparency": 1,
+        "Visible": false,
+        "ZIndex": 6
+       }
       }
      ],
      "class": "Frame",
@@ -3071,6 +3616,551 @@
         },
         "Transparency": 1,
         "ZIndex": 3
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UIPadding",
+         "name": "UIPadding",
+         "props": {
+          "PaddingBottom": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          },
+          "PaddingLeft": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          },
+          "PaddingRight": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          },
+          "PaddingTop": {
+           "t": "UDim",
+           "v": [
+            0,
+            4
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIListLayout",
+         "name": "UIListLayout",
+         "props": {
+          "FillDirection": {
+           "e": "FillDirection",
+           "t": "EnumItem",
+           "v": "Horizontal"
+          },
+          "Padding": {
+           "t": "UDim",
+           "v": [
+            0,
+            -7
+           ]
+          },
+          "SortOrder": {
+           "e": "SortOrder",
+           "t": "EnumItem",
+           "v": "LayoutOrder"
+          },
+          "VerticalAlignment": {
+           "e": "VerticalAlignment",
+           "t": "EnumItem",
+           "v": "Center"
+          }
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "Outline",
+           "props": {
+            "Thickness": 4
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "Amount",
+         "props": {
+          "AutomaticSize": {
+           "e": "AutomaticSize",
+           "t": "EnumItem",
+           "v": "X"
+          },
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Italic"
+           ]
+          },
+          "LayoutOrder": 1,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            0,
+            0,
+            26
+           ]
+          },
+          "Text": "+120",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            0,
+            1,
+            0
+           ]
+          },
+          "TextSize": 22,
+          "TextXAlignment": {
+           "e": "TextXAlignment",
+           "t": "EnumItem",
+           "v": "Left"
+          },
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainIcon",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 9
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainOutline1",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              0,
+              0
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainOutline2",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              3
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainOutline3",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              4
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainOutline4",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              3
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainOutline5",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -4,
+              0,
+              0
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainOutline6",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              -3,
+              0,
+              -3
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainOutline7",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              -4
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          },
+          {
+           "children": [],
+           "class": "ImageLabel",
+           "name": "CashGainOutline8",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://96406134533444",
+            "ImageColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              3,
+              0,
+              -3
+             ]
+            },
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Fit"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "Transparency": 1,
+            "ZIndex": 8
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Icon",
+         "props": {
+          "BackgroundTransparency": 1,
+          "LayoutOrder": 2,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            29,
+            0,
+            29
+           ]
+          },
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        }
+       ],
+       "class": "CanvasGroup",
+       "name": "GainTemplate",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0,
+          0.5
+         ]
+        },
+        "AutomaticSize": {
+         "e": "AutomaticSize",
+         "t": "EnumItem",
+         "v": "X"
+        },
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          162,
+          0,
+          39
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          0,
+          0,
+          37
+         ]
+        },
+        "Transparency": 1,
+        "Visible": false,
+        "ZIndex": 6
        }
       }
      ],
