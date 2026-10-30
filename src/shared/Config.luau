@@ -1896,6 +1896,12 @@ return {
 		-- Config.Pets (Lasso's AnimalStats Speed; its horse rides at 44). This replaces the
 		-- rarity's Speed and the Lean's speed half; a pet without a Speed keeps those.
 		MountSpeed = 44,
+		-- Past the Horse's 1 the curve is logarithmic (QM, Oct 30): MountSpeed + k x ln(Speed),
+		-- k set so the fastest Speed in Config.Pets (TopSpeed, the Royal Eagle's 10) rides at
+		-- MaxSpeed studs/s; nothing rides faster (before the sprint). Pets under 1 stay
+		-- MountSpeed x Speed. Horse 44, Unicorn 84, Snake 114, Icebringer 134, Phoenix 178.
+		MaxSpeed = 200,
+		TopSpeed = 10,
 		Hitbox = 0.5, -- 0: size doesn't matter; 1: twice the hitbox, twice the health
 		TierGrowth = 1.6, -- each size tier reads this much bigger than the one below (LassoAPet's)
 		SmallSize = 10.4, -- studs a tier 1 pet reads (LassoAPet's PetSmallSize: the Horse at 1x its drawing)

@@ -38,6 +38,17 @@ local function hitbox(class)
 end
 
 local HORSE_HITBOX = hitbox(Horse)
+
+-- studs/s for a Config.Pets Speed (LassoAPet's multiplier): linear up to the Horse's 1,
+-- logarithmic after it, reaching PetStats.MaxSpeed at PetStats.TopSpeed (QM, Oct 30)
+local function rideSpeed(mult)
+	local tune = Config.PetStats
+	if mult <= 1 then
+		return tune.MountSpeed * mult
+	end
+	local k = (tune.MaxSpeed - tune.MountSpeed) / math.log(tune.TopSpeed)
+	return math.min(tune.MountSpeed + k * math.log(mult), tune.MaxSpeed)
+end
 local stats = {}
 function Pets.stats(kind)
 	kind = if Config.Pets[kind] then kind else "Horse"
@@ -53,7 +64,7 @@ function Pets.stats(kind)
 			Rarity = pet.Rarity,
 			Cash = pet.Cash or 0,
 			Health = math.round(base.Health * (1 + lean) * (box / HORSE_HITBOX) ^ tune.Hitbox),
-			Speed = math.round((if pet.Speed then tune.MountSpeed * pet.Speed else base.Speed * (1 - lean)) * 10) / 10, -- (LassoAPet's speeds: QM, Oct 26)
+			Speed = math.round((if pet.Speed then rideSpeed(pet.Speed) else base.Speed * (1 - lean)) * 10) / 10, -- (LassoAPet's speeds, on a log curve: QM, Oct 26/30)
 			Hitbox = math.round(box * 10) / 10,
 		}
 	end
