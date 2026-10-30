@@ -1842,10 +1842,10 @@ return {
 		-- each biome's picture's colour, under its Studio screenshot (client/HudImages
 		-- Biome<Name>) and in place of it until that's uploaded
 		Tint = {
-			Meadow = Color3.fromRGB(96, 186, 70), Desert = Color3.fromRGB(226, 186, 110),
-			Ice = Color3.fromRGB(170, 220, 245), Lava = Color3.fromRGB(230, 90, 30),
-			Dungeon = Color3.fromRGB(90, 90, 110), Castle = Color3.fromRGB(180, 40, 50),
-			Forest = Color3.fromRGB(150, 80, 220), Ocean = Color3.fromRGB(30, 80, 170),
+			Meadow = Color3.fromRGB(42, 186, 0), Desert = Color3.fromRGB(226, 148, 0),
+			Ice = Color3.fromRGB(0, 163, 245), Lava = Color3.fromRGB(230, 69, 0),
+			Dungeon = Color3.fromRGB(0, 0, 110), Castle = Color3.fromRGB(180, 0, 13),
+			Forest = Color3.fromRGB(110, 0, 220), Ocean = Color3.fromRGB(0, 61, 170),
 		},
 	},
 

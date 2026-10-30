@@ -58,7 +58,7 @@ local SECTIONS = {
 	{
 		key = "Passes",
 		title = "~Game Passes~",
-		colours = { "ffd000", "fff6a0", "ffae00" },
+		colours = { "ffd000", "ffe700", "ffae00" },
 		rows = { { 1, 2 }, { 3, 4 } },
 	},
 	{
@@ -71,7 +71,7 @@ local SECTIONS = {
 	{
 		key = "Power",
 		title = "~Power Packs~",
-		colours = { "00c8ff", "a8f6ff", "0096ff" },
+		colours = { "00c8ff", "00e5ff", "0096ff" },
 		look = "PowerCard",
 		rows = { { 1, 2, 3 }, { 4, 5, 6 } },
 	},
@@ -293,7 +293,7 @@ local function pass(row, index, order)
 		ZIndex = 4,
 	})
 	if not had then
-		gradient(badge, { "fff6a0", "ffd000", "ff9d00" })
+		gradient(badge, { "ffe700", "ffd000", "ff9d00" })
 	end
 	label(c, "PassName", {
 		Text = item.Title,

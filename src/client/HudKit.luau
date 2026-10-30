@@ -110,8 +110,8 @@ HudKit.LOOKS = {
 	-- the Index popup (QM's Figma Index refs, Oct 30; client/IndexPanel): the Weapon Shop's
 	-- popup with a pink and purple header, its boxes and its cards
 	PinkHeader = {
-		across = { rgb("e231ff"), rgb("c53dff"), rgb("dc6bff") },
-		bevel = { 0.5, 0.5, rgb("ffc4ff"), rgb("5a0078"), 12 },
+		across = { rgb("ff00f2"), rgb("d400ff"), rgb("b300ff") },
+		bevel = { 0.5, 0.5, rgb("ff00ff"), rgb("5a0078"), 12 },
 		tile = { 223.5, 0.8 },
 		outline = 8,
 	},
@@ -127,12 +127,12 @@ HudKit.LOOKS = {
 		tile = { 223.5, 0.8 },
 		outline = 8,
 	},
-	CashCard = { diag = { rgb("21ff00"), rgb("f3fe0d"), rgb("31ff01"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
-	PowerCard = { diag = { rgb("0090ff"), rgb("8ff6ff"), rgb("1aa3ff"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
-	LifeCard = { diag = { rgb("ff2e74"), rgb("ffb3d6"), rgb("ff4f8f"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
-	DamageCard = { diag = { rgb("ff3c00"), rgb("ffc04d"), rgb("ff5500"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
-	GoldCard = { diag = { rgb("ffae00"), rgb("fff27a"), rgb("ffa200"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
-	GrowthCard = { diag = { rgb("a83bff"), rgb("ff9cf0"), rgb("7a4dff"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	CashCard = { diag = { rgb("21ff00"), rgb("f2fe00"), rgb("30ff00"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	PowerCard = { diag = { rgb("0090ff"), rgb("00ebff"), rgb("0099ff"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	LifeCard = { diag = { rgb("ff0055"), rgb("ff0075"), rgb("ff005d"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	DamageCard = { diag = { rgb("ff3c00"), rgb("ffa500"), rgb("ff5500"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	GoldCard = { diag = { rgb("ffae00"), rgb("ffe600"), rgb("ffa200"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	GrowthCard = { diag = { rgb("8e00ff"), rgb("ff00d8"), rgb("4000ff"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
 }
 
 function HudKit.fig(n)
