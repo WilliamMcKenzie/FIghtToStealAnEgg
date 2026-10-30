@@ -5,7 +5,7 @@ P = dict(Scale=10, Damage=0.65, Speed=0.054, Max=2)
 def pdmg(S): return 1+P['Damage']*math.log(1+S/P['Scale'])
 def pspd(S): return min(1+P['Speed']*math.log(1+S/P['Scale']), P['Max'])
 # weapons in price order: (name, price, base dps at S=0)
-W = [("Kendo",0)]+[(n,p) for n,p in [("Shortbow",500),("Shortsword",1500),("Staff",3500),("Axe",10000),("Lightning",25000),("Longbow",50000),("Longsword",100000),("Wind",250000),("Water",500000),("Waraxe",1000000),("Club",2000000),("Unholy",4000000),("Nature",8000000),("Blood",15000000),("Fire",30000000),("Flower",75000000)]]
+W = [("Kendo",0)]+[(n,p) for n,p in [("Shortbow",500),("Shortsword",1500),("Staff",3500),("Axe",10000),("Lightning",25000),("Longbow",50000),("Longsword",100000),("Wind",250000),("Water",500000),("Waraxe",1000000),("Club",2000000),("Unholy",4000000),("Nature",8000000),("Blood",15000000),("Fire",30000000),("Flower",75000000),("SunBlade",150000000),("Starlight",250000000),("Nebula",450000000),("Comet",800000000),("Galaxy",1500000000),("VoidReaver",2500000000),("Abyss",4500000000),("Eclipse",8000000000),("Worldbreaker",15000000000),("Genesis",25000000000)]]
 WDPS=[20*1.3**i for i in range(len(W))]
 biomes=["Meadow","Desert","Ice","Lava"]
 REG = dict(Meadow=0,Desert=6000,Ice=120000,Lava=1500000)
