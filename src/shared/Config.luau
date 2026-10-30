@@ -714,7 +714,7 @@ return {
 				Count = 3,
 				Model = "RockHog",
 				Name = "Rock Hog",
-				Scale = 1.6,
+				Scale = 0.8, -- (QM: half the size they were)
 				Health = 40000,
 				Speed = 15,
 				Strength = 20,
