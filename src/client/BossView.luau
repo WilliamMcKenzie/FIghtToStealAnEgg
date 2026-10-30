@@ -22,6 +22,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Horse = require(Shared.Animals.Horse)
+local BossTuning = require(Shared.BossTuning)
 local BurrowFx = require(script.Parent.BurrowFx)
 local DamageNumbers = require(script.Parent.DamageNumbers)
 local OnScreen = require(script.Parent.OnScreen)
@@ -43,6 +44,9 @@ local function kindOf(body)
 	local model, size, tint = body:GetAttribute("Model"), body:GetAttribute("ModelSize") or 1, body:GetAttribute("Tint")
 	if not model then
 		return nil
+	end
+	if body.Parent and body.Parent.Name == "Bosses" and body.Parent.Parent == workspace then
+		size *= BossTuning.scale() -- (workspace.BossTuning's BossScale: Shared/BossTuning)
 	end
 	local key = model .. " " .. size .. " " .. tostring(tint)
 	if kinds[key] == nil then
@@ -263,7 +267,7 @@ local function add(body)
 		view.burrow = c and c.Burrow and { cfg = c.Burrow, radius = body:GetAttribute("Radius") or 4 }
 	end
 	views[body] = view
-	body:GetAttributeChangedSignal("Health"):Connect(function()
+	view.healthChanged = body:GetAttributeChangedSignal("Health"):Connect(function()
 		local health = body:GetAttribute("Health")
 		if health < view.health then
 			view.hitAt = os.clock()
@@ -289,6 +293,7 @@ local function remove(body)
 		if view.shield then
 			view.shield:Destroy()
 		end
+		view.healthChanged:Disconnect()
 		view.animal.model:Destroy()
 		views[body] = nil
 	end
@@ -304,6 +309,42 @@ for _, name in { "Bosses", "Mobs", "PenPets" } do
 		folder.ChildRemoved:Connect(remove)
 	end)
 end
+
+-- workspace.BossTuning (Shared/BossTuning): a new BossScale redraws the bosses out now at
+-- it, and its Boss line says which is out and the Config Size that scale comes to
+local function tuned()
+	local tuning, bossFolder = BossTuning.folder(), workspace:FindFirstChild("Bosses")
+	if not (tuning and bossFolder) then
+		return
+	end
+	local k = BossTuning.scale()
+	local out = {}
+	for _, body in bossFolder:GetChildren() do
+		local c = Config.Bosses[body:GetAttribute("Kind")]
+		if c then
+			local size = (body:GetAttribute("ModelSize") or 1) * k
+			local which = if c.StandIn and body:GetAttribute("Model") ~= c.Model then "StandIn size" else "Size"
+			table.insert(out, string.format("%s: %s = %.3g", body:GetAttribute("Kind"), which, size))
+		end
+	end
+	tuning:SetAttribute("Boss", table.concat(out, "; "))
+end
+task.spawn(function()
+	local tuning = workspace:WaitForChild("BossTuning")
+	local bossFolder = workspace:WaitForChild("Bosses")
+	tuning:GetAttributeChangedSignal("BossScale"):Connect(function()
+		for _, body in bossFolder:GetChildren() do
+			if views[body] and not views[body].diedAt then
+				remove(body)
+				add(body)
+			end
+		end
+		tuned()
+	end)
+	bossFolder.ChildAdded:Connect(tuned)
+	bossFolder.ChildRemoved:Connect(tuned)
+	tuned()
+end)
 
 -- a boss's Magic shot (Server/BossAttacks' BossShot): a Pulse attack pulses its head
 task.spawn(function()

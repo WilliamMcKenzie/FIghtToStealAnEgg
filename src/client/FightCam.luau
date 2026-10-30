@@ -2,7 +2,8 @@
 -- LockedIn attribute), the camera sits high above you, looking steeply down at a fixed
 -- angle from a fixed side, and follows you. You can't turn or zoom it. It eases in when
 -- the fight starts and, when it ends, back to exactly the angle and distance your camera
--- had before the fight. Config.FightCam.
+-- had before the fight. Config.FightCam; tune it live in workspace.BossTuning
+-- (Shared/BossTuning).
 --
 -- The camera isn't taken over: each frame this blends whatever camera is active toward
 -- the fight shot, after Roblox's camera scripts, so handing back is seamless. Runs
@@ -15,7 +16,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local BossTuning = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BossTuning"))
 
 local FightCam = {}
 
@@ -37,7 +38,7 @@ local function smooth(k)
 end
 
 RunService:BindToRenderStep("FightCam", Enum.RenderPriority.Camera.Value + 1, function(dt)
-	local cfg = Config.FightCam
+	local cfg = BossTuning.camera() -- (Config.FightCam, with workspace.BossTuning's live values)
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local on = cfg.On and root ~= nil and player:GetAttribute("LockedIn") ~= nil

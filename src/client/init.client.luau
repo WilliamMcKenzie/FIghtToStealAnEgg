@@ -62,6 +62,7 @@ local function settings(tool)
 	return if id then Weapons.slash(c, id) else c
 end
 SlashTuning.watchPrint()
+require(Shared.BossTuning).watchPrint()
 task.spawn(WorldColors.watch)
 
 -- the slash's centre on its plane, facing world yaw `yaw` (or where the character faces)
