@@ -2,6 +2,7 @@
 -- hand: change its design there and run python3 tools/boss_designs.py PufferLord.
 -- Units are studs, rest pose, feet on Y = 0, facing -Z.
 -- Puffer Lord: Ocean Trench boss, swims. Bones: root, FinL, FinR, Tail.
+-- Its blocks and bones are QM's drawing, designs/bosses/PufferLord.bbmodel; its animations are here.
 
 return {
 	bones = {
@@ -12,10 +13,10 @@ return {
 	},
 	parts = {
 		{ name = "Body", bone = "root", class = "Part", size = Vector3.new(7, 6.6, 7.2), cframe = CFrame.new(0, 7.2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 204, 84) },
-		{ name = "Belly", bone = "root", class = "Part", size = Vector3.new(5.6, 1, 5.8), cframe = CFrame.new(0, 3.75, -0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 240, 196) },
-		{ name = "Spot0", bone = "root", class = "Part", size = Vector3.new(1.2, 0.1, 1.2), cframe = CFrame.new(-1.8, 10.55, 1.4, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 150, 60), plain = true },
-		{ name = "Spot1", bone = "root", class = "Part", size = Vector3.new(1.2, 0.1, 1.2), cframe = CFrame.new(1.6, 10.55, -1.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 150, 60), plain = true },
-		{ name = "Spot2", bone = "root", class = "Part", size = Vector3.new(1.2, 0.1, 1.2), cframe = CFrame.new(0.2, 10.55, 2.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 150, 60), plain = true },
+		{ name = "Belly", bone = "root", class = "Part", size = Vector3.new(5.6, 1, 5.8), cframe = CFrame.new(0, 3.75, -0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 246, 222) },
+		{ name = "Spot0", bone = "root", class = "Part", size = Vector3.new(1.2, 0.1, 1.2), cframe = CFrame.new(-1.8, 10.55, 1.4, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 150, 60) },
+		{ name = "Spot1", bone = "root", class = "Part", size = Vector3.new(1.2, 0.1, 1.2), cframe = CFrame.new(1.6, 10.55, -1.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 150, 60) },
+		{ name = "Spot2", bone = "root", class = "Part", size = Vector3.new(1.2, 0.1, 1.2), cframe = CFrame.new(0.2, 10.55, 2.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 150, 60) },
 		{ name = "Spine0", bone = "root", class = "Part", size = Vector3.new(0.5, 1.6, 0.5), cframe = CFrame.new(0, 11, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 246, 222) },
 		{ name = "Spine1", bone = "root", class = "Part", size = Vector3.new(0.5, 1.4, 0.5), cframe = CFrame.new(-2.2, 10.9, -1.6, 0.93969, -0.34202, 0, 0.34202, 0.93969, 0, 0, 0, 1), color = Color3.fromRGB(255, 246, 222) },
 		{ name = "Spine2", bone = "root", class = "Part", size = Vector3.new(0.5, 1.4, 0.5), cframe = CFrame.new(2.2, 10.9, -1.6, 0.93969, 0.34202, 0, -0.34202, 0.93969, 0, 0, 0, 1), color = Color3.fromRGB(255, 246, 222) },
@@ -28,21 +29,19 @@ return {
 		{ name = "Spine9", bone = "root", class = "Part", size = Vector3.new(0.5, 0.5, 1.5), cframe = CFrame.new(0, 9.4, 4.1, 1, 0, 0, 0, 0.93969, 0.34202, 0, -0.34202, 0.93969), color = Color3.fromRGB(255, 246, 222) },
 		{ name = "Spine10", bone = "root", class = "Part", size = Vector3.new(0.5, 0.5, 1.4), cframe = CFrame.new(-2.4, 5.6, 3.9, 1, 0, 0, 0, 0.93969, -0.34202, 0, 0.34202, 0.93969), color = Color3.fromRGB(255, 246, 222) },
 		{ name = "Spine11", bone = "root", class = "Part", size = Vector3.new(0.5, 0.5, 1.4), cframe = CFrame.new(2.4, 5.6, 3.9, 1, 0, 0, 0, 0.93969, -0.34202, 0, 0.34202, 0.93969), color = Color3.fromRGB(255, 246, 222) },
-		{ name = "EyeL", bone = "root", class = "Part", size = Vector3.new(1.8, 1.8, 0.1), cframe = CFrame.new(-1.6, 8.4, -3.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236), plain = true },
-		{ name = "PupilL", bone = "root", class = "Part", size = Vector3.new(0.9, 1.1, 0.1), cframe = CFrame.new(-1.4, 8.3, -3.72, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34), plain = true },
-		{ name = "FinL", bone = "FinL", class = "Part", size = Vector3.new(0.4, 2, 2.8), cframe = CFrame.new(-3.9, 7, 0.4, 0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969), color = Color3.fromRGB(255, 150, 70) },
-		{ name = "EyeR", bone = "root", class = "Part", size = Vector3.new(1.8, 1.8, 0.1), cframe = CFrame.new(1.6, 8.4, -3.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236), plain = true },
-		{ name = "PupilR", bone = "root", class = "Part", size = Vector3.new(0.9, 1.1, 0.1), cframe = CFrame.new(1.4, 8.3, -3.72, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34), plain = true },
-		{ name = "FinR", bone = "FinR", class = "Part", size = Vector3.new(0.4, 2, 2.8), cframe = CFrame.new(3.9, 7, 0.4, 0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969), color = Color3.fromRGB(255, 150, 70) },
+		{ name = "EyeL", bone = "root", class = "Part", size = Vector3.new(1.8, 1.8, 0.1), cframe = CFrame.new(-2.3, 7, -3.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(0, 0, 0), plain = true },
+		{ name = "PupilL", bone = "root", class = "Part", size = Vector3.new(0.9, 1.1, 0.1), cframe = CFrame.new(-2.1, 6.9, -3.72, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 0, 0), plain = true },
+		{ name = "EyeR", bone = "root", class = "Part", size = Vector3.new(1.8, 1.8, 0.1), cframe = CFrame.new(2.2, 7, -3.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(0, 0, 0), plain = true },
+		{ name = "PupilR", bone = "root", class = "Part", size = Vector3.new(0.9, 1.1, 0.1), cframe = CFrame.new(2, 6.9, -3.72, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 0, 0), plain = true },
 		{ name = "Lips", bone = "root", class = "Part", size = Vector3.new(2, 1.1, 0.8), cframe = CFrame.new(0, 6.2, -3.9, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 110, 90) },
-		{ name = "Mouth", bone = "root", class = "Part", size = Vector3.new(1, 0.4, 0.1), cframe = CFrame.new(0, 6.2, -4.32, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34), plain = true },
-		{ name = "Crown", bone = "root", class = "Part", size = Vector3.new(2.6, 0.7, 2.6), cframe = CFrame.new(0, 11, -1.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
-		{ name = "CrownPt0", bone = "root", class = "Part", size = Vector3.new(0.5, 0.8, 0.5), cframe = CFrame.new(-0.9, 11.7, -2.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
-		{ name = "CrownPt1", bone = "root", class = "Part", size = Vector3.new(0.5, 1.1, 0.5), cframe = CFrame.new(0, 11.85, -2.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
-		{ name = "CrownPt2", bone = "root", class = "Part", size = Vector3.new(0.5, 0.8, 0.5), cframe = CFrame.new(0.9, 11.7, -2.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
+		{ name = "Mouth", bone = "root", class = "Part", size = Vector3.new(1, 0.4, 0.1), cframe = CFrame.new(0, 6.2, -4.32, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34) },
 		{ name = "Dorsal", bone = "root", class = "Part", size = Vector3.new(0.4, 1.8, 2.4), cframe = CFrame.new(0, 11.2, 2.4, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 70) },
+		{ name = "FinL", bone = "FinL", class = "Part", size = Vector3.new(0.4, 2, 2.8), cframe = CFrame.new(-3.9, 7, 0.4, 0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969), color = Color3.fromRGB(255, 150, 70) },
+		{ name = "FinR", bone = "FinR", class = "Part", size = Vector3.new(0.4, 2, 2.8), cframe = CFrame.new(3.9, 7, 0.4, 0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969), color = Color3.fromRGB(255, 150, 70) },
 		{ name = "Stalk", bone = "Tail", class = "Part", size = Vector3.new(1.6, 1.6, 1.4), cframe = CFrame.new(0, 7, 4.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 204, 84) },
 		{ name = "TailFan", bone = "Tail", class = "Part", size = Vector3.new(0.4, 4, 2.8), cframe = CFrame.new(0, 7, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 70) },
+		{ name = "BrowR", bone = "root", class = "Part", size = Vector3.new(2.7, 0.75, 0.3), cframe = CFrame.new(-2.23563, 7.90798, -3.65, 0.96126, 0.27564, 0, -0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(214, 150, 60) },
+		{ name = "BrowR", bone = "root", class = "Part", size = Vector3.new(2.7, 0.75, 0.3), cframe = CFrame.new(2.23563, 7.90798, -3.65, 0.96126, -0.27564, 0, 0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(214, 150, 60) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs.
 	-- hit: seconds in where an attack strikes (Server/BossAttacks' Anim lands it on the attack)

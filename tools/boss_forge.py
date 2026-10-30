@@ -103,9 +103,12 @@ class Model:
         if self.note:
             out += ["-- " + line for line in self.note.strip().split("\n")]
         out += ["", "return {", "\tbones = {"]
+        rests = getattr(self, "rests", {})  # radians, X then Y then Z (a Blockbench drawing's group turns)
         for name, parent, pivot in self.bones:
-            out.append('\t\t{{ name = "{}", parent = {}, pivot = Vector3.new({}) }},'.format(
-                name, '"%s"' % parent if parent else "nil", ", ".join(g(v) for v in pivot)))
+            rest = rests.get(name, (0, 0, 0))
+            out.append('\t\t{{ name = "{}", parent = {}, pivot = Vector3.new({}){} }},'.format(
+                name, '"%s"' % parent if parent else "nil", ", ".join(g(v) for v in pivot),
+                ", rest = CFrame.Angles({})".format(", ".join(g(v) for v in rest)) if any(rest) else ""))
         out += ["\t},", "\tparts = {"]
         for p in self.parts:
             assert p["bone"] in pivots, self.name + ": " + p["name"] + " on unknown bone " + p["bone"]

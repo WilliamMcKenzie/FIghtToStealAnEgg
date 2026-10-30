@@ -829,7 +829,7 @@ SLEEPS = {
 # bones come from the drawing, their animations (and hit marks) still from here. Blockbench
 # drops the hit marks, and re-saving an older file flips its animation keys' X and Y turns,
 # so their animations aren't read back from the drawing.
-BLOCKBENCH = {"BlizzardOwl"}  # (QM's new owl, Oct 30: brows, black eyes with red pupils, bigger wing tips)
+BLOCKBENCH = {"BlizzardOwl", "PufferLord", "TreasureMimic"}  # (QM's redraws, Oct 30)
 
 
 def from_blockbench(m):
@@ -843,14 +843,14 @@ def from_blockbench(m):
     with tempfile.TemporaryDirectory() as tmp:
         out = os.path.join(tmp, m.name + "Model.luau")
         bbmodel_to_luau.main(src, out)
+        assert "rest = CFrame.new" not in open(out).read(), m.name + ": a bone turned at rest about two axes isn't supported"
         path = boss_luau.path
         boss_luau.path = lambda name: out
         try:
             drawn = boss_luau.load(m.name)
         finally:
             boss_luau.path = path
-    assert not any(any(r) for r in drawn.rests.values()), m.name + ": bones turned at rest aren't supported"
-    m.bones, m.parts = drawn.bones, drawn.parts
+    m.bones, m.parts, m.rests = drawn.bones, drawn.parts, drawn.rests
     m.note += "\nIts blocks and bones are QM's drawing, designs/bosses/" + m.name + ".bbmodel; its animations are here."
 
 

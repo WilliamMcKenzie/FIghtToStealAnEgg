@@ -2,27 +2,29 @@
 -- hand: change its design there and run python3 tools/boss_designs.py TreasureMimic.
 -- Units are studs, rest pose, feet on Y = 0, facing -Z.
 -- Treasure Mimic: Abandoned Dungeon boss. Bones: root, Lid, Tongue.
+-- Its blocks and bones are QM's drawing, designs/bosses/TreasureMimic.bbmodel; its animations are here.
 
 return {
 	bones = {
 		{ name = "root", parent = nil, pivot = Vector3.new(0, 3.6, 0) },
 		{ name = "Lid", parent = "root", pivot = Vector3.new(0, 5.6, 2.7) },
-		{ name = "Tongue", parent = "root", pivot = Vector3.new(0, 5.2, 1.6) },
+		{ name = "Tongue", parent = "root", pivot = Vector3.new(0, 5.2, 1.6), rest = CFrame.Angles(0.2618, 0, 0) },
 	},
 	parts = {
 		{ name = "Box", bone = "root", class = "Part", size = Vector3.new(7.6, 4, 5.4), cframe = CFrame.new(0, 3.6, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(156, 100, 56) },
 		{ name = "Band", bone = "root", class = "Part", size = Vector3.new(7.7, 0.6, 5.5), cframe = CFrame.new(0, 2.6, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(104, 64, 40) },
-		{ name = "Mouth", bone = "root", class = "Part", size = Vector3.new(6.8, 0.2, 4.6), cframe = CFrame.new(0, 5.55, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(110, 22, 40), plain = true },
+		{ name = "Mouth", bone = "root", class = "Part", size = Vector3.new(6.8, 0.2, 4.6), cframe = CFrame.new(0, 5.75, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(110, 22, 40) },
 		{ name = "Lock", bone = "root", class = "Part", size = Vector3.new(1.4, 1.6, 0.3), cframe = CFrame.new(0, 4.4, -2.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
-		{ name = "Keyhole", bone = "root", class = "Part", size = Vector3.new(0.35, 0.7, 0.1), cframe = CFrame.new(0, 4.3, -2.97, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34), plain = true },
-		{ name = "ToothB0", bone = "root", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(-2.8, 6, -2.4, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(250, 246, 236) },
-		{ name = "ToothB1", bone = "root", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(-1.4, 6, -2.4, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(250, 246, 236) },
-		{ name = "ToothB2", bone = "root", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(1.4, 6, -2.4, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(250, 246, 236) },
-		{ name = "ToothB3", bone = "root", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(2.8, 6, -2.4, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(250, 246, 236) },
+		{ name = "Keyhole", bone = "root", class = "Part", size = Vector3.new(0.35, 0.7, 0.1), cframe = CFrame.new(0, 4.3, -2.97, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34) },
+		{ name = "ToothB0", bone = "root", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(-3.1, 6, -2.4, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(250, 246, 236) },
+		{ name = "ToothB1", bone = "root", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(-1.7, 6, -2.4, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(250, 246, 236) },
+		{ name = "ToothB2", bone = "root", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(1.7, 6, -2.4, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(250, 246, 236) },
+		{ name = "ToothB3", bone = "root", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(3.1, 6, -2.4, -1, 0, 0, 0, 1, 0, 0, 0, -1), color = Color3.fromRGB(250, 246, 236) },
 		{ name = "CornerLF", bone = "root", class = "Part", size = Vector3.new(0.9, 4.1, 0.9), cframe = CFrame.new(-3.45, 3.6, -2.35, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
 		{ name = "LegLF", bone = "root", class = "Part", size = Vector3.new(1.4, 1.8, 1.4), cframe = CFrame.new(-2.6, 0.9, -1.88, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(104, 64, 40) },
 		{ name = "CornerLB", bone = "root", class = "Part", size = Vector3.new(0.9, 4.1, 0.9), cframe = CFrame.new(-3.45, 3.6, 2.35, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
 		{ name = "LegLB", bone = "root", class = "Part", size = Vector3.new(1.4, 1.8, 1.4), cframe = CFrame.new(-2.6, 0.9, 1.88, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(104, 64, 40) },
+		{ name = "LidTrim", bone = "root", class = "Part", size = Vector3.new(7.9, 0.45, 5.7), cframe = CFrame.new(0, 5.45, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
 		{ name = "CornerRF", bone = "root", class = "Part", size = Vector3.new(0.9, 4.1, 0.9), cframe = CFrame.new(3.45, 3.6, -2.35, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
 		{ name = "LegRF", bone = "root", class = "Part", size = Vector3.new(1.4, 1.8, 1.4), cframe = CFrame.new(2.6, 0.9, -1.88, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(104, 64, 40) },
 		{ name = "CornerRB", bone = "root", class = "Part", size = Vector3.new(0.9, 4.1, 0.9), cframe = CFrame.new(3.45, 3.6, 2.35, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
@@ -30,15 +32,17 @@ return {
 		{ name = "Lid", bone = "Lid", class = "Part", size = Vector3.new(7.8, 2.2, 5.6), cframe = CFrame.new(0, 6.75, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(156, 100, 56) },
 		{ name = "LidTop", bone = "Lid", class = "Part", size = Vector3.new(7.9, 0.5, 5.7), cframe = CFrame.new(0, 7.85, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(104, 64, 40) },
 		{ name = "LidTrim", bone = "Lid", class = "Part", size = Vector3.new(7.9, 0.45, 5.7), cframe = CFrame.new(0, 5.85, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
-		{ name = "LidMouth", bone = "Lid", class = "Part", size = Vector3.new(6.8, 0.1, 4.6), cframe = CFrame.new(0, 5.6, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(110, 22, 40), plain = true },
-		{ name = "ToothT0", bone = "Lid", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(-2.1, 5.25, -2.4, -1, 0, 0, 0, -1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236) },
-		{ name = "ToothT1", bone = "Lid", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(0, 5.25, -2.4, -1, 0, 0, 0, -1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236) },
-		{ name = "ToothT2", bone = "Lid", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(2.1, 5.25, -2.4, -1, 0, 0, 0, -1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236) },
-		{ name = "EyeL", bone = "Lid", class = "Part", size = Vector3.new(1.3, 0.9, 0.1), cframe = CFrame.new(-1.6, 6.85, -2.86, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 214, 70), neon = true },
-		{ name = "BrowL", bone = "Lid", class = "Part", size = Vector3.new(1.8, 0.45, 0.3), cframe = CFrame.new(-1.55, 7.55, -2.9, 0.96126, -0.27564, 0, 0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(104, 64, 40) },
-		{ name = "EyeR", bone = "Lid", class = "Part", size = Vector3.new(1.3, 0.9, 0.1), cframe = CFrame.new(1.6, 6.85, -2.86, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 214, 70), neon = true },
-		{ name = "BrowR", bone = "Lid", class = "Part", size = Vector3.new(1.8, 0.45, 0.3), cframe = CFrame.new(1.55, 7.55, -2.9, 0.96126, 0.27564, 0, -0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(104, 64, 40) },
-		{ name = "Tongue", bone = "Tongue", class = "Part", size = Vector3.new(2, 0.5, 4), cframe = CFrame.new(0, 5.55, -0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(236, 96, 130) },
+		{ name = "LidMouth", bone = "Lid", class = "Part", size = Vector3.new(6.8, 0.1, 4.6), cframe = CFrame.new(0, 5.6, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(110, 22, 40) },
+		{ name = "ToothT0", bone = "Lid", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(-2.1, 5.25, -2.6, -1, 0, 0, 0, -1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236) },
+		{ name = "ToothT1", bone = "Lid", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(0, 5.25, -2.6, -1, 0, 0, 0, -1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236) },
+		{ name = "ToothT2", bone = "Lid", class = "WedgePart", size = Vector3.new(0.7, 0.8, 0.5), cframe = CFrame.new(2.1, 5.25, -2.6, -1, 0, 0, 0, -1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236) },
+		{ name = "EyeL", bone = "Lid", class = "Part", size = Vector3.new(1.3, 1.1, 0.1), cframe = CFrame.new(-1.6, 6.95, -2.86, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34), plain = true },
+		{ name = "BrowL", bone = "Lid", class = "Part", size = Vector3.new(1.8, 0.45, 0.3), cframe = CFrame.new(-1.55, 7.55, -2.9, 0.96126, 0.27564, 0, -0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
+		{ name = "EyeR", bone = "Lid", class = "Part", size = Vector3.new(1.3, 1.1, 0.1), cframe = CFrame.new(1.6, 6.95, -2.86, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 22, 34), plain = true },
+		{ name = "EyeR", bone = "Lid", class = "Part", size = Vector3.new(0.5, 0.4, 0.025), cframe = CFrame.new(1.5, 6.9, -2.9225, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 0, 0), plain = true },
+		{ name = "EyeR", bone = "Lid", class = "Part", size = Vector3.new(0.5, 0.4, 0.025), cframe = CFrame.new(-1.5, 6.9, -2.9225, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 0, 0), plain = true },
+		{ name = "BrowR", bone = "Lid", class = "Part", size = Vector3.new(1.8, 0.45, 0.3), cframe = CFrame.new(1.55, 7.55, -2.9, 0.96126, -0.27564, 0, 0.27564, 0.96126, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
+		{ name = "Tongue", bone = "Tongue", class = "Part", size = Vector3.new(2, 0.5, 4), cframe = CFrame.new(0, 5.75, -0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(236, 96, 130) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs.
 	-- hit: seconds in where an attack strikes (Server/BossAttacks' Anim lands it on the attack)
