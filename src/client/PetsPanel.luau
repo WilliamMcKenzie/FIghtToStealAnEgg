@@ -4,7 +4,9 @@
 -- (each copy): its render (Shared/ItemIcons), its name (white: QM), its cash a second, and
 -- Riding (yellow: the one you ride, first; it's out of the pen but still counts and earns),
 -- Unequip (red, the pen's other pets), Equip (green) or Full (grey, no room in the pen). The red ">" tab on its left slides
--- it away. Equip and Unequip go through Server/PetInventory's PetEquip remote.
+-- it away. Under the panel, on its right, the green "Equip Best" (QM, Oct 30: like Lasso's)
+-- fills the pen with the pets earning the most. Equip, Unequip and Equip Best go through
+-- Server/PetInventory's PetEquip remote.
 --
 --   PetsPanel.init(root, petsButton)   -- once, from Hud
 --   PetsPanel.open() / PetsPanel.close() / PetsPanel.isOpen()
@@ -46,6 +48,7 @@ local OUTLINES = { -- text outlines (Figma)
 	Equip = hex("006b10"),
 	Full = hex("3a3a3a"),
 	Riding = hex("8a5a00"),
+	Best = hex("0a5a00"),
 }
 
 local panel, rows, template, countLabel
@@ -118,9 +121,19 @@ local function build(root)
 		ZIndex = 5,
 	})
 	HudKit.outlineArt(robux, 3) -- (QM: outlined like its text)
+	-- Equip Best: under the panel, lined up with its right edge (the panel's 1168 x 734)
+	local best = button(panel.gui, "PetsEquipBest", 560, 150, { Position = UDim2.fromOffset(fig(608), fig(764)), ZIndex = 4 }, "Green")
+	local bestText = label(best, "Text", {
+		Text = "Equip Best",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = fig(80),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 5,
+	})
+	bestText.Outline.Color = OUTLINES.Best
 	rows = panel.rows
 	template = Ui.template(rows, "RowTemplate", rowTemplate)
-	return buy
+	return buy, best
 end
 
 -- ---- filling in -------------------------------------------------------------------------
@@ -249,7 +262,7 @@ function PetsPanel.close()
 end
 
 function PetsPanel.init(root, petsButton)
-	local buy = build(root)
+	local buy, best = build(root)
 	if petsButton then
 		badge = buildBadge(petsButton)
 	end
@@ -281,6 +294,11 @@ function PetsPanel.init(root, petsButton)
 	end)
 
 	local remote = ReplicatedStorage:WaitForChild("PetEquip", 10)
+	best.Activated:Connect(function()
+		if remote then
+			remote:FireServer("best")
+		end
+	end)
 	local made = {}
 	local function refresh()
 		for _, r in made do
