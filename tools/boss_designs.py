@@ -744,8 +744,277 @@ def toadstool_king():
     return m
 
 
+STEEL = (184, 186, 198)
+STEEL_DARK = (112, 114, 130)
+CRIMSON = (170, 30, 52)
+CRIMSON_DARK = (120, 20, 40)
+
+
+def knight_body(m, k, plume=True):
+    """The Crimson Knight and his Castle Guards: steel plate, a crimson tabard, a helm with
+    a visor slit, k times the Guard's size. Bones: root, neck, ArmL (shield), ArmR (weapon),
+    LegL, LegR."""
+    m.bone("root", None, (0, 4.4 * k, 0))
+    m.bone("neck", "root", (0, 9.6 * k, 0))
+    m.bone("ArmL", "root", (-3 * k, 9.2 * k, 0))
+    m.bone("ArmR", "root", (3 * k, 9.2 * k, 0))
+    m.bone("LegL", "root", (-1.3 * k, 4.4 * k, 0))
+    m.bone("LegR", "root", (1.3 * k, 4.4 * k, 0))
+    for side, s in (("L", -1), ("R", 1)):
+        leg = "Leg" + side
+        m.block("Leg" + side, leg, (1.7 * k, 3.4 * k, 1.9 * k), (s * 1.3 * k, 2.9 * k, 0), STEEL)
+        m.block("Boot" + side, leg, (1.9 * k, 1.3 * k, 2.6 * k), (s * 1.3 * k, 0.65 * k, -0.3 * k), STEEL_DARK)
+        arm = "Arm" + side
+        m.block("Pauldron" + side, arm, (2.4 * k, 1.4 * k, 2.6 * k), (s * 3.3 * k, 9.3 * k, 0), STEEL)
+        m.block("Arm" + side, arm, (1.5 * k, 3.6 * k, 1.6 * k), (s * 3.3 * k, 7.2 * k, 0), STEEL_DARK)
+        m.block("Gauntlet" + side, arm, (1.7 * k, 1.4 * k, 1.8 * k), (s * 3.3 * k, 5.2 * k, 0), STEEL)
+    m.block("Torso", "root", (5 * k, 4.8 * k, 3.2 * k), (0, 7.4 * k, 0), STEEL)
+    m.block("Tabard", "root", (3.6 * k, 5.6 * k, 0.3 * k), (0, 6.4 * k, -1.7 * k), CRIMSON)
+    m.block("TabardBack", "root", (3.6 * k, 4.4 * k, 0.3 * k), (0, 7 * k, 1.7 * k), CRIMSON)
+    m.block("Belt", "root", (5.2 * k, 0.6 * k, 3.4 * k), (0, 5.4 * k, 0), GOLD_DARK)
+    m.block("Helm", "neck", (3 * k, 3.1 * k, 3.2 * k), (0, 11.2 * k, 0), STEEL)
+    m.block("Visor", "neck", (2.3 * k, 0.4 * k, 0.1 * k), (0, 11.3 * k, -1.63 * k), DARK, plain=True)
+    m.block("VisorBar", "neck", (0.4 * k, 1.6 * k, 0.1 * k), (0, 10.5 * k, -1.63 * k), DARK, plain=True)
+    if plume:
+        m.block("Plume", "neck", (0.7 * k, 1.3 * k, 3.6 * k), (0, 13.3 * k, 0.4 * k), CRIMSON)
+        m.block("Plume2", "neck", (0.7 * k, 1.4 * k, 1.2 * k), (0, 12.6 * k, 2.4 * k), CRIMSON)
+
+
+def knight_gaits(m, k):
+    m.anim("idle", 2.6, {
+        "root": {"p": bob(2.6, 0.1 * k)},
+        "neck": {"r": wave(2.6, (3, 5, 0))},
+        "ArmL": {"r": wave(2.6, (3, 0, 0))},
+        "ArmR": {"r": wave(2.6, (3, 0, 0), 0.3)},
+    })
+    walk = {
+        "root": {"p": bob(1.0, 0.3 * k, 0.25, double=True), "r": wave(1.0, (0, 4, 2))},
+        "LegL": {"r": wave(1.0, (24, 0, 0))},
+        "LegR": {"r": wave(1.0, (-24, 0, 0))},
+        "ArmL": {"r": wave(1.0, (-8, 0, 0))},
+        "ArmR": {"r": wave(1.0, (10, 0, 0))},
+    }
+    m.anim("walk", 1.0, walk)
+    gallop_from(m, walk, 0.65)
+
+
+def run_after(m, hit, end, bones=("LegL", "LegR")):
+    """bones' gallop from hit to end (eased in and out): a charge keeps running."""
+    gl = m.anims["gallop"]
+    tracks = {}
+    for b in bones:
+        tr = gl["tracks"][b]
+        out = {}
+        for key, keys in tr.items():
+            seq, t0 = [], hit
+            while t0 < end - 0.05:
+                seq += [(t0 + t, x, y, z) for t, x, y, z in keys if t0 + t < end - 0.05 and (not seq or t > 0)]
+                t0 += gl["length"]
+            out[key] = [(0, 0, 0, 0), (max(0, hit - 0.15), 0, 0, 0)] + seq + [(end, 0, 0, 0)]
+        tracks[b] = out
+    return tracks
+
+
+# ---------------------------------------------------------------------------------------
+# Red Castle: Crimson Knight (the raid boss). A big steel knight in a crimson tabard, a
+# plumed helm, a crimson tower shield with a gold diamond, and a long steel lance held
+# upright. Charge: couches the lance and leans in, then runs down the lane. Slam: raises
+# his shield, then bashes it down. Summon: draws the lance up, then thrusts it at the sky.
+# ---------------------------------------------------------------------------------------
+def crimson_knight():
+    m = Model("CrimsonKnight", "Crimson Knight: Red Castle raid boss. Bones: root, neck, ArmL (shield), ArmR (lance), LegL, LegR.")
+    k = 1.0
+    knight_body(m, k)
+    # tower shield, held on his left facing forward
+    m.block("ShieldRim", "ArmL", (4.4, 6.6, 0.5), (-3.4, 6.4, -2.1), GOLD_DARK, r=(0, 20, 0))
+    m.block("Shield", "ArmL", (3.8, 6, 0.4), (-3.45, 6.4, -2.3), CRIMSON, r=(0, 20, 0))
+    m.block("Emblem", "ArmL", (1.3, 1.3, 0.2), (-3.5, 6.8, -2.55), GOLD, r=(0, 20, 45))
+    # lance, upright in his right hand
+    m.block("Grip", "ArmR", (0.6, 2, 0.6), (3.3, 5.2, 0), STEEL_DARK)
+    m.block("Vamplate", "ArmR", (1.8, 1, 1.8), (3.3, 6.6, 0), STEEL)
+    m.block("Shaft", "ArmR", (1, 4, 1), (3.3, 9.1, 0), STEEL)
+    m.block("Shaft2", "ArmR", (0.7, 3.6, 0.7), (3.3, 12.9, 0), STEEL)
+    m.block("LanceTip", "ArmR", (0.4, 2, 0.4), (3.3, 15.6, 0), STEEL_DARK)
+    m.block("Pennant", "ArmR", (0.1, 1.2, 1.8), (3.3, 13.8, 1.2), CRIMSON)
+    knight_gaits(m, k)
+    # charge (1.0s windup): couches the lance level under his arm, crouches and leans in
+    # behind his shield, then runs down the lane from the hit
+    m.anim("charge", 2.1, dict(run_after(m, 1.0, 2.0), **{
+        "ArmR": {"r": [(0, 0, 0, 0), (0.6, -82, 0, 0), (1.0, -86, 0, 0), (2.0, -84, 0, 0), (2.1, 0, 0, 0)]},
+        "ArmL": {"r": [(0, 0, 0, 0), (0.6, 20, -20, 0), (2.0, 20, -20, 0), (2.1, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.6, -12, 0, 0), (1.0, -16, 0, 0), (2.0, -14, 0, 0), (2.1, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.6, 0, -0.7, 0), (1.0, 0, -0.4, 0), (2.0, 0, -0.4, 0), (2.1, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.6, 12, 0, 0), (2.0, 12, 0, 0), (2.1, 0, 0, 0)]},
+    }), hit=1.0)
+    # slam (0.8s windup): shield hauled up high, then bashed down in front at the hit
+    m.anim("slam", 1.5, {
+        "ArmL": {"r": [(0, 0, 0, 0), (0.6, 80, 0, 10), (0.7, 86, 0, 10), (0.8, 18, 0, 0), (1.1, 16, 0, 0), (1.5, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.6, 0, 0.8, 0), (0.8, 0, -0.3, 0), (1.5, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.7, 8, 0, 0), (0.8, -14, 0, 0), (1.1, -12, 0, 0), (1.5, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.7, 0, 0.3, 0), (0.8, 0, -0.6, -0.4), (1.1, 0, -0.5, -0.3), (1.5, 0, 0, 0)]},
+        "LegL": {"r": [(0, 0, 0, 0), (0.7, 0, 0, 0), (0.8, 18, 0, 0), (1.1, 16, 0, 0), (1.5, 0, 0, 0)]},
+        "LegR": {"r": [(0, 0, 0, 0), (0.7, 0, 0, 0), (0.8, -12, 0, 0), (1.1, -10, 0, 0), (1.5, 0, 0, 0)]},
+    }, hit=0.8)
+    # summon (1.0s windup): draws the lance back and down, then thrusts it high at the sky
+    # at the hit (his guards drop in) and holds it there
+    m.anim("summon", 2.0, {
+        "ArmR": {"r": [(0, 0, 0, 0), (0.7, 22, 0, 0), (0.85, 24, 0, 0), (1.0, -6, 0, -8), (1.6, -6, 0, -8), (2.0, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.7, 0, -0.6, 0), (1.0, 0, 2.6, 0), (1.6, 0, 2.5, 0), (2.0, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.7, -4, 0, 0), (1.0, 6, 0, 0), (1.6, 6, 0, 0), (2.0, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.7, -8, 0, 0), (1.0, 18, 0, 0), (1.6, 16, 0, 0), (2.0, 0, 0, 0)]},
+        "ArmL": {"r": [(0, 0, 0, 0), (1.0, 0, 0, -12), (1.6, 0, 0, -12), (2.0, 0, 0, 0)]},
+    }, hit=1.0)
+    return m
+
+
+# the Crimson Knight's Castle Guards (minions): half his size, a spear and a round shield
+def castle_guard():
+    m = Model("CastleGuard", "Castle Guard: the Crimson Knight's minion. Bones: root, neck, ArmL, ArmR, LegL, LegR.")
+    k = 0.55
+    knight_body(m, k, plume=False)
+    m.block("Shield", "ArmL", (2.2, 2.2, 0.3), (-2.0, 3.6, -1.1), CRIMSON, r=(0, 20, 0))
+    m.block("Boss", "ArmL", (0.6, 0.6, 0.2), (-2.05, 3.6, -1.3), GOLD, r=(0, 20, 0))
+    m.block("Spear", "ArmR", (0.3, 7, 0.3), (1.8, 4.6, 0), (120, 84, 60))
+    m.block("SpearTip", "ArmR", (0.45, 1.2, 0.2), (1.8, 8.6, 0), STEEL, r=(0, 0, 45))
+    knight_gaits(m, k)
+    return m
+
+
+# ---------------------------------------------------------------------------------------
+# Red Castle: Blood Bat. A round crimson bat hovering on two huge wings, big pointed ears,
+# yellow eyes and two little fangs. Screech: spreads its wings wide and throws its head
+# back, then screams at the hit, shaking.
+# ---------------------------------------------------------------------------------------
+def blood_bat():
+    m = Model("BloodBat", "Blood Bat: Red Castle boss, hovers. Bones: root, WingL, WingR.")
+    MEMBRANE = (196, 54, 72)
+    EAR_IN = (236, 120, 140)
+    m.bone("root", None, (0, 8, 0))
+    m.bone("WingL", "root", (-2.6, 9, 0.2))
+    m.bone("WingR", "root", (2.6, 9, 0.2))
+
+    m.block("Body", "root", (5.4, 5.2, 5), (0, 8, 0), CRIMSON)
+    m.block("Belly", "root", (3.6, 3, 0.3), (0, 7.2, -2.55), CRIMSON_DARK)
+    for side, s in (("L", -1), ("R", 1)):
+        m.wedge("Ear" + side, "root", (1.6, 3.2, 1.4), (s * 1.6, 12.1, -0.4), CRIMSON, r=(0, 180, s * 10))
+        m.block("EarIn" + side, "root", (0.9, 1.8, 0.1), (s * 1.6, 11.6, -1.13), EAR_IN, plain=True, r=(0, 0, s * -10))
+        m.block("Eye" + side, "root", (1.1, 0.8, 0.1), (s * 1.15, 9.2, -2.54), (255, 220, 60), neon=True)
+        m.wedge("Fang" + side, "root", (0.4, 0.8, 0.2), (s * 0.6, 7.6, -2.62), WHITE, r=(180, 0, 0))
+        m.block("Foot" + side, "root", (0.7, 1, 0.7), (s * 1, 4.9, 0.4), CRIMSON_DARK)
+        b = "Wing" + side
+        m.block("Spar" + side, b, (7, 0.6, 0.6), (s * 6, 9.6, -0.4), CRIMSON_DARK, r=(0, 0, s * -10))
+        m.block("Membrane" + side, b, (6.6, 0.3, 4.4), (s * 6, 9.2, 1.6), MEMBRANE, r=(0, 0, s * -10))
+        m.block("Finger" + side, b, (0.5, 0.5, 4.6), (s * 9.2, 8.7, 1.6), CRIMSON_DARK, r=(0, 0, s * -10))
+        m.block("Finger2" + side, b, (0.5, 0.5, 3.8), (s * 5.4, 9.3, 2.1), CRIMSON_DARK, r=(0, 0, s * -10))
+
+    m.anim("idle", 0.7, {
+        "root": {"p": wave(0.7, (0, 0.4, 0), 0.25)},
+        "WingL": {"r": wave(0.7, (0, 0, 32))},
+        "WingR": {"r": wave(0.7, (0, 0, -32))},
+    })
+    walk = {
+        "root": {"p": wave(0.5, (0, 0.4, 0), 0.25), "r": [(0, -10, 0, 0), (0.5, -10, 0, 0)]},
+        "WingL": {"r": wave(0.5, (0, 0, 38))},
+        "WingR": {"r": wave(0.5, (0, 0, -38))},
+    }
+    m.anim("walk", 0.5, walk)
+    gallop_from(m, walk, 0.35)
+    # screech (0.6s windup): rises with its wings spread wide and back and its head thrown
+    # back, then screams at the hit, wings flared, shaking
+    shake = [(0.6 + i * 0.05, -8, (3 if i % 2 else -3), 0) for i in range(8)]
+    m.anim("screech", 1.3, {
+        "root": {"r": [(0, 0, 0, 0), (0.45, 20, 0, 0), (0.6, -8, 0, 0)] + shake + [(1.3, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.45, 0, 1.2, 0.4), (0.6, 0, 0.6, -0.4), (1.0, 0, 0.6, -0.4), (1.3, 0, 0, 0)]},
+        "WingL": {"r": [(0, 0, 0, 0), (0.45, 0, 30, -40), (0.6, 0, -10, 12), (1.0, 0, -10, 10), (1.3, 0, 0, 0)]},
+        "WingR": {"r": [(0, 0, 0, 0), (0.45, 0, -30, 40), (0.6, 0, 10, -12), (1.0, 0, 10, -10), (1.3, 0, 0, 0)]},
+    }, hit=0.6)
+    return m
+
+
+# ---------------------------------------------------------------------------------------
+# Red Castle: Castle Wyvern. A dark red dragon: a body block on four stubby legs, a neck
+# rising to a horned head, two big wings folded up, a tail with a spade. Breath: rears its
+# head up and back, then thrusts it down the lane at the hit, holding the flame. Leap:
+# wings raised, crouched, one big downbeat at the hit, then lands.
+# ---------------------------------------------------------------------------------------
+def castle_wyvern():
+    m = Model("CastleWyvern", "Castle Wyvern: Red Castle boss. Bones: root, neck, WingL, WingR, Tail.")
+    RED = (150, 30, 44)
+    RED_DARK = (100, 18, 32)
+    BELLY = (236, 196, 150)
+    WING = (200, 70, 60)
+    HORN = (240, 226, 200)
+    m.bone("root", None, (0, 5, 0))
+    m.bone("neck", "root", (0, 6.4, -3.4))
+    m.bone("WingL", "root", (-2.4, 7, -1))
+    m.bone("WingR", "root", (2.4, 7, -1))
+    m.bone("Tail", "root", (0, 5, 3.8))
+
+    m.block("Body", "root", (5, 4.6, 8), (0, 5.2, 0), RED)
+    m.block("Belly", "root", (4, 0.8, 6.6), (0, 2.85, -0.2), BELLY)
+    for i, z in enumerate((-2.2, 0, 2.2)):
+        m.wedge("Spine%d" % i, "root", (0.5, 1.2, 1.6), (0, 8.1, z), RED_DARK, r=(0, 180, 0))
+    for side, s in (("L", -1), ("R", 1)):
+        for end, z in (("F", -2.6), ("B", 2.4)):
+            m.block("Leg" + side + end, "root", (1.6, 3.2, 1.8), (s * 2, 1.6, z), RED_DARK)
+            m.block("Claw" + side + end, "root", (1.7, 0.5, 0.6), (s * 2, 0.25, z - 1.1), HORN)
+    m.block("Neck", "neck", (2.4, 2.4, 3.6), (0, 7.9, -4.6), RED, r=(32, 0, 0))
+    m.block("Head", "neck", (3.2, 2.6, 3.6), (0, 9.8, -6.8), RED)
+    m.block("Snout", "neck", (2.6, 1.6, 2.6), (0, 9.2, -9.6), RED)
+    m.block("Chin", "neck", (2.4, 0.6, 2.4), (0, 8.15, -9.4), BELLY)
+    for side, s in (("L", -1), ("R", 1)):
+        m.block("Eye" + side, "neck", (0.1, 0.5, 1), (s * 1.63, 10.2, -7.8), (255, 210, 60), neon=True)
+        m.wedge("Horn" + side, "neck", (0.6, 1, 2.6), (s * 1.1, 11.4, -5.4), HORN, r=(-20, 0, 0))
+        m.block("Nostril" + side, "neck", (0.4, 0.3, 0.1), (s * 0.6, 9.6, -10.93), DARK, plain=True)
+        b = "Wing" + side
+        m.block("WingArm" + side, b, (8, 0.8, 0.8), (s * 5.6, 9.3, -1), RED_DARK, r=(0, 0, s * -35))
+        m.block("Wing" + side, b, (7.6, 0.3, 6.4), (s * 5.4, 9.0, 2.2), WING, r=(0, 0, s * -35))
+    m.block("Tail1", "Tail", (2.2, 2, 3.4), (0, 4.8, 5.4), RED)
+    m.block("Tail2", "Tail", (1.5, 1.4, 3.2), (0, 4.2, 8.6), RED)
+    m.wedge("Spade", "Tail", (2.4, 0.5, 1.8), (0, 4.0, 11), RED_DARK, r=(0, 180, 0))
+
+    m.anim("idle", 2.6, {
+        "root": {"p": bob(2.6, 0.2)},
+        "neck": {"r": wave(2.6, (4, 6, 0), 0.25)},
+        "WingL": {"r": wave(2.6, (0, 0, -6))},
+        "WingR": {"r": wave(2.6, (0, 0, 6))},
+        "Tail": {"r": wave(2.6, (0, 12, 0), 0.4)},
+    })
+    walk = {
+        "root": {"p": bob(0.8, 0.4, double=True), "r": wave(0.8, (0, 5, 4))},
+        "neck": {"r": wave(0.8, (6, -6, 0), 0.25)},
+        "WingL": {"r": wave(0.8, (0, 0, -10), 0.5)},
+        "WingR": {"r": wave(0.8, (0, 0, 10), 0.5)},
+        "Tail": {"r": wave(0.8, (0, 18, 0), 0.25)},
+    }
+    m.anim("walk", 0.8, walk)
+    gallop_from(m, walk, 0.55)
+    # breath (1.0s windup): head reared up and back, wings half open, then at the hit the
+    # head thrusts forward and down the lane and holds the flame, shuddering
+    m.anim("breath", 2.2, {
+        "neck": {"r": [(0, 0, 0, 0), (0.75, 30, 0, 0), (0.88, 32, 0, 0), (1.0, -16, 0, 0), (1.2, -16, 3, 0), (1.4, -16, -3, 0),
+                       (1.6, -16, 3, 0), (1.8, -14, 0, 0), (2.2, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.88, 0, 0, 0.6), (1.0, 0, 0, -0.8), (1.8, 0, 0, -0.6), (2.2, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.88, 6, 0, 0), (1.0, -6, 0, 0), (1.8, -5, 0, 0), (2.2, 0, 0, 0)]},
+        "WingL": {"r": [(0, 0, 0, 0), (0.88, 0, 0, -30), (1.0, 0, 0, 10), (1.8, 0, 0, 8), (2.2, 0, 0, 0)]},
+        "WingR": {"r": [(0, 0, 0, 0), (0.88, 0, 0, 30), (1.0, 0, 0, -10), (1.8, 0, 0, -8), (2.2, 0, 0, 0)]},
+        "Tail": {"r": [(0, 0, 0, 0), (0.88, -14, 0, 0), (1.0, 8, 0, 0), (2.2, 0, 0, 0)]},
+    }, hit=1.0)
+    # leap (0.8s windup): wings raised high, crouched; one big downbeat at the hit as it
+    # takes off, wings beating through the jump, then lands heavily
+    m.anim("leap", 2.0, {
+        "root": {"p": [(0, 0, 0, 0), (0.6, 0, -1, 0), (0.8, 0, 2.6, 0), (1.3, 0, 2.2, 0), (1.55, 0, -0.8, 0), (2.0, 0, 0, 0)],
+                 "r": [(0, 0, 0, 0), (0.6, -6, 0, 0), (0.8, 8, 0, 0), (1.3, 2, 0, 0), (1.55, -6, 0, 0), (2.0, 0, 0, 0)]},
+        "WingL": {"r": [(0, 0, 0, 0), (0.6, 0, 0, -70), (0.8, 0, 0, 30), (1.0, 0, 0, -50), (1.2, 0, 0, 25), (1.4, 0, 0, -40), (1.55, 0, 0, 10), (2.0, 0, 0, 0)]},
+        "WingR": {"r": [(0, 0, 0, 0), (0.6, 0, 0, 70), (0.8, 0, 0, -30), (1.0, 0, 0, 50), (1.2, 0, 0, -25), (1.4, 0, 0, 40), (1.55, 0, 0, -10), (2.0, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.6, -10, 0, 0), (0.8, 12, 0, 0), (1.55, -12, 0, 0), (2.0, 0, 0, 0)]},
+        "Tail": {"r": [(0, 0, 0, 0), (0.6, 10, 0, 0), (0.8, -16, 0, 0), (1.55, 12, 0, 0), (2.0, 0, 0, 0)]},
+    }, hit=0.8)
+    return m
+
+
 BUILDERS = [scorpion_king, frost_golem, blizzard_owl, magma_slime, bone_warden, skeleton, dungeon_watcher, treasure_mimic,
-            rune_mage, elder_treant, toadstool_king]
+            rune_mage, elder_treant, toadstool_king, crimson_knight, castle_guard, blood_bat, castle_wyvern]
 
 
 def models():
