@@ -26,16 +26,16 @@ local FILL_TRANSPARENCY = 0.5 -- the fill growing out from the middle
 local EDGE_TRANSPARENCY = 0.15 -- its leading edge
 local EDGE_WIDTH = 0.05 -- of the radius
 local LIFT = 0.15 -- studs above the ground
-local SIZE = 0.88 -- the bomb's width (studs) as it leaves and lands
+local SIZE = 1.4 -- the bomb's width (studs) as it leaves and lands
 local SWELL = 2 -- how much bigger it is at the top of its flight (Kingdom's: 3x, so
 -- about twice a trail square there)
 local SPIN = 900 -- degrees a second at the top of its flight (none at either end)
 local OUTLINE = 0.13 -- the edge, of a square's width (the same on every square)
 local TRAIL_EVERY = 0.1 -- seconds between the squares dropped behind it
-local TRAIL_SIZE = 1.44 -- studs
-local SPLASH_SIZE = 1.6 -- studs
+local TRAIL_SIZE = 2.3 -- studs
+local SPLASH_SIZE = 2.56 -- studs
 local SPLASH_SPOKES = 7 -- squares in each ring of the splash
-local SPLASH_STEP = 1.6 -- studs further out each ring goes
+local SPLASH_STEP = 2.56 -- studs further out each ring goes
 local SPLASH_EVERY = 0.03 -- seconds between rings
 local FADE = 0.5 -- seconds for a trail or splash square to fade out
 local SHRINK = 1 -- seconds for one to shrink to nothing (it's gone once faded)
@@ -178,7 +178,7 @@ local function splash(at, radius, style)
 		local ring = math.min(r, radius)
 		for k = 1, SPLASH_SPOKES do
 			local a = turn + k / SPLASH_SPOKES * math.pi * 2
-			bit(style, at + Vector3.new(math.cos(a) * ring, 1, math.sin(a) * ring), SPLASH_SIZE, 45)
+			bit(style, at + Vector3.new(math.cos(a) * ring, 1.6, math.sin(a) * ring), SPLASH_SIZE, 45)
 		end
 		if r >= radius then
 			break
@@ -208,7 +208,7 @@ ReplicatedStorage:WaitForChild("BossBomb").OnClientEvent:Connect(function(info)
 		start = info.start,
 		airtime = info.airtime,
 		radius = info.radius,
-		height = info.height or 15,
+		height = info.height or 24,
 		angle = math.random() * 90,
 		dropped = os.clock(),
 		style = s,

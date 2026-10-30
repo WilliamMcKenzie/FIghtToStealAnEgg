@@ -383,10 +383,10 @@ return {
 					Kind = "Lob",
 					Every = 3.5, -- seconds between volleys
 					Count = 2, -- extra bombs scattered round you, besides the one at your feet
-					Scatter = 22, -- how far off (studs) the extras can land
-					Radius = 7, -- each blast's radius (studs)
+					Scatter = 35, -- how far off (studs) the extras can land
+					Radius = 11, -- each blast's radius (studs)
 					Airtime = 1.3, -- seconds in the air (the red ring's fill time)
-					Height = 18, -- the arc's peak, studs above the straight line
+					Height = 29, -- the arc's peak, studs above the straight line
 					Damage = 14,
 					Style = "Cactus", -- (client/Bombs' look)
 				},
@@ -618,7 +618,7 @@ return {
 			Strength = 20,
 			Respawn = 30,
 			Attacks = {
-				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 22, Radius = 7, Airtime = 1.3, Height = 20, Damage = 24, Style = "Snow", Cast = 0.5, Anim = "throw" },
+				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 35, Radius = 11, Airtime = 1.3, Height = 32, Damage = 24, Style = "Snow", Cast = 0.5, Anim = "throw" },
 				-- (three ice lances, flung like arrows)
 				{
 					Kind = "Magic",
@@ -706,7 +706,7 @@ return {
 			Respawn = 35,
 			Attacks = {
 				{ Kind = "Swipe", Every = 2.8, Reach = 16, Arc = 180, Windup = 1, Damage = 75 },
-				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 26, Radius = 8, Airtime = 1.4, Height = 30, Damage = 40, Style = "Lava", Cast = 0.8, Anim = "erupt" },
+				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 13, Airtime = 1.4, Height = 48, Damage = 40, Style = "Lava", Cast = 0.8, Anim = "erupt" },
 				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 46 },
 			},
 			Minions = {
@@ -825,7 +825,7 @@ return {
 			Attacks = {
 				{ Kind = "Swipe", Every = 2, Reach = 14, Arc = 80, Windup = 0.7, Damage = 100 },
 				{ Kind = "Charge", Every = 4, Range = 100, Windup = 0.7, Speed = 90, Width = 24, Damage = 65, Anim = "charge", Then = 3 },
-				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 24, Radius = 7, Airtime = 1.2, Height = 22, Damage = 45, Style = "Coin", Cast = 0.5, Anim = "spit" },
+				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 38.5, Radius = 11, Airtime = 1.2, Height = 35, Damage = 45, Style = "Coin", Cast = 0.5, Anim = "spit" },
 			},
 		},
 
@@ -931,7 +931,7 @@ return {
 					BurstGap = 0.12,
 					Shot = { Color = Color3.fromRGB(255, 110, 50), Count = 3, Spread = 25, Speed = 45, Homing = 0, Launch = 0, Range = 70, Slack = 0, Size = 1.5 },
 				},
-				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 24, Radius = 8, Airtime = 1.3, Height = 26, Damage = 70, Style = "Fire" },
+				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 38.5, Radius = 13, Airtime = 1.3, Height = 41.5, Damage = 70, Style = "Fire" },
 				{ Kind = "Leap", Every = 8, Range = 120, Windup = 0.8, Airtime = 1.3, Height = 40, Radius = 25, Damage = 90, Anim = "leap" },
 			},
 		},
@@ -2076,7 +2076,7 @@ return {
 						Pet = "Penguin",
 						Mode = "Flee",
 						Attacks = {
-							{ Kind = "Lob", Every = 3, Count = 0, Scatter = 6, Radius = 5, Airtime = 1.2, Height = 14, Damage = 22 },
+							{ Kind = "Lob", Every = 3, Count = 0, Scatter = 9.5, Radius = 8, Airtime = 1.2, Height = 22.5, Damage = 22 },
 						},
 					},
 				},
