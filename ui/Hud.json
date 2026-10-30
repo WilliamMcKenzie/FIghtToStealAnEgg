@@ -3936,7 +3936,7 @@
          "class": "UIStroke",
          "name": "Outline",
          "props": {
-          "Thickness": 4
+          "Thickness": 5
          }
         }
        ],
@@ -3996,7 +3996,7 @@
          "class": "UIStroke",
          "name": "Outline",
          "props": {
-          "Thickness": 4
+          "Thickness": 5
          }
         }
        ],
@@ -12539,6 +12539,371 @@
           189,
           0,
           44
+         ]
+        },
+        "Transparency": 1,
+        "ZIndex": 4
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              2
+             ]
+            }
+           }
+          },
+          {
+           "children": [],
+           "class": "UIGradient",
+           "name": "Fill",
+           "props": {
+            "Color": {
+             "t": "ColorSequence",
+             "v": [
+              [
+               0,
+               0.7921568751335144,
+               1,
+               0
+              ],
+              [
+               0.1589999943971634,
+               0.7921568751335144,
+               1,
+               0
+              ],
+              [
+               1,
+               0.03921568766236305,
+               1,
+               0
+              ]
+             ]
+            },
+            "Rotation": 90
+           }
+          },
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "Outline",
+           "props": {
+            "ApplyStrokeMode": {
+             "e": "ApplyStrokeMode",
+             "t": "EnumItem",
+             "v": "Border"
+            },
+            "Thickness": 4
+           }
+          },
+          {
+           "children": [
+            {
+             "children": [],
+             "class": "UICorner",
+             "name": "UICorner",
+             "props": {
+              "CornerRadius": {
+               "t": "UDim",
+               "v": [
+                0,
+                2
+               ]
+              }
+             }
+            }
+           ],
+           "class": "ImageLabel",
+           "name": "Studs",
+           "props": {
+            "BackgroundTransparency": 1,
+            "Image": "rbxassetid://94674059514917",
+            "ImageTransparency": 0.800000011920929,
+            "ScaleType": {
+             "e": "ScaleType",
+             "t": "EnumItem",
+             "v": "Tile"
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              1,
+              0
+             ]
+            },
+            "TileSize": {
+             "t": "UDim2",
+             "v": [
+              0,
+              113,
+              0,
+              113
+             ]
+            },
+            "Transparency": 1
+           }
+          },
+          {
+           "children": [],
+           "class": "Frame",
+           "name": "Light",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              1,
+              1,
+              1
+             ]
+            },
+            "BackgroundTransparency": 0.75,
+            "BorderSizePixel": 0,
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              0,
+              0,
+              4
+             ]
+            },
+            "Transparency": 0.75
+           }
+          },
+          {
+           "children": [],
+           "class": "Frame",
+           "name": "Light",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              1,
+              1,
+              1
+             ]
+            },
+            "BackgroundTransparency": 0.75,
+            "BorderSizePixel": 0,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              0,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              1,
+              -4
+             ]
+            },
+            "Transparency": 0.75
+           }
+          },
+          {
+           "children": [],
+           "class": "Frame",
+           "name": "Shade",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "BackgroundTransparency": 0.75,
+            "BorderSizePixel": 0,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              1,
+              -4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              1,
+              -4,
+              0,
+              4
+             ]
+            },
+            "Transparency": 0.75
+           }
+          },
+          {
+           "children": [],
+           "class": "Frame",
+           "name": "Shade",
+           "props": {
+            "BackgroundColor3": {
+             "t": "Color3",
+             "v": [
+              0,
+              0,
+              0
+             ]
+            },
+            "BackgroundTransparency": 0.75,
+            "BorderSizePixel": 0,
+            "Position": {
+             "t": "UDim2",
+             "v": [
+              1,
+              -4,
+              0,
+              4
+             ]
+            },
+            "Size": {
+             "t": "UDim2",
+             "v": [
+              0,
+              4,
+              1,
+              -4
+             ]
+            },
+            "Transparency": 0.75
+           }
+          }
+         ],
+         "class": "Frame",
+         "name": "Back",
+         "props": {
+          "BackgroundColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "BorderSizePixel": 0,
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIScale",
+         "name": "Hover",
+         "props": []
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "Outline",
+           "props": {
+            "Color": {
+             "t": "Color3",
+             "v": [
+              0.03921568766236305,
+              0.3529411852359772,
+              0
+             ]
+            },
+            "Thickness": 4
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "Text",
+         "props": {
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Normal"
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "Text": "Equip Best",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "TextSize": 39,
+          "Transparency": 1,
+          "ZIndex": 5
+         }
+        }
+       ],
+       "class": "ImageButton",
+       "name": "PetsEquipBest",
+       "props": {
+        "AnchorPoint": {
+         "t": "Vector2",
+         "v": [
+          0.5,
+          0.5
+         ]
+        },
+        "AutoButtonColor": false,
+        "BackgroundTransparency": 1,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          438,
+          0,
+          414
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          276,
+          0,
+          74
          ]
         },
         "Transparency": 1,
