@@ -67,7 +67,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss, swapPet, givePet, buyWeapon, giveWeapon, giveWeapons, giveCash, resetPlayer -- (below)
+local requestBoss, reboss, bossFight, bossList, swapPet, givePet, buyWeapon, giveWeapon, giveWeapons, giveCash, resetPlayer -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your Strength (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -82,6 +82,10 @@ local function joined(player)
 	player.Chatted:Connect(function(message)
 		if message:lower():match("^/reboss") then
 			reboss(player)
+		elseif message:lower():match("^/bossfight") then
+			bossFight(player, message)
+		elseif message:lower():match("^/bosslist") then
+			bossList(player, message)
 		elseif message:lower():match("^/boss") then
 			requestBoss(player)
 		elseif message:lower():match("^/ride") then
@@ -228,6 +232,107 @@ local rebossRequest = Instance.new("RemoteEvent")
 rebossRequest.Name = "RebossRequest"
 rebossRequest.Parent = ReplicatedStorage
 rebossRequest.OnServerEvent:Connect(reboss)
+
+-- what a command has to say, shown to just that player in their chat (client/ChatCommands)
+local commandReply = Instance.new("RemoteEvent")
+commandReply.Name = "CommandReply"
+commandReply.Parent = ReplicatedStorage
+local function reply(player, text)
+	print(player.Name .. ": " .. text)
+	commandReply:FireClient(player, text)
+end
+
+-- /bosslist: every arena boss's name, by biome. /bossfight <boss>: you go to that boss's
+-- arena (in front of its dais, on the gateway side) and it's summoned there at once, with
+-- its intro, you locked into its fight; whatever boss was there goes (QM, Oct 30). Names
+-- as /bosslist shows them or Config.Bosses keys, any case, spaces optional. The game's
+-- owner, or anyone in a Studio playtest.
+local BIOMES = { "Meadow", "Desert", "Ice", "Lava" }
+local function biomeOrder()
+	local list = table.clone(BIOMES)
+	for biome in Config.BossPools do
+		if not table.find(list, biome) then
+			table.insert(list, biome)
+		end
+	end
+	return list
+end
+local function bossName(kind)
+	return Config.Bosses[kind].Name or kind
+end
+function bossList(player)
+	if not mayReboss(player) then
+		return
+	end
+	local lines = {}
+	for _, biome in biomeOrder() do
+		local names = {}
+		for _, kind in Config.BossPools[biome] or {} do
+			if Config.Bosses[kind] then
+				table.insert(names, bossName(kind))
+			end
+		end
+		if #names > 0 then
+			table.insert(lines, biome .. ": " .. table.concat(names, ", "))
+		end
+	end
+	reply(player, "Bosses (/bossfight [name])\n" .. table.concat(lines, "\n"))
+end
+local lastFight = 0
+function bossFight(player, message)
+	if not mayReboss(player) then
+		return
+	end
+	local want = (message:match("^/%a+%s+(.-)%s*$") or ""):lower():gsub("[%s_]", "")
+	if want == "" then
+		return bossList(player)
+	end
+	local kind
+	for _, biome in biomeOrder() do
+		for _, k in Config.BossPools[biome] or {} do
+			if Config.Bosses[k] and not kind and (k:lower() == want or bossName(k):lower():gsub("%s", "") == want) then
+				kind = k
+			end
+		end
+	end
+	if not kind then
+		reply(player, "No boss called \"" .. want .. "\". /bosslist for their names.")
+		return
+	end
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if not (root and humanoid and humanoid.Health > 0) or os.clock() - lastFight < 1 then
+		return
+	end
+	local biome
+	for b, list in Config.BossPools do
+		if table.find(list, kind) then
+			biome = b
+		end
+	end
+	local arena = biome and Bosses.arenaOf(biome)
+	if not arena then
+		reply(player, bossName(kind) .. "'s arena isn't on the map.")
+		return
+	end
+	lastFight = os.clock()
+	-- (halfway from its dais to the arena's gateway edge, bounds[2], facing the dais)
+	local spot = arena.spot
+	local z = if arena.bounds then (spot.Z + arena.bounds[2]) / 2 else spot.Z + 40
+	local at = Vector3.new(spot.X, 0, z)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.RespectCanCollide = true
+	params.FilterDescendantsInstances = { player.Character, workspace:FindFirstChild("Bosses") }
+	local hit = workspace:Raycast(at + Vector3.new(0, 200, 0), Vector3.new(0, -400, 0), params)
+	local ground = if hit then hit.Position.Y else 0
+	local height = humanoid.HipHeight + root.Size.Y / 2 + 1
+	local from = Vector3.new(at.X, ground + height, at.Z)
+	player.Character:PivotTo(CFrame.lookAt(from, Vector3.new(spot.X, from.Y, spot.Z)))
+	player:SetAttribute("LockedIn", biome) -- (first, so their screen knows the boss is theirs)
+	Bosses.fight(kind, player)
+	reply(player, bossName(kind) .. " (" .. biome .. ")")
+end
 
 -- /ride <pet>: ride that pet (QM, Oct 25: for trying the pets out), given to you first if
 -- you don't own one (the pet ridden is always one of yours: Server/PetInventory);
@@ -431,6 +536,8 @@ for _, cmd in {
 	{ "Bows", giveWeapons },
 	{ "Cash", giveCash },
 	{ "Reset", resetPlayer },
+	{ "Bossfight", bossFight },
+	{ "Bosslist", bossList },
 } do
 	local command = Instance.new("TextChatCommand")
 	command.Name = cmd[1] .. "Command"
