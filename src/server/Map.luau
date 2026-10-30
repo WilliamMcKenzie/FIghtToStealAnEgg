@@ -34,6 +34,7 @@ local MapData = require(Shared.MapData)
 local WorldColors = require(Shared.WorldColors)
 local RegionBlocker = require(Shared.RegionBlocker)
 local Studs = require(Shared.Studs)
+local StudStyle = require(Shared.StudStyle)
 local VendorStallModel = require(Shared.VendorStallModel)
 local Weapons = require(Shared.Weapons.Weapons)
 local Cactus = require(Shared.Animals.Cactus)
@@ -78,7 +79,7 @@ local function texture(part, face, image, tile, key, z, aligned)
 		t.Color3 = color(key)
 	end
 	if image == STUDS then
-		t.Transparency = Config.StudTransparency
+		t.Transparency = StudStyle.transparency() -- (workspace.StudStyle)
 	end
 	-- (lined up with the world grid, whatever the part's corner: axis-aligned parts only)
 	if aligned then

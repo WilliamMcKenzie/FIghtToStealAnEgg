@@ -19,6 +19,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Studs = require(script.Parent.Studs)
 local Config = require(script.Parent.Config)
+local StudStyle = require(script.Parent.StudStyle)
 
 local Rig = {}
 
@@ -141,7 +142,7 @@ function Rig.build(spec)
 					texture.Texture = spec.studTexture.image
 					texture.StudsPerTileU = spec.studTexture.tile
 					texture.StudsPerTileV = spec.studTexture.tile
-					texture.Transparency = Config.StudTransparency or 0 -- (subtler studs, QM Oct 24)
+					texture.Transparency = StudStyle.transparency() -- (workspace.StudStyle: subtler studs, QM)
 				end
 				texture.Face = face
 				texture.Parent = part

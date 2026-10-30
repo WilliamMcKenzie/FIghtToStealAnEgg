@@ -198,3 +198,78 @@ beat = RunService.Heartbeat:Connect(function(dt)
 		end
 	end
 end)
+
+-- ---- the studs' fade, in Edit mode ---------------------------------------------------------
+-- (QM, Oct 30) workspace.StudStyle's Transparency is every stud Texture's, in Edit mode too:
+-- this makes the knob when the place has none (seeded from Config.StudTransparency) and
+-- repaints the place whenever it changes. During Play, Shared/StudStyle does the same.
+local STUD_IMAGE = "rbxassetid://7447638591"
+local studStyle, studConn = nil, nil
+
+local function studSeed()
+	local shared = ReplicatedStorage:FindFirstChild("Shared")
+	local module = shared and shared:FindFirstChild("Config")
+	if module and module:IsA("ModuleScript") then
+		local ok, config = pcall(require, module:Clone())
+		if ok and type(config) == "table" and type(config.StudTransparency) == "number" then
+			return config.StudTransparency
+		end
+	end
+	return 0.5
+end
+
+local function studPaint()
+	local value = studStyle and studStyle:GetAttribute("Transparency")
+	if typeof(value) ~= "number" or RunService:IsRunning() then
+		return
+	end
+	local count = 0
+	for _, thing in workspace:GetDescendants() do
+		if thing:IsA("Texture") and thing.Texture == STUD_IMAGE and thing.Transparency ~= value then
+			thing.Transparency = value
+			count += 1
+		end
+	end
+	if count > 0 then
+		print(string.format("[Map Baker] StudStyle: %d stud textures at Transparency %s", count, tostring(value)))
+	end
+end
+
+local function studHook()
+	if RunService:IsRunning() then
+		return
+	end
+	local style = workspace:FindFirstChild("StudStyle")
+	if not style then
+		style = Instance.new("Configuration")
+		style.Name = "StudStyle"
+		style:SetAttribute("Transparency", studSeed())
+		style.Parent = workspace
+	elseif typeof(style:GetAttribute("Transparency")) ~= "number" then
+		style:SetAttribute("Transparency", studSeed())
+	end
+	if style ~= studStyle then
+		if studConn then
+			studConn:Disconnect()
+		end
+		studStyle = style
+		studConn = style:GetAttributeChangedSignal("Transparency"):Connect(studPaint)
+	end
+	studPaint()
+end
+
+task.defer(studHook)
+workspace.ChildAdded:Connect(function(child)
+	if child.Name == "StudStyle" then
+		task.defer(studHook)
+	end
+end)
+workspace.ChildRemoved:Connect(function(child)
+	if child == studStyle then
+		studStyle = nil
+		if studConn then
+			studConn:Disconnect()
+			studConn = nil
+		end
+	end
+end)
