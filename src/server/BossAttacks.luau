@@ -64,8 +64,8 @@
 --
 -- Only players locked into its fight (LockedIn = its biome) are hit, so someone passing
 -- through is never caught. A sprint ability (Server/SprintAbility: the player's
--- SprintAbility attribute) dodges too: burrowed, nothing hits you; flying, only homing
--- Magic shots do (QM, Oct 30). All of it is server parts in workspace.BossFx. A pet bigger
+-- SprintAbility attribute) dodges too: burrowed, nothing hits you; flying (or up on a
+-- Leap), only homing Magic shots do (QM, Oct 30). All of it is server parts in workspace.BossFx. A pet bigger
 -- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
@@ -146,7 +146,7 @@ BossAttacks.fighter = fighter
 -- whether this fighter's sprint ability dodges a hit (homing: a homing Magic shot's)
 local function dodges(f, homing)
 	local ability = f.player and f.player:GetAttribute("SprintAbility")
-	return ability == "Burrow" or (ability == "Fly" and not homing)
+	return ability == "Burrow" or ((ability == "Fly" or ability == "Leap") and not homing)
 end
 BossAttacks.dodges = dodges
 

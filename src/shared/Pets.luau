@@ -4,7 +4,7 @@
 -- bigger its hitbox. Server and clients both work it out from the same model data.
 --
 --   Pets.class(kind)  -> its Animals class (Horse.variant), the Horse for an unknown kind
---   Pets.stats(kind)  -> { Kind, Name, Rarity, Cash, Health, Speed, Hitbox }
+--   Pets.stats(kind)  -> { Kind, Name, Rarity, Cash, Health, Regen (health a second), Speed, Hitbox }
 --   Pets.name(kind)   -> how players see it ("SpineLizard" -> "Spine Lizard")
 --   Pets.kinds()      -> every kind in Config.Pets, sorted
 
@@ -66,6 +66,9 @@ function Pets.stats(kind)
 			Health = math.round(base.Health * (1 + lean) * (box / HORSE_HITBOX) ^ tune.Hitbox),
 			Speed = math.round((if pet.Speed then rideSpeed(pet.Speed) else base.Speed * (1 - lean)) * 10) / 10, -- (LassoAPet's speeds, on a log curve: QM, Oct 26/30)
 			Hitbox = math.round(box * 10) / 10,
+			Regen = math.round(
+				base.Health * tune.Regen.Rate * (1 - (pet.Lean or 0) * tune.Regen.RegenLean) * (pet.Regen or 1) * 10
+			) / 10,
 		}
 	end
 	return stats[kind]
