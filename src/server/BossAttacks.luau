@@ -422,7 +422,8 @@ local function swipe(body, b, a, pos, toward)
 				return
 			end
 			for _, f in fighters(b.biome) do
-				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra) then
+				-- (solid: right up against it, inside the crescent, counts too)
+				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra, true) then
 					f.humanoid:TakeDamage(a.Damage)
 				end
 			end

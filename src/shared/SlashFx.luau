@@ -194,12 +194,14 @@ function SlashFx.edges(o, u, dir, radius)
 	return shape(o.c, o.poly, u, dir, radius or o.c.Radius)
 end
 
--- is `point` (in the slash frame, flat) on the crescent, give or take `pad` studs?
-function SlashFx.contains(o, dir, point, pad)
+-- is `point` (in the slash frame, flat) on the crescent, give or take `pad` studs? Solid:
+-- anywhere in its wedge out to the outer edge, the gap inside the inner edge too (like your
+-- own slash's hits: an enemy's swipe can't be dodged by hugging it)
+function SlashFx.contains(o, dir, point, pad, solid)
 	local c = o.c
 	local d = Vector3.new(point.X, 0, point.Z).Magnitude
 	if d < 1e-3 then
-		return false
+		return solid == true
 	end
 	local half = math.rad(c.Arc) / 2
 	local a = math.atan2(point.X, -point.Z) * dir
@@ -209,7 +211,7 @@ function SlashFx.contains(o, dir, point, pad)
 		return false
 	end
 	local outer, inner = shape(c, o.poly, math.clamp(u, 0, 1), dir, c.Radius)
-	return d <= outer.Magnitude + pad and d >= inner.Magnitude - pad
+	return d <= outer.Magnitude + pad and (solid or d >= inner.Magnitude - pad)
 end
 
 function SlashFx.new(origin, dir, c, follow, seed)
