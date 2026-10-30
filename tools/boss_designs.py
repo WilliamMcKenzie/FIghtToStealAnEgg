@@ -304,7 +304,258 @@ def magma_slime():
     return m
 
 
-BUILDERS = [scorpion_king, frost_golem, blizzard_owl, magma_slime]
+BONE = (232, 226, 206)
+BONE_DARK = (64, 60, 70)  # (the dark inside of a rib cage, eye sockets)
+RUST = (168, 96, 60)
+IRON = (92, 88, 92)
+GHOST = (110, 255, 150)  # (glowing green eyes)
+
+
+def skeleton_body(m, k, sword):
+    """The Bone Warden and his Skeletons share a body, k times the Skeleton's size: legs,
+    pelvis, spine, a rib cage, a skull with glowing eyes, bony arms, iron boots. Bones:
+    root, neck, ArmL, ArmR, LegL, LegR. sword(m, k) hangs its weapon on ArmR."""
+    m.bone("root", None, (0, 4.6 * k, 0))
+    m.bone("neck", "root", (0, 9.6 * k, 0))
+    m.bone("ArmL", "root", (-2.6 * k, 9.2 * k, 0))
+    m.bone("ArmR", "root", (2.6 * k, 9.2 * k, 0))
+    m.bone("LegL", "root", (-1.1 * k, 4.6 * k, 0))
+    m.bone("LegR", "root", (1.1 * k, 4.6 * k, 0))
+    for side, s in (("L", -1), ("R", 1)):
+        leg = "Leg" + side
+        m.block("Thigh" + side, leg, (0.9 * k, 3.6 * k, 0.9 * k), (s * 1.1 * k, 2.9 * k, 0), BONE)
+        m.block("Boot" + side, leg, (1.6 * k, 1.4 * k, 2.2 * k), (s * 1.1 * k, 0.7 * k, -0.3 * k), IRON)
+        arm = "Arm" + side
+        m.block("Pauldron" + side, arm, (2 * k, 1.1 * k, 2.2 * k), (s * 2.9 * k, 9.5 * k, 0), RUST)
+        m.block("Bone" + side, arm, (0.8 * k, 3.8 * k, 0.8 * k), (s * 2.9 * k, 7.2 * k, 0), BONE)
+        m.block("Hand" + side, arm, (1.1 * k, 1.1 * k, 1.1 * k), (s * 2.9 * k, 4.9 * k, 0), BONE)
+    m.block("Pelvis", "root", (3.2 * k, 1 * k, 1.8 * k), (0, 4.9 * k, 0), BONE)
+    m.block("Spine", "root", (0.8 * k, 2 * k, 0.8 * k), (0, 6.2 * k, 0.4 * k), BONE)
+    m.block("Chest", "root", (3.8 * k, 3 * k, 2.2 * k), (0, 8.2 * k, 0), BONE_DARK)
+    for i, y in enumerate((7.1, 8.1, 9.1)):
+        m.block("Rib%d" % i, "root", (4.4 * k, 0.55 * k, 2.6 * k), (0, y * k, 0), BONE)
+    m.block("Sternum", "root", (0.6 * k, 3 * k, 0.3 * k), (0, 8.2 * k, -1.3 * k), BONE)
+    m.block("Skull", "neck", (3 * k, 2.6 * k, 2.8 * k), (0, 11.2 * k, 0), BONE)
+    m.block("Jaw", "neck", (2.4 * k, 0.8 * k, 2.2 * k), (0, 9.7 * k, -0.2 * k), BONE)
+    for side, s in (("L", -1), ("R", 1)):
+        m.block("Socket" + side, "neck", (0.9 * k, 0.9 * k, 0.1 * k), (s * 0.7 * k, 11.1 * k, -1.43 * k), BONE_DARK, plain=True)
+        m.block("Glow" + side, "neck", (0.4 * k, 0.4 * k, 0.1 * k), (s * 0.7 * k, 11.05 * k, -1.5 * k), GHOST, neon=True)
+    m.block("Teeth", "neck", (1.6 * k, 0.35 * k, 0.1 * k), (0, 10.05 * k, -1.33 * k), BONE_DARK, plain=True)
+    sword(m, k)
+
+
+def skeleton_gaits(m, k, lean=0):
+    m.anim("idle", 2.4, {
+        "root": {"p": bob(2.4, 0.1 * k)},
+        "neck": {"r": wave(2.4, (4, 6, 0))},
+        "ArmL": {"r": wave(2.4, (4, 0, -3))},
+        "ArmR": {"r": wave(2.4, (3, 0, 2), 0.2)},
+    })
+    walk = {
+        "root": {"p": bob(0.9, 0.3 * k, 0.25, double=True), "r": wave(0.9, (0, 5, 0), offset=(lean, 0, 0))},
+        "LegL": {"r": wave(0.9, (26, 0, 0))},
+        "LegR": {"r": wave(0.9, (-26, 0, 0))},
+        "ArmL": {"r": wave(0.9, (-22, 0, 0))},
+        "ArmR": {"r": wave(0.9, (12, 0, 0))},
+        "neck": {"r": wave(0.9, (0, 0, 6), 0.25)},
+    }
+    m.anim("walk", 0.9, walk)
+    gallop_from(m, walk, 0.6)
+    return walk
+
+
+# ---------------------------------------------------------------------------------------
+# Abandoned Dungeon: Bone Warden (Archero's skeleton king). A tall skeleton knight: rib
+# cage, skull with glowing green eyes, a rusty crown, rusty pauldrons and one huge rusty
+# sword. Cleave: sword raised over his head, then brought down in front. Charge: leans in
+# with the sword levelled, then runs down the red lane.
+# ---------------------------------------------------------------------------------------
+def big_sword(m, k):
+    m.block("Grip", "ArmR", (0.45, 0.45, 1.6), (2.9 * k, 4.9, -0.2), BONE_DARK)
+    m.block("Guard", "ArmR", (2.8, 0.6, 0.7), (2.9 * k, 4.9, -1.3), IRON)
+    m.block("Blade", "ArmR", (0.5, 1.5, 7.6), (2.9 * k, 4.9, -5.4), RUST)
+    m.block("Edge", "ArmR", (0.55, 0.4, 7.6), (2.9 * k, 4.15, -5.4), (196, 132, 92))
+    m.wedge("Tip", "ArmR", (0.5, 1.5, 1.2), (2.9 * k, 4.9, -9.8), RUST, r=(180, 0, 0))
+
+
+def bone_warden():
+    m = Model("BoneWarden", "Bone Warden: Abandoned Dungeon boss. Bones: root, neck, ArmL, ArmR (his sword), LegL, LegR.")
+    k = 1.0
+    skeleton_body(m, k, big_sword)
+    # (his rusty crown, three points round the top of his skull)
+    m.block("Crown", "neck", (3.3, 0.7, 3.1), (0, 12.6, 0), RUST)
+    for i, (x, z) in enumerate(((-1.1, -1.1), (1.1, -1.1), (0, -1.2))):
+        m.block("CrownPt%d" % i, "neck", (0.6, 1.1 if x else 1.4, 0.4), (x, 13.4 if x else 13.55, z), RUST)
+    skeleton_gaits(m, k)
+    # cleave (0.9s windup): sword swung up over his head, leaning back, then brought down
+    # in front of him at the hit, bent over it a moment
+    m.anim("cleave", 1.7, {
+        "root": {"r": [(0, 0, 0, 0), (0.7, 10, -10, 0), (0.9, -14, 6, 0), (1.25, -12, 4, 0), (1.7, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.7, 0, 0.2, 0.4), (0.9, 0, -0.5, -0.6), (1.25, 0, -0.4, -0.5), (1.7, 0, 0, 0)]},
+        "ArmR": {"r": [(0, 0, 0, 0), (0.55, 165, 0, -10), (0.75, 175, 0, -10), (0.9, 48, 0, 8), (1.25, 44, 0, 6), (1.7, 0, 0, 0)]},
+        "ArmL": {"r": [(0, 0, 0, 0), (0.7, 30, 0, -20), (0.9, -20, 0, -10), (1.7, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.7, 10, 0, 0), (0.9, -12, 0, 0), (1.7, 0, 0, 0)]},
+        "LegL": {"r": [(0, 0, 0, 0), (0.7, 0, 0, 0), (0.9, 18, 0, 0), (1.25, 16, 0, 0), (1.7, 0, 0, 0)]},
+        "LegR": {"r": [(0, 0, 0, 0), (0.7, 0, 0, 0), (0.9, -14, 0, 0), (1.25, -12, 0, 0), (1.7, 0, 0, 0)]},
+    }, hit=0.9)
+    # charge (0.8s windup): crouches and leans in with the sword levelled at you, then at
+    # the hit runs down the red lane, sword out in front
+    run = {b: dict(v) for b, v in m.anims["gallop"]["tracks"].items() if b in ("LegL", "LegR", "ArmL")}
+    for tr in run.values():
+        for key in tr:
+            tr[key] = [(0.8 + t, x, y, z) for t, x, y, z in tr[key]] + [(0.8 + 0.6 + t, x, y, z) for t, x, y, z in tr[key][1:]]
+    for tr in run.values():
+        for key in tr:
+            tr[key] = [(0, 0, 0, 0), (0.6, 0, 0, 0)] + tr[key] + [(2.2, 0, 0, 0)]
+    m.anim("charge", 2.2, dict(run, **{
+        "root": {"r": [(0, 0, 0, 0), (0.6, -12, 0, 0), (0.8, -18, 0, 0), (2.0, -16, 0, 0), (2.2, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.6, 0, -0.6, 0), (0.8, 0, -0.3, 0), (2.0, 0, -0.3, 0), (2.2, 0, 0, 0)]},
+        "ArmR": {"r": [(0, 0, 0, 0), (0.6, 30, 0, 6), (0.8, 24, 0, 6), (2.0, 24, 0, 6), (2.2, 0, 0, 0)]},
+        "neck": {"r": [(0, 0, 0, 0), (0.6, 12, 0, 0), (2.0, 12, 0, 0), (2.2, 0, 0, 0)]},
+    }), hit=0.8)
+    return m
+
+
+# the Bone Warden's Skeletons (minions): half his size, a rusty shortsword
+def short_sword(m, k):
+    m.block("Grip", "ArmR", (0.3, 0.3, 0.8), (2.9 * k, 4.9 * k, -0.1), BONE_DARK)
+    m.block("Guard", "ArmR", (1.3, 0.3, 0.35), (2.9 * k, 4.9 * k, -0.6), IRON)
+    m.block("Blade", "ArmR", (0.25, 0.7, 3), (2.9 * k, 4.9 * k, -2.2), RUST)
+
+
+def skeleton():
+    m = Model("Skeleton", "Skeleton: the Bone Warden's minion. Bones: root, neck, ArmL, ArmR, LegL, LegR.")
+    k = 0.55
+    skeleton_body(m, k, short_sword)
+    skeleton_gaits(m, k, lean=-4)
+    return m
+
+
+# ---------------------------------------------------------------------------------------
+# Abandoned Dungeon: Dungeon Watcher (Archero's eye boss). A floating block of mossy dungeon
+# stone round one big eye with a glowing green iris, four stone fins. Its lid is a stone
+# slab over the eye. Stare (beams): the lid narrows to a slit as it leans back, then snaps
+# wide open at the hit and holds the glare.
+# ---------------------------------------------------------------------------------------
+def dungeon_watcher():
+    m = Model("DungeonWatcher", "Dungeon Watcher: Abandoned Dungeon boss, floats. Bones: root, Lid.")
+    STONE = (96, 118, 108)
+    STONE_DARK = (66, 82, 78)
+    MOSS = (104, 160, 72)
+    SCLERA = (238, 234, 220)
+    IRIS = (90, 240, 120)
+    m.bone("root", None, (0, 8, 0))
+    m.bone("Lid", "root", (0, 10.2, -3.6))
+
+    m.block("Shell", "root", (8, 8, 7), (0, 8, 0), STONE)
+    m.block("Rim", "root", (6.4, 5.6, 0.6), (0, 8, -3.6), STONE_DARK)
+    m.block("Sclera", "root", (5.4, 4.6, 0.3), (0, 8, -3.85), SCLERA, plain=True)
+    m.block("Iris", "root", (2.6, 2.6, 0.1), (0, 8, -4.05), IRIS, neon=True)
+    m.block("Pupil", "root", (0.9, 1.8, 0.1), (0, 8, -4.12), DARK, plain=True)
+    m.block("Lid", "Lid", (6.2, 2.4, 0.8), (0, 11.6, -3.9), STONE)  # (sits above the eye; drops to close it)
+    m.block("LidLip", "Lid", (6.2, 0.4, 0.9), (0, 10.5, -3.95), STONE_DARK)
+    m.block("Moss", "root", (8.2, 0.5, 7.2), (0, 12.1, 0), MOSS)
+    m.block("Moss2", "root", (2.6, 2.4, 0.3), (-2.6, 10.9, 3.6), MOSS)
+    m.block("Moss3", "root", (0.3, 2, 2.6), (4.1, 11, 1.6), MOSS)
+    # four stone fins, one off each side
+    m.pair(m.wedge, "Fin", "root", (2.6, 4, 3), (-5.2, 8, 0.6), STONE_DARK, r=(0, 0, 90))
+    m.wedge("FinTop", "root", (1.6, 3, 4), (0, 13.6, 1), STONE_DARK, r=(0, 180, 0))
+    m.wedge("FinBottom", "root", (1.6, 3, 4), (0, 2.4, 1), STONE_DARK, r=(180, 0, 0))
+
+    m.anim("idle", 3.2, {
+        "root": {"p": wave(3.2, (0, 0.6, 0)), "r": wave(3.2, (3, 6, 2), 0.25)},
+        # (a blink now and then)
+        "Lid": {"p": [(0, 0, 0, 0), (2.6, 0, 0, 0), (2.7, 0, -2.6, 0), (2.85, 0, 0, 0), (3.2, 0, 0, 0)]},
+    })
+    walk = {
+        "root": {"p": wave(1.2, (0, 0.5, 0)), "r": [(0, -8, 0, 0), (0.6, -8, 0, 3), (1.2, -8, 0, 0)]},
+    }
+    m.anim("walk", 1.2, walk)
+    gallop_from(m, walk, 0.8)
+    # stare (1.0s windup): leans back narrowing its lid to a slit, then snaps it wide open
+    # at the hit and glares down the beams, trembling, before settling
+    m.anim("stare", 2.0, {
+        "Lid": {"p": [(0, 0, 0, 0), (0.6, 0, -2.0, 0), (0.9, 0, -2.2, 0), (1.0, 0, 0.7, 0), (1.7, 0, 0.6, 0), (2.0, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.85, 14, 0, 0), (1.0, -10, 0, 0), (1.1, -9, 1.5, 0), (1.25, -9, -1.5, 0), (1.4, -9, 1.5, 0),
+                       (1.55, -9, -1.5, 0), (1.7, -8, 0, 0), (2.0, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.85, 0, 0.8, 0.6), (1.0, 0, 0, -0.8), (1.7, 0, 0, -0.6), (2.0, 0, 0, 0)]},
+    }, hit=1.0)
+    return m
+
+
+# ---------------------------------------------------------------------------------------
+# Abandoned Dungeon: Treasure Mimic. A wooden treasure chest with gold corners and a gold
+# lock, angry eyes on its lid, teeth round its lips and a long tongue, on four stubby legs.
+# Charge: lid flung wide, crouched, then chomps all the way down the red lane. Spit (gold
+# coins): lid clamps shut, then pops wide open.
+# ---------------------------------------------------------------------------------------
+def treasure_mimic():
+    m = Model("TreasureMimic", "Treasure Mimic: Abandoned Dungeon boss. Bones: root, Lid, Tongue.")
+    WOOD = (156, 100, 56)
+    WOOD_DARK = (104, 64, 40)
+    MOUTH = (110, 22, 40)
+    TONGUE = (236, 96, 130)
+    m.bone("root", None, (0, 3.6, 0))
+    m.bone("Lid", "root", (0, 5.6, 2.7))
+    m.bone("Tongue", "root", (0, 5.2, 1.6))
+
+    m.block("Box", "root", (7.6, 4, 5.4), (0, 3.6, 0), WOOD)
+    m.block("Band", "root", (7.7, 0.6, 5.5), (0, 2.6, 0), WOOD_DARK)
+    m.block("Mouth", "root", (6.8, 0.2, 4.6), (0, 5.55, 0), MOUTH, plain=True)
+    m.block("Lock", "root", (1.4, 1.6, 0.3), (0, 4.4, -2.8), GOLD)
+    m.block("Keyhole", "root", (0.35, 0.7, 0.1), (0, 4.3, -2.97), DARK, plain=True)
+    for i, x in enumerate((-2.8, -1.4, 1.4, 2.8)):
+        m.wedge("ToothB%d" % i, "root", (0.7, 0.8, 0.5), (x, 6, -2.4), WHITE, r=(0, 180, 0))
+    for side, s in (("L", -1), ("R", 1)):
+        for end, z in (("F", -2.35), ("B", 2.35)):
+            m.block("Corner" + side + end, "root", (0.9, 4.1, 0.9), (s * 3.45, 3.6, z), GOLD)
+            m.block("Leg" + side + end, "root", (1.4, 1.8, 1.4), (s * 2.6, 0.9, z * 0.8), WOOD_DARK)
+    # the lid, hinged at the back; teeth along its front lip, angry eyes on its face
+    m.block("Lid", "Lid", (7.8, 2.2, 5.6), (0, 6.75, 0), WOOD)
+    m.block("LidTop", "Lid", (7.9, 0.5, 5.7), (0, 7.85, 0), WOOD_DARK)
+    m.block("LidTrim", "Lid", (7.9, 0.45, 5.7), (0, 5.85, 0), GOLD)
+    m.block("LidMouth", "Lid", (6.8, 0.1, 4.6), (0, 5.6, 0), MOUTH, plain=True)
+    for i, x in enumerate((-2.1, 0, 2.1)):
+        m.wedge("ToothT%d" % i, "Lid", (0.7, 0.8, 0.5), (x, 5.25, -2.4), WHITE, r=(180, 180, 0))
+    for side, s in (("L", -1), ("R", 1)):
+        m.block("Eye" + side, "Lid", (1.3, 0.9, 0.1), (s * 1.6, 6.85, -2.86), (255, 214, 70), neon=True)
+        m.block("Brow" + side, "Lid", (1.8, 0.45, 0.3), (s * 1.55, 7.55, -2.9), WOOD_DARK, r=(0, 0, s * -16))
+    m.block("Tongue", "Tongue", (2, 0.5, 4), (0, 5.55, -0.6), TONGUE)
+
+    m.anim("idle", 2.0, {
+        "root": {"p": bob(2.0, 0.12)},
+        "Lid": {"r": wave(2.0, (5, 0, 0), offset=(9, 0, 0))},
+        "Tongue": {"r": wave(2.0, (0, 6, 0), 0.25)},
+    })
+    # it waddles and chomps as it goes
+    walk = {
+        "root": {"p": bob(0.6, 0.6, double=True), "r": wave(0.6, (0, 0, 6))},
+        "Lid": {"r": wave(0.6, (12, 0, 0), offset=(16, 0, 0))},
+        "Tongue": {"r": wave(0.6, (0, 10, 0), 0.25)},
+    }
+    m.anim("walk", 0.6, walk)
+    gallop_from(m, walk, 0.4)
+    # charge (0.7s windup): lid flung wide, tongue out, crouched; then from the hit chomps
+    # all the way down the lane
+    chomp = [(0.7 + i * 0.1, 70 if i % 2 == 0 else 14, 0, 0) for i in range(10)]
+    m.anim("charge", 1.9, {
+        "Lid": {"r": [(0, 10, 0, 0), (0.45, 75, 0, 0), (0.6, 78, 0, 0)] + chomp + [(1.9, 10, 0, 0)]},
+        "Tongue": {"r": [(0, 0, 0, 0), (0.45, -18, 0, 0), (1.6, -18, 0, 0), (1.9, 0, 0, 0)],
+                   "p": [(0, 0, 0, 0), (0.45, 0, 0, -1.6), (1.6, 0, 0, -1.6), (1.9, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.5, -10, 0, 0), (0.7, -8, 0, 0), (1.6, -8, 0, 0), (1.9, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.5, 0, -0.6, 0), (0.7, 0, 0.3, 0)] + [(0.8 + i * 0.1, 0, 0.6 if i % 2 else 0.1, 0) for i in range(8)] + [(1.9, 0, 0, 0)]},
+    }, hit=0.7)
+    # spit (0.5s windup): clamps shut and squashes, then pops wide open spraying its coins
+    m.anim("spit", 1.1, {
+        "Lid": {"r": [(0, 10, 0, 0), (0.35, -2, 0, 0), (0.5, 85, 0, 0), (0.75, 80, 0, 0), (1.1, 10, 0, 0)]},
+        "Tongue": {"r": [(0, 0, 0, 0), (0.5, 30, 0, 0), (0.75, 20, 0, 0), (1.1, 0, 0, 0)]},
+        "root": {"p": [(0, 0, 0, 0), (0.35, 0, -0.6, 0), (0.5, 0, 0.8, 0), (0.75, 0, 0.2, 0), (1.1, 0, 0, 0)],
+                 "r": [(0, 0, 0, 0), (0.35, -4, 0, 0), (0.5, 8, 0, 0), (1.1, 0, 0, 0)]},
+    }, hit=0.5)
+    return m
+
+
+BUILDERS = [scorpion_king, frost_golem, blizzard_owl, magma_slime, bone_warden, skeleton, dungeon_watcher, treasure_mimic]
 
 
 def models():
