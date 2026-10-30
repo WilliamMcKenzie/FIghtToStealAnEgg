@@ -16,8 +16,10 @@
 --   Combat.damage(player) -> number
 --   Combat.alive(player) -> boolean  -- false once their Health hits 0 (QM, Oct 30: no
 --                                      attacking from beyond the grave)
---   Combat.touching(position, reach) -> { { body, handler } } -- every hittable target
---                                      whose edge is within reach studs of position (flat)
+--   Combat.touching(position, reach, player?) -> { { body, handler } } -- every hittable
+--                                      target whose edge is within reach studs of position
+--                                      (flat); with player, only what they can reach from
+--                                      where they stand (a training yard's from inside it)
 --   Combat.hit(player, handler, damage) -- one hit of `damage` (rolled), as a slash's
 --   Combat.knock(body, dir, studs, time) -- shoves a target studs along dir over time
 --                                      seconds (a Smash sprint: Server/SprintAbility)
@@ -29,6 +31,8 @@
 -- numbers and training gains follow what that hit actually dealt.
 -- Each hit deals that damage times the equipped weapon's Damage (Config.Weapons; the
 -- player's Weapon attribute, Server/Arsenal).
+-- A training yard's mobs and dummies are only hit by players standing in that yard
+-- (QM, Oct 30: Shared/Yards), by slashes, shots and sprints alike.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -40,6 +44,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Power = require(Shared:WaitForChild("Power"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Weapons = require(Shared:WaitForChild("Weapons"):WaitForChild("Weapons"))
+local Yards = require(Shared:WaitForChild("Yards"))
 
 local Combat = {}
 
@@ -114,6 +119,8 @@ function Combat.slash(player, yaw, c)
 	for body, handler in targets do
 		if body:GetAttribute("Asleep") or body:GetAttribute("Intro") or body:GetAttribute("Burrowed") then
 			continue -- (a boss arriving, asleep or underground can't be hit: QM, Oct 25)
+		elseif not Yards.inside(body, root.Position) then
+			continue -- (a training yard's, and you're outside it)
 		elseif body.Parent then
 			local radius = body:GetAttribute("Radius") or 0
 			local offset = (body.Position - root.Position) * Vector3.new(1, 0, 1)
@@ -143,10 +150,11 @@ local function hittable(body)
 		and not body:GetAttribute("Burrowed")
 end
 
-function Combat.touching(position, reach)
+function Combat.touching(position, reach, player)
+	local root = player and player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	local out = {}
 	for body, handler in targets do
-		if hittable(body) then
+		if hittable(body) and (not player or (root and Yards.inside(body, root.Position))) then
 			local gap = ((body.Position - position) * Vector3.new(1, 0, 1)).Magnitude - (body:GetAttribute("Radius") or 0)
 			if gap <= reach then
 				table.insert(out, { body = body, handler = handler })
@@ -231,11 +239,20 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 	for i = #flying, 1, -1 do
 		local f = flying[i]
-		for _, t in Projectiles.step(f.shot, dt, list) do
+		-- (a shot passes over a training yard's mobs unless its shooter is in that yard)
+		local root = f.player.Character and f.player.Character:FindFirstChild("HumanoidRootPart")
+		local at = root and root.Position
+		local mine = {}
+		for _, t in list do
+			if Yards.inside(t.body, at) then
+				table.insert(mine, t)
+			end
+		end
+		for _, t in Projectiles.step(f.shot, dt, mine) do
 			task.spawn(t.handler, f.player, roll(f.damage))
 			-- a splash also hits everything else that close to where it struck
 			if f.shot.splash then
-				for _, other in list do
+				for _, other in mine do
 					if other ~= t and ((other.pos - t.pos) * Vector3.new(1, 0, 1)).Magnitude - other.radius <= f.shot.splash then
 						task.spawn(other.handler, f.player, roll(f.damage))
 					end

@@ -28,6 +28,7 @@ local Config = require(Shared.Config)
 local Projectiles = require(Shared.Projectiles)
 local Weapons = require(Shared.Weapons.Weapons)
 local Pets = require(Shared.Pets)
+local Yards = require(Shared.Yards)
 local Riding = require(script.Parent.Riding)
 local Sfx = require(script.Parent.Sfx)
 
@@ -230,7 +231,7 @@ function Shots.fire(character, id, yaw, seed)
 	local room = shooter and Projectiles.room(shooter:GetAttribute("LockedIn"))
 	for _, shot in Projectiles.spawn(id, origin, yaw, seed, room) do
 		local d = build(w.Shot)
-		d.shot, d.s = shot, w.Shot
+		d.shot, d.s, d.root = shot, w.Shot, root -- (root: where it's shot from, for Yards)
 		table.insert(active, d)
 	end
 end
@@ -318,6 +319,16 @@ RunService.RenderStepped:Connect(function(dt)
 		elseif a.biome ~= nil then
 			fights[a.biome] = fights[a.biome] or players(a.biome)
 			hits = fights[a.biome]
+		elseif a.root then
+			-- (a player's shot passes over a training yard's mobs unless they're in it, as on
+			-- the server: Shared/Yards)
+			local at = a.root.Parent and a.root.Position
+			hits = {}
+			for _, t in list do
+				if Yards.inside(t.body, at) then
+					table.insert(hits, t)
+				end
+			end
 		end
 		for _ in Projectiles.step(shot, dt, hits) do
 			local at = shot.pos

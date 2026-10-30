@@ -19,7 +19,8 @@
 -- distance casting sand, Tundra boars, snowmen casting snow and penguins that run from you
 -- lobbing bombs, Lava fire boars (0.6x) and firebirds casting fire. A mob's Magic and bombs
 -- only ever hit whoever it's angry with (its b.foes). Higher grounds are bigger:
--- Config.Training's Grow.
+-- Config.Training's Grow. Only players inside a yard can hit what's in it (QM, Oct 30:
+-- each body carries its yard for Shared/Yards; Server/Combat drops hits from outside).
 --
 --   Training.start(map)   -- once, after Map.ensure()
 
@@ -31,6 +32,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local MapData = require(ReplicatedStorage.Shared.MapData)
 local Pets = require(ReplicatedStorage.Shared.Pets)
 local Abbrev = require(ReplicatedStorage.Shared.Abbrev)
+local Yards = require(ReplicatedStorage.Shared.Yards)
 local Combat = require(script.Parent.Combat)
 local BossAttacks = require(script.Parent.BossAttacks)
 
@@ -77,6 +79,18 @@ local function petsOf(biome)
 	return list
 end
 
+-- (whoever's hitting it is standing in its yard)
+local function fromInside(player, body)
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	return root ~= nil and Yards.inside(body, root.Position)
+end
+
+local function markYard(body, x, z, yardHalf)
+	body:SetAttribute("YardX", x)
+	body:SetAttribute("YardZ", z)
+	body:SetAttribute("YardHalf", yardHalf)
+end
+
 local function spawnMob(name, x, z, half, slot)
 	local g = Config.Training.Grounds[name]
 	local rng = Random.new()
@@ -111,6 +125,7 @@ local function spawnMob(name, x, z, half, slot)
 	body:SetAttribute("Radius", radius)
 	body:SetAttribute("Ground", name)
 	body:SetAttribute("Slot", slot) -- (client/Shots finds its Magic by it)
+	markYard(body, x, z, half + 6) -- (half is where it wanders: 6 studs in from the fence)
 	local attacks = def.Attacks or g.Attacks
 	local m = {
 		ground = name,
@@ -128,7 +143,7 @@ local function spawnMob(name, x, z, half, slot)
 	m.b.biome = m.b -- (its attacks hit only its foes: BossAttacks' fighters)
 	mobs[body] = m
 	Combat.add(body, function(player, damage)
-		if not mobs[body] or not Training.unlocked(player, name) then
+		if not mobs[body] or not Training.unlocked(player, name) or not fromInside(player, body) then
 			return
 		end
 		Combat.train(player, damage, g.Strength)
@@ -150,7 +165,7 @@ local function spawnMob(name, x, z, half, slot)
 end
 
 -- a straw dummy: never falls, wobbles when it's hit
-local function dummyTarget(model)
+local function dummyTarget(model, x, z, yardHalf)
 	local pivot = model:GetPivot()
 	local body = Instance.new("Part")
 	body.Name = "DummyBody"
@@ -162,9 +177,13 @@ local function dummyTarget(model)
 	body:SetAttribute("Health", 1)
 	body:SetAttribute("MaxHealth", 1)
 	body:SetAttribute("Dummy", true)
+	markYard(body, x, z, yardHalf)
 	body.Parent = folder
 	local wobbling = false
 	Combat.add(body, function(player, damage)
+		if not fromInside(player, body) then
+			return
+		end
 		Combat.train(player, damage, Config.Training.Grounds.Dummies.Strength)
 		local character = player.Character
 		if wobbling or not character then
@@ -202,7 +221,7 @@ function Training.start(map)
 			end
 			local dummies = zone:FindFirstChild("Dummies")
 			for _, d in if dummies then dummies:GetChildren() else {} do
-				dummyTarget(d)
+				dummyTarget(d, x, z, half + 6)
 			end
 			-- buying it: the prompt at its gate
 			local gate = zone:FindFirstChild("Gate")

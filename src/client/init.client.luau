@@ -24,6 +24,7 @@ local SlashTuning = require(Shared.SlashTuning)
 local WorldColors = require(Shared.WorldColors)
 local Weapons = require(Shared.Weapons.Weapons)
 local Projectiles = require(Shared.Projectiles)
+local Yards = require(Shared.Yards)
 local Riding = require(script.Riding)
 local Sfx = require(script.Sfx)
 local Shots = require(script.Shots)
@@ -137,7 +138,7 @@ end
 
 -- the nearest thing to hit within `range` of the character (flat distance to its edge):
 -- a boss (workspace.Bosses), or a training mob or dummy (workspace.Mobs) in a ground
--- you've unlocked
+-- you've unlocked and are standing in (QM, Oct 30: Shared/Yards)
 -- (room: only bodies inside these bounds, { x0, z0, x1, z1 }: a boss fight's arena)
 local function nearestBoss(root, range, room)
 	local best, bestDist = nil, range
@@ -152,6 +153,7 @@ local function nearestBoss(root, range, room)
 				and not body:GetAttribute("Intro")
 				and not body:GetAttribute("Burrowed") -- (tunnelling underground)
 				and (ground == nil or player:GetAttribute("Train" .. ground) ~= false)
+				and Yards.inside(body, root.Position)
 				and (
 					room == nil
 					or (body.Position.X >= room[1] and body.Position.Z >= room[2] and body.Position.X <= room[3] and body.Position.Z <= room[4])
