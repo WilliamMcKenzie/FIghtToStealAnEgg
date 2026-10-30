@@ -20,15 +20,13 @@ local Egg = require(Shared.Eggs.Egg)
 local Pets = require(Shared.Pets)
 local RarityLook = require(Shared.RarityLook)
 local OnScreen = require(script.Parent.OnScreen)
-local ScreenSize = require(script.Parent.ScreenSize)
 
 local TWITCH = Config.Eggs.Twitch
 local POP = 0.55 -- seconds: an egg's pop in
 local VANISH = 0.3 -- seconds: shrinking away
 -- the nest egg's label: outlined Montserrat (QM's UI), in studs so it shrinks with distance
 local LABEL_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
-local LABEL_SIZE = Vector2.new(10, 3.2) -- studs: both lines (where it sits)
-local LABEL_PX = Vector2.new(200, 64) -- design px: both lines, a fixed size on screen (QM, Oct 30)
+local LABEL_SIZE = Vector2.new(10, 3.2) -- studs: both lines
 local LABEL_ABOVE = 1.2 -- studs over the egg's top
 local LABEL_RANGE = 90 -- studs it shows within
 
@@ -89,7 +87,7 @@ local function nestLabel(box, kind)
 	local rarity = pet and pet.Rarity or "Common"
 	local board = Instance.new("BillboardGui")
 	board.Name = "EggLabel"
-	ScreenSize.fit(board, LABEL_PX.X, LABEL_PX.Y)
+	board.Size = UDim2.fromScale(LABEL_SIZE.X, LABEL_SIZE.Y)
 	board.StudsOffsetWorldSpace = Vector3.new(0, box.Size.Y / 2 + LABEL_ABOVE + LABEL_SIZE.Y / 2, 0)
 	board.MaxDistance = LABEL_RANGE
 	board.LightInfluence = 0

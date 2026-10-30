@@ -29,7 +29,6 @@ local Pets = require(Shared.Pets)
 local Studs = require(Shared.Studs)
 local OnScreen = require(script.Parent.OnScreen)
 local RideSounds = require(script.Parent.RideSounds)
-local ScreenSize = require(script.Parent.ScreenSize)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -40,7 +39,7 @@ local HATCH = Config.Hatch
 local EGG_CENTER = 1.6 -- an egg's middle above its base, at 1x (LassoAPet's Egg.luau)
 local TOP_POPS = HATCH.TopPops
 local JUMP_TIME = HATCH.JumpTime
-local TIMER_SIZE = Vector2.new(85, 27) -- design px: an egg's "Ready" / countdown, a fixed size on screen (QM, Oct 30)
+local TIMER_SIZE = Vector2.new(4, 1.28) -- studs: an egg's "Ready" / countdown
 local HATCH_SOUND_PEAK = 0.46 -- seconds into egg_hatch where it's loudest
 local TWITCH_EVERY = { 3, 6 }
 local EDGE = HATCH.Edge -- (as Server/Hatchery)
@@ -258,7 +257,7 @@ end
 
 local function newTimer(parent)
 	local gui = Instance.new("BillboardGui")
-	ScreenSize.fit(gui, TIMER_SIZE.X, TIMER_SIZE.Y)
+	gui.Size = UDim2.fromScale(TIMER_SIZE.X, TIMER_SIZE.Y) -- (studs: smaller as you zoom out)
 	gui.StudsOffsetWorldSpace = Vector3.new(0, 4.6, 0) -- above the egg (its root is at its base)
 	gui.MaxDistance = 120
 	gui.LightInfluence = 0

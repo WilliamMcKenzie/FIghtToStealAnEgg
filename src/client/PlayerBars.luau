@@ -9,7 +9,6 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local DamageNumbers = require(script.Parent.DamageNumbers)
-local ScreenSize = require(script.Parent.ScreenSize)
 
 local FILL, BACK = "rbxassetid://90275415984527", "rbxassetid://133695040857929"
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -17,12 +16,43 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 -- 37 tall from 30 down, over the bar)
 local W, H = 216, 67
 local NAME_STROKE = Color3.fromRGB(70, 70, 70)
--- design px across (at a 1080-tall screen): a fixed size on screen however far the camera is
--- (QM, Oct 30; it was 9.4 studs across before, so it shrank as you zoomed out)
-local WIDE = 190
+local WIDE = 9.4 -- studs across (QM, Oct 27: 6, then 30% up, then 20% more, to read from further off)
+-- In a boss fight (you're LockedIn) it's a fixed size on screen instead, so it doesn't go tiny
+-- under the zoomed-out fight camera (QM, Oct 30): design px across at a 1080-tall screen
+local FIGHT_WIDE = 190
+local FIGHT_RANGE = 400 -- studs it shows within in a fight (the camera's far back over a wide arena)
 local FLASH = 0.1 -- seconds the green takes to fade back from white on a hit
 local TRAIL = 0.3 -- seconds the white trail takes to catch up
 local HURT = Color3.fromRGB(255, 60, 60) -- the damage numbers over players
+
+-- studs out of a fight, screen px in one (the local player's LockedIn)
+local bars = setmetatable({}, { __mode = "k" }) -- [gui] = true
+local function size(gui)
+	local me = Players.LocalPlayer
+	if me and me:GetAttribute("LockedIn") ~= nil then
+		local k = workspace.CurrentCamera.ViewportSize.Y / 1080
+		gui.Size = UDim2.fromOffset(math.round(FIGHT_WIDE * k), math.round(FIGHT_WIDE * H / W * k))
+		gui.MaxDistance = FIGHT_RANGE
+	else
+		gui.Size = UDim2.fromScale(WIDE, WIDE * H / W) -- (studs: it shrinks with distance like the world)
+		gui.MaxDistance = 120
+	end
+end
+local function resize()
+	for gui in bars do
+		size(gui)
+	end
+end
+Players.LocalPlayer:GetAttributeChangedSignal("LockedIn"):Connect(resize)
+local viewport = nil
+local function watchCamera()
+	if viewport then
+		viewport:Disconnect()
+	end
+	viewport = workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+end
+watchCamera()
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCamera)
 
 local function attach(character)
 	local humanoid = character:WaitForChild("Humanoid", 10)
@@ -38,11 +68,11 @@ local function attach(character)
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "PlayerBar"
 	gui.Adornee = head
-	ScreenSize.fit(gui, WIDE, WIDE * H / W)
 	gui.StudsOffset = Vector3.new(0, 3.2, 0)
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	gui.MaxDistance = 400 -- (far enough for the boss fight camera over a wide arena)
 	gui.LightInfluence = 0
+	bars[gui] = true
+	size(gui)
 	-- (each text fills its Figma box: Montserrat ExtraBold, white, outlined)
 	local function text(name, y, h, outline)
 		local label = Instance.new("TextLabel")
