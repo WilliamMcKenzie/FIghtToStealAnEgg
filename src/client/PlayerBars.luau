@@ -7,8 +7,11 @@
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local Abbrev = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Abbrev"))
 
 local DamageNumbers = require(script.Parent.DamageNumbers)
+local Riding = require(script.Parent.Riding)
+local RunService = game:GetService("RunService")
 
 local FILL, BACK = "rbxassetid://90275415984527", "rbxassetid://133695040857929"
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -76,6 +79,21 @@ local function attach(character)
 	gui.LightInfluence = 0
 	bars[gui] = true
 	size(gui)
+	-- (burrowed, the rider's head is under the floor with them: the bar stays up over the
+	-- ground where they'd be: QM, Oct 30)
+	local follow = RunService.RenderStepped:Connect(function()
+		local under = math.min(Riding.lift(character), 0)
+		local want = Vector3.new(0, 3.2 - under, 0)
+		if gui.StudsOffset ~= want then
+			gui.StudsOffset = want
+		end
+	end)
+	gui.Destroying:Connect(function()
+		follow:Disconnect()
+	end)
+	character.Destroying:Connect(function()
+		follow:Disconnect()
+	end)
 	-- (each text fills its Figma box: Montserrat ExtraBold, white, outlined)
 	local function text(name, y, h, outline)
 		local label = Instance.new("TextLabel")
@@ -170,7 +188,7 @@ local function attach(character)
 		clip.Size = UDim2.fromScale(f, 1)
 		-- (the art keeps its full width inside the clip, so it's cut, not squashed)
 		fill.Size = UDim2.fromScale(if f > 0 then 1 / f else 1, 1)
-		hp.Text = tostring(math.max(0, math.ceil(humanoid.Health)))
+		hp.Text = Abbrev(math.max(0, math.ceil(humanoid.Health)))
 		local lost = last - humanoid.Health
 		last = humanoid.Health
 		if f < was and lost > 0 then

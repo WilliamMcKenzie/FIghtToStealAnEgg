@@ -16,6 +16,12 @@
 --           the gallop,
 --           and the hips and knees take a riding pose (thighs forward and apart, shins
 --           back), overriding whatever the Animator plays on those joints
+-- A sprint ability (the player's SprintAbility attribute, Server/SprintAbility) moves the
+-- pet and rider together: Fly lifts them Config.SprintAbility.Fly.Height up, Leap walks
+-- them up its steps of thin air (and they drop back down after, under its Gravity),
+-- Burrow sinks them out of sight under the floor, Smash and Crabwalk grow the pet (its
+-- Grow) and Crabwalk turns it sideways. The rider's own character stays where it is (it's
+-- only drawn up, down or turned).
 -- Transforms are written in PreSimulation (after the Animator), like SwingPose's, and the
 -- rider's is worked out relative to the HumanoidRootPart, so where physics then puts the
 -- character doesn't matter. They aren't replicated, so each client does this for every
@@ -27,6 +33,7 @@ local RunService = game:GetService("RunService")
 local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared.Config)
 local Pets = require(Shared.Pets)
 
 local Riding = {}
@@ -42,6 +49,124 @@ local LEGS = {
 	{ "LeftAnkle", "LeftFoot", 0, 0, 0 },
 }
 local HIP_UP = 0.35 -- the LowerTorso's centre sits this far above the seat
+local TIPPED = {
+	Enum.HumanoidStateType.FallingDown,
+	Enum.HumanoidStateType.Ragdoll,
+	Enum.HumanoidStateType.Physics,
+	Enum.HumanoidStateType.PlatformStanding,
+	Enum.HumanoidStateType.Seated,
+	Enum.HumanoidStateType.Climbing,
+	Enum.HumanoidStateType.Swimming,
+}
+
+-- Your own character (the one this client moves) always stands straight up, turning only
+-- round the vertical: any tilt (a shove, a bump into a pen pet or a fence) is taken off
+-- the HumanoidRootPart, and its tumbling spin with it. If it's still in a tipped-over
+-- state somehow, it's stood back up. (The pet's welded to the HumanoidRootPart, so it
+-- stays upright too.)
+--
+-- Steering (QM, Oct 30: riding felt drifty, like a racecar). Roblox's Humanoid eases into
+-- its speed and turns its body round over a moment, which at a pet's speed slides you
+-- sideways through every turn. Instead, on the ground your own pet goes exactly where you
+-- push at exactly its WalkSpeed (client/Sprint), and stops dead when you let go; it turns
+-- to face that way almost at once (Config.Steer.Turn a second). In the air (a hop) the
+-- Humanoid's own control carries on.
+local function steer(root, humanoid, dt)
+	local cfg = Config.Steer
+	if not cfg.On then
+		return
+	end
+	if humanoid.AutoRotate then
+		humanoid.AutoRotate = false
+	end
+	local move = humanoid.MoveDirection * Vector3.new(1, 0, 1)
+	if move.Magnitude > 0.05 then
+		move = move.Unit
+		local look = root.CFrame.LookVector
+		local yaw = math.atan2(-look.X, -look.Z)
+		local want = math.atan2(-move.X, -move.Z)
+		yaw += ((want - yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * cfg.Turn))
+		root.CFrame = CFrame.new(root.Position) * CFrame.Angles(0, yaw, 0)
+	else
+		move = Vector3.zero
+	end
+	if humanoid.FloorMaterial ~= Enum.Material.Air then
+		local v = root.AssemblyLinearVelocity
+		root.AssemblyLinearVelocity = Vector3.new(0, v.Y, 0) + move * humanoid.WalkSpeed
+	end
+end
+
+--
+-- The camera stays up above the ground (QM, Oct 30, as LassoAPet's camera keeps on the
+-- course while its Sandworm's under it): while your rider's drawn under the floor (a
+-- burrow), the camera follows a stand-in over your HumanoidRootPart instead of the
+-- character, so it never dives after them; it goes back to your Humanoid once you're up.
+local cameraAnchor
+local function holdCamera(root, humanoid, under)
+	local camera = workspace.CurrentCamera
+	if under then
+		if not cameraAnchor then
+			cameraAnchor = Instance.new("Part")
+			cameraAnchor.Name = "CameraAnchor"
+			cameraAnchor.Anchored, cameraAnchor.CanCollide, cameraAnchor.CanQuery, cameraAnchor.CanTouch =
+				true, false, false, false
+			cameraAnchor.Transparency = 1
+			cameraAnchor.Size = Vector3.one * 0.2
+			cameraAnchor.Parent = workspace
+		end
+		-- (where a Humanoid subject puts the camera's focus: a little over its root)
+		cameraAnchor.CFrame = CFrame.new(root.Position + Vector3.new(0, 1.5, 0))
+		if camera.CameraSubject ~= cameraAnchor then
+			camera.CameraSubject = cameraAnchor
+		end
+	elseif cameraAnchor then
+		if camera.CameraSubject == cameraAnchor then
+			camera.CameraSubject = humanoid
+		end
+		cameraAnchor:Destroy()
+		cameraAnchor = nil
+	end
+end
+
+--
+-- Never under the map (QM, Oct 30): if your HumanoidRootPart is ever below the ground
+-- (nothing under it, the floor above it), it's put straight back on top of the floor
+-- there, standing still. (Server/init's RiderBody group is what stops it happening.)
+local below = RaycastParams.new()
+below.FilterType = Enum.RaycastFilterType.Exclude
+below.RespectCanCollide = true
+local function keepAboveGround(root, humanoid)
+	below.FilterDescendantsInstances = { root.Parent, cameraAnchor }
+	local pos = root.Position
+	if workspace:Raycast(pos, Vector3.new(0, -200, 0), below) then
+		return -- (ground under you: fine)
+	end
+	local over = workspace:Raycast(pos + Vector3.new(0, 1000, 0), Vector3.new(0, -1000, 0), below)
+	if over then
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.CFrame = root.CFrame.Rotation + Vector3.new(pos.X, over.Position.Y + humanoid.HipHeight + root.Size.Y / 2 + 0.5, pos.Z)
+	end
+end
+
+local function keepUpright(root, humanoid)
+	if root.CFrame.UpVector.Y < 0.999 then
+		local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
+		if look.Magnitude < 1e-3 then -- (tipped right onto its nose: use its up instead)
+			look = root.CFrame.UpVector * Vector3.new(1, 0, 1)
+		end
+		if look.Magnitude < 1e-3 then
+			look = Vector3.new(0, 0, -1)
+		end
+		root.CFrame = CFrame.lookAt(root.Position, root.Position + look.Unit)
+	end
+	local spin = root.AssemblyAngularVelocity
+	if math.abs(spin.X) + math.abs(spin.Z) > 1e-3 then
+		root.AssemblyAngularVelocity = Vector3.new(0, spin.Y, 0)
+	end
+	if table.find(TIPPED, humanoid:GetState()) then
+		humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+	end
+end
 
 local mounts = {} -- [character] = { horse, kind, root, humanoid, joint, legs, yaw }
 
@@ -74,6 +199,7 @@ local function newPet(character, kind, root)
 	weld.Part1 = base
 	weld.Parent = base
 	horse.model.Parent = workspace
+	horse.height = horse.model:GetExtentsSize().Y -- (how deep a burrow has to go)
 	return horse, weld
 end
 
@@ -102,9 +228,15 @@ local function mount(character)
 	-- state itself on the client that drives this character)
 	if character == Players.LocalPlayer.Character then
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+		-- (and never tipped over: QM, Oct 30, a ridden pet ended up upside down and stuck.
+		-- These are the states a knock or a shove puts a Humanoid into; with them off it
+		-- can only stand, run and fall. keepUpright below catches anything else.)
+		for _, state in TIPPED do
+			humanoid:SetStateEnabled(state, false)
+		end
 	end
 	local kind = petOf(character)
-	local m = { kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil }
+	local m = { kind = kind, root = root, humanoid = humanoid, joint = joint, legs = legs, yaw = nil, lift = 0, grow = 1, turn = 0, leapT = 0, fall = 0 }
 	m.horse, m.weld = newPet(character, kind, root)
 	mounts[character] = m
 	return m
@@ -115,6 +247,9 @@ local function dismount(character)
 	if m then
 		m.horse.model:Destroy()
 		mounts[character] = nil
+		if character == Players.LocalPlayer.Character then
+			holdCamera(m.root, m.humanoid, false) -- (the camera back on you)
+		end
 	end
 end
 
@@ -141,8 +276,61 @@ RunService.PreSimulation:Connect(function(dt)
 			m.horse.model:Destroy()
 			m.kind = kind
 			m.horse, m.weld = newPet(character, kind, m.root)
+			m.grow = 1
 		end
 		local root, horse = m.root, m.horse
+		if character == Players.LocalPlayer.Character then
+			keepUpright(root, m.humanoid)
+			keepAboveGround(root, m.humanoid)
+			steer(root, m.humanoid, dt)
+			holdCamera(root, m.humanoid, m.lift < -0.5)
+		end
+
+		-- a sprint ability: up in the air, under the floor, or bigger (eased in and out)
+		local owner = Players:GetPlayerFromCharacter(character)
+		local ability = owner and owner:GetAttribute("SprintAbility")
+		local abilities = Config.SprintAbility
+		local lift, grow, turn = 0, 1, 0
+		if ability == "Fly" then
+			lift = abilities.Fly.Height
+		elseif ability == "Leap" then
+			-- (a quick hop up onto each step in turn)
+			local leap = abilities.Leap
+			m.leapT += dt
+			lift = leap.Height * math.min(math.floor(m.leapT / leap.StepTime) + 1, leap.Steps) / leap.Steps
+		elseif ability == "Burrow" then
+			-- (deep enough for all of it: the pet, and the rider on its seat with their weapon)
+			lift = -(math.max(horse.height, horse.seat.Y * horse.size * horse.scale) + 10)
+		elseif ability == "Smash" then
+			grow = abilities.Smash.Grow
+		elseif ability == "Crabwalk" then
+			grow = abilities.Smash.Grow
+			turn = math.rad(abilities.Crabwalk.Turn)
+		end
+		if ability ~= "Leap" then
+			m.leapT = 0
+		end
+		if m.leaping and ability ~= "Leap" and m.lift > 0 then
+			-- (off the steps: it drops back down, faster and faster)
+			m.fall += abilities.Leap.Gravity * dt
+			m.lift = math.max(m.lift - m.fall * dt, lift)
+		else
+			m.fall = 0
+			local rate = if ability == "Leap" then 18 else 3 / abilities.Fly.Rise
+			m.lift += (lift - m.lift) * (1 - math.exp(-dt * rate))
+		end
+		if math.abs(m.lift - lift) < 0.02 then
+			m.lift = lift
+		end
+		m.leaping = ability == "Leap" or (m.leaping and m.lift > 0)
+		m.turn += (turn - m.turn) * (1 - math.exp(-dt * 12))
+		if m.grow ~= grow then
+			m.grow += (grow - m.grow) * math.min(dt * 12, 1)
+			if math.abs(m.grow - grow) < 0.01 then
+				m.grow = grow
+			end
+			horse:setScale(m.grow)
+		end
 
 		-- speed and turning, for the horse's gaits and lean
 		local velocity = root.AssemblyLinearVelocity * Vector3.new(1, 0, 1)
@@ -158,7 +346,9 @@ RunService.PreSimulation:Connect(function(dt)
 		-- the horse at the ground under the character, its seat under the character (in the
 		-- HumanoidRootPart's frame: the weld keeps it there, facing where the character faces)
 		local seat = horse.seat * horse.size * horse.scale
-		local place = CFrame.new(-seat.X, -(root.Size.Y / 2 + m.humanoid.HipHeight), -seat.Z)
+		local place = CFrame.new(0, -(root.Size.Y / 2 + m.humanoid.HipHeight) + m.lift, 0)
+			* CFrame.Angles(0, m.turn, 0) -- (a Crabwalk's sideways scuttle)
+			* CFrame.new(-seat.X, 0, -seat.Z)
 		if m.weld.C0 ~= place then
 			m.weld.C0 = place
 		end
@@ -210,6 +400,18 @@ function Riding.gait(character)
 	local clock = horse.clocks and horse.clocks.gallop
 	local cycle = if gallop and clock and gallop.length > 0 then clock / gallop.length else nil
 	return cycle, horse.speed or 0
+end
+
+-- how far a sprint ability has drawn this rider up (or, burrowed, down), studs
+function Riding.lift(character)
+	local m = mounts[character]
+	return m and m.lift or 0
+end
+
+-- the pet under this character (its Horse-like object: .model, .scale), or nil
+function Riding.pet(character)
+	local m = mounts[character]
+	return m and m.horse
 end
 
 -- the height of the rider's hips (for things drawn at the rider, like the slash)

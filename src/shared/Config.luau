@@ -291,7 +291,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.2, Reach = 12, Arc = 100, Windup = 0.8, Damage = 22 },
+				{ Kind = "Swipe", Every = 2.2, Reach = 20, Arc = 120, Windup = 0.9, Damage = 22 },
 			},
 		},
 		GiantRafflesia = {
@@ -338,7 +338,7 @@ return {
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.4, Reach = 14, Arc = 140, Windup = 0.85, Damage = 22 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 20, Arc = 140, Windup = 0.95, Damage = 22 },
 				-- (QM, Oct 30: each Meadow boss teaches one move. Horn down, a wind-up,
 				-- then it charges: step off the side; no floor warning, QM Oct 30)
 				{ Kind = "Charge", Every = 5, Range = 70, Windup = 1, Speed = 70, Width = 18, Damage = 12, Anim = "charge" },
@@ -357,7 +357,7 @@ return {
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.4, Reach = 22, Arc = 50, Windup = 0.9, Damage = 24 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 34, Arc = 50, Width = 20, Windup = 1, Damage = 24 },
 				-- (its snapping bite: a red circle in front fills, then the jaws come down)
 				{ Kind = "Slam", Every = 3.5, Range = 14, Radius = 12, Windup = 0.9, Damage = 14, Anim = "slam" },
 			},
@@ -378,15 +378,15 @@ return {
 			-- green cactus bombs at everyone (Server/BossAttacks' Lob, drawn by client/Bombs):
 			-- each lands Airtime seconds later where you stood when it was thrown, so keep moving)
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 16, Arc = 180, Windup = 0.9, Damage = 34 },
+				{ Kind = "Swipe", Every = 2.6, Reach = 32, Arc = 180, Windup = 1.1, Damage = 34 },
 				{
 					Kind = "Lob",
 					Every = 3.5, -- seconds between volleys
 					Count = 2, -- extra bombs scattered round you, besides the one at your feet
-					Scatter = 22, -- how far off (studs) the extras can land
-					Radius = 7, -- each blast's radius (studs)
+					Scatter = 35, -- how far off (studs) the extras can land
+					Radius = 11, -- each blast's radius (studs)
 					Airtime = 1.3, -- seconds in the air (the red ring's fill time)
-					Height = 18, -- the arc's peak, studs above the straight line
+					Height = 29, -- the arc's peak, studs above the straight line
 					Damage = 14,
 					Style = "Cactus", -- (client/Bombs' look)
 				},
@@ -499,7 +499,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.4, Reach = 16, Arc = 150, Windup = 0.85, Damage = 50 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 28, Arc = 150, Windup = 1, Damage = 50 },
 				-- (tusks down, a hoof scrapes, then it charges: QM Oct 30)
 				{ Kind = "Charge", Every = 5, Range = 90, Windup = 1.1, Speed = 75, Width = 30, Damage = 34, Anim = "charge" },
 			},
@@ -519,7 +519,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 22, Arc = 220, Windup = 1.1, Damage = 75 },
+				{ Kind = "Swipe", Every = 3, Reach = 32, Arc = 230, Windup = 1.2, Damage = 75 },
 				-- (head reared back, then a gout of fireballs ahead of it: QM Oct 30, no rectangles)
 				{
 					Kind = "Magic",
@@ -557,9 +557,9 @@ return {
 			Strength = 6,
 			Respawn = 25,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 14, Arc = 100, Windup = 0.7, Damage = 26, Swings = 2, Anim = "pinch" },
+				{ Kind = "Swipe", Every = 2.6, Reach = 24, Arc = 110, Windup = 0.8, Damage = 26, Swings = 2, Anim = "pinch" },
 				-- (the tail stab: a long thin swipe straight out ahead)
-				{ Kind = "Swipe", Every = 3.5, Reach = 40, Arc = 24, Width = 30, Windup = 0.8, Damage = 22, Anim = "stab", Then = 3 },
+				{ Kind = "Swipe", Every = 3.5, Reach = 48, Arc = 24, Width = 40, Windup = 0.9, Damage = 22, Anim = "stab", Then = 3 },
 				{
 					Kind = "Magic",
 					Linked = true, -- (after each stab)
@@ -588,7 +588,7 @@ return {
 			Strength = 20,
 			Respawn = 30,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 16, Arc = 160, Windup = 0.9, Damage = 50 },
+				{ Kind = "Swipe", Every = 2.6, Reach = 28, Arc = 160, Windup = 1, Damage = 50 },
 				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.7, Airtime = 1.1, Height = 30, Radius = 18, Damage = 34, Anim = "leap", Then = 4 },
 				{ Kind = "Slam", Every = 4, Range = 10, Radius = 16, Windup = 0.9, Damage = 34, Anim = "slam" },
 				{
@@ -618,7 +618,7 @@ return {
 			Strength = 20,
 			Respawn = 30,
 			Attacks = {
-				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 22, Radius = 7, Airtime = 1.3, Height = 20, Damage = 24, Style = "Snow", Cast = 0.5, Anim = "throw" },
+				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 35, Radius = 11, Airtime = 1.3, Height = 32, Damage = 24, Style = "Snow", Cast = 0.5, Anim = "throw" },
 				-- (three ice lances, flung like arrows)
 				{
 					Kind = "Magic",
@@ -660,7 +660,7 @@ return {
 			Strength = 60,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 12, Arc = 300, Windup = 1, Damage = 70 },
+				{ Kind = "Swipe", Every = 3, Reach = 22, Arc = 300, Windup = 1.1, Damage = 70 },
 				{ Kind = "Leap", Every = 6, Range = 100, Windup = 0.6, Airtime = 0.9, Height = 26, Radius = 19, Damage = 50, Hops = 3, Anim = "leap", Then = 3 },
 				{
 					Kind = "Magic",
@@ -705,8 +705,8 @@ return {
 			Strength = 60,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 16, Arc = 180, Windup = 1, Damage = 75 },
-				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 26, Radius = 8, Airtime = 1.4, Height = 30, Damage = 40, Style = "Lava", Cast = 0.8, Anim = "erupt" },
+				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 180, Windup = 1.1, Damage = 75 },
+				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 13, Airtime = 1.4, Height = 48, Damage = 40, Style = "Lava", Cast = 0.8, Anim = "erupt" },
 				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 46 },
 			},
 			Minions = {
@@ -714,7 +714,7 @@ return {
 				Count = 3,
 				Model = "RockHog",
 				Name = "Rock Hog",
-				Scale = 1.6,
+				Scale = 0.8, -- (QM: half the size they were)
 				Health = 40000,
 				Speed = 15,
 				Strength = 20,
@@ -741,9 +741,9 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 14, Arc = 120, Windup = 0.8, Damage = 55, Swings = 2 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 30, Arc = 120, Windup = 0.9, Damage = 55, Swings = 2 },
 				-- (the big sword cleave: QM, a swipe like any melee)
-				{ Kind = "Swipe", Every = 4, Reach = 26, Arc = 170, Windup = 1.1, Damage = 80, Anim = "cleave" },
+				{ Kind = "Swipe", Every = 4, Reach = 44, Arc = 170, Windup = 1.3, Damage = 80, Anim = "cleave" },
 				{ Kind = "Charge", Every = 6, Range = 100, Windup = 0.8, Speed = 80, Width = 26, Damage = 60, Anim = "charge" },
 			},
 			Minions = {
@@ -823,9 +823,9 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2, Reach = 14, Arc = 80, Windup = 0.7, Damage = 100 },
+				{ Kind = "Swipe", Every = 2, Reach = 28, Arc = 110, Windup = 0.9, Damage = 100 },
 				{ Kind = "Charge", Every = 4, Range = 100, Windup = 0.7, Speed = 90, Width = 24, Damage = 65, Anim = "charge", Then = 3 },
-				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 24, Radius = 7, Airtime = 1.2, Height = 22, Damage = 45, Style = "Coin", Cast = 0.5, Anim = "spit" },
+				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 38.5, Radius = 11, Airtime = 1.2, Height = 35, Damage = 45, Style = "Coin", Cast = 0.5, Anim = "spit" },
 			},
 		},
 
@@ -845,7 +845,8 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3.6, Reach = 18, Arc = 150, Windup = 0.8, Damage = 75, Swings = 3 },
+				-- (QM, Oct 30: each slash of the combo bigger than the last: 1x, 1.25x, 1.5x)
+				{ Kind = "Swipe", Every = 3.6, Reach = 30, Arc = 150, Windup = 0.85, Damage = 75, Swings = 3, Grow = 0.25 },
 				{ Kind = "Charge", Every = 6, Range = 120, Windup = 1, Speed = 85, Width = 28, Damage = 90, Anim = "charge" },
 				{ Kind = "Slam", Every = 4, Range = 14, Radius = 18, Windup = 0.8, Damage = 90, Anim = "slam" },
 			},
@@ -884,7 +885,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 1.8, Reach = 16, Arc = 110, Windup = 0.7, Damage = 85 },
+				{ Kind = "Swipe", Every = 1.8, Reach = 24, Arc = 120, Windup = 0.8, Damage = 85 },
 				{ Kind = "Blink", Every = 4.5, Fade = 0.6, Near = 30, Far = 55, Anim = "screech", Then = 3 },
 				{
 					Kind = "Magic",
@@ -917,7 +918,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 20, Arc = 220, Windup = 1.1, Damage = 130 },
+				{ Kind = "Swipe", Every = 3, Reach = 34, Arc = 220, Windup = 1.2, Damage = 130 },
 				-- (fire breath: three gouts of fireballs)
 				{
 					Kind = "Magic",
@@ -931,7 +932,7 @@ return {
 					BurstGap = 0.12,
 					Shot = { Color = Color3.fromRGB(255, 110, 50), Count = 3, Spread = 25, Speed = 45, Homing = 0, Launch = 0, Range = 70, Slack = 0, Size = 1.5 },
 				},
-				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 24, Radius = 8, Airtime = 1.3, Height = 26, Damage = 70, Style = "Fire" },
+				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 38.5, Radius = 13, Airtime = 1.3, Height = 41.5, Damage = 70, Style = "Fire" },
 				{ Kind = "Leap", Every = 8, Range = 120, Windup = 0.8, Airtime = 1.3, Height = 40, Radius = 25, Damage = 90, Anim = "leap" },
 			},
 		},
@@ -987,7 +988,7 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Line", Every = 4, Range = 200, Windup = 1, Width = 10, Length = 16, Segments = 6, Gap = 0.15, Count = 2, Spread = 30, Damage = 65, Anim = "roots" },
+				{ Kind = "Line", Every = 4, Range = 200, Windup = 1, Width = 10, Length = 16, Segments = 6, Gap = 0.15, Count = 2, Spread = 30, Damage = 65, Anim = "roots", Style = "Root" },
 				{
 					Kind = "Magic",
 					Every = 2.5,
@@ -1031,7 +1032,7 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 12, Arc = 270, Windup = 1, Damage = 100 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 270, Windup = 1.1, Damage = 100 },
 				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.6, Airtime = 1, Height = 28, Radius = 17, Damage = 70, Anim = "leap", Then = 3 },
 				{ Kind = "Bombs", Linked = true, Every = 5, Count = 8, Around = true, Scatter = 8, Radius = 8, Windup = 1.2, Damage = 60, Cast = 0.5, Anim = "puff" },
 				{
@@ -1060,7 +1061,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 16, Arc = 110, Windup = 0.85, Damage = 75, Swings = 2 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 28, Arc = 120, Windup = 0.95, Damage = 75, Swings = 2 },
 				{ Kind = "Charge", Every = 5, Range = 110, Windup = 0.9, Speed = 80, Width = 40, Damage = 90, Anim = "charge" },
 				{ Kind = "Slam", Every = 4, Range = 14, Radius = 20, Windup = 0.9, Damage = 90, Anim = "slam" },
 				{
@@ -1091,7 +1092,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 10, Arc = 330, Windup = 1, Damage = 120 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 18, Arc = 330, Windup = 1.1, Damage = 120 },
 				{
 					Kind = "Magic",
 					Every = 4,
@@ -1128,7 +1129,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 1.4, Reach = 18, Arc = 110, Windup = 0.8, Damage = 90, Anim = "bite" },
+				{ Kind = "Swipe", Every = 1.4, Reach = 30, Arc = 120, Windup = 0.9, Damage = 90, Anim = "bite" },
 				{
 					Kind = "Magic",
 					Linked = true, -- (fired as it surfaces, by its Burrow: Server/Bosses)
@@ -1175,13 +1176,10 @@ return {
 		Forest = { "RuneMage", "ElderTreant", "ToadstoolKing" },
 		Ocean = { "KingCrab", "PufferLord", "Shark" },
 	},
-	-- healing out of a fight (QM, Oct 26; Server/Regen): once you go Delay seconds without
-	-- taking damage you heal Rate of your max health a second until full; any hit restarts
-	-- the wait. (Replaces Roblox's default slow regen.)
-	Regen = {
-		Delay = 10,
-		Rate = 0.1, -- 10% of max health a second
-	},
+	-- healing (QM, Oct 30; Server/Regen): always on, in a fight or not, at your pet's Regen
+	-- (health a second: Config.PetStats.Regen, Shared/Pets). A sprint ability can speed it
+	-- up (the Snake's: Config.SprintAbility.Glow). (Replaces Roblox's default slow regen;
+	-- before Oct 30 it was 10% a second after 10 s without a hit.)
 	-- boss melee only hits in front (QM, Oct 27: circle round a boss and you dodge it):
 	-- its Swipe's Arc (Config.EnemySwipe), and bosses turn at most TurnRate degrees a second
 	-- (Server/Bosses; a boss's own TurnRate overrides it). A Horse (44 studs/s) circling
@@ -1198,13 +1196,30 @@ return {
 	EnemySwipe = {
 		Windup = 0.5, -- seconds from the telegraph appearing to the hit (bosses set longer)
 		Arc = 120,
+		-- how much bigger than its Reach (and Width) every swipe really is, by region (QM,
+		-- Oct 30: pets are fast, so dodging was trivial; about 1.6x across the board,
+		-- growing further out). Bosses, minions and training mobs alike; a training
+		-- ground goes by its name (Meadow, Desert, Ice, Lava), Dummies and anything else
+		-- by Default.
+		Scale = {
+			Default = 1.6,
+			Meadow = 1.5,
+			Desert = 1.6,
+			Ice = 1.6,
+			Lava = 1.7,
+			Dungeon = 1.8,
+			Castle = 1.9,
+			Forest = 1.9,
+			Ocean = 2,
+		},
 		-- where it sits (QM, Oct 30: out in front, never over the enemy itself): a swipe of
-		-- Narrow degrees or less is centred on its front edge, like yours; Wrap or more on its
+		-- Narrow degrees or less is centred Ahead of the way to its front edge; Wrap or more on its
 		-- middle (it goes most of the way round); in between, in between
 		Narrow = 140,
 		Wrap = 220,
+		Ahead = 0.5, -- (a narrow one's centre: this share of the way out to its front edge)
 		Clear = 1, -- studs its inner edge stays off the enemy's body
-		Thick = 0.6, -- thickness, of its radius (less if that would reach the body; Width overrides)
+		Thick = 0.65, -- thickness, of its radius (less if that would reach the body; Width overrides)
 		Ends = 0.75, -- (fat ends: it reads as an area, not a streak)
 		Belly = 0.4,
 		Skew = 1,
@@ -1681,7 +1696,7 @@ return {
 			Desert = { Cactus = 0.3, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
 			Ice = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, Icebringer = 0.02 },
 			Lava = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (LassoAPet's Volcano)
-			Dungeon = { DungeonRat = 0.4, Slime = 0.22, CaveSpider = 0.16, BoneSteed = 0.12, Mimic = 0.07, BoneWyrm = 0.03 },
+			Dungeon = { DungeonRat = 0.34, Bat = 0.2, Slime = 0.18, CaveSpider = 0.16, BoneSteed = 0.12, Mimic = 0.07, BoneWyrm = 0.03 },
 			Castle = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02 },
 			Forest = { Shroom = 0.35, SpiritFox = 0.22, SpiritDeer = 0.15, AncientTreant = 0.13, MysticOwl = 0.08, CrystalTortoise = 0.05, SpiritLoong = 0.02 },
 			Ocean = { Squid = 0.38, Seahorse = 0.22, KingCrab = 0.17, FishSchool = 0.12, Whale = 0.08, AbyssWhale = 0.03 },
@@ -1783,7 +1798,7 @@ return {
 			Cactus = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 7200, -- Desert
 			Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 7200, SnackYak = 3600, -- Tundra
 			Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 1200, LavaWhale = 1200, Phoenix = 43200, -- Lava (LassoAPet's Volcano)
-			DungeonRat = 30, Slime = 60, CaveSpider = 120, BoneSteed = 300, Mimic = 1800, BoneWyrm = 21600, -- Abandoned Dungeon
+			DungeonRat = 30, Bat = 45, Slime = 60, CaveSpider = 120, BoneSteed = 300, Mimic = 1800, BoneWyrm = 21600, -- Abandoned Dungeon
 			Shroom = 30, SpiritFox = 60, SpiritDeer = 120, AncientTreant = 300, MysticOwl = 1200, CrystalTortoise = 2400, SpiritLoong = 21600, -- Magic Circle
 			WarBoar = 60, RoyalSteed = 90, ChessKnight = 300, RoyalPeacock = 600, LivingArmor = 2400, CrimsonDrake = 3600, RoyalEagle = 43200, -- Red Castle
 			Squid = 60, Seahorse = 120, KingCrab = 600, FishSchool = 900, Whale = 3600, AbyssWhale = 43200, -- Ocean Trench
@@ -1811,6 +1826,7 @@ return {
 	--           tier PetStats.TierGrowth x bigger (and x AnimalScale, top of the file)
 	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
 	--           (a guess from how fast each ran in LassoAPet)
+	--   Regen   (optional) x its regen (PetStats.Regen)
 	Pets = {
 		Horse = { Rarity = "Common", Cash = 3, Tier = 1, Lean = 0, Speed = 1 },
 		-- Meadow
@@ -1843,6 +1859,7 @@ return {
 		Phoenix = { Rarity = "Celestial", Cash = 12000, Tier = 3, Lean = -0.3, Speed = 7.2 },
 		-- Abandoned Dungeon (tools/later_pets.py; QM, Oct 30: new pets for the later biomes)
 		DungeonRat = { Rarity = "Mythic", Cash = 1500, Tier = 2, Lean = -0.4, Speed = 7.6 },
+		Bat = { Rarity = "Mythic", Cash = 1900, Tier = 1, Lean = -0.6, Speed = 7.8 }, -- (LassoAPet's Halloween Bat, QM Oct 30; its meshes are the Blood Bat boss's, tools/animal_meshes.luau)
 		Slime = { Rarity = "Mythic", Cash = 2400, Tier = 2, Lean = 0.6, Speed = 7.2 },
 		CaveSpider = { Rarity = "Divine", Cash = 5000, Tier = 2, Lean = -0.5, Speed = 8.2 },
 		BoneSteed = { Rarity = "Divine", Cash = 7000, Tier = 2, Lean = -0.2, Speed = 8 },
@@ -1892,10 +1909,20 @@ return {
 			Omega = { Health = 350, Speed = 40 },
 		},
 		Lean = 0.25, -- Lean 1: +25% health, -25% speed (Lean -1 the other way)
+		-- Regen (QM, Oct 30: pets set health and regen separately): health a second, Rate x
+		-- its rarity's Health, x (1 - its Lean x RegenLean) (the quick, fragile ones heal
+		-- faster: a Unicorn about twice a Rhino), x its own Regen in Config.Pets if it has one
+		Regen = { Rate = 0.025, RegenLean = 0.5 },
 		-- Speed (QM, Oct 26): each pet's own, LassoAPet's: MountSpeed studs/s x its Speed in
 		-- Config.Pets (Lasso's AnimalStats Speed; its horse rides at 44). This replaces the
 		-- rarity's Speed and the Lean's speed half; a pet without a Speed keeps those.
 		MountSpeed = 44,
+		-- Past the Horse's 1 the curve is logarithmic (QM, Oct 30): MountSpeed + k x ln(Speed),
+		-- k set so the fastest Speed in Config.Pets (TopSpeed, the Royal Eagle's 10) rides at
+		-- MaxSpeed studs/s; nothing rides faster (before the sprint). Pets under 1 stay
+		-- MountSpeed x Speed. Horse 44, Unicorn 84, Snake 114, Icebringer 134, Phoenix 178.
+		MaxSpeed = 200,
+		TopSpeed = 10,
 		Hitbox = 0.5, -- 0: size doesn't matter; 1: twice the hitbox, twice the health
 		TierGrowth = 1.6, -- each size tier reads this much bigger than the one below (LassoAPet's)
 		SmallSize = 10.4, -- studs a tier 1 pet reads (LassoAPet's PetSmallSize: the Horse at 1x its drawing)
@@ -1906,6 +1933,122 @@ return {
 	-- the controls, or held up against something: under StopAt of your speed) drops you
 	-- straight back. LassoAPet's sprint is 2x; this game's is 1.3x (QM).
 	Sprint = { On = true, Speed = 1.3, Delay = 1.5, Ramp = 1.2, StopAt = 0.4 },
+	-- Steering (QM, Oct 30: riding felt drifty; client/Riding): on the ground you go exactly
+	-- where you push at full speed and stop dead, turning to face it at Turn (a rate: 30 is
+	-- all but instant, lower is smoother).
+	Steer = { On = true, Turn = 30 },
+	-- Hopping (QM, Oct 30; client/Hop): riding into something solid up to Height studs tall
+	-- (a fence: 4) within Ahead studs past your pet's hitbox, it hops over, Clear studs
+	-- higher than it, with Push studs/s more forward. Taller walls stop you as before.
+	Hop = { On = true, Height = 6, Ahead = 1.5, Clear = 1.5, Push = 6 },
+	-- Sprint abilities (QM, Oct 30; client/SprintAbility draws them, Server/SprintAbility
+	-- runs them): these pets' sprint is a special move instead. It starts once, the moment
+	-- you've ridden Sprint.Delay seconds without stopping (whatever your speed), with the
+	-- camera bounce, the sky flash and the tier-up whoosh (no other pet gets those any
+	-- more: QM), and lasts till you stop.
+	--   Burrow  under the floor: nothing can hit you (LassoAPet's Sandworm: its sand
+	--           mounds and dirt spray, in Sand / Sand2)
+	--   Fly     Height studs up, rising over Rise seconds: melee, bombs, slams and plain
+	--           shots all miss you; only homing magic (a Magic shot with Homing) still hits
+	--   Smash   Grow x bigger, a white outline and LassoAPet's charge wind (the Rhino's), a
+	--           charge that builds (QM, Oct 30): over Ramp seconds of charging you speed up
+	--           to MaxSpeed x your sprint, and running into an enemy hits it for Damage x
+	--           your slash's damage at the start up to MaxDamage x at the full Ramp. It knocks
+	--           it Knockback studs back over KnockTime seconds (a boss BossKnock x that),
+	--           and ends the sprint (another Sprint.Delay of riding to start it again)
+	--   Bombs   an orange outline, and a bomb dropped every Every seconds: each goes
+	--           off Fuse seconds later, hitting every enemy within Radius for Damage x your
+	--           slash's damage (orange and yellow in turn)
+	--   Crabwalk  a Smash, scuttling sideways (the model turned Turn degrees; LassoAPet's
+	--           King Crab), its charge wind breaking round its side
+	--   Leap    LassoAPet's Unicorn leap: it walks up Steps steps of thin air, StepTime
+	--           seconds each, to Height studs, trailing its Trail colours (the rainbow);
+	--           once the sprint stops it drops back down (Gravity studs/s², like a boss's
+	--           minions out of the sky). Up there it dodges like a flier.
+	--   Glow    LassoAPet's Snake rattle: its horns and spikes glow, and you heal Regen x
+	--           your pet's regen (Server/Regen)
+	--   Frost   LassoAPet's Icebringer blizzard round it: a boss's minion that comes
+	--           within Radius studs is frozen solid for Freeze seconds (no moving, no
+	--           biting), then can't be frozen again for Again seconds
+	SprintPets = {
+		Sandworm = "Burrow",
+		Rockworm = "Burrow", -- (the Sandworm's recolour)
+		Firebird = "Fly",
+		Phoenix = "Fly",
+		MysticOwl = "Fly",
+		SpiritLoong = "Fly",
+		CrimsonDrake = "Fly",
+		RoyalEagle = "Fly",
+		BoneWyrm = "Burrow", -- (QM, Oct 30: like the Sandworm)
+		Bat = "Fly",
+		Unicorn = "Leap",
+		BoneSteed = "Leap", -- (its trail in bone and ghost-fire colours)
+		Snake = "Glow",
+		Icebringer = "Frost",
+		KingCrab = "Crabwalk",
+		Rhino = "Smash",
+		Boar = "Smash", -- (QM, Oct 30: every boar charges)
+		RockHog = "Smash",
+		WarBoar = "Smash",
+		LavaWhale = "Smash", -- (a whale like the Whale and Abyss Whale)
+		Whale = "Smash",
+		AbyssWhale = "Smash",
+		VolcanoTortoise = "Bombs",
+	},
+	SprintAbility = {
+		Burrow = {
+			-- (the Sandworm's the Sandworm boss's sand; the Rockworm's dark rock)
+			Sand = { Sandworm = Color3.fromRGB(226, 190, 128), Rockworm = Color3.fromRGB(90, 70, 65), BoneWyrm = Color3.fromRGB(110, 100, 95) },
+			Sand2 = { Sandworm = Color3.fromRGB(196, 156, 96), Rockworm = Color3.fromRGB(60, 45, 45), BoneWyrm = Color3.fromRGB(75, 68, 66) },
+			Mound = 1.3, -- x LassoAPet's mounds
+		},
+		Fly = { Height = 10, Rise = 0.4 },
+		Smash = {
+			Grow = 1.2,
+			Outline = Color3.fromRGB(255, 255, 255),
+			Damage = 2,
+			MaxDamage = 8,
+			Ramp = 3,
+			MaxSpeed = 1.6,
+			Reach = 2, -- studs past the two bodies' edges that still count as running into it
+			Knockback = 18,
+			KnockTime = 0.3,
+			BossKnock = 0.5,
+		},
+		Crabwalk = { Turn = 90 }, -- (its hits, outline and growing: Smash's)
+		Leap = {
+			Height = 9,
+			Steps = 3,
+			StepTime = 0.22,
+			Gravity = 160,
+			Trail = {
+				Unicorn = { -- (LassoAPet's rainbow)
+					Color3.fromRGB(255, 70, 70),
+					Color3.fromRGB(255, 160, 50),
+					Color3.fromRGB(255, 235, 70),
+					Color3.fromRGB(80, 220, 90),
+					Color3.fromRGB(70, 150, 255),
+					Color3.fromRGB(170, 90, 240),
+				},
+				BoneSteed = { -- (bone, then ghost fire)
+					Color3.fromRGB(235, 228, 205),
+					Color3.fromRGB(150, 255, 190),
+					Color3.fromRGB(70, 210, 170),
+					Color3.fromRGB(120, 90, 220),
+					Color3.fromRGB(70, 40, 130),
+				},
+			},
+		},
+		Glow = { Regen = 2, Color = Color3.fromRGB(48, 196, 214) }, -- (Color: the parts that glow, the Snake's horns and spikes)
+		Frost = { Radius = 30, Freeze = 0.5, Again = 1 },
+		Bombs = {
+			Outline = Color3.fromRGB(255, 140, 30),
+			Every = 0.15, -- (it runs about 200 studs/s: one every ~30 studs)
+			Fuse = 0.9,
+			Radius = 8,
+			Damage = 1,
+		},
+	},
 	-- The rest is LassoAPet's riding feel, ported as it is (its own Config values). Where it
 	-- measured speeds in studs/s against "a horse's sprint", here that's the Horse's speed
 	-- x Sprint.Speed (worked out in code), and the tiers are multiples of it.
@@ -1919,17 +2062,18 @@ return {
 	-- The sprint camera (client/SprintCam): sprinting, the view widens to Fov degrees (a
 	-- fisheye-like stretch at the edges) and the camera comes in to Zoom x its usual
 	-- distance, easing in over InTime seconds and back over OutTime; x your speed over a
-	-- horse's sprint, between MinScale and MaxScale. Breaking into a higher sprint tier
+	-- horse's sprint, between MinScale and MaxScale. A SprintPets pet's sprint starting
 	-- bounces the camera's distance: in to Bounce.In x, out to Bounce.Out x, then settling.
 	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5, MinScale = 0.5, MaxScale = 1.8, Bounce = { In = 0.7, InTime = 0.1, Out = 1.2, OutTime = 0.15, SettleTime = 0.4 } },
 	-- Sprint tiers, in horse's sprints (LassoAPet's 180, 360 and 440 studs/s over its horse's
-	-- 88): breaking into one replays the whoosh, bounces the camera, flashes the sky and
-	-- steps the wind louder (up to 2x).
+	-- 88). Breaking into one used to bounce the camera, flash the sky and play the tier-up
+	-- whoosh; QM, Oct 30: no more (only a SprintPets pet's sprint does that, once). They're
+	-- unused now.
 	SprintTiers = { 2.05, 4.1, 5 },
 	-- A white trail off you while you sprint (client/SprintTrail): Life seconds long at a
 	-- horse's sprint, longer the faster you go, up to MaxLife.
 	SprintTrail = { On = false, Life = 0.12, MaxLife = 0.6, Transparency = 0.55 }, -- (off: QM, Oct 27)
-	-- The sky flashes white on each sprint tier-up, fading back over Time seconds
+	-- The sky flashes white as a SprintPets pet's sprint starts, fading back over Time seconds
 	-- (client/SkyFlash). Start: its see-through at the flash. Distance: studs round the camera.
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 
@@ -1986,7 +2130,7 @@ return {
 	-- at Chase x its Speed and swipes with its Attacks (Server/BossAttacks' Swipe, like
 	-- the bosses), until you've left its yard, died, or not hit it for Calm seconds. They
 	-- hit for real (QM, Oct 26), about 40% of their biome boss's damage a second, and can
-	-- kill you: while one's biting you, Server/Regen doesn't heal you.
+	-- kill you (your pet's regen keeps healing you meanwhile: Server/Regen).
 	-- Each mob is a random pet from its biome's eggs (Config.Eggs.Kinds, any with odds; QM,
 	-- Oct 26), drawn at the pet's own size; Mob and Size are only for a ground whose eggs
 	-- are still the Horse placeholder. Pet (and Name) put one pet in a ground instead: the
@@ -2070,7 +2214,7 @@ return {
 						Pet = "Penguin",
 						Mode = "Flee",
 						Attacks = {
-							{ Kind = "Lob", Every = 3, Count = 0, Scatter = 6, Radius = 5, Airtime = 1.2, Height = 14, Damage = 22 },
+							{ Kind = "Lob", Every = 3, Count = 0, Scatter = 9.5, Radius = 8, Airtime = 1.2, Height = 22.5, Damage = 22 },
 						},
 					},
 				},
@@ -2285,10 +2429,10 @@ return {
 	Weapons = {
 		-- QM's weapons (Oct 25). Rarity steps up every 2-3 weapons in price order (QM, Oct 27):
 		-- (Balance, Oct 27: each weapon in price order is 1.3x the one before in damage a second,
-		-- Damage x Count / Cooldown, from the Kendo Stick's 2 to the Flower Staff's 133; prices
-		-- roughly double each step, 500 to 75M, so a new biome's cash buys the next few.)
-		-- Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, Celestial, then Cosmic,
-		-- Void and Omega for weapons still to come (Rarities above). Every Ranged one
+		-- Damage x Count / Cooldown, from the Kendo Stick's 2 to the Genesis Staff's 1,834; prices
+		-- roughly double each step, 500 to 25B, so a new biome's cash buys the next few.)
+		-- Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, Celestial, Cosmic, Void
+		-- and Omega (Rarities above; the last three are the endgame recolours). Every Ranged one
 		-- shoots the same arrow (only its numbers and trail differ); Magic ones are drawn from
 		-- their numbers (client/Shots). Tune any of them live: Workspace > Weapon.
 		-- (everyone's to start: Arsenal.Start, so Carl doesn't sell it)
@@ -2568,6 +2712,194 @@ return {
 				Speed = 35,
 				Spread = 30,
 				TrailLength = 0.6,
+			},
+		},
+		-- the endgame (QM, Oct 30: recolour some weapons into higher tiers, enough to reach the
+		-- Red Castle and Ocean Trench). Each is a recolour of one QM drew (tools/weapon_recolors.py)
+		-- that fights like it, still 1.3x the one before in damage a second (Flower Staff's 133
+		-- up to the Genesis Staff's 1,834). Prices climb ~1.8x a step from 150M: the first two
+		-- are Dungeon and Magic Circle cash, the next few Red Castle and Ocean Trench, and the
+		-- Omega pair is the chase past them (placeholders).
+		SunBlade = {
+			Name = "Sun Blade",
+			Type = "Melee",
+			Rarity = "Celestial",
+			Damage = 173,
+			Price = 150000000,
+			Slash = {
+				Arc = 240,
+				AttackRange = 20,
+				Color = Color3.fromRGB(255, 226, 140),
+				Cooldown = 1,
+				Ends = 0.3,
+				Fade = 0.5,
+				Forward = 3.5,
+				Glow = 1,
+				OuterSegments = 6,
+				Radius = 13,
+				Recover = 1,
+				Trail = 1,
+			},
+		},
+		StarlightBow = {
+			Name = "Starlight Bow",
+			Type = "Ranged",
+			Rarity = "Celestial",
+			Damage = 60,
+			Price = 250000000,
+			Shot = {
+				Cooldown = 0.8,
+				Count = 3,
+				Spread = 16,
+				TrailColor = Color3.fromRGB(255, 211, 74),
+				TrailLength = 0.3,
+				TrailTransparency = 0.5,
+			},
+		},
+		NebulaStaff = {
+			Name = "Nebula Staff",
+			Type = "Magic",
+			Rarity = "Cosmic",
+			Damage = 102,
+			Price = 450000000,
+			Shot = {
+				Color = Color3.fromRGB(255, 122, 230),
+				Count = 2,
+				Homing = 180,
+				Size = 1.2,
+				Speed = 40,
+				Splash = 6,
+				Sparkles = 6,
+			},
+		},
+		CometLance = {
+			Name = "Comet Lance",
+			Type = "Melee",
+			Rarity = "Cosmic",
+			Damage = 171,
+			Price = 800000000,
+			Slash = {
+				Arc = 60,
+				AttackRange = 19,
+				Color = Color3.fromRGB(224, 112, 255),
+				Cooldown = 0.45,
+				Forward = 0,
+				Glow = 1,
+				InnerSegments = 1,
+				Opacity = 1,
+				OuterSegments = 2,
+				Radius = 16,
+			},
+		},
+		GalaxyBow = {
+			Name = "Galaxy Bow",
+			Type = "Ranged",
+			Rarity = "Cosmic",
+			Damage = 198,
+			Price = 1500000000,
+			Shot = {
+				Cooldown = 0.4,
+				Pierce = 1,
+				Size = 3,
+				Spread = 5,
+				TrailColor = Color3.fromRGB(255, 112, 224),
+				TrailLength = 0.5,
+				TrailTransparency = 0.8,
+			},
+		},
+		VoidReaver = {
+			Name = "Void Reaver",
+			Type = "Melee",
+			Rarity = "Void",
+			Damage = 1284,
+			Price = 2500000000,
+			Slash = {
+				Arc = 300,
+				AttackRange = 10,
+				Color = Color3.fromRGB(155, 107, 255),
+				Cooldown = 2,
+				Ends = 1,
+				Forward = 1,
+				Glow = 1,
+				Hold = 0.2,
+				InnerSegments = 8,
+				OuterSegments = 14,
+				Pop = 1,
+				Radius = 15,
+				Recover = 1,
+				Trail = 1,
+				Width = 5,
+			},
+		},
+		AbyssStaff = {
+			Name = "Abyss Staff",
+			Type = "Magic",
+			Rarity = "Void",
+			Damage = 668,
+			Price = 4500000000,
+			Shot = {
+				Color = Color3.fromRGB(110, 70, 255),
+				Cooldown = 0.8,
+				Homing = 170,
+				Size = 2,
+				SparkleSize = 1,
+				Speed = 50,
+				TrailLength = 1,
+			},
+		},
+		EclipseBow = {
+			Name = "Eclipse Bow",
+			Type = "Ranged",
+			Rarity = "Void",
+			Damage = 108.5,
+			Price = 8000000000,
+			Shot = {
+				Cooldown = 0.2,
+				Count = 2,
+				Spread = 8,
+				TrailColor = Color3.fromRGB(122, 77, 255),
+				TrailLength = 0.3,
+				TrailTransparency = 0.6,
+			},
+		},
+		Worldbreaker = {
+			Name = "Worldbreaker",
+			Type = "Melee",
+			Rarity = "Omega",
+			Damage = 4232,
+			Price = 15000000000,
+			Slash = {
+				Arc = 140,
+				AttackRange = 11,
+				Belly = 0.4,
+				Color = Color3.fromRGB(180, 255, 106),
+				Cooldown = 3,
+				Forward = 5,
+				Glow = 1,
+				Hold = 0.4,
+				Jitter = 1,
+				OuterSegments = 3,
+				Pop = 1,
+				Radius = 7,
+				Recover = 1,
+				Width = 5,
+			},
+		},
+		GenesisStaff = {
+			Name = "Genesis Staff",
+			Type = "Magic",
+			Rarity = "Omega",
+			Damage = 734,
+			Price = 25000000000,
+			Shot = {
+				Color = Color3.fromRGB(180, 255, 106),
+				Cooldown = 0.4,
+				Homing = 360,
+				HomingCone = 130,
+				Size = 1.1,
+				Sparkles = 8,
+				Speed = 120,
+				TrailLength = 0.2,
 			},
 		},
 	},

@@ -10,6 +10,10 @@
 --
 --   Minions.call(boss, b)    -- the boss's minions arrive (b: its Server/Bosses entry)
 --   Minions.clear(biome)     -- every minion of that biome's fight goes
+--   Minions.freezeNear(at, radius, time, again) -- the Icebringer's sprint (Server/
+--         SprintAbility): every landed minion within radius studs of `at` is frozen for
+--         time seconds (it doesn't move or bite; its FrozenUntil attribute, server time,
+--         is for client/SprintAbility's ice), then can't be frozen again for `again`
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -125,6 +129,20 @@ local function spawnOne(m, biome, bounds, at, yaw, boss)
 	end)
 end
 
+function Minions.freezeNear(at, radius, time, again)
+	local now = workspace:GetServerTimeNow()
+	for body, e in live do
+		if e.wait <= 0 and now >= (e.thawed or 0) then
+			local gap = ((body.Position - at) * Vector3.new(1, 0, 1)).Magnitude - e.radius
+			if gap <= radius then
+				e.frozen = time
+				e.thawed = now + time + again
+				body:SetAttribute("FrozenUntil", now + time)
+			end
+		end
+	end
+end
+
 function Minions.call(boss, b)
 	local m = b.c.Minions
 	if not (m and b.biome) then
@@ -184,6 +202,10 @@ RunService.Heartbeat:Connect(function(dt)
 			e.wait -= dt
 			continue
 		end
+		if (e.frozen or 0) > 0 then -- (frozen solid by an Icebringer)
+			e.frozen -= dt
+			continue
+		end
 		local pos = body.Position
 		local target, distance = nearest(pos, e.biome)
 		if not target then
@@ -198,6 +220,7 @@ RunService.Heartbeat:Connect(function(dt)
 		if not hold and gap > 0 then
 			pos += offset.Unit * math.min(e.m.Speed * dt, gap)
 		end
+		pos = Combat.pushed(body, pos, dt) -- (knocked back by a Smash sprint)
 		if e.bounds then
 			local r = e.radius + 2
 			local x0, x1 = math.min(e.bounds[1], e.bounds[3]) + r, math.max(e.bounds[1], e.bounds[3]) - r

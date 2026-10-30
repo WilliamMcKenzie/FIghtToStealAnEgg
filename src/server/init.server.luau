@@ -28,6 +28,7 @@ local Pens = require(script.Pens)
 local PetInventory = require(script.PetInventory)
 local Regen = require(script.Regen)
 local Regions = require(script.Regions)
+require(script.SprintAbility) -- (the SprintPets' sprints: burrowing, flying, smashing, bombs)
 local Training = require(script.Training)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
@@ -48,13 +49,36 @@ Hatchery.start() -- (stolen eggs in your hotbar, put down in your pen and hatche
 Eggs.start(map)
 Training.start(map)
 Regions.start()
-Regen.start() -- (healing after Config.Regen.Delay seconds without being hit)
+Regen.start() -- (always healing, at your pet's Regen)
 Data.start() -- (after Training: it loads over the grounds' defaults)
 Arsenal.start() -- (each player's weapon tool, and buying them from Carl)
 
 local remote = Instance.new("RemoteEvent")
 remote.Name = "Slash"
 remote.Parent = ReplicatedStorage
+
+-- The rider's own body never touches the world (QM, Oct 30: a burrowing rider fell through
+-- the map). client/Riding draws the body up on the saddle, down under the floor with a
+-- burrow or up in the air with a flight, by its joints; a torso drawn into the floor
+-- dragged the whole character down through it. Only the HumanoidRootPart (the Humanoid's
+-- own collider, never moved) collides now: every other part is in RiderBody, which
+-- collides with nothing.
+local PhysicsService = game:GetService("PhysicsService")
+PhysicsService:RegisterCollisionGroup("RiderBody")
+for _, group in PhysicsService:GetRegisteredCollisionGroups() do
+	PhysicsService:CollisionGroupSetCollidable("RiderBody", group.name, false)
+end
+local function riderBody(character)
+	local function set(part)
+		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+			part.CollisionGroup = "RiderBody"
+		end
+	end
+	for _, part in character:GetDescendants() do
+		set(part)
+	end
+	character.DescendantAdded:Connect(set) -- (accessories, the weapon)
+end
 
 -- Everyone rides (client/Riding.luau): their pet's health and speed (QM, Oct 25: nothing
 -- else adds to them), and no jumping
@@ -75,6 +99,10 @@ local function joined(player)
 	-- keeps it), Cash starts at 0 (no saving yet)
 	player:SetAttribute("Cash", player:GetAttribute("Cash") or 0)
 	player.CharacterAdded:Connect(ride)
+	player.CharacterAdded:Connect(riderBody)
+	if player.Character then
+		riderBody(player.Character)
+	end
 	player:GetAttributeChangedSignal("Pet"):Connect(function()
 		if player.Character then
 			ride(player.Character)
@@ -123,7 +151,10 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 	if typeof(yaw) ~= "number" or yaw ~= yaw or math.abs(yaw) > 10 then
 		return
 	end
-	-- (only with a melee weapon equipped, at most as often as it swings)
+	-- (only with a melee weapon equipped, at most as often as it swings, and only alive)
+	if not Combat.alive(player) then
+		return
+	end
 	local id = player:GetAttribute("Weapon")
 	if Weapons.get(id).Type ~= "Melee" then
 		return
@@ -154,6 +185,9 @@ shoot.OnServerEvent:Connect(function(player, yaw, seed, origin)
 		return
 	end
 	seed = if typeof(seed) == "number" and seed == seed then math.floor(seed) % 2 ^ 30 else 0
+	if not Combat.alive(player) then
+		return -- (no shooting from beyond the grave)
+	end
 	local id = player:GetAttribute("Weapon")
 	local w = Weapons.get(id)
 	if not w.Shot then

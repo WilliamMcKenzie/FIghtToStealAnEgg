@@ -24,7 +24,9 @@ local SlashTuning = require(Shared.SlashTuning)
 local WorldColors = require(Shared.WorldColors)
 local Weapons = require(Shared.Weapons.Weapons)
 local Projectiles = require(Shared.Projectiles)
+local Yards = require(Shared.Yards)
 local Riding = require(script.Riding)
+local Sfx = require(script.Sfx)
 local Shots = require(script.Shots)
 local SlashCam = require(script.SlashCam)
 local SwingPose = require(script.SwingPose)
@@ -47,6 +49,8 @@ require(script.Liquid)
 require(script.Vendor)
 require(script.PenRide)
 require(script.Sprint)
+require(script.SprintAbility)
+require(script.Hop)
 require(script.ChatCommands)
 require(script.WeaponTuning)
 require(script.PoseTuning)
@@ -104,15 +108,8 @@ local function swingSound(character, c, seed)
 		TweenService:Create(last, TweenInfo.new(c.SoundCut), { Volume = 0 }):Play()
 		Debris:AddItem(last, c.SoundCut + 0.05)
 	end
-	local sound = Instance.new("Sound")
 	local pick = c.Sounds[Random.new(seed):NextInteger(1, #c.Sounds)]
-	sound.SoundId = pick.id
-	sound.Volume = c.Volume
-	sound.Parent = root
-	sound.TimePosition = pick.start
-	sound:Play()
-	playing[character] = sound
-	Debris:AddItem(sound, 5)
+	playing[character] = Sfx.play(pick.id, c.Volume, root, pick.start) -- (heard if on screen)
 end
 
 local function play(character, dir, tool, seed, yaw)
@@ -141,7 +138,7 @@ end
 
 -- the nearest thing to hit within `range` of the character (flat distance to its edge):
 -- a boss (workspace.Bosses), or a training mob or dummy (workspace.Mobs) in a ground
--- you've unlocked
+-- you've unlocked and are standing in (QM, Oct 30: Shared/Yards)
 -- (room: only bodies inside these bounds, { x0, z0, x1, z1 }: a boss fight's arena)
 local function nearestBoss(root, range, room)
 	local best, bestDist = nil, range
@@ -156,6 +153,7 @@ local function nearestBoss(root, range, room)
 				and not body:GetAttribute("Intro")
 				and not body:GetAttribute("Burrowed") -- (tunnelling underground)
 				and (ground == nil or player:GetAttribute("Train" .. ground) ~= false)
+				and Yards.inside(body, root.Position)
 				and (
 					room == nil
 					or (body.Position.X >= room[1] and body.Position.Z >= room[2] and body.Position.X <= room[3] and body.Position.Z <= room[4])
@@ -192,7 +190,10 @@ end
 RunService.Heartbeat:Connect(function(dt)
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
-	if not root then
+	-- (dead, Health 0: no aiming and no attacks until you respawn, or a revive puts
+	-- Health back, QM Oct 30)
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not root or not humanoid or humanoid.Health <= 0 then
 		TargetRing.set(nil)
 		return
 	end
@@ -223,8 +224,7 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 	if Weapons.get(id).Shot then
 		-- (Archero: bows and staffs hold fire while you're moving, and shoot as soon as you stop)
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if Config.Shots.StillOnly and humanoid and humanoid.MoveDirection.Magnitude > 0.1 then
+		if Config.Shots.StillOnly and humanoid.MoveDirection.Magnitude > 0.1 then
 			return
 		end
 		-- (shots go straight at it, not along the eased aim)

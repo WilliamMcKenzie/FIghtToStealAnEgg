@@ -2,7 +2,7 @@
 -- RotMG-style "bombs" with floor indicators, then all of it). Each boss's Attacks in
 -- Config.Bosses is a list of these, each on its own timer:
 --
---   Swipe { Every, Reach, Arc, Width, Windup, Swings, Damage, Anim, Then }: its melee (QM,
+--   Swipe { Every, Reach, Arc, Width, Windup, Swings, Grow, Damage, Anim, Then }: its melee (QM,
 --         Oct 30: no more hurting you just by touching you). Once you're within Reach studs
 --         of its edge it stops and faces you, a red crescent shaped like the swipe (Arc
 --         degrees round, out to Reach past its edge straight ahead, Width thick: most of
@@ -10,8 +10,10 @@
 --         yours, the crescent sits out in front of it, never over its own body (QM: narrow
 --         ones centred on its front edge, the widest ones on its middle). Then the
 --         swipe goes through it and everyone on it takes Damage. Swings: that many in a row,
---         back and forth, each with its own telegraph. Clients draw it from the EnemySwipe
---         remote (client/Swipes); the shape is Shared/SlashFx's, rolled from one seed on
+--         back and forth, each with its own telegraph, each Grow (share of the first)
+--         bigger than the last. Reach and Width are scaled by Config.EnemySwipe.Scale for its
+--         region (it still only starts one once you're within the unscaled Reach).
+--         Clients draw it from the EnemySwipe remote (client/Swipes); the shape is Shared/SlashFx's, rolled from one seed on
 --         both sides. A leftover Contact { Every, Reach, Damage } is a plain Swipe.
 --   Slam  { Every, Range, Radius, Windup, Damage }: when a fighter is within Range, it
 --         stops, a red circle grows in front of it for Windup seconds, then everything
@@ -63,7 +65,9 @@
 --         the last orb's out or the bombs have landed; so does calling its Minions.
 --
 -- Only players locked into its fight (LockedIn = its biome) are hit, so someone passing
--- through is never caught. All of it is server parts in workspace.BossFx. A pet bigger
+-- through is never caught. A sprint ability (Server/SprintAbility: the player's
+-- SprintAbility attribute) dodges too: burrowed, nothing hits you; flying (or up on a
+-- Leap), only homing Magic shots do (QM, Oct 30). All of it is server parts in workspace.BossFx. A pet bigger
 -- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
@@ -100,6 +104,12 @@ local bombRemote = Instance.new("RemoteEvent")
 bombRemote.Name = "BossBomb"
 bombRemote.Parent = ReplicatedStorage
 
+-- (every red circle that goes off splashes like a bomb landing: (centre, radius, style),
+-- client/Bombs)
+local splashRemote = Instance.new("RemoteEvent")
+splashRemote.Name = "BossSplash"
+splashRemote.Parent = ReplicatedStorage
+
 -- (everyone plays a boss's attack animation as it winds up: (body, anim name, windup))
 local animRemote = Instance.new("RemoteEvent")
 animRemote.Name = "BossAnim"
@@ -129,11 +139,18 @@ local function fighter(player)
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if root and humanoid and humanoid.Health > 0 then
 		local extra = Pets.stats(player:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
-		return { root = root, humanoid = humanoid, extra = extra }
+		return { root = root, humanoid = humanoid, extra = extra, player = player }
 	end
 	return nil
 end
 BossAttacks.fighter = fighter
+
+-- whether this fighter's sprint ability dodges a hit (homing: a homing Magic shot's)
+local function dodges(f, homing)
+	local ability = f.player and f.player:GetAttribute("SprintAbility")
+	return ability == "Burrow" or ((ability == "Fly" or ability == "Leap") and not homing)
+end
+BossAttacks.dodges = dodges
 
 -- every living root of a player in this biome's fight; for a training mob (its `biome` is
 -- its own b, Server/Training) just whoever it's angry with, its b.foes
@@ -178,7 +195,7 @@ local function blast(biome, centre, radius, damage, hit)
 		if hit and hit[f.humanoid] then
 			continue
 		end
-		if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra then
+		if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra and not dodges(f) then
 			if hit then
 				hit[f.humanoid] = true
 			end
@@ -205,7 +222,7 @@ end
 
 -- a flat red circle on the ground that fills over `windup`, then hurts everyone in the
 -- fight inside it
-local function circle(biome, centre, radius, windup, damage, hit)
+local function circle(biome, centre, radius, windup, damage, hit, style)
 	local y = groundAt(centre) + FLOOR_Y
 	local function disc(name, r, transparency)
 		local p = Instance.new("Part")
@@ -232,6 +249,8 @@ local function circle(biome, centre, radius, windup, damage, hit)
 		:Play()
 	task.delay(windup, function()
 		blast(biome, centre, radius, damage, hit)
+		-- (QM, Oct 30: something has to happen there: the bombs' splash, client/Bombs)
+		splashRemote:FireAllClients(Vector3.new(centre.X, y - FLOOR_Y, centre.Z), radius, style)
 		rim.Transparency = 0.2
 		fill:Destroy()
 		TweenService
@@ -242,14 +261,14 @@ local function circle(biome, centre, radius, windup, damage, hit)
 end
 
 -- a row of red circles Width across, from `from` Length studs along `dir`, filling over
--- `windup`; then everyone in the fight on one takes damage, once (`hit`: shared by every
--- row of the same attack, so overlapping rows hit once too)
-local function row(biome, from, dir, width, length, windup, damage, hit)
+-- `windup`; then everyone in the fight on one takes damage, once per row (`hit`: the
+-- circles overlap), and each splashes in `style` (client/Bombs)
+local function row(biome, from, dir, width, length, windup, damage, hit, style)
 	local radius = width / 2
 	local n = math.max(1, math.round(length / (width * 0.8)))
 	local step = length / n
 	for k = 1, n do
-		circle(biome, from + dir * (step * (k - 0.5)), radius, windup, damage, hit)
+		circle(biome, from + dir * (step * (k - 0.5)), radius, windup, damage, hit, style)
 	end
 end
 
@@ -366,12 +385,11 @@ local function swipe(body, b, a, pos, toward)
 	animate(body, a, windup)
 	root(b, windup * swings + 0.15)
 	b.yaw, b.facing = yaw, yaw
-	-- where its centre sits: on its front edge for a narrow swipe (like yours, out ahead),
+	-- where its centre sits: toward its front edge for a narrow swipe (like yours, out ahead),
 	-- back to its middle for one that wraps most of the way round it
 	local rb = b.c.Radius
 	local arc = a.Arc or S.Arc
-	local ahead = rb * math.clamp((S.Wrap - arc) / (S.Wrap - S.Narrow), 0, 1)
-	local radius = rb + a.Reach - ahead
+	local ahead = rb * S.Ahead * math.clamp((S.Wrap - arc) / (S.Wrap - S.Narrow), 0, 1)
 	-- (as thick as it can be with its inner edge still clear of its body all along: the
 	-- inner radius r must keep ahead^2 + r^2 + 2 ahead r cos(half) >= (rb + Clear)^2, for
 	-- the biggest arc and width its seed can roll: Config.EnemySwipe's Variety)
@@ -383,21 +401,31 @@ local function swipe(body, b, a, pos, toward)
 	if ahead >= clear and cosHalf >= 0 then
 		inner = 0 -- (its centre's already clear of it, and the swipe faces away)
 	end
-	local width = math.min(a.Width or radius * S.Thick, (radius * v.Radius[1] - math.max(inner, 0)) / v.Width[2])
-	local look = {
-		Radius = radius,
-		Arc = arc,
-		Width = math.max(width, 1),
-	}
-	local c = table.clone(S)
-	for k, value in look do
-		c[k] = value
+	-- how big (QM, Oct 30: pets are fast, so melee has to be BIG to land): its region's
+	-- Scale (a training mob's is its ground's), and a combo's later swings Grow bigger
+	local region = if type(b.biome) == "table" then b.region else b.biome
+	local scale = S.Scale[region] or S.Scale.Default
+	local function lookAt(k)
+		local grow = scale * (1 + (k - 1) * (a.Grow or 0))
+		local radius = rb + a.Reach * grow - ahead
+		local width = math.min(if a.Width then a.Width * grow else radius * S.Thick, (radius * v.Radius[1] - math.max(inner, 0)) / v.Width[2])
+		local look = {
+			Radius = radius,
+			Arc = arc,
+			Width = math.max(width, 1),
+		}
+		local c = table.clone(S)
+		for key, value in look do
+			c[key] = value
+		end
+		return look, c
 	end
 	local centre = pos + toward * ahead
 	local origin = CFrame.new(centre.X, groundAt(centre), centre.Z) * CFrame.Angles(0, yaw, 0)
 	local start = serverNow()
 	local dir = if math.random() < 0.5 then 1 else -1
 	for k = 1, swings do
+		local look, c = lookAt(k)
 		local seed = math.random(0, 2 ^ 30 - 1)
 		local o = SlashFx.outline(c, seed)
 		swipeRemote:FireAllClients({
@@ -414,7 +442,8 @@ local function swipe(body, b, a, pos, toward)
 				return
 			end
 			for _, f in fighters(b.biome) do
-				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra) then
+				-- (solid: right up against it, inside the crescent, counts too)
+				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra, true) and not dodges(f) then
 					f.humanoid:TakeDamage(a.Damage)
 				end
 			end
@@ -456,18 +485,19 @@ local function perform(body, b, i, a)
 		end
 	elseif a.Kind == "Bombs" then
 		for _, f in list do
-			circle(b.biome, flat(f.root.Position), a.Radius, a.Windup, a.Damage)
+			circle(b.biome, flat(f.root.Position), a.Radius, a.Windup, a.Damage, nil, a.Style)
 		end
 		for k = 1, a.Count or 0 do
 			-- (Around: in a ring round itself instead, like a fairy ring; else round you)
 			if a.Around then
 				local angle = k / a.Count * 2 * math.pi + math.random() * 0.3
 				local out = b.c.Radius + a.Radius + math.random() * (a.Scatter or 10)
-				circle(b.biome, pos + Vector3.new(math.cos(angle), 0, math.sin(angle)) * out, a.Radius, a.Windup, a.Damage)
+				local spot = pos + Vector3.new(math.cos(angle), 0, math.sin(angle)) * out
+				circle(b.biome, spot, a.Radius, a.Windup, a.Damage, nil, a.Style)
 			else
 				local f = list[math.random(1, #list)]
 				local off = Vector3.new(math.random() * 2 - 1, 0, math.random() * 2 - 1) * a.Scatter
-				circle(b.biome, flat(f.root.Position) + off, a.Radius, a.Windup, a.Damage)
+				circle(b.biome, flat(f.root.Position) + off, a.Radius, a.Windup, a.Damage, nil, a.Style)
 			end
 		end
 	elseif a.Kind == "Lob" then
@@ -523,7 +553,7 @@ go = function(body, b, i, list)
 		end
 		animate(body, a, a.Windup)
 		b.still = a.Windup + 0.25
-		circle(b.biome, pos + toward * (b.c.Radius + a.Radius * 0.55), a.Radius, a.Windup, a.Damage)
+		circle(b.biome, pos + toward * (b.c.Radius + a.Radius * 0.55), a.Radius, a.Windup, a.Damage, nil, a.Style)
 		if a.Then then
 			task.delay(a.Windup, go, body, b, a.Then)
 		end
@@ -558,7 +588,6 @@ go = function(body, b, i, list)
 		b.still = a.Windup + 0.25
 		local count = math.max(1, a.Count or 1)
 		local segments = math.max(1, a.Segments or 1)
-		local hit = {}
 		for k = 1, count do
 			local angle = if count > 1 then math.rad((k - (count + 1) / 2) * (a.Spread or 20)) else 0
 			local dir = CFrame.Angles(0, angle, 0):VectorToWorldSpace(toward)
@@ -574,7 +603,8 @@ go = function(body, b, i, list)
 					a.Length,
 					a.Windup + seg * (a.Gap or 0.15),
 					a.Damage,
-					hit
+					{},
+					a.Style
 				)
 			end
 		end
@@ -596,7 +626,7 @@ go = function(body, b, i, list)
 		end
 		animate(body, a, a.Windup)
 		b.still = a.Windup + a.Airtime + 0.3
-		circle(b.biome, to, a.Radius, a.Windup + a.Airtime, a.Damage)
+		circle(b.biome, to, a.Radius, a.Windup + a.Airtime, a.Damage, nil, a.Style)
 		b.move = {
 			kind = "Leap",
 			start = now + a.Windup,
@@ -667,7 +697,7 @@ function BossAttacks.move(body, b, dt, pos)
 		for _, f in fighters(b.biome) do
 			if not m.hit[f.humanoid] then
 				local off = flat(f.root.Position - at)
-				if off.Magnitude <= b.c.Radius + 1 + f.extra then
+				if off.Magnitude <= b.c.Radius + 1 + f.extra and not dodges(f) then
 					m.hit[f.humanoid] = true
 					f.humanoid:TakeDamage(m.damage)
 				end
@@ -750,12 +780,20 @@ RunService.Heartbeat:Connect(function(dt)
 			local m = magic[i]
 			local targets = byBiome[m.biome]
 			if not targets then
-				targets = {}
+				targets = { homing = {}, plain = {} }
 				for _, f in fighters(m.biome) do
-					table.insert(targets, { body = f.root, pos = f.root.Position, radius = PLAYER_RADIUS + f.extra, f = f })
+					local t = { body = f.root, pos = f.root.Position, radius = PLAYER_RADIUS + f.extra, f = f }
+					if not dodges(f, true) then
+						table.insert(targets.homing, t)
+					end
+					if not dodges(f, false) then
+						table.insert(targets.plain, t)
+					end
 				end
 				byBiome[m.biome] = targets
 			end
+			-- (a flier is only there to a homing shot; a burrower to none)
+			targets = if (m.shot.homing or 0) > 0 then targets.homing else targets.plain
 			for _, t in Projectiles.step(m.shot, dt, targets) do
 				t.f.humanoid:TakeDamage(m.damage)
 			end
@@ -770,7 +808,7 @@ RunService.Heartbeat:Connect(function(dt)
 		s.travelled += step
 		local hit = false
 		for _, f in fighters(s.biome) do
-			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + 1.5 + f.extra then
+			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + 1.5 + f.extra and not dodges(f) then
 				f.humanoid:TakeDamage(s.damage)
 				hit = true
 				break

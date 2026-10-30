@@ -1,7 +1,7 @@
 -- Riding a pet from your pen (QM, Oct 27: the pet you ride IS one of your pen's pets, you
 -- just choose to ride it). Each pet wandering in your own pen gets a Ride prompt; taking
--- it asks the server to ride that one (PetEquip "ride", Server/PetInventory), and the one
--- you were riding goes back in the pen. A stand-in until the pen tools on the right of the
+-- it asks the server to ride that one (PetEquip "ride", Server/PetInventory): you get on it
+-- right where it stands, and the one you were riding stays in the pen where you got off. A stand-in until the pen tools on the right of the
 -- screen come: they only need to fire the same remote.
 
 local Players = game:GetService("Players")
@@ -28,7 +28,7 @@ local function add(body)
 	player:GetAttributeChangedSignal("EggPromptUp"):Connect(eggUp)
 	eggUp()
 	prompt.Triggered:Connect(function()
-		remote:FireServer("ride", body:GetAttribute("Model"))
+		remote:FireServer("ride", body:GetAttribute("Model"), body) -- (you get on it right where it stands)
 	end)
 	prompt.Parent = body
 end

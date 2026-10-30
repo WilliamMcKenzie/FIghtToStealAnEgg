@@ -11,6 +11,11 @@
 --   Pens.facing(pen) -> yaw        -- out of the pen, toward its gate (LassoAPet's facing)
 --   Pens.hatching(player, kind, at, popAt, from) -- the next pet of this kind to come into
 --                                  -- their pen jumps out of the egg hatching at `at`
+--   Pens.mountSpot(player, body) -> CFrame or nil -- where their rider goes to sit on this
+--                                  -- pen pet of theirs just as it stands (QM, Oct 30: ride
+--                                  -- the pet where it is, no teleporting)
+--   Pens.dismountAt(player, kind, cframe) -- the next pet of this kind to come into their
+--                                  -- pen stands here (the one they got off), not anywhere
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -125,6 +130,26 @@ local function takeHatch(player, kind)
 	return nil
 end
 
+local dismounts = {} -- [player] = { kind, cframe, expires }
+
+function Pens.mountSpot(player, body)
+	local p = penPets[body]
+	if not p or p.owner ~= player then
+		return nil
+	end
+	p.mounted = true -- (this one goes, not another of its kind: setPets)
+	local class = Pets.class(p.kind)
+	local seat = class.seat * class.size
+	local floor = body.Position.Y - body.Size.Y / 2
+	-- (the rider's root over the pet's seat: client/Riding puts the pet's feet under it
+	-- seat studs back, so the pet lands right where it stood, facing the same way)
+	return CFrame.new(body.Position.X, floor, body.Position.Z) * CFrame.Angles(0, p.yaw, 0) * CFrame.new(seat.X, 0, seat.Z)
+end
+
+function Pens.dismountAt(player, kind, cframe)
+	dismounts[player] = { kind = kind, cframe = cframe, expires = os.clock() + 2 }
+end
+
 local function spawnPet(player, area, kind)
 	local class = Pets.class(kind)
 	local box = Horse.extent(class.data) * class.size
@@ -147,7 +172,16 @@ local function spawnPet(player, area, kind)
 	body:SetAttribute("Owner", player.UserId)
 	local yaw, wait = rng:NextNumber(-math.pi, math.pi), rng:NextNumber(0, 2)
 	local hatch = takeHatch(player, kind)
-	if hatch then
+	local off = dismounts[player]
+	if off and off.kind == kind and os.clock() < off.expires then
+		-- (the one just got off: standing where it was ridden, in the pen)
+		dismounts[player] = nil
+		local _, y = off.cframe:ToOrientation()
+		local x = math.clamp(off.cframe.X, area.Position.X - half, area.Position.X + half)
+		local z = math.clamp(off.cframe.Z, area.Position.Z - half, area.Position.Z + half)
+		yaw, wait = y, rng:NextNumber(1, 3)
+		body.CFrame = CFrame.new(x, floor + body.Size.Y / 2, z) * CFrame.Angles(0, yaw, 0)
+	elseif hatch then
 		yaw = Pens.facing(area.Parent)
 		body.CFrame = CFrame.new(hatch.at.X, floor + body.Size.Y / 2, hatch.at.Z) * CFrame.Angles(0, yaw, 0)
 		body:SetAttribute("HatchPop", hatch.popAt)
@@ -180,7 +214,7 @@ function Pens.setPets(player, kinds)
 	end
 	for body, p in penPets do
 		if p.owner == player then
-			if (want[p.kind] or 0) > 0 and p.area == area then
+			if (want[p.kind] or 0) > 0 and p.area == area and not p.mounted then
 				want[p.kind] -= 1
 			else
 				penPets[body] = nil

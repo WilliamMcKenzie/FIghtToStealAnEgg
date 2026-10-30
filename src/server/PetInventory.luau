@@ -17,7 +17,11 @@
 --
 --   PetInventory.start()               -- once, after Pens.start
 --   PetInventory.give(player, kind, n) -- n more of it (1 if nil), into the pen if there's room
---   PetInventory.ride(player, kind)    -- ride that pet they own (see "ride" above); false if they don't
+--   PetInventory.ride(player, kind, body) -- ride that pet they own (see "ride" above); false if they
+--                                      don't. body (optional): the one in their pen they rode it
+--                                      from (its F prompt, client/PenRide): they get on it just
+--                                      where it stands, and the one they were on stays where they
+--                                      got off it (QM, Oct 30: no teleporting, no new pet popping in)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -26,6 +30,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Stacks = require(Shared.Stacks)
 local Pens = require(script.Parent.Pens)
+local Pets = require(Shared.Pets)
 
 local PetInventory = {}
 
@@ -101,10 +106,25 @@ local function unequip(player, slot)
 	end
 end
 
-function PetInventory.ride(player, kind)
+function PetInventory.ride(player, kind, body)
 	-- (not mid-fight: a fresh mount would be a free heal)
 	if not isPet(kind) or Stacks.count(PetInventory.owned(player), kind) == 0 or player:GetAttribute("LockedIn") then
 		return false
+	end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local spot = body and root and humanoid and body:GetAttribute("Model") == kind and Pens.mountSpot(player, body)
+	if spot then
+		-- the one they're getting off stands where it was, under them
+		local old = player:GetAttribute("Pet") or "Horse"
+		local class = Pets.class(old)
+		local seat = class.seat * class.size
+		local _, yaw = root.CFrame:ToOrientation()
+		Pens.dismountAt(player, old, CFrame.new(root.Position) * CFrame.Angles(0, yaw, 0) * CFrame.new(-seat.X, 0, -seat.Z))
+		-- and they sit on the new one as it stands
+		root.AssemblyLinearVelocity = Vector3.zero
+		character:PivotTo(spot + Vector3.new(0, humanoid.HipHeight + root.Size.Y / 2, 0))
 	end
 	local list = PetInventory.equipped(player)
 	if not table.find(list, kind) then
@@ -190,7 +210,7 @@ function PetInventory.start()
 	local remote = Instance.new("RemoteEvent")
 	remote.Name = "PetEquip"
 	remote.Parent = ReplicatedStorage
-	remote.OnServerEvent:Connect(function(player, action, arg)
+	remote.OnServerEvent:Connect(function(player, action, arg, ...)
 		if action == "equip" and type(arg) == "string" then
 			equip(player, arg)
 		elseif action == "unequip" then
@@ -198,7 +218,8 @@ function PetInventory.start()
 		elseif action == "best" then
 			best(player)
 		elseif action == "ride" and type(arg) == "string" then
-			PetInventory.ride(player, arg)
+			local body = ...
+			PetInventory.ride(player, arg, if typeof(body) == "Instance" and body:IsA("BasePart") then body else nil)
 		end
 	end)
 

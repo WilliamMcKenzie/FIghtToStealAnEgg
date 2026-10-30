@@ -12,7 +12,13 @@
 -- squares radiate out to the blast's edge, each fading where it was put. Every square is a
 -- pooled BillboardGui on one anchored part, so a volley costs no parts or models.
 --
--- A Style is how a bomb looks (STYLES below): its squares' fill and outline colours.
+-- A Style is how a bomb looks (STYLES below): its squares' fill and outline colours. Every
+-- other red circle a boss puts down splashes like a landing bomb too (BossSplash).
+--
+-- A sprinting Volcano Tortoise's bombs (PetBomb, Server/SprintAbility; QM, Oct 30) are
+-- the same squares, dropped where it went: each sits on the ground ticking (swelling and
+-- shrinking, faster as it nears the end) for its fuse, then splashes. No red ring: they
+-- only hurt enemies.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -26,16 +32,16 @@ local FILL_TRANSPARENCY = 0.5 -- the fill growing out from the middle
 local EDGE_TRANSPARENCY = 0.15 -- its leading edge
 local EDGE_WIDTH = 0.05 -- of the radius
 local LIFT = 0.15 -- studs above the ground
-local SIZE = 0.88 -- the bomb's width (studs) as it leaves and lands
+local SIZE = 1.4 -- the bomb's width (studs) as it leaves and lands
 local SWELL = 2 -- how much bigger it is at the top of its flight (Kingdom's: 3x, so
 -- about twice a trail square there)
 local SPIN = 900 -- degrees a second at the top of its flight (none at either end)
 local OUTLINE = 0.13 -- the edge, of a square's width (the same on every square)
 local TRAIL_EVERY = 0.1 -- seconds between the squares dropped behind it
-local TRAIL_SIZE = 1.44 -- studs
-local SPLASH_SIZE = 1.6 -- studs
+local TRAIL_SIZE = 2.3 -- studs
+local SPLASH_SIZE = 2.56 -- studs
 local SPLASH_SPOKES = 7 -- squares in each ring of the splash
-local SPLASH_STEP = 1.6 -- studs further out each ring goes
+local SPLASH_STEP = 2.56 -- studs further out each ring goes
 local SPLASH_EVERY = 0.03 -- seconds between rings
 local FADE = 0.5 -- seconds for a trail or splash square to fade out
 local SHRINK = 1 -- seconds for one to shrink to nothing (it's gone once faded)
@@ -51,6 +57,11 @@ local STYLES = {
 	Coin = { Fill = Color3.fromRGB(255, 214, 70), Outline = Color3.fromRGB(170, 110, 20) },
 	Spore = { Fill = Color3.fromRGB(255, 160, 220), Outline = Color3.fromRGB(150, 70, 140) },
 	Fire = { Fill = Color3.fromRGB(255, 120, 60), Outline = Color3.fromRGB(120, 20, 30) },
+	Root = { Fill = Color3.fromRGB(160, 120, 75), Outline = Color3.fromRGB(70, 110, 50) }, -- (the Elder Treant's roots)
+	Ink = { Fill = Color3.fromRGB(90, 70, 130), Outline = Color3.fromRGB(30, 20, 50) },
+	-- (the Volcano Tortoise's sprint, orange and yellow in turn: PetBomb below)
+	PetOrange = { Fill = Color3.fromRGB(255, 140, 30), Outline = Color3.fromRGB(150, 146, 156) },
+	PetYellow = { Fill = Color3.fromRGB(255, 220, 60), Outline = Color3.fromRGB(150, 146, 156) },
 }
 
 local folder = Instance.new("Folder")
@@ -58,6 +69,7 @@ folder.Name = "BombFx"
 folder.Parent = workspace
 
 local active = {} -- { { sprite, mark, fill, edge, inner, from, to, ground, start, airtime, radius, height, angle, dropped, style } }
+local sitting = {} -- { { sprite, at, start, fuse, radius, style, angle } }: pet bombs on the ground
 local bits = {} -- { { sprite, born, size } }: trail and splash squares fading out
 
 local function part(props)
@@ -178,7 +190,7 @@ local function splash(at, radius, style)
 		local ring = math.min(r, radius)
 		for k = 1, SPLASH_SPOKES do
 			local a = turn + k / SPLASH_SPOKES * math.pi * 2
-			bit(style, at + Vector3.new(math.cos(a) * ring, 1, math.sin(a) * ring), SPLASH_SIZE, 45)
+			bit(style, at + Vector3.new(math.cos(a) * ring, 1.6, math.sin(a) * ring), SPLASH_SIZE, 45)
 		end
 		if r >= radius then
 			break
@@ -208,16 +220,52 @@ ReplicatedStorage:WaitForChild("BossBomb").OnClientEvent:Connect(function(info)
 		start = info.start,
 		airtime = info.airtime,
 		radius = info.radius,
-		height = info.height or 15,
+		height = info.height or 24,
 		angle = math.random() * 90,
 		dropped = os.clock(),
 		style = s,
 	})
 end)
 
+-- every other red circle (Server/BossAttacks: slams, leap landings, roots, bombs that
+-- aren't flung) splashes the same way the moment it goes off
+ReplicatedStorage:WaitForChild("BossSplash").OnClientEvent:Connect(function(at, radius, style)
+	task.spawn(splash, at, radius, STYLES[style] or STYLES.Cactus)
+end)
+
+ReplicatedStorage:WaitForChild("PetBomb").OnClientEvent:Connect(function(info)
+	local s = STYLES[info.style] or STYLES.PetOrange
+	local bomb = sprite(s.Fill, s.Outline, SIZE, 0)
+	local at = info.at + Vector3.new(0, SIZE / 2 + LIFT, 0)
+	bomb.att.Position = at
+	table.insert(sitting, {
+		sprite = bomb,
+		at = at,
+		ground = info.at,
+		start = info.start,
+		fuse = info.fuse,
+		radius = info.radius,
+		style = s,
+		angle = math.random() * 90,
+	})
+end)
+
 RunService.RenderStepped:Connect(function(dt)
 	local now = workspace:GetServerTimeNow()
 	local clock = os.clock()
+	for i = #sitting, 1, -1 do
+		local b = sitting[i]
+		local t = (now - b.start) / b.fuse
+		if t >= 1 then
+			table.remove(sitting, i)
+			release(b.sprite)
+			task.spawn(splash, b.ground, b.radius, b.style)
+			continue
+		end
+		-- (ticking: a pulse that quickens toward the bang)
+		local pulse = 1 + 0.25 * math.abs(math.sin(t * t * math.pi * 6))
+		place(b.sprite, b.at, SIZE * 1.4 * pulse, b.angle)
+	end
 	for i = #active, 1, -1 do
 		local b = active[i]
 		local t = math.clamp((now - b.start) / b.airtime, 0, 1)

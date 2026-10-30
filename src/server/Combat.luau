@@ -14,12 +14,25 @@
 --                                      Strength: adds Strength (and updates Power)
 --   Combat.refresh(player)           -- updates Power after Strength is set directly
 --   Combat.damage(player) -> number
+--   Combat.alive(player) -> boolean  -- false once their Health hits 0 (QM, Oct 30: no
+--                                      attacking from beyond the grave)
+--   Combat.touching(position, reach, player?) -> { { body, handler } } -- every hittable
+--                                      target whose edge is within reach studs of position
+--                                      (flat); with player, only what they can reach from
+--                                      where they stand (a training yard's from inside it)
+--   Combat.hit(player, handler, damage) -- one hit of `damage` (rolled), as a slash's
+--   Combat.knock(body, dir, studs, time) -- shoves a target studs along dir over time
+--                                      seconds (a Smash sprint: Server/SprintAbility)
+--   Combat.pushed(body, pos, dt) -> pos -- where its mover puts it this frame, shoved
+--                                      (Server/Bosses, Minions and Training call it)
 --
 -- Every hit on every target rolls its own damage: the base times a random
 -- Config.Slash.RollMin..RollMax, rounded to a whole number (at least 1), so the damage
 -- numbers and training gains follow what that hit actually dealt.
 -- Each hit deals that damage times the equipped weapon's Damage (Config.Weapons; the
 -- player's Weapon attribute, Server/Arsenal).
+-- A training yard's mobs and dummies are only hit by players standing in that yard
+-- (QM, Oct 30: Shared/Yards), by slashes, shots and sprints alike.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -31,6 +44,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Power = require(Shared:WaitForChild("Power"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Weapons = require(Shared:WaitForChild("Weapons"):WaitForChild("Weapons"))
+local Yards = require(Shared:WaitForChild("Yards"))
 
 local Combat = {}
 
@@ -42,6 +56,14 @@ end
 
 function Combat.remove(body)
 	targets[body] = nil
+end
+
+-- every attack checks this: a dead player's slashes, new shots and shots still in the air
+-- deal nothing. It reads Health, not the Dead state, so a revive (the Phoenix's, when it
+-- lands) that puts Health back above 0 brings attacking back with it.
+function Combat.alive(player)
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	return humanoid ~= nil and humanoid.Health > 0
 end
 
 function Combat.damage(player)
@@ -87,7 +109,7 @@ end
 -- side, plus slack for the target's width)
 function Combat.slash(player, yaw, c)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root then
+	if not root or not Combat.alive(player) then -- (died during the wind-up)
 		return
 	end
 	local look = CFrame.Angles(0, yaw, 0).LookVector
@@ -97,6 +119,8 @@ function Combat.slash(player, yaw, c)
 	for body, handler in targets do
 		if body:GetAttribute("Asleep") or body:GetAttribute("Intro") or body:GetAttribute("Burrowed") then
 			continue -- (a boss arriving, asleep or underground can't be hit: QM, Oct 25)
+		elseif not Yards.inside(body, root.Position) then
+			continue -- (a training yard's, and you're outside it)
 		elseif body.Parent then
 			local radius = body:GetAttribute("Radius") or 0
 			local offset = (body.Position - root.Position) * Vector3.new(1, 0, 1)
@@ -119,6 +143,54 @@ function Combat.slash(player, yaw, c)
 	end
 end
 
+local function hittable(body)
+	return body.Parent ~= nil
+		and not body:GetAttribute("Asleep")
+		and not body:GetAttribute("Intro")
+		and not body:GetAttribute("Burrowed")
+end
+
+function Combat.touching(position, reach, player)
+	local root = player and player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	local out = {}
+	for body, handler in targets do
+		if hittable(body) and (not player or (root and Yards.inside(body, root.Position))) then
+			local gap = ((body.Position - position) * Vector3.new(1, 0, 1)).Magnitude - (body:GetAttribute("Radius") or 0)
+			if gap <= reach then
+				table.insert(out, { body = body, handler = handler })
+			end
+		end
+	end
+	return out
+end
+
+function Combat.hit(player, handler, damage)
+	task.spawn(handler, player, roll(damage))
+end
+
+local knocks = {} -- [body] = { velocity, left }
+
+function Combat.knock(body, dir, studs, time)
+	local flatDir = dir * Vector3.new(1, 0, 1)
+	if flatDir.Magnitude < 1e-3 or time <= 0 then
+		return
+	end
+	knocks[body] = { velocity = flatDir.Unit * (studs / time), left = time }
+end
+
+function Combat.pushed(body, pos, dt)
+	local k = knocks[body]
+	if not k then
+		return pos
+	end
+	local step = math.min(dt, k.left)
+	k.left -= step
+	if k.left <= 0 or not body.Parent then
+		knocks[body] = nil
+	end
+	return pos + k.velocity * step
+end
+
 -- shots in the air: { shot, player, damage }, stepped every frame against every target
 local flying = {}
 local MAX_FLYING = 300
@@ -128,7 +200,7 @@ local MAX_FLYING = 300
 -- server's spot flew a little to the side of the ones drawn, missing what they hit there)
 function Combat.shoot(player, id, yaw, seed, origin)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root or #flying > MAX_FLYING then
+	if not root or #flying > MAX_FLYING or not Combat.alive(player) then
 		return
 	end
 	local from = root.Position
@@ -148,6 +220,12 @@ RunService.Heartbeat:Connect(function(dt)
 	if #flying == 0 then
 		return
 	end
+	-- (a dead shooter's shots still in the air fizzle out)
+	for i = #flying, 1, -1 do
+		if not Combat.alive(flying[i].player) then
+			table.remove(flying, i)
+		end
+	end
 	local list = {}
 	for body, handler in targets do
 		if
@@ -161,11 +239,20 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 	for i = #flying, 1, -1 do
 		local f = flying[i]
-		for _, t in Projectiles.step(f.shot, dt, list) do
+		-- (a shot passes over a training yard's mobs unless its shooter is in that yard)
+		local root = f.player.Character and f.player.Character:FindFirstChild("HumanoidRootPart")
+		local at = root and root.Position
+		local mine = {}
+		for _, t in list do
+			if Yards.inside(t.body, at) then
+				table.insert(mine, t)
+			end
+		end
+		for _, t in Projectiles.step(f.shot, dt, mine) do
 			task.spawn(t.handler, f.player, roll(f.damage))
 			-- a splash also hits everything else that close to where it struck
 			if f.shot.splash then
-				for _, other in list do
+				for _, other in mine do
 					if other ~= t and ((other.pos - t.pos) * Vector3.new(1, 0, 1)).Magnitude - other.radius <= f.shot.splash then
 						task.spawn(other.handler, f.player, roll(f.damage))
 					end
