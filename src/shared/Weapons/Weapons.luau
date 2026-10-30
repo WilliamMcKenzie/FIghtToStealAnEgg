@@ -42,6 +42,17 @@ local WaterStaffModel = require(script.Parent.WaterStaffModel)
 local FireStaffModel = require(script.Parent.FireStaffModel)
 local FlowerStaffModel = require(script.Parent.FlowerStaffModel)
 local UnholyLanceModel = require(script.Parent.UnholyLanceModel)
+-- (the endgame ones: recolours of QM's, tools/weapon_recolors.py)
+local SunBladeModel = require(script.Parent.SunBladeModel)
+local StarlightBowModel = require(script.Parent.StarlightBowModel)
+local NebulaStaffModel = require(script.Parent.NebulaStaffModel)
+local CometLanceModel = require(script.Parent.CometLanceModel)
+local GalaxyBowModel = require(script.Parent.GalaxyBowModel)
+local VoidReaverModel = require(script.Parent.VoidReaverModel)
+local AbyssStaffModel = require(script.Parent.AbyssStaffModel)
+local EclipseBowModel = require(script.Parent.EclipseBowModel)
+local WorldbreakerModel = require(script.Parent.WorldbreakerModel)
+local GenesisStaffModel = require(script.Parent.GenesisStaffModel)
 
 local Weapons = {}
 
@@ -76,6 +87,17 @@ local DRAWN = {
 	FireStaff = FireStaffModel,
 	RafflesiaBloom = FlowerStaffModel, -- (the Flower Staff)
 	UnholyLance = UnholyLanceModel,
+	-- (recolours of QM's, tools/weapon_recolors.py: Celestial to Omega)
+	SunBlade = SunBladeModel,
+	StarlightBow = centred(StarlightBowModel),
+	NebulaStaff = NebulaStaffModel,
+	CometLance = CometLanceModel,
+	GalaxyBow = centred(GalaxyBowModel),
+	VoidReaver = VoidReaverModel,
+	AbyssStaff = AbyssStaffModel,
+	EclipseBow = centred(EclipseBowModel),
+	Worldbreaker = WorldbreakerModel,
+	GenesisStaff = GenesisStaffModel,
 }
 
 local STUDS = { image = Studs.IMAGE, tile = 0.5 }
