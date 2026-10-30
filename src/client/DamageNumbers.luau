@@ -5,6 +5,7 @@
 --     middle it starts; colour: white if left out
 
 local TweenService = game:GetService("TweenService")
+local Abbrev = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Abbrev"))
 
 local DamageNumbers = {}
 
@@ -52,7 +53,7 @@ function DamageNumbers.pop(body, amount, height, colour)
 		label.FontFace = NUMBER_FONT
 		label.TextSize = NUMBER_SIZE * SHARP
 		label.TextColor3 = colour
-		label.Text = "-" .. tostring(math.round(amount))
+		label.Text = "-" .. Abbrev(math.round(amount))
 		label.Parent = holder
 		return label
 	end

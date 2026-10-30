@@ -19,6 +19,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local ItemIcons = require(Shared.ItemIcons)
 local Stacks = require(Shared.Stacks)
+local Abbrev = require(Shared.Abbrev)
 local Ui = require(script.Parent.Ui)
 
 local Hotbar = {}
@@ -144,7 +145,7 @@ function Hotbar.init(root, fig)
 				slot.LayoutOrder = i
 				slot.Number.Text = tostring(i)
 				slot.Count.Visible = s.count > 1
-				slot.Count.Text = "x" .. s.count
+				slot.Count.Text = "x" .. Abbrev(s.count)
 				slot.Picture.Image = (if s.kind then ItemIcons.Eggs[s.kind] else ItemIcons.Weapons[weapon or ""]) or ""
 				slot.Activated:Connect(function()
 					pick(i)
