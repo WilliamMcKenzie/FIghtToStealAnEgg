@@ -682,7 +682,7 @@
          "class": "UIStroke",
          "name": "Outline",
          "props": {
-          "Thickness": 3
+          "Thickness": 4
          }
         }
        ],
@@ -1448,7 +1448,7 @@
          "class": "UIStroke",
          "name": "Outline",
          "props": {
-          "Thickness": 3
+          "Thickness": 4
          }
         }
        ],
@@ -2472,7 +2472,7 @@
          "class": "UIStroke",
          "name": "Outline",
          "props": {
-          "Thickness": 3
+          "Thickness": 4
          }
         }
        ],
@@ -2808,7 +2808,7 @@
            "class": "UIStroke",
            "name": "Outline",
            "props": {
-            "Thickness": 3
+            "Thickness": 4
            }
           }
          ],
@@ -3020,7 +3020,7 @@
          "class": "UIStroke",
          "name": "Outline",
          "props": {
-          "Thickness": 3
+          "Thickness": 4
          }
         }
        ],
@@ -3936,7 +3936,7 @@
          "class": "UIStroke",
          "name": "Outline",
          "props": {
-          "Thickness": 3
+          "Thickness": 4
          }
         }
        ],
@@ -3996,7 +3996,7 @@
          "class": "UIStroke",
          "name": "Outline",
          "props": {
-          "Thickness": 3
+          "Thickness": 4
          }
         }
        ],
@@ -4332,7 +4332,7 @@
            "class": "UIStroke",
            "name": "Outline",
            "props": {
-            "Thickness": 3
+            "Thickness": 4
            }
           }
          ],
@@ -4698,7 +4698,7 @@
                 0.27450981736183167
                ]
               },
-              "Thickness": 3
+              "Thickness": 4
              }
             },
             {
@@ -4763,7 +4763,7 @@
              "class": "UIStroke",
              "name": "Outline",
              "props": {
-              "Thickness": 3
+              "Thickness": 4
              }
             },
             {
@@ -4928,7 +4928,7 @@
                "class": "UIStroke",
                "name": "Outline",
                "props": {
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -5215,7 +5215,7 @@
                "class": "UIStroke",
                "name": "Outline",
                "props": {
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -5500,7 +5500,7 @@
                "class": "UIStroke",
                "name": "Outline",
                "props": {
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -5826,7 +5826,7 @@
                "class": "UIStroke",
                "name": "Outline",
                "props": {
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -7521,7 +7521,7 @@
            "class": "UIStroke",
            "name": "Outline",
            "props": {
-            "Thickness": 3
+            "Thickness": 4
            }
           }
          ],
@@ -8045,7 +8045,7 @@
             0
            ]
           },
-          "Thickness": 3
+          "Thickness": 4
          }
         }
        ],
@@ -8588,7 +8588,7 @@
                "class": "UIStroke",
                "name": "Outline",
                "props": {
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -9018,7 +9018,7 @@
            "class": "UIStroke",
            "name": "Outline",
            "props": {
-            "Thickness": 3
+            "Thickness": 4
            }
           }
          ],
@@ -9411,7 +9411,7 @@
            "class": "UIStroke",
            "name": "Outline",
            "props": {
-            "Thickness": 3
+            "Thickness": 4
            }
           }
          ],
@@ -9940,7 +9940,7 @@
             0
            ]
           },
-          "Thickness": 3
+          "Thickness": 4
          }
         }
        ],
@@ -10345,7 +10345,7 @@
              "class": "UIStroke",
              "name": "Outline",
              "props": {
-              "Thickness": 3
+              "Thickness": 4
              }
             }
            ],
@@ -10413,7 +10413,7 @@
                 0
                ]
               },
-              "Thickness": 3
+              "Thickness": 4
              }
             }
            ],
@@ -10708,7 +10708,7 @@
                   0
                  ]
                 },
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -11024,7 +11024,7 @@
                   0.062745101749897
                  ]
                 },
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -11340,7 +11340,7 @@
                   0.22745098173618317
                  ]
                 },
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -11656,7 +11656,7 @@
                   0
                  ]
                 },
-                "Thickness": 3
+                "Thickness": 4
                }
               }
              ],
@@ -12087,7 +12087,7 @@
            "class": "UIStroke",
            "name": "Outline",
            "props": {
-            "Thickness": 3
+            "Thickness": 4
            }
           }
          ],

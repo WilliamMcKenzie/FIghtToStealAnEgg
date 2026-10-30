@@ -30,6 +30,7 @@ local HOVER_TIME = 0.08
 HudKit.FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 HudKit.ITALIC = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic)
 HudKit.BLACK = Color3.new(0, 0, 0)
+HudKit.TEXT_OUTLINE = 4 -- a label's black outline, in design px (QM, Oct 30: "make these outlines 4px")
 
 -- the Figma rectangles' looks. top/bottom: a top-to-bottom gradient (Figma: from at 15.9%,
 --   or `from`);
@@ -126,7 +127,7 @@ function HudKit.label(parent, name, props)
 		local stroke = Instance.new("UIStroke")
 		stroke.Name = "Outline"
 		stroke.Color = HudKit.BLACK
-		stroke.Thickness = 3
+		stroke.Thickness = HudKit.TEXT_OUTLINE
 		stroke.LineJoinMode = Enum.LineJoinMode.Round
 		stroke.Parent = l
 		l.BackgroundTransparency = 1
