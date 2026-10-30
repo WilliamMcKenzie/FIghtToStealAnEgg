@@ -297,6 +297,7 @@ local function animate(body, a, windup)
 	end
 end
 BossAttacks.animate = animate
+BossAttacks.circle = circle -- (a hunting burrower's breach: Server/Bosses)
 
 -- rooted for `seconds`: it neither walks nor turns (QM Oct 30: a boss stands its ground while
 -- its bombs are in the air, its troops are dropping in or its magic's going out)
