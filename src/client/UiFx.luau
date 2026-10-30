@@ -7,6 +7,9 @@
 --   UiFx.play(name)              -- a UI sound, 2D (not Sfx.play's on-screen world logic):
 --                                -- Click, Hover, Open, Close, Buy, Claim, Error, Equip
 --                                -- (ids in Config.UiSounds)
+--   UiFx.centre(b)               -- anchors b on its middle (0.5, 0.5) without moving it, so a
+--                                -- UIScale grows it from there, not its top left (QM, Oct 30).
+--                                -- UiFx.button does it to every button
 --   UiFx.button(b, sound?)       -- a button that ducks in when pressed and bounces back on
 --                                -- release, with a click (`sound`, default "Click"; false:
 --                                -- silent) and a soft tick when the mouse comes onto it.
@@ -105,11 +108,32 @@ end
 
 local wired = setmetatable({}, { __mode = "k" })
 
+function UiFx.centre(b)
+	local a = b.AnchorPoint
+	if a == Vector2.new(0.5, 0.5) then
+		return
+	end
+	-- (a list or grid places its children itself, by their top left: leave those be)
+	local parent = b.Parent
+	if parent and parent:FindFirstChildWhichIsA("UIGridStyleLayout") then
+		return
+	end
+	local size, pos = b.Size, b.Position
+	b.Position = UDim2.new(
+		pos.X.Scale + (0.5 - a.X) * size.X.Scale,
+		pos.X.Offset + math.round((0.5 - a.X) * size.X.Offset),
+		pos.Y.Scale + (0.5 - a.Y) * size.Y.Scale,
+		pos.Y.Offset + math.round((0.5 - a.Y) * size.Y.Offset)
+	)
+	b.AnchorPoint = Vector2.new(0.5, 0.5)
+end
+
 function UiFx.button(b, sound)
 	if wired[b] then
 		return
 	end
 	wired[b] = true
+	UiFx.centre(b)
 	local scale = b:FindFirstChildOfClass("UIScale")
 	if not scale then
 		scale = Instance.new("UIScale")

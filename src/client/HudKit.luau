@@ -306,23 +306,6 @@ function HudKit.back(parent, look, props)
 	return back
 end
 
--- anchors `b` on its centre without moving it (so the hover's UIScale grows it from there;
--- also fixes a copy baked before, anchored on its left)
-local function centre(b)
-	local a = b.AnchorPoint
-	if a == Vector2.new(0.5, 0.5) then
-		return
-	end
-	local size, pos = b.Size, b.Position
-	b.Position = UDim2.new(
-		pos.X.Scale + (0.5 - a.X) * size.X.Scale,
-		pos.X.Offset + math.round((0.5 - a.X) * size.X.Offset),
-		pos.Y.Scale + (0.5 - a.Y) * size.Y.Scale,
-		pos.Y.Offset + math.round((0.5 - a.Y) * size.Y.Offset)
-	)
-	b.AnchorPoint = Vector2.new(0.5, 0.5)
-end
-
 function HudKit.button(parent, name, w, h, props, look)
 	local b, fresh = Ui.make(parent, name, "ImageButton")
 	if fresh then
@@ -334,7 +317,7 @@ function HudKit.button(parent, name, w, h, props, look)
 			b[k] = v
 		end
 	end
-	centre(b)
+	require(script.Parent.UiFx).centre(b) -- (so the hover's UIScale grows it from its middle)
 	HudKit.back(b, look, {})
 	Ui.make(b, "Hover", "UIScale")
 	HudKit.hover(b)
