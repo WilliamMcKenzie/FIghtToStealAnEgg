@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local DamageNumbers = require(script.Parent.DamageNumbers)
+local ScreenSize = require(script.Parent.ScreenSize)
 
 local FILL, BACK = "rbxassetid://90275415984527", "rbxassetid://133695040857929"
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -16,7 +17,9 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 -- 37 tall from 30 down, over the bar)
 local W, H = 216, 67
 local NAME_STROKE = Color3.fromRGB(70, 70, 70)
-local WIDE = 9.4 -- studs across (QM, Oct 27: 6, then 30% up, then 20% more, to read from further off)
+-- design px across (at a 1080-tall screen): a fixed size on screen however far the camera is
+-- (QM, Oct 30; it was 9.4 studs across before, so it shrank as you zoomed out)
+local WIDE = 190
 local FLASH = 0.1 -- seconds the green takes to fade back from white on a hit
 local TRAIL = 0.3 -- seconds the white trail takes to catch up
 local HURT = Color3.fromRGB(255, 60, 60) -- the damage numbers over players
@@ -35,10 +38,10 @@ local function attach(character)
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "PlayerBar"
 	gui.Adornee = head
-	gui.Size = UDim2.fromScale(WIDE, WIDE * H / W) -- (studs: it shrinks with distance like the world)
+	ScreenSize.fit(gui, WIDE, WIDE * H / W)
 	gui.StudsOffset = Vector3.new(0, 3.2, 0)
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	gui.MaxDistance = 120
+	gui.MaxDistance = 400 -- (far enough for the boss fight camera over a wide arena)
 	gui.LightInfluence = 0
 	-- (each text fills its Figma box: Montserrat ExtraBold, white, outlined)
 	local function text(name, y, h, outline)
