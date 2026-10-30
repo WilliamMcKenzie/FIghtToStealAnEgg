@@ -19,6 +19,7 @@ local hidden = {} -- [blocker] = true while you own it (kept out of the world)
 local all = {} -- [blocker] = the player attribute that opens it
 
 local function press(button, region, training)
+	UiFx.centre(button) -- (grows from its middle)
 	local scale = button:FindFirstChildOfClass("UIScale")
 	local function to(s, t)
 		if scale then
