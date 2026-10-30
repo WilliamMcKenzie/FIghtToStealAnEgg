@@ -1000,10 +1000,10 @@ return {
 			Minions = {
 				At = 0.5,
 				Count = 4,
-				Model = "LivingBirch",
+				Model = "AncientTreant",
 				StandIn = { "Cactus", 1.4 },
 				Size = 1.4,
-				Scale = 1.2, -- (x the Living Birch pet: about the old Treant's height)
+				Scale = 1.1, -- (x the Ancient Treant pet)
 				Name = "Sapling",
 				Health = 200000,
 				Speed = 14,
@@ -1117,12 +1117,12 @@ return {
 			Name = "Trench Shark",
 			Model = "SharkBoss",
 			StandIn = { "Fish", 5 },
-			Size = 3,
+			Size = 12, -- (Lasso's shark boss is a small drawing: about 60 studs long, 36 tall)
 			Health = 10000000,
 			Cash = 1500000,
 			Speed = 0, -- (it never walks: it swims under, Burrow)
 			StopAt = 1,
-			Radius = 14,
+			Radius = 18,
 			Turn = 5,
 			TurnRate = 200,
 			Strength = 500,
@@ -1152,8 +1152,8 @@ return {
 				Near = 0,
 				Far = 10,
 				Hop = 0,
-				Breach = { Radius = 16, Windup = 0.8, Damage = 90, Anim = "breach" },
-				Depth = 14, -- (model studs it sinks to be all under, x Size)
+				Breach = { Radius = 22, Windup = 0.8, Damage = 90, Anim = "breach" },
+				Depth = 3.4, -- (model studs it sinks to be all under, x Size)
 				Pose = {},
 				Sand = Color3.fromRGB(220, 240, 255), -- (its wake: foam and sea)
 				Sand2 = Color3.fromRGB(140, 200, 236),
