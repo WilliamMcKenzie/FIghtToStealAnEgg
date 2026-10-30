@@ -42,7 +42,7 @@ local WaterStaffModel = require(script.Parent.WaterStaffModel)
 local FireStaffModel = require(script.Parent.FireStaffModel)
 local FlowerStaffModel = require(script.Parent.FlowerStaffModel)
 local UnholyLanceModel = require(script.Parent.UnholyLanceModel)
--- (the endgame ones: recolours of QM's, tools/weapon_recolors.py)
+-- (the endgame ones: original designs, tools/weapon_designs.py)
 local SunBladeModel = require(script.Parent.SunBladeModel)
 local StarlightBowModel = require(script.Parent.StarlightBowModel)
 local NebulaStaffModel = require(script.Parent.NebulaStaffModel)
@@ -87,7 +87,7 @@ local DRAWN = {
 	FireStaff = FireStaffModel,
 	RafflesiaBloom = FlowerStaffModel, -- (the Flower Staff)
 	UnholyLance = UnholyLanceModel,
-	-- (recolours of QM's, tools/weapon_recolors.py: Celestial to Omega)
+	-- (original designs, tools/weapon_designs.py: Celestial to Omega)
 	SunBlade = SunBladeModel,
 	StarlightBow = centred(StarlightBowModel),
 	NebulaStaff = NebulaStaffModel,
