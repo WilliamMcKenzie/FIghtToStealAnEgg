@@ -5,8 +5,10 @@
 --   Swipe { Every, Reach, Arc, Width, Windup, Swings, Damage, Anim, Then }: its melee (QM,
 --         Oct 30: no more hurting you just by touching you). Once you're within Reach studs
 --         of its edge it stops and faces you, a red crescent shaped like the swipe (Arc
---         degrees round, out to Reach past its edge, Width thick: Reach + half its Radius
---         if nil) fills on the ground over Windup (Config.EnemySwipe's if nil), then the
+--         degrees round, out to Reach past its edge straight ahead, Width thick: most of
+--         Reach if nil) fills on the ground over Windup (Config.EnemySwipe's if nil). Like
+--         yours, the crescent sits out in front of it, never over its own body (QM: narrow
+--         ones centred on its front edge, the widest ones on its middle). Then the
 --         swipe goes through it and everyone on it takes Damage. Swings: that many in a row,
 --         back and forth, each with its own telegraph. Clients draw it from the EnemySwipe
 --         remote (client/Swipes); the shape is Shared/SlashFx's, rolled from one seed on
@@ -33,16 +35,18 @@
 --         within Radius. Clients draw the bomb and its red landing ring, which fills from
 --         the middle out as it comes down (client/Bombs, from the BossBomb remote).
 --
---   Charge { Every, Range, Windup, Width, Length, Speed, Damage, Anim }: it stops and a red
---         rectangle Width wide runs Length studs from it toward its target, filling over
---         Windup; then it dashes down it at Speed, hurting everyone it runs into once (the
---         Majestic Unicorn's horn, the Elder Boar's tusks: QM, Oct 30, Archero's chargers).
+--   Charge { Every, Range, Windup, Width, Length, Speed, Damage, Anim }: it stops and winds
+--         up (its Anim) for Windup, then dashes Length studs at its target at Speed,
+--         hurting everyone it runs into once (the Majestic Unicorn's horn, the Elder Boar's
+--         tusks: QM, Oct 30, Archero's chargers). No floor warning (QM, Oct 30: no
+--         rectangles), just the wind-up.
 --   Line  { Every, Range, Windup, Width, Length, Count, Spread, Segments, Gap, From, Damage,
---         Anim, Then }: Count red rectangles fanned Spread degrees apart toward its target,
---         filling over Windup, then everyone on one is hit (tail stabs, ice lances, fire
---         breath, roots, beams). From "Target" centres each on where you stand instead of
---         starting at its edge. Segments more lay end to end beyond the first, each going
---         off Gap seconds after the one before: roots creeping out at you.
+--         Anim, Then }: Count rows of red circles (Width across) fanned Spread degrees apart
+--         toward its target, filling over Windup, then everyone on one is hit once (roots,
+--         tentacles). From "Target" centres each on where you stand instead of starting at
+--         its edge. Segments more lay end to end beyond the first, each going off Gap
+--         seconds after the one before: roots creeping out at you. (QM, Oct 30: no more
+--         rectangles; breath, lances and beams are Magic shots, stabs and cleaves Swipes.)
 --   Leap  { Every, Range, Windup, Airtime, Height, Radius, Damage, Hops, Anim, Then }: it
 --         crouches for Windup, then jumps onto where its target stood when it crouched,
 --         Airtime seconds in the air (Height studs up, client/BossView); a red circle Radius
@@ -167,10 +171,17 @@ local function groundAt(position)
 	return if hit then hit.Position.Y else 0
 end
 
--- everyone in the fight within radius of centre (flat) takes damage
-local function blast(biome, centre, radius, damage)
+-- everyone in the fight within radius of centre (flat) takes damage (once: anyone already
+-- in `hit` is skipped, and added)
+local function blast(biome, centre, radius, damage, hit)
 	for _, f in fighters(biome) do
+		if hit and hit[f.humanoid] then
+			continue
+		end
 		if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra then
+			if hit then
+				hit[f.humanoid] = true
+			end
 			f.humanoid:TakeDamage(damage)
 		end
 	end
@@ -194,7 +205,7 @@ end
 
 -- a flat red circle on the ground that fills over `windup`, then hurts everyone in the
 -- fight inside it
-local function circle(biome, centre, radius, windup, damage)
+local function circle(biome, centre, radius, windup, damage, hit)
 	local y = groundAt(centre) + FLOOR_Y
 	local function disc(name, r, transparency)
 		local p = Instance.new("Part")
@@ -220,7 +231,7 @@ local function circle(biome, centre, radius, windup, damage)
 		)
 		:Play()
 	task.delay(windup, function()
-		blast(biome, centre, radius, damage)
+		blast(biome, centre, radius, damage, hit)
 		rim.Transparency = 0.2
 		fill:Destroy()
 		TweenService
@@ -230,53 +241,16 @@ local function circle(biome, centre, radius, windup, damage)
 	end)
 end
 
--- a flat red rectangle on the ground Width wide, from `from` Length studs along `dir`,
--- filling from its near end over `windup`; then (with damage) everyone in the fight on it
--- takes damage. -> nothing; the parts tidy themselves away
-local function rectangle(biome, from, dir, width, length, windup, damage)
-	local mid = from + dir * (length / 2)
-	local y = groundAt(mid) + FLOOR_Y
-	local facing = CFrame.lookAt(Vector3.new(mid.X, y, mid.Z), Vector3.new(mid.X, y, mid.Z) + dir)
-	local function plate(name, long, transparency)
-		local p = Instance.new("Part")
-		p.Name = name
-		p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch = true, false, false, false
-		p.Material = Enum.Material.Neon
-		p.Color = RED
-		p.Transparency = transparency
-		p.Size = Vector3.new(width, 0.2, long)
-		p.Parent = fx
-		return p
+-- a row of red circles Width across, from `from` Length studs along `dir`, filling over
+-- `windup`; then everyone in the fight on one takes damage, once (`hit`: shared by every
+-- row of the same attack, so overlapping rows hit once too)
+local function row(biome, from, dir, width, length, windup, damage, hit)
+	local radius = width / 2
+	local n = math.max(1, math.round(length / (width * 0.8)))
+	local step = length / n
+	for k = 1, n do
+		circle(biome, from + dir * (step * (k - 0.5)), radius, windup, damage, hit)
 	end
-	local rim = plate("Warning", length, 0.75)
-	rim.CFrame = facing
-	-- (the fill grows from its near end out to the far one)
-	local near = facing * CFrame.new(0, 0.02, length / 2)
-	local fill = plate("WarningFill", 0.2, 0.45)
-	fill.CFrame = near * CFrame.new(0, 0, -0.1)
-	TweenService
-		:Create(fill, TweenInfo.new(windup, Enum.EasingStyle.Linear), {
-			Size = Vector3.new(width, 0.2, length),
-			CFrame = near * CFrame.new(0, 0, -length / 2),
-		})
-		:Play()
-	task.delay(windup, function()
-		if damage then
-			for _, f in fighters(biome) do
-				local off = flat(f.root.Position - from)
-				local along = off:Dot(dir)
-				local side = (off - dir * along).Magnitude
-				local pad = 1 + f.extra
-				if along >= -pad and along <= length + pad and side <= width / 2 + pad then
-					f.humanoid:TakeDamage(damage)
-				end
-			end
-		end
-		rim.Transparency = 0.2
-		fill:Destroy()
-		TweenService:Create(rim, TweenInfo.new(0.25), { Transparency = 1 }):Play()
-		task.delay(0.3, rim.Destroy, rim)
-	end)
 end
 
 -- a spot inside its arena (Radius in from the edges; near home for a /boss boss)
@@ -297,6 +271,7 @@ local function animate(body, a, windup)
 	end
 end
 BossAttacks.animate = animate
+BossAttacks.circle = circle -- (a hunting burrower's breach: Server/Bosses)
 
 -- rooted for `seconds`: it neither walks nor turns (QM Oct 30: a boss stands its ground while
 -- its bombs are in the air, its troops are dropping in or its magic's going out)
@@ -391,29 +366,47 @@ local function swipe(body, b, a, pos, toward)
 	animate(body, a, windup)
 	root(b, windup * swings + 0.15)
 	b.yaw, b.facing = yaw, yaw
+	-- where its centre sits: on its front edge for a narrow swipe (like yours, out ahead),
+	-- back to its middle for one that wraps most of the way round it
+	local rb = b.c.Radius
+	local arc = a.Arc or S.Arc
+	local ahead = rb * math.clamp((S.Wrap - arc) / (S.Wrap - S.Narrow), 0, 1)
+	local radius = rb + a.Reach - ahead
+	-- (as thick as it can be with its inner edge still clear of its body all along: the
+	-- inner radius r must keep ahead^2 + r^2 + 2 ahead r cos(half) >= (rb + Clear)^2, for
+	-- the biggest arc and width its seed can roll: Config.EnemySwipe's Variety)
+	local v = S.Variety
+	local half = math.rad(arc * v.Arc[2]) / 2
+	local clear = rb + S.Clear
+	local cosHalf = math.cos(math.min(half, math.pi))
+	local inner = -ahead * cosHalf + math.sqrt(math.max(0, clear ^ 2 - ahead ^ 2 * (1 - cosHalf ^ 2)))
+	if ahead >= clear and cosHalf >= 0 then
+		inner = 0 -- (its centre's already clear of it, and the swipe faces away)
+	end
+	local width = math.min(a.Width or radius * S.Thick, (radius * v.Radius[1] - math.max(inner, 0)) / v.Width[2])
 	local look = {
-		Radius = b.c.Radius + a.Reach,
-		Arc = a.Arc or S.Arc,
-		Width = a.Width or (a.Reach + b.c.Radius * 0.5),
+		Radius = radius,
+		Arc = arc,
+		Width = math.max(width, 1),
 	}
 	local c = table.clone(S)
-	for k, v in look do
-		c[k] = v
+	for k, value in look do
+		c[k] = value
 	end
-	local origin = CFrame.new(pos.X, groundAt(pos), pos.Z) * CFrame.Angles(0, yaw, 0)
+	local centre = pos + toward * ahead
+	local origin = CFrame.new(centre.X, groundAt(centre), centre.Z) * CFrame.Angles(0, yaw, 0)
 	local start = serverNow()
 	local dir = if math.random() < 0.5 then 1 else -1
 	for k = 1, swings do
 		local seed = math.random(0, 2 ^ 30 - 1)
 		local o = SlashFx.outline(c, seed)
-		local at = start + (k - 1) * windup
 		swipeRemote:FireAllClients({
 			body = body,
 			origin = origin,
 			look = look,
 			seed = seed,
 			dir = dir,
-			start = at,
+			start = start + (k - 1) * windup,
 			windup = windup,
 		})
 		task.delay(k * windup, function(d)
@@ -538,14 +531,13 @@ go = function(body, b, i, list)
 		if edge > (a.Range or 60) then
 			return false
 		end
-		-- (it faces you, then runs the rectangle: from its middle, past where you stand)
+		-- (it faces you, then runs: from its middle, past where you stand)
 		b.yaw = math.atan2(-toward.X, -toward.Z)
 		local length = a.Length or (distance + 15)
 		local width = a.Width or b.c.Radius * 2
 		local time = length / a.Speed
 		animate(body, a, a.Windup)
 		b.still = a.Windup + time + 0.4
-		rectangle(b.biome, pos, toward, width, length + b.c.Radius, a.Windup, nil)
 		b.move = {
 			kind = "Dash",
 			start = now + a.Windup,
@@ -566,6 +558,7 @@ go = function(body, b, i, list)
 		b.still = a.Windup + 0.25
 		local count = math.max(1, a.Count or 1)
 		local segments = math.max(1, a.Segments or 1)
+		local hit = {}
 		for k = 1, count do
 			local angle = if count > 1 then math.rad((k - (count + 1) / 2) * (a.Spread or 20)) else 0
 			local dir = CFrame.Angles(0, angle, 0):VectorToWorldSpace(toward)
@@ -573,14 +566,15 @@ go = function(body, b, i, list)
 				then flat(target.root.Position) - dir * (a.Length / 2)
 				else pos + dir * (b.c.Radius * 0.6)
 			for seg = 0, segments - 1 do
-				rectangle(
+				row(
 					b.biome,
 					from + dir * (seg * a.Length),
 					dir,
 					a.Width,
 					a.Length,
 					a.Windup + seg * (a.Gap or 0.15),
-					a.Damage
+					a.Damage,
+					hit
 				)
 			end
 		end
