@@ -1108,54 +1108,56 @@ return {
 			},
 		},
 
-		-- Ocean: a kraken rooted mid-arena. Tentacles slam down long rectangles at you, ink
-		-- orbs, crabs at half health
-		Kraken = {
-			Name = "Kraken",
-			Model = "Kraken",
-			StandIn = { "LavaWhale", 2.6 },
-			Size = 3.6,
+		-- Ocean: LassoAPet's shark boss (QM, Oct 30, in place of the Kraken). It swims under the
+		-- floor like the Sandworm (its Burrow: a wake runs over the ground), hunting whoever's
+		-- nearest for up to Hunt seconds; then a red circle fills where it is and it bursts up
+		-- through it (Breach), throwing a ring of water orbs (its Magic, on surfacing), bites
+		-- at anyone close while it's up (its Swipe), and dives again
+		Shark = {
+			Name = "Trench Shark",
+			Model = "SharkBoss",
+			StandIn = { "Fish", 5 },
+			Size = 3,
 			Health = 10000000,
 			Cash = 1500000,
-			Speed = 0,
-			Centre = true,
+			Speed = 0, -- (it never walks: it swims under, Burrow)
 			StopAt = 1,
-			Radius = 18,
-			Turn = 2.5,
-			TurnRate = 70,
+			Radius = 14,
+			Turn = 5,
+			TurnRate = 200,
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Line", Every = 3.5, Range = 200, Windup = 1, Width = 12, Length = 80, Count = 2, Spread = 40, Damage = 90, Anim = "slam" },
+				{ Kind = "Swipe", Every = 1.4, Reach = 18, Arc = 110, Windup = 0.8, Damage = 90, Anim = "bite" },
 				{
 					Kind = "Magic",
-					Every = 3,
+					Linked = true, -- (fired as it surfaces, by its Burrow: Server/Bosses)
+					Every = 4,
 					Like = "Staff",
 					Damage = 55,
-					Height = 6,
-					Burst = 3,
-					BurstGap = 0.35,
-					Cast = 0.5,
-					Anim = "ink",
-					Shot = { Color = Color3.fromRGB(70, 50, 110), Count = 3, Spread = 40, Speed = 38, Homing = 40, Launch = 20, Range = 110, Slack = 0, Size = 1.5 },
+					Height = 5,
+					Burst = 2,
+					BurstGap = 0.5,
+					Shot = { Color = Color3.fromRGB(140, 200, 236), Count = 12, Spread = 330, Speed = 32, Homing = 0, Launch = 0, Range = 100, Slack = 0, Size = 1.4 },
 				},
 			},
-			Minions = {
-				At = 0.5,
-				Count = 4,
-				Model = "KingCrab",
-				StandIn = { "Fish", 1.5 },
-				Size = 2.5, -- (KingCrabModel's own drawing)
-				Scale = 2.5, -- (or as the King Crab pet, once the Ocean has one)
-				Name = "Trench Crab",
-				Health = 1500000,
-				Speed = 15,
-				Strength = 150,
-				Spread = 14,
-				Drop = 0.8,
-				DropFrom = 60,
-				Dust = Color3.fromRGB(140, 200, 236),
-				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 5, Arc = 100, Damage = 50 } },
+			Burrow = {
+				Emerge = 0.5,
+				Aim = 0.2, -- (its ring goes out just as it's up)
+				Linger = 2.5, -- (up this long after its ring: bite range)
+				Hide = 0.5,
+				Speed = 34, -- studs/s swimming under (a Horse outruns it; slower pets don't)
+				Travel = 0,
+				Hunt = 3, -- seconds it chases you under the floor before it breaches
+				Near = 0,
+				Far = 10,
+				Hop = 0,
+				Breach = { Radius = 16, Windup = 0.8, Damage = 90, Anim = "breach" },
+				Depth = 14, -- (model studs it sinks to be all under, x Size)
+				Pose = {},
+				Sand = Color3.fromRGB(220, 240, 255), -- (its wake: foam and sea)
+				Sand2 = Color3.fromRGB(140, 200, 236),
+				Mound = 3,
 			},
 		},
 	},
@@ -1171,7 +1173,7 @@ return {
 		Dungeon = { "BoneWarden", "DungeonWatcher", "TreasureMimic" },
 		Castle = { "CrimsonKnight", "BloodBat", "CastleWyvern" },
 		Forest = { "RuneMage", "ElderTreant", "ToadstoolKing" },
-		Ocean = { "KingCrab", "PufferLord", "Kraken" },
+		Ocean = { "KingCrab", "PufferLord", "Shark" },
 	},
 	-- healing out of a fight (QM, Oct 26; Server/Regen): once you go Delay seconds without
 	-- taking damage you heal Rate of your max health a second until full; any hit restarts

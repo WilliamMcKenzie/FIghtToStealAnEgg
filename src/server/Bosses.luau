@@ -408,6 +408,17 @@ local function nextSpot(b, pos, target)
 	return best or pos
 end
 
+-- a point kept inside its arena, clear of the edges by its Radius
+local function inArena(b, p)
+	if not b.bounds then
+		return p
+	end
+	local r = b.c.Radius + 4
+	local x0, x1 = math.min(b.bounds[1], b.bounds[3]) + r, math.max(b.bounds[1], b.bounds[3]) - r
+	local z0, z1 = math.min(b.bounds[2], b.bounds[4]) + r, math.max(b.bounds[2], b.bounds[4]) - r
+	return Vector3.new(math.clamp(p.X, x0, x1), p.Y, math.clamp(p.Z, z0, z1))
+end
+
 local function faceNow(b, pos, target)
 	local offset = flat(target.Position - pos)
 	if offset.Magnitude > 1e-3 then
@@ -451,6 +462,12 @@ local function burrowStep(body, b, dt, target, pos)
 			end
 		elseif leaving then
 			setBurrow(body, w, "Hide")
+		elseif w.state == "Up" and b.biome and cfg.Hunt then
+			-- (a hunter, the Shark: up, it bites with its own attacks till it dives again)
+			BossAttacks.update(body, b, dt, BossAttacks.fighters(b.biome))
+		end
+		if w.state ~= "Up" or leaving then
+			-- (nothing more this frame)
 		elseif not w.spat then
 			if target and w.t >= cfg.Aim then
 				-- spits its bursts, then stays up Linger seconds after the last
@@ -480,6 +497,30 @@ local function burrowStep(body, b, dt, target, pos)
 			leave(body, b)
 			return nil
 		end
+		-- a hunter (the Shark, QM Oct 30) swims after its target for up to Hunt seconds, then
+		-- a red circle fills where it is for Breach.Windup and it bursts up through it
+		if cfg.Hunt then
+			if w.breach then
+				if w.t >= w.breach then
+					w.breach = nil
+					if target then
+						faceNow(b, pos, target)
+					end
+					setBurrow(body, w, "Emerge")
+				end
+				return pos
+			end
+			local near = target and flat(target.Position - pos).Magnitude < 3
+			if target and not near and w.t < cfg.Hunt then
+				w.to = inArena(b, flat(target.Position) + Vector3.new(0, pos.Y, 0))
+			else
+				local br = cfg.Breach
+				BossAttacks.circle(b.biome, flat(pos), br.Radius, br.Windup, br.Damage)
+				BossAttacks.animate(body, br, br.Windup)
+				w.breach = w.t + br.Windup
+				return pos
+			end
+		end
 		-- tunnelling to its next spot (facing the way it goes: the mound's heading)
 		local offset = flat(w.to - pos)
 		w.speed = w.speed or tunnelSpeed(b.c)
@@ -489,7 +530,8 @@ local function burrowStep(body, b, dt, target, pos)
 			pos += offset.Unit * step
 		else
 			pos = Vector3.new(w.to.X, pos.Y, w.to.Z)
-			if w.t >= cfg.Travel then
+			-- (a hunter comes up by its Breach instead, once it's on you)
+			if w.t >= cfg.Travel and not cfg.Hunt then
 				if target then
 					faceNow(b, pos, target)
 				end
