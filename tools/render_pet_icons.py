@@ -4,8 +4,9 @@ and unlit with the same thick black outline). Each pet in Config.Pets
 front and a little above; each egg (src/shared/Eggs/<Kind>EggModel.luau) the same way.
 Drawn by tools/render_weapon_icons.py's renderer and outline.
 
-Run: python3 tools/render_pet_icons.py
-     writes assets/pets/icons/<Kind>.png and assets/eggs/icons/<Kind>.png (128 x 128).
+Run: python3 tools/render_pet_icons.py [Kind ...]
+     writes assets/pets/icons/<Kind>.png and assets/eggs/icons/<Kind>.png (128 x 128), for
+     every pet and egg or only the kinds named.
 
 Upload them (on the Mac, through Studio):
   cd tools/studio && OUT=../../assets/pets/icons/ids.json python3 imgup.py ../../assets/pets/icons/*.png
@@ -105,6 +106,7 @@ def pet_kinds():
 
 
 def main():
+    only = set(sys.argv[1:])
     jobs = []  # (kind, out dir, model path, mesh dir)
     for kind in pet_kinds():
         path = os.path.join(ROOT, "src", "shared", "Animals", kind + "Model.luau")
@@ -113,6 +115,8 @@ def main():
     for path in sorted(glob.glob(os.path.join(ROOT, "src", "shared", "Eggs", "*EggModel.luau"))):
         kind = os.path.basename(path)[: -len("EggModel.luau")]
         jobs.append((kind, os.path.join(ROOT, "assets", "eggs", "icons"), path, kind + "Egg"))
+    if only:
+        jobs = [j for j in jobs if j[0] in only]
     tmp = tempfile.mkdtemp()
     items = []
     for i, (kind, out, path, mesh_dir) in enumerate(jobs):
