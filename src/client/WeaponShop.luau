@@ -19,7 +19,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -29,6 +28,7 @@ local Abbrev = require(Shared.Abbrev)
 local RarityLook = require(Shared.RarityLook)
 local HudKit = require(script.Parent.HudKit)
 local Ui = require(script.Parent.Ui)
+local UiFx = require(script.Parent.UiFx)
 
 local WeaponShop = {}
 
@@ -47,7 +47,6 @@ local RARITY = Config.Rarities
 local SPIN = 45 -- degrees a second a moving card's back turns
 local SHEEN = 0.45 -- transparency at the middle of the sheen's band
 local ICON_OUTLINE = 3 -- px of black round the Robux icon (QM, Oct 27: like its text's)
-local POP = 0.12 -- seconds it takes to pop open
 local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
 
 local gui -- the WeaponShop frame
@@ -349,24 +348,19 @@ local function refresh(card, id, mine)
 end
 
 function WeaponShop.isOpen()
-	return gui ~= nil and gui.Visible
+	return gui ~= nil and UiFx.isOpen(gui)
 end
 
+-- (pops in and out with its sounds: client/UiFx)
 function WeaponShop.open()
-	if not gui then
-		return
-	end
-	gui.Visible = true
-	local pop = gui:FindFirstChild("Pop")
-	if pop then
-		pop.Scale = 0.85
-		TweenService:Create(pop, TweenInfo.new(POP, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	if gui then
+		UiFx.popIn(gui)
 	end
 end
 
 function WeaponShop.close()
 	if gui then
-		gui.Visible = false
+		UiFx.popOut(gui)
 	end
 end
 
@@ -400,6 +394,7 @@ function WeaponShop.init(root)
 		end
 		card.ShopEquip.Activated:Connect(function()
 			if equipRemote and player:GetAttribute("Weapon") ~= id then
+				UiFx.play("Equip")
 				equipRemote:FireServer(id)
 			end
 		end)
@@ -408,8 +403,11 @@ function WeaponShop.init(root)
 				return
 			end
 			local ok, why = buyRemote:InvokeServer(id)
-			if not ok then
-				-- (says why on the button for a moment)
+			if ok then
+				UiFx.play("Buy")
+			else
+				-- (says why on the button for a moment, with a shake)
+				UiFx.shake(card.ShopBuy)
 				card.ShopBuy:SetAttribute("Failing", true)
 				card.ShopBuy.Text.Text = if why == "not enough cash" then "Need cash!" else "Can't buy"
 				task.delay(FAIL_SHOW, function()

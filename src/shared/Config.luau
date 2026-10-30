@@ -2902,6 +2902,20 @@ return {
 	},
 	-- weapons a player owns (Server/Arsenal). No spins, drops or merging any more (QM, Oct
 	-- 27): every weapon but the starting one is bought from Carl (Config.Vendor), once.
+	-- the screen UI's sounds (client/UiFx; QM, Oct 30: "find some UI/UX sfx ... to make it
+	-- better"). Flat 2D, never through Sfx.play. Free Creator Store sounds; swap any id here.
+	-- id, volume, speed (pitch: 1 as recorded), start (seconds in to begin from)
+	UiSounds = {
+		Click = { id = "rbxassetid://6895079853", volume = 0.5 }, -- UI Click: every button, as it's pressed
+		Hover = { id = "rbxassetid://6895079853", volume = 0.12, speed = 1.6 }, -- the same, small and high
+		Open = { id = "rbxassetid://2375539277", volume = 0.45 }, -- Pop Sound: a popup opens
+		Close = { id = "rbxassetid://2198217232", volume = 0.3, speed = 1.3 }, -- whoosh: one closes
+		Buy = { id = "rbxassetid://7112275565", volume = 0.45 }, -- Cash Register (Kaching)
+		Claim = { id = "rbxassetid://1169755927", volume = 0.5 }, -- Coin Collect: a pet sent to storage
+		Equip = { id = "rbxassetid://133331985238497", volume = 0.5 }, -- Item grab/equip 7
+		Error = { id = "rbxassetid://6895079853", volume = 0.6, speed = 0.55 }, -- the click, low: can't buy
+	},
+
 	Arsenal = {
 		Start = "KendoStick", -- everyone owns this one (QM, Oct 25: the Sword's gone)
 	},
