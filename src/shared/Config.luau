@@ -6,7 +6,7 @@ return {
 	-- Rig.luau / Studs.luau: studs as stud Textures for now (no stud MaterialVariants yet)
 	StudMaterial = false,
 	FineStuds = {},
-	AnimalScale = { RockHog = 1.5, VolcanoTortoise = 2.5, LavaWhale = 2.5, Phoenix = 2 }, -- (LassoAPet's)
+	AnimalScale = { RockHog = 1.5, VolcanoTortoise = 2.5, LavaWhale = 2.5, Phoenix = 2, CrystalTortoise = 2.5, AbyssWhale = 2.5, RoyalEagle = 2 }, -- (LassoAPet's; and the later pets made from those)
 	StudTransparency = 0.5, -- every stud Texture (floor, walls, sword, horse): 0.5 = half strength (QM, Oct 24)
 
 	-- every world colour, by the ColorKey attribute on the parts (and checker Textures)
@@ -1361,21 +1361,22 @@ return {
 		-- (QM, Oct 25: real eggs, LassoAPet's: Shared/Eggs/<Kind>EggModel, one per animal.)
 		-- Each nest lays one of its biome's kinds, by these weights (LassoAPet's spawn odds:
 		-- each biome's Herd there). A new animal: its egg model, Pets above, then here.
-		-- The biomes past the Lava Valley are still to come (QM): Horse eggs until then.
+		-- The biomes past the Lava Valley (QM, Oct 30) lay the later pets (tools/later_pets.py),
+		-- on odds shaped like the Lava Valley's.
 		Kinds = {
 			Meadow = { Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
 			Desert = { Cactus = 0.3, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
 			Ice = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, Icebringer = 0.02 },
 			Lava = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (LassoAPet's Volcano)
-			Dungeon = { Horse = 1 },
-			Castle = { Horse = 1 },
-			Forest = { Horse = 1 },
-			Ocean = { Horse = 1 },
+			Dungeon = { DungeonRat = 0.4, Slime = 0.22, CaveSpider = 0.16, BoneSteed = 0.12, Mimic = 0.07, BoneWyrm = 0.03 },
+			Castle = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02 },
+			Forest = { Shroom = 0.35, SpiritFox = 0.22, SpiritDeer = 0.15, Treant = 0.13, MysticOwl = 0.08, CrystalTortoise = 0.05, SpiritLoong = 0.02 },
+			Ocean = { Pufferfish = 0.38, Seahorse = 0.22, KingCrab = 0.17, Shark = 0.12, Octopus = 0.08, AbyssWhale = 0.03 },
 		},
 		Scale = { Nest = 1.3, Carried = 0.6, Pen = 0.9 }, -- times the egg's drawing (about 4 studs tall)
 		-- a nest's egg is also this x bigger by its pet's rarity (QM, Oct 27: a Legendary's
 		-- much bigger than a Common's)
-		RarityScale = { Common = 1, Uncommon = 1.1, Rare = 1.25, Epic = 1.45, Legendary = 1.75, Mythic = 2, Divine = 2.2, Celestial = 2.4 },
+		RarityScale = { Common = 1, Uncommon = 1.1, Rare = 1.25, Epic = 1.45, Legendary = 1.75, Mythic = 2, Divine = 2.2, Celestial = 2.4, Cosmic = 2.6, Void = 2.8, Omega = 3 },
 		Twitch = { 3, 8 }, -- seconds between an egg's AFK twitches (random in this range)
 		Reward = { Meadow = 100, Desert = 600, Ice = 3000, Lava = 15000, Dungeon = 60000, Forest = 60000, Castle = 250000, Ocean = 250000 },
 		PenShows = 24, -- most eggs sat in a pen
@@ -1469,6 +1470,10 @@ return {
 			Cactus = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 7200, -- Desert
 			Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 7200, SnackYak = 3600, -- Tundra
 			Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 1200, LavaWhale = 1200, Phoenix = 43200, -- Lava (LassoAPet's Volcano)
+			DungeonRat = 30, Slime = 60, CaveSpider = 120, BoneSteed = 300, Mimic = 1800, BoneWyrm = 21600, -- Abandoned Dungeon
+			Shroom = 30, SpiritFox = 60, SpiritDeer = 120, Treant = 300, MysticOwl = 1200, CrystalTortoise = 2400, SpiritLoong = 21600, -- Magic Circle
+			WarBoar = 60, RoyalSteed = 90, ChessKnight = 300, RoyalPeacock = 600, LivingArmor = 2400, CrimsonDrake = 3600, RoyalEagle = 43200, -- Red Castle
+			Pufferfish = 60, Seahorse = 120, KingCrab = 600, Shark = 900, Octopus = 3600, AbyssWhale = 43200, -- Ocean Trench
 		},
 	},
 
@@ -1482,10 +1487,13 @@ return {
 	--   Desert  Rare .. Mythic        (one tier up)
 	--   Tundra  Epic .. Divine        (two up)
 	--   Lava    Legendary .. Celestial (three up)
+	--   Abandoned Dungeon, Magic Circle   Mythic .. Cosmic (the fork's first biomes)
+	--   Red Castle, Ocean Trench          Divine .. Void   (its last)
 	--   Rarity  its rarity
 	--   Cash    cash a second it earns in your pen (LassoAPet's PetIncome, the Tundra's
 	--           after its income curve; the Lava's on tools/balance_sim.py's curve, as
-	--           LassoAPet's Volcano came after its Ocean; Config.Income)
+	--           LassoAPet's Volcano came after its Ocean; the later biomes' about 4x per biome
+	--           on from there; Config.Income)
 	--   Tier    its size tier (LassoAPet's PetTiers): 1 reads as big as the Horse, each
 	--           tier PetStats.TierGrowth x bigger (and x AnimalScale, top of the file)
 	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
@@ -1520,6 +1528,36 @@ return {
 		Rockworm = { Rarity = "Divine", Cash = 1800, Tier = 2, Lean = 0.3, Speed = 7.12 },
 		LavaWhale = { Rarity = "Divine", Cash = 4500, Tier = 4, Lean = 0.7, Speed = 6.83 },
 		Phoenix = { Rarity = "Celestial", Cash = 12000, Tier = 3, Lean = -0.3, Speed = 7.2 },
+		-- Abandoned Dungeon (tools/later_pets.py; QM, Oct 30: new pets for the later biomes)
+		DungeonRat = { Rarity = "Mythic", Cash = 1500, Tier = 2, Lean = -0.4, Speed = 7.6 },
+		Slime = { Rarity = "Mythic", Cash = 2400, Tier = 2, Lean = 0.6, Speed = 7.2 },
+		CaveSpider = { Rarity = "Divine", Cash = 5000, Tier = 2, Lean = -0.5, Speed = 8.2 },
+		BoneSteed = { Rarity = "Divine", Cash = 7000, Tier = 2, Lean = -0.2, Speed = 8 },
+		Mimic = { Rarity = "Celestial", Cash = 16000, Tier = 2, Lean = 0.6, Speed = 7.4 },
+		BoneWyrm = { Rarity = "Cosmic", Cash = 60000, Tier = 2, Lean = 0.3, Speed = 8.6 },
+		-- Magic Circle
+		Shroom = { Rarity = "Mythic", Cash = 1500, Tier = 2, Lean = 0.4, Speed = 7.2 },
+		SpiritFox = { Rarity = "Mythic", Cash = 2400, Tier = 2, Lean = -0.6, Speed = 8.2 },
+		SpiritDeer = { Rarity = "Divine", Cash = 5000, Tier = 2, Lean = -0.5, Speed = 8.4 },
+		Treant = { Rarity = "Divine", Cash = 7000, Tier = 2, Lean = 0.7, Speed = 7.3 },
+		MysticOwl = { Rarity = "Celestial", Cash = 14000, Tier = 2, Lean = -0.2, Speed = 7.6 },
+		CrystalTortoise = { Rarity = "Celestial", Cash = 18000, Tier = 2, Lean = 0.8, Speed = 7.2 },
+		SpiritLoong = { Rarity = "Cosmic", Cash = 60000, Tier = 3, Lean = -0.3, Speed = 8.6 },
+		-- Red Castle
+		WarBoar = { Rarity = "Divine", Cash = 8000, Tier = 2, Lean = 0.5, Speed = 8.4 },
+		RoyalSteed = { Rarity = "Divine", Cash = 12000, Tier = 2, Lean = -0.3, Speed = 9.2 },
+		ChessKnight = { Rarity = "Celestial", Cash = 25000, Tier = 2, Lean = 0.2, Speed = 8.6 },
+		RoyalPeacock = { Rarity = "Celestial", Cash = 32000, Tier = 2, Lean = -0.4, Speed = 8.8 },
+		LivingArmor = { Rarity = "Cosmic", Cash = 70000, Tier = 3, Lean = 0.8, Speed = 8.6 },
+		CrimsonDrake = { Rarity = "Cosmic", Cash = 100000, Tier = 3, Lean = 0, Speed = 9.4 },
+		RoyalEagle = { Rarity = "Void", Cash = 300000, Tier = 3, Lean = -0.4, Speed = 10 },
+		-- Ocean Trench
+		Pufferfish = { Rarity = "Divine", Cash = 8000, Tier = 2, Lean = 0.6, Speed = 8.4 },
+		Seahorse = { Rarity = "Divine", Cash = 12000, Tier = 2, Lean = -0.3, Speed = 8.8 },
+		KingCrab = { Rarity = "Celestial", Cash = 25000, Tier = 2, Lean = 0.6, Speed = 8.6 },
+		Shark = { Rarity = "Celestial", Cash = 35000, Tier = 3, Lean = -0.2, Speed = 9.6 },
+		Octopus = { Rarity = "Cosmic", Cash = 90000, Tier = 3, Lean = 0.2, Speed = 9 },
+		AbyssWhale = { Rarity = "Void", Cash = 300000, Tier = 4, Lean = 0.7, Speed = 9.4 },
 	},
 	-- a pet's health and speed (Shared/Pets): set by its rarity (QM, Oct 25: mostly a status
 	-- signal; since Oct 30 rarity climbs with the biome, so later pets get a little tougher).
@@ -1536,6 +1574,9 @@ return {
 			Mythic = { Health = 200, Speed = 32.5 },
 			Divine = { Health = 230, Speed = 34 },
 			Celestial = { Health = 260, Speed = 35.5 },
+			Cosmic = { Health = 290, Speed = 37 },
+			Void = { Health = 320, Speed = 38.5 },
+			Omega = { Health = 350, Speed = 40 },
 		},
 		Lean = 0.25, -- Lean 1: +25% health, -25% speed (Lean -1 the other way)
 		-- Speed (QM, Oct 26): each pet's own, LassoAPet's: MountSpeed studs/s x its Speed in
