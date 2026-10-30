@@ -328,12 +328,12 @@ return {
 		MajesticUnicorn = {
 			Name = "Majestic Unicorn",
 			Model = "MajesticUnicorn", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
-			Size = 4, -- (about 53 studs tall)
+			Size = 3.2, -- (about 42 studs tall; QM Oct 30: x0.8)
 			Health = 200,
 			Cash = 50, -- to each player who beat it
 			Speed = 10,
 			StopAt = 1,
-			Radius = 13,
+			Radius = 10.5,
 			Turn = 4,
 			Strength = 2,
 			Respawn = 20,
@@ -347,12 +347,12 @@ return {
 		VenusFlytrap = {
 			Name = "Venus Flytrap",
 			Model = "VenusFlytrap", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
-			Size = 3, -- (about 52 studs tall)
+			Size = 2.7, -- (about 47 studs tall; QM Oct 30: x0.9)
 			Health = 200,
 			Cash = 50, -- to each player who beat it
 			Speed = 10,
 			StopAt = 1,
-			Radius = 15,
+			Radius = 13.5,
 			Turn = 4,
 			Strength = 2,
 			Respawn = 20,
@@ -420,12 +420,12 @@ return {
 		Sandworm = {
 			Name = "Sandworm",
 			Model = "Sandworm", -- (the Sandworm pet's model, QM's designs/desert/Sandworm.bbmodel)
-			Size = 2.6, -- (about 29 studs tall arched up out of the ground)
+			Size = 3.12, -- (about 35 studs tall arched up out of the ground; QM Oct 30: x1.2)
 			Health = 4000,
 			Cash = 500, -- to each player who beat it
 			Speed = 0, -- (it never walks: it tunnels, Burrow)
 			StopAt = 1,
-			Radius = 8,
+			Radius = 9.5,
 			Turn = 5,
 			TurnRate = 240, -- (degrees a second: it keeps its face on you while it's up)
 			Strength = 6,
@@ -487,12 +487,12 @@ return {
 		ElderBoar = {
 			Name = "Elder Boar",
 			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
-			Size = 3.33, -- (about 45 studs tall, 66 long)
+			Size = 2.66, -- (about 36 studs tall, 53 long; QM Oct 30: x0.8)
 			Health = 30000,
 			Cash = 5000, -- to each player who beat it
 			Speed = 9,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
-			Radius = 20,
+			Radius = 16,
 			Turn = 3,
 			Strength = 20,
 			Respawn = 30,
@@ -547,12 +547,12 @@ return {
 			Name = "Scorpion King",
 			Model = "ScorpionKing",
 			StandIn = { "Scorpion", 3.2 },
-			Size = 3.2,
+			Size = 3.25, -- (the Scorpion pet's drawing, 15.7 studs long: about 51 studs long, QM Oct 30: x0.8 of before)
 			Health = 4000,
 			Cash = 500,
 			Speed = 12,
 			StopAt = 6,
-			Radius = 18,
+			Radius = 14.5,
 			Turn = 3.5,
 			Strength = 6,
 			Respawn = 25,
@@ -695,12 +695,12 @@ return {
 		VolcanoTortoise = {
 			Name = "Volcano Tortoise",
 			Model = "VolcanoTortoise",
-			Size = 5,
+			Size = 3, -- (QM Oct 30: x0.6)
 			Health = 200000,
 			Cash = 40000,
 			Speed = 5,
 			StopAt = 1,
-			Radius = 18,
+			Radius = 11,
 			Turn = 2,
 			Strength = 60,
 			Respawn = 35,
@@ -731,12 +731,12 @@ return {
 			Name = "Bone Warden",
 			Model = "BoneWarden",
 			StandIn = { "IceGolem", 1.8 },
-			Size = 3.4,
+			Size = 4.76, -- (QM Oct 30: x1.4)
 			Health = 1500000,
 			Cash = 250000,
 			Speed = 10,
 			StopAt = 1,
-			Radius = 14,
+			Radius = 19.5,
 			Turn = 3.5,
 			Strength = 180,
 			Respawn = 35,
@@ -1050,12 +1050,12 @@ return {
 		KingCrab = {
 			Name = "King Crab",
 			Model = "KingCrab",
-			Size = 9,
+			Size = 7.2, -- (QM Oct 30: x0.8)
 			Health = 10000000,
 			Cash = 1500000,
 			Speed = 10,
 			StopAt = 1,
-			Radius = 22,
+			Radius = 17.5,
 			Turn = 3,
 			Strength = 500,
 			Respawn = 40,
@@ -1442,21 +1442,6 @@ return {
 				Hide = { "GlowSlit_pupil_L", "GlowSlit_pupil_R" },
 			},
 			-- the bosses made in Python: written by tools/boss_designs.py from each one's sleep() (QM, Oct 30)
-			ScorpionKing = { -- (belly down, pincers tucked in, tail drooped forward)
-				Bones = {
-					root = { 0, -1, 0, 0, 0, 0 },
-					ClawL = { 0.3, -0.4, 0.8, -0.13963, -0.34907, 0 },
-					ClawR = { -0.3, -0.4, 0.8, -0.13963, 0.34907, 0 },
-					Tail = { 0, 0, 0, -0.20944, 0, 0 },
-					Stinger = { 0, 0, 0, -0.5236, 0, 0 },
-				},
-				Breathe = {
-					root = { 0, 0.12, 0, 0, 0, 0 },
-					Tail = { 0, 0, 0, 0.05236, 0, 0 },
-				},
-				Shut = { "EyeL", "EyeR" },
-				Hide = {},
-			},
 			FrostGolem = { -- (slumped down, fists on the ground)
 				Bones = {
 					root = { 0, -1.4, 0, -0.10472, 0, 0 },
@@ -1547,6 +1532,42 @@ return {
 				Shut = { "EyeL", "EyeR" },
 				Hide = {},
 			},
+			ToadstoolKing = { -- (squat, cap tipped forward)
+				Bones = {
+					root = { 0, -0.8, 0, 0, 0, 0 },
+					Cap = { 0, -0.5, 0, -0.13963, 0, 0 },
+				},
+				Breathe = {
+					Cap = { 0, 0.2, 0, 0, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			PufferLord = { -- (resting on the sand, deflated)
+				Bones = {
+					root = { 0, -3.4, 0, 0, 0, 0 },
+					Tail = { 0, 0, 0, 0, 0.34907, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.15, 0, 0, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = { "PupilL", "PupilR" },
+			},
+			ScorpionKing = { -- (belly down, pincers tucked in, tail drooped forward)
+				Bones = {
+					root = { 0, -1, 0, 0, 0, 0 },
+					ClawL = { 0.3, -0.4, 0.8, -0.13963, -0.34907, 0 },
+					ClawR = { -0.3, -0.4, 0.8, -0.13963, 0.34907, 0 },
+					Tail = { 0, -0.3, 0, 0.27925, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.1, 0, 0, 0, 0 },
+					Tail = { 0, 0, 0, 0.05236, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = { "PupilL", "PupilR" },
+			},
 			ElderTreant = { -- (branches drooped, canopy sagging)
 				Bones = {
 					root = { 0, 0, 0, -0.03491, 0, 0 },
@@ -1556,17 +1577,6 @@ return {
 				},
 				Breathe = {
 					Canopy = { 0, 0.15, 0, 0.01745, 0, 0 },
-				},
-				Shut = { "EyeL", "EyeR" },
-				Hide = {},
-			},
-			ToadstoolKing = { -- (squat, cap tipped forward)
-				Bones = {
-					root = { 0, -0.8, 0, 0, 0, 0 },
-					Cap = { 0, -0.5, 0, -0.13963, 0, 0 },
-				},
-				Breathe = {
-					Cap = { 0, 0.2, 0, 0, 0, 0 },
 				},
 				Shut = { "EyeL", "EyeR" },
 				Hide = {},
@@ -1611,31 +1621,6 @@ return {
 				},
 				Shut = { "EyeL", "EyeR" },
 				Hide = {},
-			},
-			PufferLord = { -- (resting on the sand, deflated)
-				Bones = {
-					root = { 0, -3.4, 0, 0, 0, 0 },
-					Tail = { 0, 0, 0, 0, 0.34907, 0 },
-				},
-				Breathe = {
-					root = { 0, 0.15, 0, 0, 0, 0 },
-				},
-				Shut = { "EyeL", "EyeR" },
-				Hide = { "PupilL", "PupilR" },
-			},
-			Kraken = { -- (sunk low, tentacles drawn down into the floor, just their tips showing)
-				Bones = {
-					root = { 0, -1, 0, 0, 0, 0 },
-					Tent1 = { 0, -5.5, 0, 0, 0, -0.17453 },
-					Tent2 = { 0, -5.5, 0, 0, 0, 0.17453 },
-					Tent3 = { 0, -5.5, 0, 0, 0, -0.17453 },
-					Tent4 = { 0, -5.5, 0, 0, 0, 0.17453 },
-				},
-				Breathe = {
-					root = { 0, 0.15, 0, 0, 0, 0 },
-				},
-				Shut = { "EyeL", "EyeR" },
-				Hide = { "PupilL", "PupilR" },
 			},
 			-- end of the bosses made in Python
 		},

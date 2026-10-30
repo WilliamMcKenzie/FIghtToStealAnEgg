@@ -52,6 +52,13 @@ def shark_boss(src):
     return src
 
 
+@boss("ScorpionKing", os.path.join(ANIMALS, "ScorpionModel.luau"),
+      "The Desert Scorpion pet with red pupils on black eyes and a red stinger: the Scorpion King (QM, Oct 30).")
+def scorpion_king(src):
+    return recolor(src, lambda name, bone, c: {"EyeL": (20, 16, 22), "EyeR": (20, 16, 22), "PupilL": (235, 36, 44),
+                                               "PupilR": (235, 36, 44), "Stinger": (206, 52, 44)}.get(name))
+
+
 def write(name):
     base, note, fn = BOSSES[name]
     src = open(base).read()

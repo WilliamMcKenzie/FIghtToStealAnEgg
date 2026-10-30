@@ -155,6 +155,27 @@ def king_crab(m):
     return {"slam": slam, "charge": charge}
 
 
+def scorpion_king(m):
+    # stab (0.8s windup): its tail cocks back over its body, quivering, then at the hit whips
+    # over its head, the stinger driving down the red line in front, and pulls back up
+    stab = {"length": 1.4, "hit": 0.8, "tracks": {
+        "Tail": {"r": [(0, 0, 0, 0), (0.5, 22, 0, 0), (0.6, 25, 0, 2), (0.68, 23, 0, -2), (0.74, 26, 0, 0), (0.8, -40, 0, 0),
+                       (1.0, -36, 0, 0), (1.4, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.7, 0, 0, 0), (0.8, 0, 1.6, -0.8), (1.0, 0, 1.4, -0.7), (1.4, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.7, 6, 0, 0), (0.8, -8, 0, 0), (1.0, -6, 0, 0), (1.4, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.7, 0, 0, 0.3), (0.8, 0, 0, -0.5), (1.4, 0, 0, 0)]},
+    }}
+    # pinch (0.5s windup): it rears its front up with both pincers flung wide open, then at
+    # the hit lunges and snaps them shut together in front of it
+    pinch = {"length": 1.0, "hit": 0.5, "tracks": {
+        "ClawL": {"r": [(0, 0, 0, 0), (0.4, 18, 34, 0), (0.5, -6, -16, 0), (0.7, -4, -12, 0), (1.0, 0, 0, 0)]},
+        "ClawR": {"r": [(0, 0, 0, 0), (0.4, 18, -34, 0), (0.5, -6, 16, 0), (0.7, -4, 12, 0), (1.0, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.4, 8, 0, 0), (0.5, -4, 0, 0), (1.0, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.4, 0, 0.2, 0.4), (0.5, 0, 0, -0.8), (0.7, 0, 0, -0.6), (1.0, 0, 0, 0)]},
+    }}
+    return {"stab": stab, "pinch": pinch}
+
+
 def shark_boss(m):
     # breach (0.8s windup, the red circle filling): under the floor it thrashes, tail beating
     # faster and faster with its nose tipping up, then at the hit it surges up through the
@@ -192,6 +213,7 @@ ANIMS = {
     "VolcanoTortoise": volcano_tortoise,
     "KingCrab": king_crab,
     "SharkBoss": shark_boss,
+    "ScorpionKing": scorpion_king,
 }
 
 
