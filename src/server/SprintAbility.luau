@@ -68,7 +68,7 @@ remote.OnServerEvent:Connect(function(player, on)
 	local kind = abilityOf(player)
 	if on == true and kind and rootOf(player) then
 		if not riders[player] then
-			riders[player] = { kind = kind, wait = 0 }
+			riders[player] = { kind = kind, wait = 0, since = os.clock() }
 			player:SetAttribute("SprintAbility", kind)
 		end
 	else
@@ -113,8 +113,11 @@ RunService.Heartbeat:Connect(function(dt)
 			local reach = Pets.stats(player:GetAttribute("Pet")).Hitbox * cfg.Grow + cfg.Reach
 			local hits = Combat.touching(pos, reach)
 			if #hits > 0 then
+				-- (harder the longer it's been charging)
+				local built = math.clamp((os.clock() - r.since) / cfg.Ramp, 0, 1)
+				local k = cfg.Damage + (cfg.MaxDamage - cfg.Damage) * built
 				for _, t in hits do
-					Combat.hit(player, t.handler, damage(player, cfg.Damage))
+					Combat.hit(player, t.handler, damage(player, k))
 					local studs = cfg.Knockback * (if t.body:GetAttribute("Boss") then cfg.BossKnock else 1)
 					Combat.knock(t.body, t.body.Position - pos, studs, cfg.KnockTime)
 				end

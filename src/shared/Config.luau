@@ -1916,6 +1916,10 @@ return {
 	-- the controls, or held up against something: under StopAt of your speed) drops you
 	-- straight back. LassoAPet's sprint is 2x; this game's is 1.3x (QM).
 	Sprint = { On = true, Speed = 1.3, Delay = 1.5, Ramp = 1.2, StopAt = 0.4 },
+	-- Hopping (QM, Oct 30; client/Hop): riding into something solid up to Height studs tall
+	-- (a fence: 4) within Ahead studs past your pet's hitbox, it hops over, Clear studs
+	-- higher than it, with Push studs/s more forward. Taller walls stop you as before.
+	Hop = { On = true, Height = 6, Ahead = 1.5, Clear = 1.5, Push = 6 },
 	-- Sprint abilities (QM, Oct 30; client/SprintAbility draws them, Server/SprintAbility
 	-- runs them): these pets' sprint is a special move instead. It starts once, the moment
 	-- you've ridden Sprint.Delay seconds without stopping (whatever your speed), with the
@@ -1925,8 +1929,10 @@ return {
 	--           mounds and dirt spray, in Sand / Sand2)
 	--   Fly     Height studs up, rising over Rise seconds: melee, bombs, slams and plain
 	--           shots all miss you; only homing magic (a Magic shot with Homing) still hits
-	--   Smash   Grow x bigger, a white outline and LassoAPet's charge wind (the Rhino's):
-	--           running into an enemy hits it for Damage x your slash's damage and knocks
+	--   Smash   Grow x bigger, a white outline and LassoAPet's charge wind (the Rhino's), a
+	--           charge that builds (QM, Oct 30): over Ramp seconds of charging you speed up
+	--           to MaxSpeed x your sprint, and running into an enemy hits it for Damage x
+	--           your slash's damage at the start up to MaxDamage x at the full Ramp. It knocks
 	--           it Knockback studs back over KnockTime seconds (a boss BossKnock x that),
 	--           and ends the sprint (another Sprint.Delay of riding to start it again)
 	--   Bombs   an orange outline, and a bomb dropped every Every seconds: each goes
@@ -1960,6 +1966,9 @@ return {
 		Icebringer = "Frost",
 		KingCrab = "Crabwalk",
 		Rhino = "Smash",
+		Boar = "Smash", -- (QM, Oct 30: every boar charges)
+		RockHog = "Smash",
+		WarBoar = "Smash",
 		LavaWhale = "Smash", -- (a whale like the Whale and Abyss Whale)
 		Whale = "Smash",
 		AbyssWhale = "Smash",
@@ -1976,7 +1985,10 @@ return {
 		Smash = {
 			Grow = 1.2,
 			Outline = Color3.fromRGB(255, 255, 255),
-			Damage = 3,
+			Damage = 2,
+			MaxDamage = 8,
+			Ramp = 3,
+			MaxSpeed = 1.6,
 			Reach = 2, -- studs past the two bodies' edges that still count as running into it
 			Knockback = 18,
 			KnockTime = 0.3,

@@ -46,6 +46,7 @@ local function gates()
 			elseif not open and not bars[zone] then
 				local bar = Instance.new("Part")
 				bar.Name = "LockedGate"
+				bar:SetAttribute("NoHop", true) -- (client/Hop: no hopping it)
 				bar.Anchored = true
 				bar.CanCollide = true
 				bar.Size = Vector3.new(gate.Size.X, 4, 0.6)
