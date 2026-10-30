@@ -1108,7 +1108,7 @@ return {
 			},
 		},
 
-		-- Ocean: a kraken rooted mid-arena. Tentacles slam down rows of circles at you, ink
+		-- Ocean: a kraken rooted mid-arena. Tentacles slam down long rectangles at you, ink
 		-- orbs, crabs at half health
 		Kraken = {
 			Name = "Kraken",
