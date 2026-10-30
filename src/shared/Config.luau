@@ -224,6 +224,72 @@ return {
 		LiquidSink = 1, -- and you sink this far into it, below its surface
 	},
 
+	-- the Shop popup (QM, Oct 30: the HUD's Shop button; client/Shop, Server/Store), laid out
+	-- like QM's Figma "Shop" frame: Game Passes first, then Cash Packs, then Power Packs.
+	-- Ids are placeholders: a pass without its game pass id, or a pack without its developer
+	-- product, can't be bought yet (in Studio it's simply given, so it can be tried out).
+	--   Passes  Id: its game pass; Gift: a developer product that gives it to someone else;
+	--           Robux: the price shown; Look: its card's colours (Shop.Looks); Icon: its
+	--           picture (HudImages); Badge: the text on its icon; Text: what it does
+	--           (RichText). What each one does: Server/Store (Life, Damage, Cash, Growth).
+	--   Cash / Power  Amount: cash, or Strength (the Power counter) it gives; Product: its
+	--           developer product (bought for yourself or, through Gift, for someone else);
+	--   Robux: the price shown; Icons: the pile on its card, each { picture, x, y, size }
+	--           in Figma px, x from the card's middle, y from its top (QM's arrangements from
+	--           the Figma: the first three cash piles are his). Pictures: Stack (a bundle of
+	--           cash), StackFlip (mirrored), Bills (the flat one in front), Sword, SwordFlip.
+	--   Cash packs sit 3 then 2 (wider), like QM's reference; Power packs 3 and 3.
+	Shop = {
+		Passes = {
+			{ Name = "Life", Title = "Extra Life", Text = 'Come back once with <font color="#7CFF4D">full HP</font>!', Badge = "+1", Icon = "PassLife", Look = "Life", Robux = 149, Id = nil, Gift = nil },
+			{ Name = "Damage", Title = "x2 Damage", Text = 'Deal <font color="#7CFF4D">2x</font> Damage!', Badge = "x2", Icon = "ShopSword", Look = "Damage", Robux = 299, Id = nil, Gift = nil },
+			{ Name = "Cash", Title = "x2 Cash", Text = 'Earn <font color="#7CFF4D">2x</font> Money!', Badge = "x2", Icon = "CashStack", Look = "Gold", Robux = 199, Id = nil, Gift = nil },
+			{ Name = "Growth", Title = "x2 Growth", Text = 'Eggs grow <font color="#7CFF4D">2x</font> Faster!', Badge = "x2", Icon = "PassGrowth", Look = "Growth", Robux = 149, Id = nil, Gift = nil },
+		},
+		Cash = {
+			{ Amount = 200000, Robux = 59, Product = nil, Icons = { { "Stack", 0, 229, 256 } } },
+			{ Amount = 2000000, Robux = 79, Product = nil, Icons = {
+				{ "Stack", -111, 175, 219 }, { "StackFlip", 136, 191, 219 }, { "Stack", 13, 229, 294 },
+			} },
+			{ Amount = 10000000, Robux = 299, Product = nil, Icons = {
+				{ "Stack", -111, 194, 219 }, { "Stack", 245, 247, 219 }, { "StackFlip", 154, 138, 219 },
+				{ "StackFlip", -240, 266, 219 }, { "Bills", 16, 229, 294 },
+			} },
+			{ Amount = 50000000, Robux = 599, Product = nil, Icons = {
+				{ "Stack", -150, 130, 219 }, { "StackFlip", 150, 130, 219 }, { "StackFlip", -330, 240, 219 },
+				{ "Stack", 330, 240, 219 }, { "Stack", -150, 255, 240 }, { "StackFlip", 150, 255, 240 },
+				{ "Bills", 0, 220, 294 },
+			} },
+			{ Amount = 250000000, Robux = 1199, Product = nil, Icons = {
+				{ "Stack", -230, 110, 210 }, { "StackFlip", 0, 95, 210 }, { "StackFlip", 230, 110, 210 },
+				{ "StackFlip", -400, 240, 219 }, { "Stack", 400, 240, 219 }, { "Stack", -250, 250, 240 },
+				{ "StackFlip", 250, 250, 240 }, { "Bills", -110, 215, 294 }, { "Bills", 110, 225, 294 },
+			} },
+		},
+		Power = {
+			{ Amount = 1000, Robux = 49, Product = nil, Icons = { { "Sword", 0, 229, 280 } } },
+			{ Amount = 5000, Robux = 99, Product = nil, Icons = { { "SwordFlip", -70, 220, 260 }, { "Sword", 70, 220, 260 } } },
+			{ Amount = 25000, Robux = 199, Product = nil, Icons = {
+				{ "SwordFlip", -120, 205, 230 }, { "Sword", 120, 205, 230 }, { "Sword", 0, 235, 290 },
+			} },
+			{ Amount = 100000, Robux = 459, Product = nil, Icons = {
+				{ "Sword", -200, 235, 210 }, { "SwordFlip", 200, 235, 210 }, { "SwordFlip", -75, 200, 260 },
+				{ "Sword", 75, 200, 260 },
+			} },
+			{ Amount = 500000, Robux = 799, Product = nil, Icons = {
+				{ "Sword", -215, 250, 210 }, { "SwordFlip", 215, 250, 210 }, { "SwordFlip", -110, 165, 230 },
+				{ "Sword", 110, 165, 230 }, { "Sword", 0, 240, 300 },
+			} },
+			{ Amount = 2500000, Robux = 1499, Product = nil, Icons = {
+				{ "SwordFlip", -235, 140, 190 }, { "Sword", 235, 140, 190 }, { "Sword", -225, 265, 210 },
+				{ "SwordFlip", 225, 265, 210 }, { "SwordFlip", -110, 175, 240 }, { "Sword", 110, 175, 240 },
+				{ "Sword", 0, 240, 310 },
+			} },
+		},
+		-- a gift of a pack goes through the pack's own Product; Gift picks who gets it
+		LifeShield = 2, -- seconds you can't be hurt after the Extra Life brings you back
+	},
+
 	-- the cactus vendor (QM, Oct 27: LassoAPet's Carl and his stall, a Vendor object in the
 	-- map editor; Server/Map builds it, Client/Vendor animates him). He sells weapons for
 	-- cash (QM, Oct 27): each weapon's Price in Config.Weapons (placeholders, climbing

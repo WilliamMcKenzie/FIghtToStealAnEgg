@@ -116,7 +116,7 @@ function EggsPanel.init(root, eggsButton)
 		local now = workspace:GetServerTimeNow()
 		for _, m in made do
 			local row, egg = m[1], m[2]
-			local total = Config.Hatch.Time[egg.k] or Config.Hatch.Default
+			local total = tonumber(egg.d) or Config.Hatch.Time[egg.k] or Config.Hatch.Default
 			local rest = (tonumber(egg.t) or 0) - now
 			local done = math.clamp(1 - rest / math.max(total, 1), 0, 1)
 			row.Track.Clip.Size = UDim2.fromScale(done, 1)

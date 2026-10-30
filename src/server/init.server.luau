@@ -31,6 +31,8 @@ local Regen = require(script.Regen)
 local Regions = require(script.Regions)
 require(script.SprintAbility) -- (the SprintPets' sprints: burrowing, flying, smashing, bombs)
 local Training = require(script.Training)
+local Lives = require(script.Lives)
+local Store = require(script.Store)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
 BossTuning.create() -- workspace.BossTuning: live boss scale and fight camera, the same
@@ -54,6 +56,8 @@ Training.start()
 Regions.start()
 Regen.start() -- (always healing, at your pet's Regen)
 Data.start() -- (after Training: it loads over the grounds' defaults)
+Store.start() -- (the Shop's Robux buys and game passes; owns ProcessReceipt)
+Lives.start() -- (the Extra Life pass)
 Arsenal.start() -- (each player's weapon tool, and buying them from Carl)
 
 local remote = Instance.new("RemoteEvent")

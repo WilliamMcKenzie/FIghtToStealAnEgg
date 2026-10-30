@@ -11,6 +11,17 @@ return {
 	PowerGainIcon = "", -- assets/ui/hud/PowerGainIcon.png (the gain popups': client/GainPopups)
 	CashGainIcon = "", -- assets/ui/hud/CashGainIcon.png
 	RobuxIcon = "rbxassetid://86362799525767",
+	-- the Shop's (client/Shop; assets/ui/shop): QM's Figma cash icons, a sword and pass
+	-- pictures from his icon pack, the gift icon and the sunburst behind every card
+	CashStack = "", -- assets/ui/shop/CashStack.png
+	CashStackFlip = "", -- assets/ui/shop/CashStackFlip.png (mirrored: Roblox can't flip an image)
+	CashBills = "", -- assets/ui/shop/CashBills.png
+	ShopSword = "", -- assets/ui/shop/ShopSword.png
+	ShopSwordFlip = "", -- assets/ui/shop/ShopSwordFlip.png
+	PassLife = "", -- assets/ui/shop/PassLife.png
+	PassGrowth = "", -- assets/ui/shop/PassGrowth.png
+	GiftIcon = "", -- assets/ui/shop/GiftIcon.png
+	Sunburst = "", -- assets/ui/shop/Sunburst.png
 	StudTile = "rbxassetid://100359261064701", -- assets/ui/StudTile.png (QM's Figma stud texture)
 	WeldTile = "rbxassetid://94674059514917", -- assets/ui/WeldTile.png (QM's Figma weld texture)
 	BossAliveIcon = "rbxassetid://136700539456694", -- assets/ui/hud/BossAliveIcon.png

@@ -1,7 +1,6 @@
 -- The Weapon Shop (QM's NewUI Figma, Oct 27), opened by Talking to Carl the cactus vendor
--- (client/Vendor). An orange header with "Weapon Shop", two shine stripes across it (QM's
--- Pickaxe Shop ref: Figma couldn't do them, so they're made here) and the red X; under it a
--- dark panel with a row of cards, one per weapon: the starter first (Config.Arsenal.Start),
+-- (client/Vendor). An orange header with "Weapon Shop", two shine stripes across it and the
+-- red X (HudKit.popup: the Shop popup is the same one, in lime); under it a dark panel with a row of cards, one per weapon: the starter first (Config.Arsenal.Start),
 -- then everything Carl sells (Weapons.forSale), scrolling sideways when they don't fit.
 -- Each card: the weapon's name, its rarity (in its rarity's colours), its render (Shared/
 -- ItemIcons), its DPS at your Strength (Weapons.dps), and at the bottom
@@ -36,9 +35,6 @@ local player = Players.LocalPlayer
 local fig, art, label, button = HudKit.fig, HudKit.art, HudKit.label, HudKit.button -- (backs: HudKit.back)
 local DPS_COLOR = "#00FFF6"
 local NAME_STROKE = Color3.fromRGB(70, 70, 70)
-local SHINE = { { at = 0.62, width = 0.07 }, { at = 0.72, width = 0.025 } } -- across the header, of its width
-local SHINE_SLANT = 22 -- degrees the stripes lean
-local SHINE_ALPHA = 0.7 -- their transparency
 -- each rarity's card (QM's Figma, Oct 27): its back's gradient and its rarity's text
 -- colours are Config.Rarities'. From Mythic up they move: the back's gradient turns round
 -- with a light sheen sweeping across it (QM, Oct 27: the backs should visibly move), and
@@ -172,73 +168,8 @@ end
 
 local function build(root)
 	local fresh
-	gui, fresh = Ui.make(root, "WeaponShop", "Frame")
-	if fresh then
-		-- (Figma: 2268 x 1370, centred on the screen)
-		gui.BackgroundTransparency = 1
-		gui.AnchorPoint = Vector2.new(0.5, 0.5)
-		gui.Position = UDim2.fromScale(0.5, 0.5)
-		gui.Size = UDim2.fromOffset(fig(2268), fig(1370))
-		gui.ZIndex = 10
-		gui.Visible = not Ui.live -- (shown in Studio to edit; in Play when Carl's Talked to)
-	end
-	Ui.make(gui, "Pop", "UIScale")
-	HudKit.back(gui, "Panel", {
-		Name = "Panel",
-		-- (tucked under the header, so only its bottom corners show rounded)
-		Position = UDim2.fromOffset(0, fig(263)),
-		Size = UDim2.fromOffset(fig(2268), fig(1107)),
-	})
-	local header = HudKit.back(gui, "Header", {
-		Name = "Header",
-		Size = UDim2.fromOffset(fig(2268), fig(283)),
-		ZIndex = 2,
-	})
-	-- the shine: slanted white stripes, clipped to the header by a CanvasGroup (a rotated
-	-- frame isn't clipped by ClipsDescendants)
-	local shine
-	shine, fresh = Ui.make(header, "Shine", "CanvasGroup")
-	if fresh then
-		shine.BackgroundTransparency = 1
-		shine.Size = UDim2.fromScale(1, 1)
-		shine.GroupTransparency = SHINE_ALPHA
-		shine.ZIndex = 2
-		for i, s in SHINE do
-			local stripe = Instance.new("Frame")
-			stripe.Name = "Stripe" .. i
-			stripe.BackgroundColor3 = Color3.new(1, 1, 1)
-			stripe.BorderSizePixel = 0
-			stripe.AnchorPoint = Vector2.new(0.5, 0.5)
-			stripe.Position = UDim2.fromScale(s.at, 0.5)
-			stripe.Size = UDim2.new(s.width, 0, 2, 0)
-			stripe.Rotation = SHINE_SLANT
-			stripe.Parent = shine
-		end
-	end
-	label(gui, "Title", {
-		Text = "Weapon Shop",
-		TextSize = fig(130),
-		Position = UDim2.fromOffset(fig(70), fig(66)),
-		Size = UDim2.fromOffset(fig(1100), fig(158)),
-		ZIndex = 4,
-	})
-	-- (Figma: an 8px drop shadow under the title)
-	label(gui, "TitleShadow", {
-		Text = "Weapon Shop",
-		TextSize = fig(130),
-		TextColor3 = HudKit.BLACK,
-		Position = UDim2.fromOffset(fig(70), fig(66 + 8)),
-		Size = UDim2.fromOffset(fig(1100), fig(158)),
-		ZIndex = 3,
-	})
-	local close = button(gui, "ShopClose", 174, 174, { Position = UDim2.fromOffset(fig(2046), fig(54)), ZIndex = 4 }, "Red")
-	label(close, "X", {
-		Text = "X",
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextSize = fig(120),
-		Size = UDim2.fromScale(1, 1),
-		ZIndex = 5,
-	})
+	local close
+	gui, close = HudKit.popup(root, "WeaponShop", "Weapon Shop", "Header")
 
 	cards, fresh = Ui.make(gui, "Cards", "ScrollingFrame")
 	if fresh then

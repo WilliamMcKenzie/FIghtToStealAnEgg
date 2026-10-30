@@ -24,6 +24,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Passes = require(Shared.Passes)
 local Stacks = require(Shared.Stacks)
 local Pens = require(script.Parent.Pens)
 local PetInventory = require(script.Parent.PetInventory)
@@ -71,7 +72,7 @@ local function placed(player)
 	local out = {}
 	for _, e in list do
 		if type(e) == "table" and isPet(e.k) and type(e.x) == "number" and type(e.z) == "number" then
-			table.insert(out, { id = tostring(e.id), k = e.k, x = e.x, z = e.z, t = tonumber(e.t) or 0 })
+			table.insert(out, { id = tostring(e.id), k = e.k, x = e.x, z = e.z, t = tonumber(e.t) or 0, d = tonumber(e.d) })
 		end
 	end
 	return out
@@ -109,12 +110,14 @@ local function place(player, x, z)
 	end
 	Stacks.add(eggs, kind, -1)
 	setBag(player, eggs)
+	local grow = Passes.hatchTime(player, Hatchery.hatchTime(kind)) -- (halved by x2 Growth)
 	table.insert(list, {
 		id = HttpService:GenerateGUID(false):sub(1, 8),
 		k = kind,
 		x = math.round(x * 10) / 10,
 		z = math.round(z * 10) / 10,
-		t = os.time() + Hatchery.hatchTime(kind),
+		t = os.time() + grow,
+		d = grow, -- (how long it grows: the clients' progress bars count from it)
 	})
 	setPlaced(player, list)
 end

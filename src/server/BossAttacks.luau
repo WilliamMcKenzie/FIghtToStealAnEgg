@@ -87,6 +87,7 @@ local Pets = require(Shared:WaitForChild("Pets"))
 local SlashFx = require(Shared:WaitForChild("SlashFx"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Config = require(Shared:WaitForChild("Config"))
+local Lives = require(script.Parent.Lives) -- (every hit on a player: the Extra Life pass)
 local HORSE_HITBOX = Pets.stats("Horse").Hitbox
 
 local BossAttacks = {}
@@ -199,7 +200,7 @@ local function blast(biome, centre, radius, damage, hit)
 			if hit then
 				hit[f.humanoid] = true
 			end
-			f.humanoid:TakeDamage(damage)
+			Lives.hurt(f.humanoid, damage)
 		end
 	end
 end
@@ -444,7 +445,7 @@ local function swipe(body, b, a, pos, toward)
 			for _, f in fighters(b.biome) do
 				-- (solid: right up against it, inside the crescent, counts too)
 				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra, true) and not dodges(f) then
-					f.humanoid:TakeDamage(a.Damage)
+					Lives.hurt(f.humanoid, a.Damage)
 				end
 			end
 		end, dir)
@@ -699,7 +700,7 @@ function BossAttacks.move(body, b, dt, pos)
 				local off = flat(f.root.Position - at)
 				if off.Magnitude <= b.c.Radius + 1 + f.extra and not dodges(f) then
 					m.hit[f.humanoid] = true
-					f.humanoid:TakeDamage(m.damage)
+					Lives.hurt(f.humanoid, m.damage)
 				end
 			end
 		end
@@ -795,7 +796,7 @@ RunService.Heartbeat:Connect(function(dt)
 			-- (a flier is only there to a homing shot; a burrower to none)
 			targets = if (m.shot.homing or 0) > 0 then targets.homing else targets.plain
 			for _, t in Projectiles.step(m.shot, dt, targets) do
-				t.f.humanoid:TakeDamage(m.damage)
+				Lives.hurt(t.f.humanoid, m.damage)
 			end
 			if m.shot.dead then
 				table.remove(magic, i)
@@ -809,7 +810,7 @@ RunService.Heartbeat:Connect(function(dt)
 		local hit = false
 		for _, f in fighters(s.biome) do
 			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + 1.5 + f.extra and not dodges(f) then
-				f.humanoid:TakeDamage(s.damage)
+				Lives.hurt(f.humanoid, s.damage)
 				hit = true
 				break
 			end
