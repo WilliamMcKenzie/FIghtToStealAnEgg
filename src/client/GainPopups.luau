@@ -37,11 +37,13 @@ local REFERENCE = "14K"
 
 local player = Players.LocalPlayer
 
--- the popup in Figma px (its frame is in a 1245-tall screenshot, so x 2190/1245): the 25px
--- number, then the 34px icon starting 8px before the number's end
+-- the popup in its Figma px (the 25px number, then the 34px icon starting 8px before the
+-- number's end), scaled up so the number is the counter's size, 60 (QM, Oct 30)
 local function k(n)
-	return fig(n * 2190 / 1245)
+	return fig(n * 60 / 25)
 end
+-- bumped when the template's look changes, so an older baked copy is rebuilt
+local VERSION = 2
 
 local function build(name, band, color)
 	local group = Instance.new("CanvasGroup")
@@ -70,7 +72,7 @@ local function build(name, band, color)
 		AutomaticSize = Enum.AutomaticSize.X,
 		Size = UDim2.fromOffset(0, k(30)),
 		LayoutOrder = 1,
-		ZIndex = 7,
+		ZIndex = 8, -- (over the icon, QM)
 	})
 	local holder = Instance.new("Frame")
 	holder.Name = "Icon"
@@ -84,6 +86,7 @@ local function build(name, band, color)
 		ZIndex = 8,
 	})
 	HudKit.outlineArt(icon, HudKit.TEXT_OUTLINE)
+	group:SetAttribute("Version", VERSION)
 	return group
 end
 
@@ -99,6 +102,10 @@ local function width(counter, text)
 end
 
 function GainPopups.init(row, name, counter, color, band)
+	local old = row:FindFirstChild("GainTemplate")
+	if old and old:GetAttribute("Version") ~= VERSION then
+		old:Destroy()
+	end
 	local template = Ui.template(row, "GainTemplate", function()
 		return build(name, band, color)
 	end)
