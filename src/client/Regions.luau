@@ -9,6 +9,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local UiFx = require(script.Parent.UiFx)
+
 local player = Players.LocalPlayer
 local map = workspace:WaitForChild("Map")
 local blockers = map:WaitForChild("Blockers", 30)
@@ -31,8 +33,10 @@ local function press(button, region, training)
 	end)
 	button.Activated:Connect(function()
 		to(0.92, 0.06)
+		UiFx.play("Click")
 		local ok = ReplicatedStorage:WaitForChild("BuyRegion"):InvokeServer(region, training)
 		to(1, 0.15)
+		UiFx.play(if ok then "Buy" else "Error")
 		if not ok then
 			local at = button.Position
 			for _, dx in { 12, -10, 7, -4, 0 } do

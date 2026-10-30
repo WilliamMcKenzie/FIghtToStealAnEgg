@@ -14,6 +14,7 @@ local TweenService = game:GetService("TweenService")
 
 local HudKit = require(script.Parent.HudKit)
 local Ui = require(script.Parent.Ui)
+local UiFx = require(script.Parent.UiFx)
 
 local SidePanel = {}
 SidePanel.__index = SidePanel
@@ -22,6 +23,7 @@ local fig, label, button = HudKit.fig, HudKit.label, HudKit.button
 local W, H = 1168, 734
 local SLIDE = TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local SLIDE_OUT = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+local POP_FROM = 0.85 -- it grows from this as it slides in (QM, Oct 30: popups pop)
 
 local current -- the one open
 
@@ -115,6 +117,10 @@ function SidePanel:open()
 	gui.Visible = true
 	gui.Position = self.shownAt + UDim2.fromOffset(fig(W) + fig(60), 0)
 	TweenService:Create(gui, SLIDE, { Position = self.shownAt }):Play()
+	local pop = gui:FindFirstChild("Pop") or Ui.make(gui, "Pop", "UIScale")
+	pop.Scale = POP_FROM
+	TweenService:Create(pop, SLIDE, { Scale = 1 }):Play()
+	UiFx.play("Open")
 end
 
 function SidePanel:close()
@@ -134,6 +140,7 @@ function SidePanel:close()
 		end
 	end)
 	out:Play()
+	UiFx.play("Close")
 end
 
 function SidePanel:toggle()
