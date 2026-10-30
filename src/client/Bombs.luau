@@ -7,12 +7,12 @@
 --
 -- Drawn flat like the bombs in QM's Kingdom Crushers (QM Oct 30; its bombs.js and
 -- particles.js): the bomb is a 2D square that always faces the camera (a BillboardGui),
--- spinning fastest and swelling to 2x at the top of its flight, dropping a fading square
+-- spinning fastest and swelling to 3x at the top of its flight, dropping a fading square
 -- behind it every TRAIL_EVERY seconds. Where it lands, rings of SPLASH_SPOKES little
 -- squares radiate out to the blast's edge, each fading where it was put. Every square is a
 -- pooled BillboardGui on one anchored part, so a volley costs no parts or models.
 --
--- A Style is how a bomb looks (STYLES below): its fill and outline colours.
+-- A Style is how a bomb looks (STYLES below): its squares' fill and outline colours.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -26,10 +26,11 @@ local FILL_TRANSPARENCY = 0.5 -- the fill growing out from the middle
 local EDGE_TRANSPARENCY = 0.15 -- its leading edge
 local EDGE_WIDTH = 0.05 -- of the radius
 local LIFT = 0.15 -- studs above the ground
-local SIZE = 2.2 -- the bomb's width (studs) as it leaves and lands
-local SWELL = 1 -- how much bigger it is at the top of its flight (Kingdom's: 2x)
+local SIZE = 0.55 -- the bomb's width (studs) as it leaves and lands
+local SWELL = 2 -- how much bigger it is at the top of its flight (Kingdom's: 3x, so
+-- about twice a trail square there)
 local SPIN = 900 -- degrees a second at the top of its flight (none at either end)
-local OUTLINE = 0.16 -- the dark edge, of a square's width
+local OUTLINE = 0.13 -- the edge, of a square's width (the same on every square)
 local TRAIL_EVERY = 0.1 -- seconds between the squares dropped behind it
 local TRAIL_SIZE = 0.9 -- studs
 local SPLASH_SIZE = 1 -- studs
@@ -41,10 +42,8 @@ local SHRINK = 1 -- seconds for one to shrink to nothing (it's gone once faded)
 
 local STYLES = {
 	Cactus = {
-		Fill = Color3.fromRGB(255, 255, 255),
-		Outline = Color3.fromRGB(52, 48, 56),
-		Bit = Color3.fromRGB(255, 255, 255), -- trail and splash squares
-		BitOutline = Color3.fromRGB(200, 196, 204),
+		Fill = Color3.fromRGB(255, 255, 255), -- the bomb, its trail and its splash alike
+		Outline = Color3.fromRGB(150, 146, 156),
 	},
 }
 
@@ -126,7 +125,7 @@ end
 
 -- a trail or splash square, left to fade and shrink where it's put
 local function bit(style, pos, size, angle)
-	local s = sprite(style.Bit, style.BitOutline, size, angle)
+	local s = sprite(style.Fill, style.Outline, size, angle)
 	s.att.Position = pos
 	table.insert(bits, { sprite = s, born = os.clock(), size = size })
 end
