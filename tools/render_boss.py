@@ -29,8 +29,8 @@ def catmull(p0, p1, p2, p3, u):
     return 0.5 * ((2 * p1) + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u * u * u)
 
 
-def sample(keys, t):
-    """Rig.sample, smooth."""
+def sample(keys, t, smooth=True):
+    """Rig.sample."""
     n = len(keys)
     if t <= keys[0][0]:
         return keys[0][1:]
@@ -41,6 +41,8 @@ def sample(keys, t):
         i += 1
     a, b = keys[i], keys[i + 1]
     u = (t - a[0]) / (b[0] - a[0])
+    if not smooth:
+        return tuple(a[j] + (b[j] - a[j]) * u for j in (1, 2, 3))
     k0, k3 = keys[max(i - 1, 0)], keys[min(i + 2, n - 1)]
     return tuple(catmull(k0[j], a[j], b[j], k3[j], u) for j in (1, 2, 3))
 
@@ -50,9 +52,9 @@ def pose_at(model, name, t):
     for bone, tr in model.anims[name]["tracks"].items():
         p = [0.0] * 6
         if "p" in tr:
-            p[0:3] = sample(tr["p"], t)
+            p[0:3] = sample(tr["p"], t, "p" not in tr.get("linear", ()))
         if "r" in tr:
-            p[3:6] = [math.radians(v) for v in sample(tr["r"], t)]
+            p[3:6] = [math.radians(v) for v in sample(tr["r"], t, "r" not in tr.get("linear", ()))]
         pose[bone] = p
     return pose
 
@@ -66,12 +68,13 @@ def mix(a, b, w):
 
 
 def scene_data(model):
-    bones = [{"name": n, "parent": p, "pivot": list(v)} for n, p, v in model.bones]
+    rests = getattr(model, "rests", {})
+    bones = [{"name": n, "parent": p, "pivot": list(v), "rest": list(rests.get(n, (0, 0, 0)))} for n, p, v in model.bones]
     parts = []
     for p in model.parts:
         R = rot(*p["r"])
         parts.append({"name": p["name"], "bone": p["bone"], "class": p["class"], "size": list(p["size"]),
-                      "cframe": list(p["at"]) + [R[i][j] for i in range(3) for j in range(3)],
+                      "cframe": p.get("cf") or list(p["at"]) + [R[i][j] for i in range(3) for j in range(3)],
                       "color": list(p["color"]), "neon": p["neon"]})
     return bones, parts
 
@@ -170,7 +173,8 @@ const [dataPath, outDir, threePath] = process.argv.slice(2);
     const floor = new T.Mesh(new T.PlaneGeometry(data.span * 8, data.span * 8), new T.MeshLambertMaterial({ map: tex }));
     floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
     const pivots = {}, parentOf = {}, order = [];
-    for (const b of data.bones) { pivots[b.name] = new T.Vector3(...b.pivot); parentOf[b.name] = b.parent; }
+    const rests = {};
+    for (const b of data.bones) { pivots[b.name] = new T.Vector3(...b.pivot); parentOf[b.name] = b.parent; rests[b.name] = b.rest; }
     const placed = new Set();
     while (order.length < data.bones.length) for (const b of data.bones) if (!placed.has(b.name) && (!b.parent || placed.has(b.parent))) { placed.add(b.name); order.push(b.name); }
     const tri = (pts) => { const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pts.flat(), 3)); g.computeVertexNormals(); return g; };
@@ -200,7 +204,9 @@ const [dataPath, outDir, threePath] = process.argv.slice(2);
       const world = {};
       for (const name of order) {
         const par = parentOf[name], pp = par ? pivots[par] : new T.Vector3();
-        const c0 = new T.Matrix4().makeTranslation(pivots[name].x - pp.x, pivots[name].y - pp.y, pivots[name].z - pp.z);
+        const r = rests[name];
+        const c0 = new T.Matrix4().makeTranslation(pivots[name].x - pp.x, pivots[name].y - pp.y, pivots[name].z - pp.z)
+          .multiply(new T.Matrix4().makeRotationFromEuler(new T.Euler(r[0], r[1], r[2], 'XYZ')));
         world[name] = (par ? world[par].clone() : new T.Matrix4()).multiply(c0).multiply(xf(f.pose[name] || [0, 0, 0, 0, 0, 0]));
       }
       for (const m of meshes) m.mesh.matrix.copy(world[m.p.bone]).multiply(m.local);
@@ -262,6 +268,7 @@ def render(model, out_dirs, gif=True):
 
 def main():
     import boss_designs
+    import boss_luau
 
     args = sys.argv[1:]
     out_dirs = [os.path.join(ROOT, "previews", "bosses")]
@@ -271,9 +278,10 @@ def main():
         del args[i:i + 2]
     gif = "--stills" not in args
     args = [a for a in args if a != "--stills"]
-    for m in boss_designs.models():
-        if not args or m.name in args:
-            render(m, out_dirs, gif)
+    made = {m.name: m for m in boss_designs.models()}
+    for name in args or list(made):
+        # (a model not made in Python, e.g. a Blockbench one: read back from its Model.luau)
+        render(made.get(name) or boss_luau.load(name), out_dirs, gif)
 
 
 if __name__ == "__main__":
