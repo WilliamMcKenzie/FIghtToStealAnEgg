@@ -198,6 +198,7 @@ RunService.Heartbeat:Connect(function(dt)
 		if not hold and gap > 0 then
 			pos += offset.Unit * math.min(e.m.Speed * dt, gap)
 		end
+		pos = Combat.pushed(body, pos, dt) -- (knocked back by a Smash sprint)
 		if e.bounds then
 			local r = e.radius + 2
 			local x0, x1 = math.min(e.bounds[1], e.bounds[3]) + r, math.max(e.bounds[1], e.bounds[3]) - r

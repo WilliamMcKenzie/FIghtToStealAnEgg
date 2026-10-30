@@ -14,6 +14,11 @@
 --
 -- A Style is how a bomb looks (STYLES below): its squares' fill and outline colours. Every
 -- other red circle a boss puts down splashes like a landing bomb too (BossSplash).
+--
+-- A sprinting Volcano Tortoise's bombs (PetBomb, Server/SprintAbility; QM, Oct 30) are
+-- the same squares, dropped where it went: each sits on the ground ticking (swelling and
+-- shrinking, faster as it nears the end) for its fuse, then splashes. No red ring: they
+-- only hurt enemies.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -54,6 +59,9 @@ local STYLES = {
 	Fire = { Fill = Color3.fromRGB(255, 120, 60), Outline = Color3.fromRGB(120, 20, 30) },
 	Root = { Fill = Color3.fromRGB(160, 120, 75), Outline = Color3.fromRGB(70, 110, 50) }, -- (the Elder Treant's roots)
 	Ink = { Fill = Color3.fromRGB(90, 70, 130), Outline = Color3.fromRGB(30, 20, 50) },
+	-- (the Volcano Tortoise's sprint, orange and yellow in turn: PetBomb below)
+	PetOrange = { Fill = Color3.fromRGB(255, 140, 30), Outline = Color3.fromRGB(150, 146, 156) },
+	PetYellow = { Fill = Color3.fromRGB(255, 220, 60), Outline = Color3.fromRGB(150, 146, 156) },
 }
 
 local folder = Instance.new("Folder")
@@ -61,6 +69,7 @@ folder.Name = "BombFx"
 folder.Parent = workspace
 
 local active = {} -- { { sprite, mark, fill, edge, inner, from, to, ground, start, airtime, radius, height, angle, dropped, style } }
+local sitting = {} -- { { sprite, at, start, fuse, radius, style, angle } }: pet bombs on the ground
 local bits = {} -- { { sprite, born, size } }: trail and splash squares fading out
 
 local function part(props)
@@ -224,9 +233,39 @@ ReplicatedStorage:WaitForChild("BossSplash").OnClientEvent:Connect(function(at, 
 	task.spawn(splash, at, radius, STYLES[style] or STYLES.Cactus)
 end)
 
+ReplicatedStorage:WaitForChild("PetBomb").OnClientEvent:Connect(function(info)
+	local s = STYLES[info.style] or STYLES.PetOrange
+	local bomb = sprite(s.Fill, s.Outline, SIZE, 0)
+	local at = info.at + Vector3.new(0, SIZE / 2 + LIFT, 0)
+	bomb.att.Position = at
+	table.insert(sitting, {
+		sprite = bomb,
+		at = at,
+		ground = info.at,
+		start = info.start,
+		fuse = info.fuse,
+		radius = info.radius,
+		style = s,
+		angle = math.random() * 90,
+	})
+end)
+
 RunService.RenderStepped:Connect(function(dt)
 	local now = workspace:GetServerTimeNow()
 	local clock = os.clock()
+	for i = #sitting, 1, -1 do
+		local b = sitting[i]
+		local t = (now - b.start) / b.fuse
+		if t >= 1 then
+			table.remove(sitting, i)
+			release(b.sprite)
+			task.spawn(splash, b.ground, b.radius, b.style)
+			continue
+		end
+		-- (ticking: a pulse that quickens toward the bang)
+		local pulse = 1 + 0.25 * math.abs(math.sin(t * t * math.pi * 6))
+		place(b.sprite, b.at, SIZE * 1.4 * pulse, b.angle)
+	end
 	for i = #active, 1, -1 do
 		local b = active[i]
 		local t = math.clamp((now - b.start) / b.airtime, 0, 1)

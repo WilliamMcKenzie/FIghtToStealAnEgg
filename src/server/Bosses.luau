@@ -153,6 +153,7 @@ local function make(kind, at, yaw)
 	body.Size = size
 	body.CFrame = CFrame.new(at + Vector3.new(0, size.Y / 2, 0)) * CFrame.Angles(0, yaw, 0)
 	body:SetAttribute("Kind", kind)
+	body:SetAttribute("Boss", true) -- (a Smash sprint knocks a boss back less: Server/SprintAbility)
 	body:SetAttribute("Model", model)
 	body:SetAttribute("ModelSize", modelSize)
 	body:SetAttribute("Name", c.Name or c.Model)
@@ -591,6 +592,7 @@ RunService.Heartbeat:Connect(function(dt)
 				end
 			end
 		end
+		pos = Combat.pushed(body, pos, dt) -- (knocked back by a Smash sprint)
 		if b.bounds then
 			local r = c.Radius + 2
 			local x0, x1 = math.min(b.bounds[1], b.bounds[3]) + r, math.max(b.bounds[1], b.bounds[3]) - r

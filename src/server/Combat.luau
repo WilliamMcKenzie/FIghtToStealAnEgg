@@ -16,6 +16,13 @@
 --   Combat.damage(player) -> number
 --   Combat.alive(player) -> boolean  -- false once their Health hits 0 (QM, Oct 30: no
 --                                      attacking from beyond the grave)
+--   Combat.touching(position, reach) -> { { body, handler } } -- every hittable target
+--                                      whose edge is within reach studs of position (flat)
+--   Combat.hit(player, handler, damage) -- one hit of `damage` (rolled), as a slash's
+--   Combat.knock(body, dir, studs, time) -- shoves a target studs along dir over time
+--                                      seconds (a Smash sprint: Server/SprintAbility)
+--   Combat.pushed(body, pos, dt) -> pos -- where its mover puts it this frame, shoved
+--                                      (Server/Bosses, Minions and Training call it)
 --
 -- Every hit on every target rolls its own damage: the base times a random
 -- Config.Slash.RollMin..RollMax, rounded to a whole number (at least 1), so the damage
@@ -127,6 +134,53 @@ function Combat.slash(player, yaw, c)
 	for _, handler in hits do
 		task.spawn(handler, player, roll(damage))
 	end
+end
+
+local function hittable(body)
+	return body.Parent ~= nil
+		and not body:GetAttribute("Asleep")
+		and not body:GetAttribute("Intro")
+		and not body:GetAttribute("Burrowed")
+end
+
+function Combat.touching(position, reach)
+	local out = {}
+	for body, handler in targets do
+		if hittable(body) then
+			local gap = ((body.Position - position) * Vector3.new(1, 0, 1)).Magnitude - (body:GetAttribute("Radius") or 0)
+			if gap <= reach then
+				table.insert(out, { body = body, handler = handler })
+			end
+		end
+	end
+	return out
+end
+
+function Combat.hit(player, handler, damage)
+	task.spawn(handler, player, roll(damage))
+end
+
+local knocks = {} -- [body] = { velocity, left }
+
+function Combat.knock(body, dir, studs, time)
+	local flatDir = dir * Vector3.new(1, 0, 1)
+	if flatDir.Magnitude < 1e-3 or time <= 0 then
+		return
+	end
+	knocks[body] = { velocity = flatDir.Unit * (studs / time), left = time }
+end
+
+function Combat.pushed(body, pos, dt)
+	local k = knocks[body]
+	if not k then
+		return pos
+	end
+	local step = math.min(dt, k.left)
+	k.left -= step
+	if k.left <= 0 or not body.Parent then
+		knocks[body] = nil
+	end
+	return pos + k.velocity * step
 end
 
 -- shots in the air: { shot, player, damage }, stepped every frame against every target
