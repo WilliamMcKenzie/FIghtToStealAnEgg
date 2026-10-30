@@ -8,6 +8,8 @@ return {
 	PetsIcon = "rbxassetid://135122637332207",
 	PowerIcon = "rbxassetid://123860946510182",
 	CashIcon = "rbxassetid://102450910988008",
+	PowerGainIcon = "", -- assets/ui/hud/PowerGainIcon.png (the gain popups': client/GainPopups)
+	CashGainIcon = "", -- assets/ui/hud/CashGainIcon.png
 	RobuxIcon = "rbxassetid://86362799525767",
 	StudTile = "rbxassetid://100359261064701", -- assets/ui/StudTile.png (QM's Figma stud texture)
 	WeldTile = "rbxassetid://94674059514917", -- assets/ui/WeldTile.png (QM's Figma weld texture)

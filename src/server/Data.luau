@@ -180,6 +180,8 @@ function Data.start()
 		player:SetAttribute("Rebirths", player:GetAttribute("Rebirths") or 0)
 		player:SetAttribute("Eggs", player:GetAttribute("Eggs") or 0)
 		load(player)
+		-- (the HUD's gain popups count from here, so the saved Cash and Power don't pop up)
+		player:SetAttribute("Loaded", true)
 	end
 	Players.PlayerAdded:Connect(joined)
 	for _, player in Players:GetPlayers() do
