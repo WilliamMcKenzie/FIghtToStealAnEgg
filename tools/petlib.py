@@ -61,7 +61,9 @@ class Model:
 
     # ---- reading -----------------------------------------------------------------------
     @classmethod
-    def load(cls, path):
+    def load(cls, path, meshes=False):
+        """meshes: True drops any MeshPart (otherwise it's an error: they can't be recoloured
+        or reshaped here, and the game draws pets from blocks)."""
         if not os.path.isabs(path):
             path = os.path.join(ANIMALS, path + "Model.luau")
         src = open(path).read()
@@ -89,6 +91,8 @@ class Model:
                 if re.search(r"\b" + flag + r" = true", e):
                     p[flag] = True
             if re.search(r"\bmesh = ", e):
+                if meshes:
+                    continue
                 raise ValueError("meshes aren't supported: " + path)
             if len(p["cf"]) == 3:
                 p["cf"] = p["cf"] + [1, 0, 0, 0, 1, 0, 0, 0, 1]
@@ -215,6 +219,14 @@ class Model:
             self.animations = rx.sub(lambda m: m.group(0) + "%s%s = {\n%s\n\t\t\t\t},\n" % (m.group(1), name, m.group(2)), self.animations)
         return self
 
+    def drop_bone(self, name):
+        """Remove a bone with its parts and animation tracks (it must have no child bones)."""
+        assert not any(b["parent"] == name for b in self.bones), name
+        self.bones = [b for b in self.bones if b["name"] != name]
+        self.parts = [p for p in self.parts if p["bone"] != name]
+        self.animations = re.sub(r"\t\t\t\t%s = \{\n.*?\n\t\t\t\t\},\n" % re.escape(name), "", self.animations, flags=re.S)
+        return self
+
     # ---- writing -----------------------------------------------------------------------
     def luau(self, header):
         out = [header.rstrip("\n"), "", "return {", "\tbones = {"]
@@ -259,8 +271,9 @@ def anims(spec):
                     t, v = k[0], list(k[1:])
                     if ch == "rotation":
                         v = [math.radians(a) for a in v]
-                    keys.append("{ %s }" % ", ".join(fmt(x) for x in [t] + v))
-                out.append("\t\t\t\t\t%s = { smooth = %s, keys = { %s } }," % (ch, smooth, ", ".join(keys)))
+                    keys.append("{%s}" % ",".join(fmt(x) for x in [t] + v))
+                # (packed: Studio refuses a script over 200k characters, and a big school hits that)
+                out.append("\t\t\t\t\t%s = { smooth = %s, keys = { %s } }," % (ch, smooth, ",".join(keys)))
             out.append("\t\t\t\t},")
         out.append("\t\t\t},")
         out.append("\t\t},")
