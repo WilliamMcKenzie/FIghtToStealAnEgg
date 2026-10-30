@@ -121,6 +121,10 @@ def frames(model, view):
 def stills(model, view):
     eye, at, _ = view
     out = [{"name": "s0.png", "pose": {}, "label": model.name, "eye": eye, "at": at}]
+    if getattr(model, "sleeping", None):
+        sl = model.sleeping["bones"]
+        out.append({"name": "s1.png", "pose": {b: list(v[:3]) + [math.radians(a) for a in v[3:]] for b, v in sl.items()},
+                    "label": "asleep", "eye": eye, "at": at})
     for name, a in model.anims.items():
         if name in ("idle", "walk", "gallop"):
             continue

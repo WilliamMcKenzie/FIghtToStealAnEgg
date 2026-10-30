@@ -51,6 +51,7 @@ class Model:
         self.bones = []  # (name, parent, pivot)
         self.parts = []  # dicts
         self.anims = {}  # name -> { length, hit, tracks: { bone: { rotation, position } } }
+        self.sleeping = None  # its Config.BossSleep.Poses entry (sleep())
 
     # -- shape --------------------------------------------------------------------------
     def bone(self, name, parent, pivot):
@@ -86,6 +87,12 @@ class Model:
     def anim(self, name, length, tracks, hit=None):
         """tracks: { bone: { "r": [(t, rx, ry, rz) degrees], "p": [(t, x, y, z) studs] } }"""
         self.anims[name] = {"length": length, "hit": hit, "tracks": tracks}
+
+    def sleep(self, bones, breathe=None, shut=(), hide=(), note=""):
+        """How it sleeps on its dais till you steal its egg (Config.BossSleep.Poses, played by
+        Client/BossView): bones and breathe are { bone: (x, y, z, rx, ry, rz) }, studs and
+        degrees; shut are its eyes (squashed to a dark line), hide its pupils (gone)."""
+        self.sleeping = {"bones": bones, "breathe": breathe or {}, "shut": list(shut), "hide": list(hide), "note": note}
 
     # -- out ----------------------------------------------------------------------------
     def luau(self):
@@ -164,3 +171,46 @@ def bob(length, height, phase=0.0, steps=8, double=False):
 def poses(*keys):
     """(t, (x, y, z)) pairs to (t, x, y, z) keys."""
     return [(t, *v) for t, v in keys]
+
+
+SLEEP_BEGIN = "\t\t\t-- the bosses made in Python: written by tools/boss_designs.py from each one's sleep() (QM, Oct 30)"
+SLEEP_END = "\t\t\t-- end of the bosses made in Python"
+
+
+def write_sleep(models):
+    """Every model's sleep() into Config.BossSleep.Poses, between two marker comments."""
+    path = os.path.join(ROOT, "src", "shared", "Config.luau")
+    src = open(path).read()
+    if SLEEP_BEGIN in src:
+        src = src[:src.index(SLEEP_BEGIN)] + src[src.index(SLEEP_END) + len(SLEEP_END) + 1:]
+    start = src.index("{", src.index("Poses = {", src.index("BossSleep = {")))
+    depth, i = 0, start
+    while True:
+        depth += {"{": 1, "}": -1}.get(src[i], 0)
+        if depth == 0:
+            break
+        i += 1
+    line = src.rindex("\n", 0, i) + 1
+
+    def pose(v):
+        x, y, z, rx, ry, rz = v
+        return "{{ {}, {}, {}, {}, {}, {} }}".format(g(x), g(y), g(z), g(math.radians(rx)), g(math.radians(ry)), g(math.radians(rz)))
+
+    out = [SLEEP_BEGIN]
+    for m in models:
+        s = m.sleeping
+        if not s:
+            continue
+        out.append("\t\t\t{} = {{{}".format(m.name, " -- (" + s["note"] + ")" if s["note"] else ""))
+        for key, field in (("bones", "Bones"), ("breathe", "Breathe")):
+            out.append("\t\t\t\t{} = {{".format(field))
+            for bone, v in s[key].items():
+                out.append("\t\t\t\t\t{} = {},".format(bone, pose(v)))
+            out.append("\t\t\t\t},")
+        for key, field in (("shut", "Shut"), ("hide", "Hide")):
+            out.append("\t\t\t\t{} = {{{}}},".format(field, " " + ", ".join('"%s"' % n for n in s[key]) + " " if s[key] else ""))
+        out.append("\t\t\t},")
+    out.append(SLEEP_END)
+    src = src[:line] + "\n".join(out) + "\n" + src[line:]
+    open(path, "w").write(src)
+    print("wrote", sum(1 for m in models if m.sleeping), "sleep poses into Config.BossSleep.Poses")

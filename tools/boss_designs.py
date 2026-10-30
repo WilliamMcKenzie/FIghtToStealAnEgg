@@ -7,7 +7,7 @@ The roster and each attack's windup: /mnt/project-files/boss-roster/design.md (Q
 
 import sys
 
-from boss_forge import Model, bob, wave
+from boss_forge import Model, bob, wave, write_sleep
 
 DARK = (30, 22, 34)  # eyes and mouths, as the Cactus Boss's
 WHITE = (250, 246, 236)
@@ -1013,15 +1013,230 @@ def castle_wyvern():
     return m
 
 
+# ---------------------------------------------------------------------------------------
+# Ocean Trench: Puffer Lord. A round yellow pufferfish swimming above the sand: spines all
+# round, big eyes, pouty lips, a little gold crown, two side fins and a tail fan. Puff:
+# draws in with its fins tucked, then puffs up at the hit with everything flared (its ring
+# of spines flies). Charge: tail thrashing as it draws back, then darts down the lane.
+# ---------------------------------------------------------------------------------------
+def puffer_lord():
+    m = Model("PufferLord", "Puffer Lord: Ocean Trench boss, swims. Bones: root, FinL, FinR, Tail.")
+    BODY = (250, 204, 84)
+    BELLY = (255, 240, 196)
+    SPOT = (214, 150, 60)
+    SPINE = (255, 246, 222)
+    FIN = (255, 150, 70)
+    LIPS = (240, 110, 90)
+    m.bone("root", None, (0, 7, 0))
+    m.bone("FinL", "root", (-3.6, 7, -0.6))
+    m.bone("FinR", "root", (3.6, 7, -0.6))
+    m.bone("Tail", "root", (0, 7, 3.6))
+
+    m.block("Body", "root", (7, 6.6, 7.2), (0, 7.2, 0), BODY)
+    m.block("Belly", "root", (5.6, 1, 5.8), (0, 3.75, -0.2), BELLY)
+    for i, (x, z) in enumerate(((-1.8, 1.4), (1.6, -1.2), (0.2, 2.6))):
+        m.block("Spot%d" % i, "root", (1.2, 0.1, 1.2), (x, 10.55, z), SPOT, plain=True)
+    # spines out all round it: across its top, round its sides, under its chin
+    spines = [((0, 11, 0), (0.5, 1.6, 0.5), (0, 0, 0)), ((-2.2, 10.9, -1.6), (0.5, 1.4, 0.5), (0, 0, 20)),
+              ((2.2, 10.9, -1.6), (0.5, 1.4, 0.5), (0, 0, -20)), ((-2.2, 10.9, 2), (0.5, 1.4, 0.5), (-15, 0, 20)),
+              ((2.2, 10.9, 2), (0.5, 1.4, 0.5), (-15, 0, -20)), ((-4, 8.6, 1.6), (1.5, 0.5, 0.5), (0, 0, -15)),
+              ((4, 8.6, 1.6), (1.5, 0.5, 0.5), (0, 0, 15)), ((-4, 5.4, 0.4), (1.5, 0.5, 0.5), (0, 0, 20)),
+              ((4, 5.4, 0.4), (1.5, 0.5, 0.5), (0, 0, -20)), ((0, 9.4, 4.1), (0.5, 0.5, 1.5), (-20, 0, 0)),
+              ((-2.4, 5.6, 3.9), (0.5, 0.5, 1.4), (20, 0, 0)), ((2.4, 5.6, 3.9), (0.5, 0.5, 1.4), (20, 0, 0))]
+    for i, (at, size, r) in enumerate(spines):
+        m.block("Spine%d" % i, "root", size, at, SPINE, r=r)
+    for side, s in (("L", -1), ("R", 1)):
+        m.block("Eye" + side, "root", (1.8, 1.8, 0.1), (s * 1.6, 8.4, -3.65), WHITE, plain=True)
+        m.block("Pupil" + side, "root", (0.9, 1.1, 0.1), (s * 1.4, 8.3, -3.72), DARK, plain=True)
+        m.block("Fin" + side, "Fin" + side, (0.4, 2, 2.8), (s * 3.9, 7, 0.4), FIN, r=(0, s * 20, 0))
+    m.block("Lips", "root", (2, 1.1, 0.8), (0, 6.2, -3.9), LIPS)
+    m.block("Mouth", "root", (1, 0.4, 0.1), (0, 6.2, -4.32), DARK, plain=True)
+    m.block("Crown", "root", (2.6, 0.7, 2.6), (0, 11, -1.6), GOLD)
+    for i, x in enumerate((-0.9, 0, 0.9)):
+        m.block("CrownPt%d" % i, "root", (0.5, 0.8 if x else 1.1, 0.5), (x, 11.7 if x else 11.85, -2.6), GOLD)
+    m.block("Dorsal", "root", (0.4, 1.8, 2.4), (0, 11.2, 2.4), FIN)
+    m.block("Stalk", "Tail", (1.6, 1.6, 1.4), (0, 7, 4.2), BODY)
+    m.block("TailFan", "Tail", (0.4, 4, 2.8), (0, 7, 6), FIN)
+
+    m.anim("idle", 1.8, {
+        "root": {"p": wave(1.8, (0, 0.5, 0)), "r": wave(1.8, (3, 0, 2), 0.25)},
+        "FinL": {"r": wave(0.9 * 2, (0, 25, 0), 0)},
+        "FinR": {"r": wave(0.9 * 2, (0, -25, 0), 0)},
+        "Tail": {"r": wave(1.8, (0, 18, 0), 0.25)},
+    })
+    walk = {
+        "root": {"p": wave(0.7, (0, 0.4, 0)), "r": [(0, -8, 0, 0), (0.35, -8, 3, 0), (0.7, -8, 0, 0)]},
+        "FinL": {"r": wave(0.7, (0, 35, 0))},
+        "FinR": {"r": wave(0.7, (0, -35, 0))},
+        "Tail": {"r": wave(0.7, (0, 30, 0), 0.25)},
+    }
+    m.anim("walk", 0.7, walk)
+    gallop_from(m, walk, 0.45)
+    # puff (1.0s windup): sinks and draws in, fins tucked, quivering; at the hit it bursts up
+    # with fins and tail flared wide, and drifts back down
+    quiver = [(0.4 + i * 0.07, 0, (3 if i % 2 else -3), 0) for i in range(8)]
+    m.anim("puff", 1.8, {
+        "root": {"p": [(0, 0, 0, 0), (0.5, 0, -0.8, 0.4), (0.9, 0, -1.0, 0.4), (1.0, 0, 1.2, 0), (1.3, 0, 0.9, 0), (1.8, 0, 0, 0)],
+                 "r": [(0, 0, 0, 0), (0.35, 0, 0, 0)] + quiver + [(1.0, -6, 0, 0), (1.3, 4, 0, 0), (1.8, 0, 0, 0)]},
+        "FinL": {"r": [(0, 0, 0, 0), (0.5, 0, 40, 0), (0.9, 0, 45, 0), (1.0, 0, -40, -40), (1.4, 0, -35, -35), (1.8, 0, 0, 0)]},
+        "FinR": {"r": [(0, 0, 0, 0), (0.5, 0, -40, 0), (0.9, 0, -45, 0), (1.0, 0, 40, 40), (1.4, 0, 35, 35), (1.8, 0, 0, 0)]},
+        "Tail": {"r": [(0, 0, 0, 0), (0.5, 20, 0, 0), (0.9, 24, 0, 0), (1.0, -20, 0, 0), (1.4, -16, 0, 0), (1.8, 0, 0, 0)]},
+    }, hit=1.0)
+    # charge (darts at you): draws back with its tail thrashing, then darts at the hit
+    thrash = [(0.2 + i * 0.1, 0, (40 if i % 2 else -40), 0) for i in range(14)]
+    m.anim("charge", 1.8, {
+        "root": {"p": [(0, 0, 0, 0), (0.6, 0, 0, 1.2), (0.8, 0, 0, 1.4), (1.0, 0, 0, -1.2), (1.6, 0, 0, -1), (1.8, 0, 0, 0)],
+                 "r": [(0, 0, 0, 0), (0.6, 6, 0, 0), (1.0, -12, 0, 0), (1.6, -10, 0, 0), (1.8, 0, 0, 0)]},
+        "Tail": {"r": [(0, 0, 0, 0)] + thrash + [(1.8, 0, 0, 0)]},
+        "FinL": {"r": [(0, 0, 0, 0), (0.6, 0, -30, 0), (0.8, 0, 30, 0), (1.0, 0, 50, 0), (1.6, 0, 50, 0), (1.8, 0, 0, 0)]},
+        "FinR": {"r": [(0, 0, 0, 0), (0.6, 0, 30, 0), (0.8, 0, -30, 0), (1.0, 0, -50, 0), (1.6, 0, -50, 0), (1.8, 0, 0, 0)]},
+    }, hit=0.8)
+    return m
+
+
+# ---------------------------------------------------------------------------------------
+# Ocean Trench: Kraken. A purple dome of a head rising out of the floor in the middle of its
+# arena, big yellow eyes with slit pupils, four tentacles curling up out of the floor round
+# it. Slam: its two front tentacles rear up high, then smash down toward you at the hit
+# (the red lines). Ink: its head sinks, then pulses up as it spits, tentacles flared.
+# ---------------------------------------------------------------------------------------
+def kraken():
+    m = Model("Kraken", "Kraken: Ocean Trench boss, rooted. Bones: root, Tent1, Tent2, Tent3, Tent4.")
+    SKIN = (140, 72, 176)
+    SKIN_DARK = (104, 50, 140)
+    SPOT = (192, 128, 226)
+    SUCKER = (236, 190, 236)
+    EYE = (255, 214, 60)
+    m.bone("root", None, (0, 3, 0))
+    tents = [("Tent1", -6.2, -3.6), ("Tent2", 6.2, -3.6), ("Tent3", -6.6, 3.8), ("Tent4", 6.6, 3.8)]
+    for name, x, z in tents:
+        m.bone(name, "root", (x, 0, z))
+
+    m.block("Base", "root", (9, 4.4, 8), (0, 2.2, 0), SKIN)
+    m.block("Dome", "root", (7.4, 3, 6.8), (0, 5.9, 0.4), SKIN)
+    m.block("Top", "root", (5, 2.2, 4.8), (0, 8.4, 0.8), SKIN_DARK)
+    for i, (x, y, z, w) in enumerate(((-2, 7.42, -1.2, 1.4), (2.4, 7.42, 1.4, 1.2), (-0.6, 9.52, 1.4, 1))):
+        m.block("Spot%d" % i, "root", (w, 0.1, w), (x, y, z), SPOT, plain=True)
+    m.block("Brow", "root", (7.6, 0.8, 1), (0, 5.4, -3.2), SKIN_DARK)
+    for side, s in (("L", -1), ("R", 1)):
+        m.block("Eye" + side, "root", (2, 1.6, 0.1), (s * 2, 3.9, -4.03), EYE, plain=True)
+        m.block("Pupil" + side, "root", (1.4, 0.4, 0.1), (s * 2, 3.8, -4.1), DARK, plain=True)
+    m.block("Ring", "root", (11, 0.3, 10), (0, 0.15, 0), (60, 92, 188))  # (the floor it rises from, darker)
+    for name, x, z in tents:
+        s = -1 if x < 0 else 1
+        m.block(name + "A", name, (2, 3.4, 2), (x, 1.7, z), SKIN)
+        m.block(name + "B", name, (1.6, 3, 1.6), (x + s * 0.5, 4.7, z), SKIN, r=(0, 0, s * -12))
+        m.block(name + "C", name, (1.2, 2.4, 1.2), (x + s * 0.4, 7.2, z), SKIN, r=(0, 0, s * 24))
+        m.block(name + "Tip", name, (1.6, 0.9, 0.9), (x - s * 0.5, 8.5, z), SKIN_DARK, r=(0, 0, s * 30))
+        m.block(name + "Sucker", name, (0.1, 1.2, 1.2), (x - s * 1.01, 2.2, z), SUCKER, plain=True)
+        m.block(name + "Sucker2", name, (0.1, 1, 1), (x - s * 0.33, 4.8, z), SUCKER, plain=True, r=(0, 0, s * -12))
+
+    sway = {}
+    for i, (name, x, z) in enumerate(tents):
+        s = -1 if x < 0 else 1
+        sway[name] = {"r": wave(3.0, (8, 0, s * 10), i * 0.27)}
+    m.anim("idle", 3.0, dict(sway, root={"p": wave(3.0, (0, 0.25, 0))}))
+    walk = {name: {"r": wave(1.4, (12, 0, (-1 if x < 0 else 1) * 14), i * 0.25)} for i, (name, x, z) in enumerate(tents)}
+    walk["root"] = {"p": wave(1.4, (0, 0.4, 0))}
+    m.anim("walk", 1.4, walk)
+    gallop_from(m, walk, 1.0)
+    # slam (1.0s windup): the two front tentacles rear up and back, high over its head, then
+    # smash down forward at the hit, lying along the red lines, and curl back up
+    slam_tent = [(0, 0, 0, 0), (0.6, 30, 0, 0), (0.85, 34, 0, 0), (1.0, -78, 0, 0), (1.35, -76, 0, 0), (1.9, 0, 0, 0)]
+    m.anim("slam", 1.9, {
+        "Tent1": {"r": [(t, x, y, z + (8 if 0 < t < 1.9 else 0)) for t, x, y, z in slam_tent], "p": [(0, 0, 0, 0), (0.85, 0, 1.4, 0), (1.0, 0, 1.1, 0), (1.35, 0, 1.0, 0), (1.9, 0, 0, 0)]},
+        "Tent2": {"r": [(t, x, y, z - (8 if 0 < t < 1.9 else 0)) for t, x, y, z in slam_tent], "p": [(0, 0, 0, 0), (0.85, 0, 1.4, 0), (1.0, 0, 1.1, 0), (1.35, 0, 1.0, 0), (1.9, 0, 0, 0)]},
+        "Tent3": {"r": [(0, 0, 0, 0), (0.85, 0, 0, 14), (1.0, 0, 0, -6), (1.9, 0, 0, 0)]},
+        "Tent4": {"r": [(0, 0, 0, 0), (0.85, 0, 0, -14), (1.0, 0, 0, 6), (1.9, 0, 0, 0)]},
+        "root": {"r": [(0, 0, 0, 0), (0.85, 8, 0, 0), (1.0, -8, 0, 0), (1.35, -6, 0, 0), (1.9, 0, 0, 0)],
+                 "p": [(0, 0, 0, 0), (0.85, 0, 0.6, 0), (1.0, 0, -0.4, 0), (1.9, 0, 0, 0)]},
+    }, hit=1.0)
+    # ink (0.5s windup): head sinks and the tentacles draw in, then it pulses up and spits
+    # at the hit with the tentacles flared out
+    flare = {}
+    for name, x, z in tents:
+        s = -1 if x < 0 else 1
+        flare[name] = {"r": [(0, 0, 0, 0), (0.4, 0, 0, s * 14), (0.5, 0, 0, s * -26), (0.75, 0, 0, s * -20), (1.1, 0, 0, 0)]}
+    m.anim("ink", 1.1, dict(flare, root={"p": [(0, 0, 0, 0), (0.4, 0, -0.8, 0), (0.5, 0, 0.6, 0), (0.75, 0, 0.3, 0), (1.1, 0, 0, 0)],
+                                         "r": [(0, 0, 0, 0), (0.4, 6, 0, 0), (0.5, -8, 0, 0), (1.1, 0, 0, 0)]}), hit=0.5)
+    return m
+
+
 BUILDERS = [scorpion_king, frost_golem, blizzard_owl, magma_slime, bone_warden, skeleton, dungeon_watcher, treasure_mimic,
-            rune_mage, elder_treant, toadstool_king, crimson_knight, castle_guard, blood_bat, castle_wyvern]
+            rune_mage, elder_treant, toadstool_king, crimson_knight, castle_guard, blood_bat, castle_wyvern, puffer_lord, kraken]
+
+
+# how each sleeps on its dais till its egg is stolen (Config.BossSleep.Poses; no Zzz: QM)
+# bones and breathe: (x, y, z, rx, ry, rz), drawing studs and degrees
+SLEEPS = {
+    "ScorpionKing": dict(note="belly down, pincers tucked in, tail drooped forward",
+                         bones={"root": (0, -1, 0, 0, 0, 0), "ClawL": (0.3, -0.4, 0.8, -8, -20, 0), "ClawR": (-0.3, -0.4, 0.8, -8, 20, 0),
+                                "Tail": (0, 0, 0, -12, 0, 0), "Stinger": (0, 0, 0, -30, 0, 0)},
+                         breathe={"root": (0, 0.12, 0, 0, 0, 0), "Tail": (0, 0, 0, 3, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "FrostGolem": dict(note="slumped down, fists on the ground",
+                       bones={"root": (0, -1.4, 0, -6, 0, 0), "ArmL": (0, 0, 0, 10, 0, 6), "ArmR": (0, 0, 0, 10, 0, -6)},
+                       breathe={"root": (0, 0.15, 0, 1, 0, 0)}, shut=["GlowL", "GlowR"]),
+    "BlizzardOwl": dict(note="landed, wings tucked in",
+                        bones={"root": (0, -3.4, 0, 0, 0, 0), "WingL": (0, 0, 0, 0, 0, 6), "WingR": (0, 0, 0, 0, 0, -6)},
+                        breathe={"root": (0, 0.12, 0, 0, 0, 0), "WingL": (0, 0, 0, 0, 0, 3), "WingR": (0, 0, 0, 0, 0, -3)},
+                        shut=["EyeL", "EyeR"], hide=["PupilL", "PupilR"]),
+    "MagmaSlime": dict(note="settled, its lid down",
+                       bones={"root": (0, -0.5, 0, 0, 0, 0), "Lid": (0, -0.15, 0, 0, 0, 0)},
+                       breathe={"root": (0, 0.12, 0, 0, 0, 0), "Lid": (0, 0.2, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "BoneWarden": dict(note="sat on the ground, legs out, skull drooped, sword laid forward",
+                       bones={"root": (0, -2.4, 0.6, 0, 0, 0), "LegL": (0, 0, 0, 80, 0, -8), "LegR": (0, 0, 0, 80, 0, 8),
+                              "neck": (0, 0, 0, -25, 0, 8), "ArmR": (0, 0, 0, 20, 0, 0), "ArmL": (0, 0, 0, 10, 0, -6)},
+                       breathe={"root": (0, 0.1, 0, 0, 0, 0), "neck": (0, 0, 0, 3, 0, 0)}, hide=["GlowL", "GlowR"]),
+    "DungeonWatcher": dict(note="sunk to the floor, its lid shut",
+                           bones={"root": (0, -3.6, 0, 0, 0, 0), "Lid": (0, -2.6, 0, 0, 0, 0)},
+                           breathe={"root": (0, 0.15, 0, 0, 0, 0)}, shut=["Sclera"], hide=["Iris", "Pupil"]),
+    "TreasureMimic": dict(note="just a chest, lid shut, lifting a crack with each breath",
+                          bones={"root": (0, -0.2, 0, 0, 0, 0), "Lid": (0, 0, 0, 0, 0, 0)},
+                          breathe={"root": (0, 0.08, 0, 0, 0, 0), "Lid": (0, 0, 0, 4, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "RuneMage": dict(note="settled down, hat tipped over its eyes",
+                     bones={"root": (0, -0.3, 0, -4, 0, 0), "Hat": (0, -0.3, -0.2, -14, 0, 0), "ArmR": (0, 0, 0, 4, 0, 0)},
+                     breathe={"root": (0, 0.1, 0, 0, 0, 0), "Hat": (0, 0, 0, 2, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "ElderTreant": dict(note="branches drooped, canopy sagging",
+                        bones={"root": (0, 0, 0, -2, 0, 0), "ArmL": (0, 0, 0, 0, 0, 20), "ArmR": (0, 0, 0, 0, 0, -20),
+                               "Canopy": (0, -0.3, 0, -4, 0, 0)},
+                        breathe={"Canopy": (0, 0.15, 0, 1, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "ToadstoolKing": dict(note="squat, cap tipped forward",
+                          bones={"root": (0, -0.8, 0, 0, 0, 0), "Cap": (0, -0.5, 0, -8, 0, 0)},
+                          breathe={"Cap": (0, 0.2, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "CrimsonKnight": dict(note="asleep on his feet, leaning on his lance, helm drooped",
+                          bones={"root": (0, -0.3, 0, -4, 0, 0), "neck": (0, -0.2, 0, -28, 0, 6), "ArmL": (0, 0, 0, 6, 0, 0)},
+                          breathe={"root": (0, 0.1, 0, 0, 0, 0), "neck": (0, 0, 0, 3, 0, 0)}),
+    "BloodBat": dict(note="landed, wrapped in its wings",
+                     bones={"root": (0, -3, 0, 0, 0, 0), "WingL": (0, 0, 0, 0, -50, 75), "WingR": (0, 0, 0, 0, 50, -75)},
+                     breathe={"root": (0, 0.1, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "CastleWyvern": dict(note="lying down, head on the ground, tail curled round, wings folded",
+                         bones={"root": (0, -1.8, 0, 0, 0, 0), "neck": (0, -1.4, 0.4, -24, 30, 0), "Tail": (0, 0, 0, 0, -50, 0),
+                                "WingL": (0, 0, 0, 0, 0, 30), "WingR": (0, 0, 0, 0, 0, -30)},
+                         breathe={"root": (0, 0.12, 0, 0, 0, 0), "WingL": (0, 0, 0, 0, 0, -4), "WingR": (0, 0, 0, 0, 0, 4)},
+                         shut=["EyeL", "EyeR"]),
+    "PufferLord": dict(note="resting on the sand, deflated",
+                       bones={"root": (0, -3.4, 0, 0, 0, 0), "Tail": (0, 0, 0, 0, 20, 0)},
+                       breathe={"root": (0, 0.15, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"], hide=["PupilL", "PupilR"]),
+    "Kraken": dict(note="sunk low, tentacles drawn down into the floor, just their tips showing",
+                   bones={"root": (0, -1, 0, 0, 0, 0), "Tent1": (0, -5.5, 0, 0, 0, -10), "Tent2": (0, -5.5, 0, 0, 0, 10),
+                          "Tent3": (0, -5.5, 0, 0, 0, -10), "Tent4": (0, -5.5, 0, 0, 0, 10)},
+                   breathe={"root": (0, 0.15, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"], hide=["PupilL", "PupilR"]),
+}
 
 
 def models():
-    return [b() for b in BUILDERS]
+    out = []
+    for b in BUILDERS:
+        m = b()
+        if m.name in SLEEPS:
+            m.sleep(**SLEEPS[m.name])
+        out.append(m)
+    return out
 
 
 if __name__ == "__main__":
-    for m in models():
+    made = models()
+    for m in made:
         if len(sys.argv) < 2 or m.name in sys.argv[1:]:
             m.write()
+    write_sleep(made)

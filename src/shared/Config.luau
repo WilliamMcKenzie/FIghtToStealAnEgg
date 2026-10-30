@@ -1333,6 +1333,203 @@ return {
 				Shut = { "GlowAmber_iris_L", "GlowAmber_iris_R" },
 				Hide = { "GlowSlit_pupil_L", "GlowSlit_pupil_R" },
 			},
+			-- the bosses made in Python: written by tools/boss_designs.py from each one's sleep() (QM, Oct 30)
+			ScorpionKing = { -- (belly down, pincers tucked in, tail drooped forward)
+				Bones = {
+					root = { 0, -1, 0, 0, 0, 0 },
+					ClawL = { 0.3, -0.4, 0.8, -0.13963, -0.34907, 0 },
+					ClawR = { -0.3, -0.4, 0.8, -0.13963, 0.34907, 0 },
+					Tail = { 0, 0, 0, -0.20944, 0, 0 },
+					Stinger = { 0, 0, 0, -0.5236, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.12, 0, 0, 0, 0 },
+					Tail = { 0, 0, 0, 0.05236, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			FrostGolem = { -- (slumped down, fists on the ground)
+				Bones = {
+					root = { 0, -1.4, 0, -0.10472, 0, 0 },
+					ArmL = { 0, 0, 0, 0.17453, 0, 0.10472 },
+					ArmR = { 0, 0, 0, 0.17453, 0, -0.10472 },
+				},
+				Breathe = {
+					root = { 0, 0.15, 0, 0.01745, 0, 0 },
+				},
+				Shut = { "GlowL", "GlowR" },
+				Hide = {},
+			},
+			BlizzardOwl = { -- (landed, wings tucked in)
+				Bones = {
+					root = { 0, -3.4, 0, 0, 0, 0 },
+					WingL = { 0, 0, 0, 0, 0, 0.10472 },
+					WingR = { 0, 0, 0, 0, 0, -0.10472 },
+				},
+				Breathe = {
+					root = { 0, 0.12, 0, 0, 0, 0 },
+					WingL = { 0, 0, 0, 0, 0, 0.05236 },
+					WingR = { 0, 0, 0, 0, 0, -0.05236 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = { "PupilL", "PupilR" },
+			},
+			MagmaSlime = { -- (settled, its lid down)
+				Bones = {
+					root = { 0, -0.5, 0, 0, 0, 0 },
+					Lid = { 0, -0.15, 0, 0, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.12, 0, 0, 0, 0 },
+					Lid = { 0, 0.2, 0, 0, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			BoneWarden = { -- (sat on the ground, legs out, skull drooped, sword laid forward)
+				Bones = {
+					root = { 0, -2.4, 0.6, 0, 0, 0 },
+					LegL = { 0, 0, 0, 1.39626, 0, -0.13963 },
+					LegR = { 0, 0, 0, 1.39626, 0, 0.13963 },
+					neck = { 0, 0, 0, -0.43633, 0, 0.13963 },
+					ArmR = { 0, 0, 0, 0.34907, 0, 0 },
+					ArmL = { 0, 0, 0, 0.17453, 0, -0.10472 },
+				},
+				Breathe = {
+					root = { 0, 0.1, 0, 0, 0, 0 },
+					neck = { 0, 0, 0, 0.05236, 0, 0 },
+				},
+				Shut = {},
+				Hide = { "GlowL", "GlowR" },
+			},
+			DungeonWatcher = { -- (sunk to the floor, its lid shut)
+				Bones = {
+					root = { 0, -3.6, 0, 0, 0, 0 },
+					Lid = { 0, -2.6, 0, 0, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.15, 0, 0, 0, 0 },
+				},
+				Shut = { "Sclera" },
+				Hide = { "Iris", "Pupil" },
+			},
+			TreasureMimic = { -- (just a chest, lid shut, lifting a crack with each breath)
+				Bones = {
+					root = { 0, -0.2, 0, 0, 0, 0 },
+					Lid = { 0, 0, 0, 0, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.08, 0, 0, 0, 0 },
+					Lid = { 0, 0, 0, 0.06981, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			RuneMage = { -- (settled down, hat tipped over its eyes)
+				Bones = {
+					root = { 0, -0.3, 0, -0.06981, 0, 0 },
+					Hat = { 0, -0.3, -0.2, -0.24435, 0, 0 },
+					ArmR = { 0, 0, 0, 0.06981, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.1, 0, 0, 0, 0 },
+					Hat = { 0, 0, 0, 0.03491, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			ElderTreant = { -- (branches drooped, canopy sagging)
+				Bones = {
+					root = { 0, 0, 0, -0.03491, 0, 0 },
+					ArmL = { 0, 0, 0, 0, 0, 0.34907 },
+					ArmR = { 0, 0, 0, 0, 0, -0.34907 },
+					Canopy = { 0, -0.3, 0, -0.06981, 0, 0 },
+				},
+				Breathe = {
+					Canopy = { 0, 0.15, 0, 0.01745, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			ToadstoolKing = { -- (squat, cap tipped forward)
+				Bones = {
+					root = { 0, -0.8, 0, 0, 0, 0 },
+					Cap = { 0, -0.5, 0, -0.13963, 0, 0 },
+				},
+				Breathe = {
+					Cap = { 0, 0.2, 0, 0, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			CrimsonKnight = { -- (asleep on his feet, leaning on his lance, helm drooped)
+				Bones = {
+					root = { 0, -0.3, 0, -0.06981, 0, 0 },
+					neck = { 0, -0.2, 0, -0.48869, 0, 0.10472 },
+					ArmL = { 0, 0, 0, 0.10472, 0, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.1, 0, 0, 0, 0 },
+					neck = { 0, 0, 0, 0.05236, 0, 0 },
+				},
+				Shut = {},
+				Hide = {},
+			},
+			BloodBat = { -- (landed, wrapped in its wings)
+				Bones = {
+					root = { 0, -3, 0, 0, 0, 0 },
+					WingL = { 0, 0, 0, 0, -0.87266, 1.309 },
+					WingR = { 0, 0, 0, 0, 0.87266, -1.309 },
+				},
+				Breathe = {
+					root = { 0, 0.1, 0, 0, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			CastleWyvern = { -- (lying down, head on the ground, tail curled round, wings folded)
+				Bones = {
+					root = { 0, -1.8, 0, 0, 0, 0 },
+					neck = { 0, -1.4, 0.4, -0.41888, 0.5236, 0 },
+					Tail = { 0, 0, 0, 0, -0.87266, 0 },
+					WingL = { 0, 0, 0, 0, 0, 0.5236 },
+					WingR = { 0, 0, 0, 0, 0, -0.5236 },
+				},
+				Breathe = {
+					root = { 0, 0.12, 0, 0, 0, 0 },
+					WingL = { 0, 0, 0, 0, 0, -0.06981 },
+					WingR = { 0, 0, 0, 0, 0, 0.06981 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = {},
+			},
+			PufferLord = { -- (resting on the sand, deflated)
+				Bones = {
+					root = { 0, -3.4, 0, 0, 0, 0 },
+					Tail = { 0, 0, 0, 0, 0.34907, 0 },
+				},
+				Breathe = {
+					root = { 0, 0.15, 0, 0, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = { "PupilL", "PupilR" },
+			},
+			Kraken = { -- (sunk low, tentacles drawn down into the floor, just their tips showing)
+				Bones = {
+					root = { 0, -1, 0, 0, 0, 0 },
+					Tent1 = { 0, -5.5, 0, 0, 0, -0.17453 },
+					Tent2 = { 0, -5.5, 0, 0, 0, 0.17453 },
+					Tent3 = { 0, -5.5, 0, 0, 0, -0.17453 },
+					Tent4 = { 0, -5.5, 0, 0, 0, 0.17453 },
+				},
+				Breathe = {
+					root = { 0, 0.15, 0, 0, 0, 0 },
+				},
+				Shut = { "EyeL", "EyeR" },
+				Hide = { "PupilL", "PupilR" },
+			},
+			-- end of the bosses made in Python
 		},
 		Zzz = {
 			Count = 3, -- Zs in a run, one run per breath as it breathes out (each bigger than the last)
