@@ -14,8 +14,8 @@ don't rebuild the place from Rojo over it.
 - `MapBaker.lua` is a Studio plugin (copy it into the Plugins folder): **Map > Rebuild** bakes
   Shared/MapData into `workspace.Map` in Edit mode, **Map > Import .map** bakes a file from the map
   editor (tools/mapeditor) straight from disk. Save the place after.
-  It also keeps `workspace.StudStyle` live in Edit mode: its `Transparency` attribute is every
-  stud Texture's (made from Config.StudTransparency when the place has none).
+  It also keeps `workspace.StudStyle` live in Edit mode: its `GroundTransparency`/`Transparency`
+  and `GroundTileScale`/`TileScale` attributes hold for every stud Texture (Shared/StudStyle).
 
 ## The UI in StarterGui (QM edits it in Studio)
 

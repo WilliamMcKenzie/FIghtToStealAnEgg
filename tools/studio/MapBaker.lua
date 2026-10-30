@@ -199,39 +199,48 @@ beat = RunService.Heartbeat:Connect(function(dt)
 	end
 end)
 
--- ---- the studs' fade, in Edit mode ---------------------------------------------------------
--- (QM, Oct 30) workspace.StudStyle's Transparency is every stud Texture's, in Edit mode too:
--- this makes the knob when the place has none (seeded from Config.StudTransparency) and
--- repaints the place whenever it changes. During Play, Shared/StudStyle does the same.
-local STUD_IMAGE = "rbxassetid://7447638591"
+-- ---- the studs, in Edit mode ---------------------------------------------------------------
+-- (QM, Oct 30) workspace.StudStyle's knobs (ground and everything else: Transparency and
+-- TileScale) hold for every stud Texture in Edit mode too: this makes them when the place
+-- has none and repaints the place (Shared/StudStyle, a fresh copy each time, so an update
+-- shows without restarting Studio) whenever one changes or the map is baked. During Play,
+-- Shared/StudStyle does the same itself.
 local studStyle, studConn = nil, nil
 
-local function studSeed()
+local function studCode()
 	local shared = ReplicatedStorage:FindFirstChild("Shared")
-	local module = shared and shared:FindFirstChild("Config")
-	if module and module:IsA("ModuleScript") then
-		local ok, config = pcall(require, module:Clone())
-		if ok and type(config) == "table" and type(config.StudTransparency) == "number" then
-			return config.StudTransparency
-		end
+	local module = shared and shared:FindFirstChild("StudStyle")
+	if not (module and module:IsA("ModuleScript")) then
+		return nil, nil
 	end
-	return 0.5
+	local tmp = Instance.new("Folder")
+	tmp.Name = "StudStyleTemp"
+	local copy = module:Clone()
+	copy.Parent = tmp
+	local config = shared:FindFirstChild("Config")
+	if config then
+		config:Clone().Parent = tmp
+	end
+	local ok, code = pcall(require, copy)
+	return if ok then code else nil, tmp
 end
 
 local function studPaint()
-	local value = studStyle and studStyle:GetAttribute("Transparency")
-	if typeof(value) ~= "number" or RunService:IsRunning() then
+	if RunService:IsRunning() then
 		return
 	end
-	local count = 0
-	for _, thing in workspace:GetDescendants() do
-		if thing:IsA("Texture") and thing.Texture == STUD_IMAGE and thing.Transparency ~= value then
-			thing.Transparency = value
-			count += 1
+	local code, tmp = studCode()
+	if code then
+		local ok, err = pcall(function()
+			code.ensure()
+			code.applyAll()
+		end)
+		if not ok then
+			warn("[Map Baker] StudStyle: " .. tostring(err))
 		end
 	end
-	if count > 0 then
-		print(string.format("[Map Baker] StudStyle: %d stud textures at Transparency %s", count, tostring(value)))
+	if tmp then
+		tmp:Destroy()
 	end
 end
 
@@ -239,28 +248,20 @@ local function studHook()
 	if RunService:IsRunning() then
 		return
 	end
+	studPaint() -- (makes workspace.StudStyle if it's missing)
 	local style = workspace:FindFirstChild("StudStyle")
-	if not style then
-		style = Instance.new("Configuration")
-		style.Name = "StudStyle"
-		style:SetAttribute("Transparency", studSeed())
-		style.Parent = workspace
-	elseif typeof(style:GetAttribute("Transparency")) ~= "number" then
-		style:SetAttribute("Transparency", studSeed())
-	end
-	if style ~= studStyle then
+	if style and style ~= studStyle then
 		if studConn then
 			studConn:Disconnect()
 		end
 		studStyle = style
-		studConn = style:GetAttributeChangedSignal("Transparency"):Connect(studPaint)
+		studConn = style.AttributeChanged:Connect(studPaint)
 	end
-	studPaint()
 end
 
 task.defer(studHook)
 workspace.ChildAdded:Connect(function(child)
-	if child.Name == "StudStyle" then
+	if child.Name == "StudStyle" or child.Name == "Map" then
 		task.defer(studHook)
 	end
 end)
