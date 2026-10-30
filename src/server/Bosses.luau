@@ -29,6 +29,8 @@
 --   Bosses.summon(biome, player)     -- its boss arrives (facing the player), if it's not
 --                                        there yet and not dead and waiting -> body or nil
 --   Bosses.reroll()                  -- every biome's boss gone, ready to be summoned again
+--   Bosses.fight(kind, player)       -- that boss in its biome's arena now, whatever was
+--                                        there gone (the /bossfight command) -> body, biome
 --   Bosses.wake(biome)
 --   Bosses.alive(biome) -> its boss is up or can be summoned (not dead, waiting)
 --   Bosses.defeated                  -- BindableEvent: Event(biome)
@@ -206,7 +208,7 @@ function Bosses.arena(biome, spot, bounds)
 	return arenas[biome]
 end
 
-function Bosses.summon(biome, player)
+function Bosses.summon(biome, player, kind)
 	for body, b in live do
 		if b.biome == biome then
 			return body
@@ -218,7 +220,7 @@ function Bosses.summon(biome, player)
 		return nil
 	end
 	arena.ready = false
-	local kind = list[math.random(#list)]
+	kind = kind or list[math.random(#list)]
 	local at = arena.spot * Vector3.new(1, 0, 1)
 	-- (a rooted boss, Centre: the middle of its arena instead of the dais)
 	local bounds = arena.bounds
@@ -263,6 +265,35 @@ function Bosses.reroll()
 	for _, arena in arenas do
 		arena.ready = true
 	end
+end
+
+-- /bossfight: this boss in the arena of the biome whose pool has it, now (QM, Oct 30). The
+-- boss there already goes (its fight's players stay locked in, into the new one).
+function Bosses.fight(kind, player)
+	local biome
+	for name in arenas do
+		if table.find(pool(name), kind) then
+			biome = name
+		end
+	end
+	if not biome then
+		return nil
+	end
+	for body, b in live do
+		if b.biome == biome then
+			live[body] = nil
+			Combat.remove(body)
+			body:Destroy()
+			Bosses.ended:Fire(biome)
+		end
+	end
+	arenas[biome].ready = true
+	return Bosses.summon(biome, player, kind), biome
+end
+
+-- a biome's arena, { spot, bounds, ready } (for /bossfight's teleport)
+function Bosses.arenaOf(biome)
+	return arenas[biome]
 end
 
 -- is this biome's boss there to fight, or ready to be summoned (not dead and waiting)?
