@@ -160,8 +160,14 @@ function BurrowFx.mound(scale, colours)
 	dirt.Rate = 25
 	dirt.Parent = spray
 	local mound = { at = nil } -- (where the last mound went up)
+	local shown = colours[1]
 	function mound.place(_, at)
 		spray.CFrame = CFrame.new(at + Vector3.new(0, 0.5, 0))
+		-- (colours can change as it goes: a rider's burrow takes the ground's, client/SprintAbility)
+		if colours[1] ~= shown then
+			shown = colours[1]
+			dirt.Color = ColorSequence.new(colours[1], colours[2])
+		end
 		if not mound.at or ((at - mound.at) * Vector3.new(1, 0, 1)).Magnitude > MOUND_EVERY * scale then
 			mound.at = at
 			moundAt(at, scale, colours)
