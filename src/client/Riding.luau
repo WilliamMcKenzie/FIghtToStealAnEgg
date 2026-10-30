@@ -96,6 +96,38 @@ local function steer(root, humanoid, dt)
 	end
 end
 
+--
+-- The camera stays up above the ground (QM, Oct 30, as LassoAPet's camera keeps on the
+-- course while its Sandworm's under it): while your rider's drawn under the floor (a
+-- burrow), the camera follows a stand-in over your HumanoidRootPart instead of the
+-- character, so it never dives after them; it goes back to your Humanoid once you're up.
+local cameraAnchor
+local function holdCamera(root, humanoid, under)
+	local camera = workspace.CurrentCamera
+	if under then
+		if not cameraAnchor then
+			cameraAnchor = Instance.new("Part")
+			cameraAnchor.Name = "CameraAnchor"
+			cameraAnchor.Anchored, cameraAnchor.CanCollide, cameraAnchor.CanQuery, cameraAnchor.CanTouch =
+				true, false, false, false
+			cameraAnchor.Transparency = 1
+			cameraAnchor.Size = Vector3.one * 0.2
+			cameraAnchor.Parent = workspace
+		end
+		-- (where a Humanoid subject puts the camera's focus: a little over its root)
+		cameraAnchor.CFrame = CFrame.new(root.Position + Vector3.new(0, 1.5, 0))
+		if camera.CameraSubject ~= cameraAnchor then
+			camera.CameraSubject = cameraAnchor
+		end
+	elseif cameraAnchor then
+		if camera.CameraSubject == cameraAnchor then
+			camera.CameraSubject = humanoid
+		end
+		cameraAnchor:Destroy()
+		cameraAnchor = nil
+	end
+end
+
 local function keepUpright(root, humanoid)
 	if root.CFrame.UpVector.Y < 0.999 then
 		local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
@@ -195,6 +227,9 @@ local function dismount(character)
 	if m then
 		m.horse.model:Destroy()
 		mounts[character] = nil
+		if character == Players.LocalPlayer.Character then
+			holdCamera(m.root, m.humanoid, false) -- (the camera back on you)
+		end
 	end
 end
 
@@ -227,6 +262,7 @@ RunService.PreSimulation:Connect(function(dt)
 		if character == Players.LocalPlayer.Character then
 			keepUpright(root, m.humanoid)
 			steer(root, m.humanoid, dt)
+			holdCamera(root, m.humanoid, m.lift < -0.5)
 		end
 
 		-- a sprint ability: up in the air, under the floor, or bigger (eased in and out)
