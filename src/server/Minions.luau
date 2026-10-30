@@ -1,9 +1,10 @@
 -- A boss's helpers (QM, Oct 27, trying it on the Cactus Boss first): once it's down to
 -- its Minions.At share of health it calls up Minions.Count of them (Config.Bosses[kind]
--- .Minions), popping up out of the ground round it. Each is an invisible body in
+-- .Minions), dropping out of the sky round it (QM, Oct 30). Each is an invisible body in
 -- workspace.Mobs (attributes Model, ModelSize, Name, Health, MaxHealth, Radius, Biome,
--- Minion, and Rise: client/BossView pops it up out of the ground over that many seconds),
--- drawn like a training mob. They chase the nearest player in the boss's fight round its
+-- Minion, and Drop, DropAt, DropFrom, Dust: client/BossView drops it from DropFrom studs
+-- up over Drop seconds from server time DropAt), drawn like a training mob. It can't be
+-- hit or bite till it's landed. They chase the nearest player in the boss's fight round its
 -- arena and bite with their Attacks (Server/BossAttacks, like the boss's), and hitting one
 -- trains its Strength. They all crumble when their boss's fight ends, however it ends.
 --
@@ -61,30 +62,40 @@ local function spawnOne(m, biome, bounds, at, yaw)
 	body:SetAttribute("Radius", radius)
 	body:SetAttribute("Biome", biome)
 	body:SetAttribute("Minion", true)
-	body:SetAttribute("Rise", m.Rise or 0.6)
+	local drop = m.Drop or 0.8
+	body:SetAttribute("Drop", drop)
+	body:SetAttribute("DropAt", workspace:GetServerTimeNow())
+	body:SetAttribute("DropFrom", m.DropFrom or 60)
+	body:SetAttribute("Dust", m.Dust)
 	local entry = {
 		m = m,
 		biome = biome,
 		bounds = bounds,
 		yaw = yaw,
 		radius = radius,
-		-- (not biting till it's out of the ground)
-		wait = m.Rise or 0.6,
+		-- (not biting till it's landed)
+		wait = drop,
 		b = { c = { Attacks = m.Attacks, Radius = radius }, biome = biome },
 	}
 	live[body] = entry
-	Combat.add(body, function(player, damage)
+	body.Parent = folder()
+	-- (no hitting it in mid-air)
+	task.delay(drop, function()
 		if not live[body] then
 			return
 		end
-		Combat.train(player, damage, m.Strength or 1)
-		local health = math.max(0, body:GetAttribute("Health") - damage)
-		body:SetAttribute("Health", health)
-		if health <= 0 then
-			kill(body)
-		end
+		Combat.add(body, function(player, damage)
+			if not live[body] then
+				return
+			end
+			Combat.train(player, damage, m.Strength or 1)
+			local health = math.max(0, body:GetAttribute("Health") - damage)
+			body:SetAttribute("Health", health)
+			if health <= 0 then
+				kill(body)
+			end
+		end)
 	end)
-	body.Parent = folder()
 end
 
 function Minions.call(boss, b)

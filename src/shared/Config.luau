@@ -397,8 +397,12 @@ return {
 				Health = 500, -- (about 3s of swinging when you get here: Config.Training's Desert)
 				Speed = 14,
 				Strength = 3, -- what each hit trains (x damage, like any enemy)
-				Spread = 10, -- studs out from the boss's edge they pop up
-				Rise = 0.6, -- seconds to pop up out of the ground
+				Spread = 10, -- studs out from the boss's edge they land
+				-- they drop out of the sky onto their spots (QM, Oct 30), a shadow growing under
+				-- each as it comes down, and land in a puff of Dust (client/BossView)
+				Drop = 0.8, -- seconds to fall
+				DropFrom = 60, -- studs up they start
+				Dust = Color3.fromRGB(226, 190, 128),
 				Attacks = {
 					{ Kind = "Contact", Every = 1.2, Reach = 3, Damage = 7 },
 				},

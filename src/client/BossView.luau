@@ -238,10 +238,18 @@ local function add(body)
 	if body:GetAttribute("Intro") then
 		view.appearAt = os.clock() + INTRO.PanIn
 		view.appearFor = INTRO.Appear
-	elseif body:GetAttribute("Rise") then
-		-- (a boss's minion pops straight up out of the ground: Server/Minions)
-		view.appearAt = os.clock()
-		view.appearFor = body:GetAttribute("Rise")
+	end
+	-- (a boss's minion drops out of the sky onto its spot, its shadow growing under it:
+	-- Server/Minions. On server time, so one that's already landed is just stood there)
+	local dropAt = body:GetAttribute("DropAt")
+	if dropAt and workspace:GetServerTimeNow() < dropAt + body:GetAttribute("Drop") then
+		view.drop = {
+			at = dropAt,
+			time = body:GetAttribute("Drop"),
+			from = body:GetAttribute("DropFrom") or 60,
+			dust = body:GetAttribute("Dust") or Color3.fromRGB(226, 190, 128),
+			radius = body:GetAttribute("Radius") or 2,
+		}
 	end
 	-- (a pen pet just hatched: hidden till its egg's top pops off, then it jumps out,
 	-- LassoAPet's hatch; server time HatchPop, from HatchFrom studs up: Server/Pens)
@@ -274,6 +282,9 @@ local function remove(body)
 		local w = view.burrow
 		if w and w.mound then
 			w.mound:stop()
+		end
+		if view.drop and view.drop.shadow then
+			view.drop.shadow:Destroy()
 		end
 		view.animal.model:Destroy()
 		views[body] = nil
@@ -373,6 +384,36 @@ local function burrowFrame(body, view, dt, ground)
 	return 1, 1
 end
 
+-- a minion dropping out of the sky, this frame: falls (speeding up, like it's dropped)
+-- from its DropFrom studs up onto `ground`, with a dark shadow under it growing and
+-- darkening as it comes down; on landing a puff of its Dust and a squash -> where to draw it
+local LAND = 0.3 -- seconds the landing squash takes to spring back
+local function dropFrame(view, ground)
+	local d = view.drop
+	local k = math.clamp((workspace:GetServerTimeNow() - d.at) / d.time, 0, 1)
+	if not d.shadow then
+		d.shadow = Instance.new("Part")
+		d.shadow.Shape = Enum.PartType.Cylinder
+		d.shadow.Anchored, d.shadow.CanCollide, d.shadow.CanQuery, d.shadow.CanTouch = true, false, false, false
+		d.shadow.CastShadow = false
+		d.shadow.Material = Enum.Material.SmoothPlastic
+		d.shadow.Color = Color3.new(0, 0, 0)
+		d.shadow.Parent = workspace
+	end
+	local size = d.radius * 2 * (0.35 + 0.65 * k)
+	d.shadow.Size = Vector3.new(0.05, size, size)
+	d.shadow.CFrame = CFrame.new(ground + Vector3.new(0, 0.06, 0)) * CFrame.Angles(0, 0, math.pi / 2)
+	d.shadow.Transparency = 0.85 - 0.35 * k
+	if k >= 1 then
+		d.shadow:Destroy()
+		BurrowFx.burst(ground, d.radius, d.dust)
+		view.drop = nil
+		view.landAt = os.clock()
+		return ground
+	end
+	return ground + Vector3.new(0, d.from * (1 - k * k), 0)
+end
+
 RunService.RenderStepped:Connect(function(dt)
 	local now = os.clock()
 	for body, view in views do
@@ -405,6 +446,8 @@ RunService.RenderStepped:Connect(function(dt)
 			and not view.diedAt
 			and not view.appearAt
 			and not view.hatchPop
+			and not view.drop
+			and not view.landAt
 			and not OnScreen.near(pos, reach)
 			and not OnScreen.near(view.drawnAt, reach)
 		then
@@ -427,6 +470,18 @@ RunService.RenderStepped:Connect(function(dt)
 			if k >= 1 then
 				animal:setScale(1)
 				view.appearAt = nil
+			end
+		end
+		if view.drop then
+			ground = dropFrame(view, ground)
+		end
+		if view.landAt then
+			-- (squashed a little by the landing, springing back to size)
+			local k = math.clamp((now - view.landAt) / LAND, 0, 1)
+			animal:setScale(1 - 0.18 * (1 - k) * math.cos(k * math.pi * 1.5))
+			if k >= 1 then
+				animal:setScale(1)
+				view.landAt = nil
 			end
 		end
 		if view.hatchPop then
