@@ -271,8 +271,14 @@ function Training.start(map)
 					-- (it faces you, except running away, when it faces where it's going)
 					local look = if mode == "Flee" and move.Magnitude > 0.01 then move else offset
 					local want = math.atan2(-look.X, -look.Z)
+					-- (winding up a Swipe it turns to face it; any other hold, it stays as it is)
+					local face = if (m.b.rooted or 0) > 0 then m.b.facing else nil
+					if face or not hold then
+						want = face or want
+						local rate = if face then 14 else 6
+						m.yaw += ((want - m.yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * rate))
+					end
 					if not hold then
-						m.yaw += ((want - m.yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * 6))
 						pos += move
 					end
 					-- (it stays in its yard)

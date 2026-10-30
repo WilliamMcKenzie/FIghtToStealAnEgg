@@ -191,7 +191,8 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		local hold = BossAttacks.update(body, e.b, dt, BossAttacks.fighters(e.biome))
 		local offset = (target.root.Position - pos) * Vector3.new(1, 0, 1)
-		local want = if (e.b.rooted or 0) > 0 then e.yaw else math.atan2(-offset.X, -offset.Z)
+		-- (rooted: it holds still, or turns to face its Swipe)
+		local want = if (e.b.rooted or 0) > 0 then e.b.facing or e.yaw else math.atan2(-offset.X, -offset.Z)
 		e.yaw += ((want - e.yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * 6))
 		local gap = distance - e.radius - target.extra - 1
 		if not hold and gap > 0 then

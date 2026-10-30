@@ -2,11 +2,15 @@
 -- RotMG-style "bombs" with floor indicators, then all of it). Each boss's Attacks in
 -- Config.Bosses is a list of these, each on its own timer:
 --
---   Contact { Every, Reach, Damage, Gentle }: everyone in the fight within Reach studs of
---         its edge and inside its front cone (Config.BossMelee.Cone, QM Oct 27: circle
---         behind it and its melee misses) takes Damage, at most every Every seconds (QM,
---         Oct 24: all bosses, for now). Gentle ones never take anyone below 1 health (unused: QM, Oct 26 wants the
---         training mobs to be able to kill you).
+--   Swipe { Every, Reach, Arc, Width, Windup, Swings, Damage, Anim, Then }: its melee (QM,
+--         Oct 30: no more hurting you just by touching you). Once you're within Reach studs
+--         of its edge it stops and faces you, a red crescent shaped like the swipe (Arc
+--         degrees round, out to Reach past its edge, Width thick: Reach + half its Radius
+--         if nil) fills on the ground over Windup (Config.EnemySwipe's if nil), then the
+--         swipe goes through it and everyone on it takes Damage. Swings: that many in a row,
+--         back and forth, each with its own telegraph. Clients draw it from the EnemySwipe
+--         remote (client/Swipes); the shape is Shared/SlashFx's, rolled from one seed on
+--         both sides. A leftover Contact { Every, Reach, Damage } is a plain Swipe.
 --   Slam  { Every, Range, Radius, Windup, Damage }: when a fighter is within Range, it
 --         stops, a red circle grows in front of it for Windup seconds, then everything
 --         inside takes Damage. Step out of the circle.
@@ -72,6 +76,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Pets = require(Shared:WaitForChild("Pets"))
+local SlashFx = require(Shared:WaitForChild("SlashFx"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Config = require(Shared:WaitForChild("Config"))
 local HORSE_HITBOX = Pets.stats("Horse").Hitbox
@@ -95,6 +100,11 @@ bombRemote.Parent = ReplicatedStorage
 local animRemote = Instance.new("RemoteEvent")
 animRemote.Name = "BossAnim"
 animRemote.Parent = ReplicatedStorage
+
+-- (every client draws an enemy's swipe: its telegraph, then the slash: client/Swipes)
+local swipeRemote = Instance.new("RemoteEvent")
+swipeRemote.Name = "EnemySwipe"
+swipeRemote.Parent = ReplicatedStorage
 
 local shots = {} -- [part] = { dir, speed, travelled, range, damage, radius, biome }
 local magic = {} -- { { shot, damage, biome } }: Magic attacks' shots in the air
@@ -293,6 +303,7 @@ BossAttacks.animate = animate
 local function root(b, seconds)
 	b.rooted = math.max(b.rooted or 0, seconds)
 	b.still = math.max(b.still or 0, seconds)
+	b.facing = nil -- (a Swipe sets the way it holds while rooted; anything else, as it is)
 end
 BossAttacks.root = root
 
@@ -362,15 +373,61 @@ function BossAttacks.burst(body, b)
 	end
 end
 
--- (the cos of half its melee cone: a fighter at most this far off its facing gets hit)
-local coneCos = math.cos(math.rad(Config.BossMelee.Cone / 2))
-
 local function alive(body)
 	return body.Parent ~= nil and (body:GetAttribute("Health") or 0) > 0
 end
 
 local function serverNow()
 	return workspace:GetServerTimeNow()
+end
+
+-- a Swipe (or an old Contact): it faces `toward` and holds still while each swing's red
+-- crescent fills, then hits everyone on it
+local function swipe(body, b, a, pos, toward)
+	local S = Config.EnemySwipe
+	local windup = a.Windup or S.Windup
+	local swings = math.max(1, a.Swings or 1)
+	local yaw = math.atan2(-toward.X, -toward.Z)
+	animate(body, a, windup)
+	root(b, windup * swings + 0.15)
+	b.yaw, b.facing = yaw, yaw
+	local look = {
+		Radius = b.c.Radius + a.Reach,
+		Arc = a.Arc or S.Arc,
+		Width = a.Width or (a.Reach + b.c.Radius * 0.5),
+	}
+	local c = table.clone(S)
+	for k, v in look do
+		c[k] = v
+	end
+	local origin = CFrame.new(pos.X, groundAt(pos), pos.Z) * CFrame.Angles(0, yaw, 0)
+	local start = serverNow()
+	local dir = if math.random() < 0.5 then 1 else -1
+	for k = 1, swings do
+		local seed = math.random(0, 2 ^ 30 - 1)
+		local o = SlashFx.outline(c, seed)
+		local at = start + (k - 1) * windup
+		swipeRemote:FireAllClients({
+			body = body,
+			origin = origin,
+			look = look,
+			seed = seed,
+			dir = dir,
+			start = at,
+			windup = windup,
+		})
+		task.delay(k * windup, function(d)
+			if not alive(body) then
+				return
+			end
+			for _, f in fighters(b.biome) do
+				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra) then
+					f.humanoid:TakeDamage(a.Damage)
+				end
+			end
+		end, dir)
+		dir = -dir
+	end
 end
 
 local go -- (go(body, b, i): an attack going off now; Then chains through it)
@@ -459,7 +516,15 @@ go = function(body, b, i, list)
 	toward = if toward.Magnitude > 0.01 then toward.Unit else Vector3.new(0, 0, -1)
 	local now = serverNow()
 	b.hops = b.hops or {}
-	if a.Kind == "Slam" then
+	if a.Kind == "Swipe" or a.Kind == "Contact" then
+		if edge - target.extra > a.Reach then
+			return false
+		end
+		swipe(body, b, a, pos, toward)
+		if a.Then then
+			task.delay((a.Windup or Config.EnemySwipe.Windup) * math.max(1, a.Swings or 1), go, body, b, a.Then)
+		end
+	elseif a.Kind == "Slam" then
 		if edge > a.Range then
 			return false
 		end
@@ -673,26 +738,7 @@ function BossAttacks.update(body, b, dt, list)
 		if b.timers[i] > 0 or b.still > 0 or b.move then
 			continue
 		end
-		if a.Kind == "Contact" then
-			-- too close and it hurts: everyone within Reach of its edge and in front of it,
-			-- every Every seconds
-			local hit = false
-			local facing = flat(body.CFrame.LookVector).Unit
-			for _, f in list do
-				local off = flat(f.root.Position - pos)
-				local inFront = off.Magnitude < 0.01 or facing:Dot(off.Unit) >= coneCos
-				if inFront and off.Magnitude - b.c.Radius - f.extra <= a.Reach then
-					local damage = if a.Gentle then math.min(a.Damage, f.humanoid.Health - 1) else a.Damage
-					if damage > 0 then
-						f.humanoid:TakeDamage(damage)
-					end
-					hit = true
-				end
-			end
-			if hit then
-				b.timers[i] = a.Every
-			end
-		elseif go(body, b, i, list) then
+		if go(body, b, i, list) then
 			-- (a Leap's further hops set their own short timer)
 			if not (a.Kind == "Leap" and (b.hops[i] or 0) > 0 and b.timers[i] > 0) then
 				b.timers[i] = a.Every

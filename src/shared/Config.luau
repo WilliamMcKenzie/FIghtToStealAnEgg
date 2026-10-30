@@ -283,7 +283,7 @@ return {
 			Health = 200,
 			Cash = 50, -- to each player who beat it
 			Speed = 10,
-			StopAt = 1, -- (walks right into you: its Contact reaches 4)
+			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 11,
 			Turn = 4,
 			Strength = 2,
@@ -291,7 +291,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+				{ Kind = "Swipe", Every = 1.6, Reach = 6, Arc = 90, Damage = 16 },
 			},
 		},
 		GiantRafflesia = {
@@ -338,7 +338,7 @@ return {
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+				{ Kind = "Swipe", Every = 1.8, Reach = 7, Arc = 140, Damage = 16 },
 				-- (QM, Oct 30: each Meadow boss teaches one floor warning. Horn down, a red
 				-- rectangle runs out at you, then it charges down it: step off the side)
 				{ Kind = "Charge", Every = 5, Range = 70, Windup = 1, Speed = 70, Width = 18, Damage = 12, Anim = "charge" },
@@ -357,7 +357,7 @@ return {
 			Strength = 2,
 			Respawn = 20,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 10 },
+				{ Kind = "Swipe", Every = 1.7, Reach = 9, Arc = 70, Damage = 16 },
 				-- (its snapping bite: a red circle in front fills, then the jaws come down)
 				{ Kind = "Slam", Every = 3.5, Range = 14, Radius = 12, Windup = 0.9, Damage = 14, Anim = "slam" },
 			},
@@ -369,7 +369,7 @@ return {
 			Health = 4000,
 			Cash = 500, -- to each player who beat it
 			Speed = 11,
-			StopAt = 1, -- (walks right into you: its Contact reaches 4)
+			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 22,
 			Turn = 3.5,
 			Strength = 6,
@@ -378,7 +378,7 @@ return {
 			-- green cactus bombs at everyone (Server/BossAttacks' Lob, drawn by client/Bombs):
 			-- each lands Airtime seconds later where you stood when it was thrown, so keep moving)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 16 },
+				{ Kind = "Swipe", Every = 2.2, Reach = 6, Arc = 200, Damage = 26 },
 				{
 					Kind = "Lob",
 					Every = 3.5, -- seconds between volleys
@@ -409,7 +409,7 @@ return {
 				DropFrom = 60, -- studs up they start
 				Dust = Color3.fromRGB(226, 190, 128),
 				Attacks = {
-					{ Kind = "Contact", Every = 1.2, Reach = 3, Damage = 7 },
+					{ Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 110, Damage = 10 },
 				},
 			},
 		},
@@ -491,7 +491,7 @@ return {
 			Health = 30000,
 			Cash = 5000, -- to each player who beat it
 			Speed = 9,
-			StopAt = 1, -- (walks right into you: its Contact reaches 4)
+			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 20,
 			Turn = 3,
 			Strength = 20,
@@ -499,7 +499,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 26 },
+				{ Kind = "Swipe", Every = 2, Reach = 7, Arc = 150, Damage = 40 },
 				-- (tusks down, a hoof scrapes, then it charges down its red rectangle: QM Oct 30)
 				{ Kind = "Charge", Every = 5, Range = 90, Windup = 1.1, Speed = 75, Width = 30, Damage = 34, Anim = "charge" },
 			},
@@ -511,7 +511,7 @@ return {
 			Health = 200000,
 			Cash = 40000, -- to each player who beat it
 			Speed = 8,
-			StopAt = 1, -- (walks right into you: its Contact reaches 4)
+			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 17,
 			Turn = 2.5,
 			Strength = 60,
@@ -519,7 +519,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 40 },
+				{ Kind = "Swipe", Every = 2.6, Reach = 10, Arc = 240, Damage = 60 },
 				-- (head reared back, then a long rectangle of fire breath ahead of it: QM Oct 30)
 				{ Kind = "Line", Every = 4.5, Range = 60, Windup = 1, Width = 14, Length = 70, Damage = 50, Anim = "breath" },
 			},
@@ -546,7 +546,7 @@ return {
 			Strength = 6,
 			Respawn = 25,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 16, Anim = "pinch" },
+				{ Kind = "Swipe", Every = 2.2, Reach = 6, Arc = 100, Damage = 20, Swings = 2, Anim = "pinch" },
 				{ Kind = "Line", Every = 3.5, Range = 50, Windup = 0.8, Width = 7, Length = 55, Damage = 22, Anim = "stab", Then = 3 },
 				{
 					Kind = "Magic",
@@ -576,7 +576,7 @@ return {
 			Strength = 20,
 			Respawn = 30,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 26 },
+				{ Kind = "Swipe", Every = 2.2, Reach = 7, Arc = 160, Damage = 40 },
 				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.7, Airtime = 1.1, Height = 30, Radius = 18, Damage = 34, Anim = "leap", Then = 4 },
 				{ Kind = "Slam", Every = 4, Range = 10, Radius = 16, Windup = 0.9, Damage = 34, Anim = "slam" },
 				{
@@ -638,7 +638,7 @@ return {
 			Strength = 60,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 40 },
+				{ Kind = "Swipe", Every = 2.6, Reach = 6, Arc = 300, Damage = 55 },
 				{ Kind = "Leap", Every = 6, Range = 100, Windup = 0.6, Airtime = 0.9, Height = 26, Radius = 19, Damage = 50, Hops = 3, Anim = "leap", Then = 3 },
 				{
 					Kind = "Magic",
@@ -664,7 +664,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(90, 60, 50),
-				Attacks = { { Kind = "Contact", Every = 1.2, Reach = 3, Damage = 18 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 100, Damage = 26 } },
 			},
 		},
 
@@ -683,7 +683,7 @@ return {
 			Strength = 60,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 40 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 8, Arc = 180, Damage = 60 },
 				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 26, Radius = 8, Airtime = 1.4, Height = 30, Damage = 40, Style = "Lava", Cast = 0.8, Anim = "erupt" },
 				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 46 },
 			},
@@ -700,7 +700,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(90, 60, 50),
-				Attacks = { { Kind = "Contact", Every = 1.2, Reach = 3, Damage = 20 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 120, Damage = 28 } },
 			},
 		},
 
@@ -719,7 +719,7 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 55 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 9, Arc = 130, Damage = 45, Swings = 2 },
 				{ Kind = "Line", Every = 3.5, Range = 18, Windup = 0.9, Width = 34, Length = 26, Damage = 70, Anim = "cleave" },
 				{ Kind = "Charge", Every = 6, Range = 100, Windup = 0.8, Speed = 80, Width = 26, Damage = 60, Anim = "charge" },
 			},
@@ -737,7 +737,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(104, 126, 146),
-				Attacks = { { Kind = "Contact", Every = 1.2, Reach = 3, Damage = 25 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 5, Arc = 90, Damage = 35 } },
 			},
 		},
 
@@ -788,7 +788,7 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 55 },
+				{ Kind = "Swipe", Every = 1.6, Reach = 8, Arc = 80, Damage = 85 },
 				{ Kind = "Charge", Every = 4, Range = 100, Windup = 0.7, Speed = 90, Width = 24, Damage = 65, Anim = "charge", Then = 3 },
 				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 24, Radius = 7, Airtime = 1.2, Height = 22, Damage = 45, Style = "Coin", Cast = 0.5, Anim = "spit" },
 			},
@@ -810,7 +810,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 70 },
+				{ Kind = "Swipe", Every = 3, Reach = 11, Arc = 150, Damage = 60, Swings = 3 },
 				{ Kind = "Charge", Every = 6, Range = 120, Windup = 1, Speed = 85, Width = 28, Damage = 90, Anim = "charge" },
 				{ Kind = "Slam", Every = 4, Range = 14, Radius = 18, Windup = 0.8, Damage = 90, Anim = "slam" },
 			},
@@ -830,7 +830,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(156, 22, 42),
-				Attacks = { { Kind = "Contact", Every = 1.2, Reach = 3, Damage = 35 } },
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 6, Arc = 120, Damage = 50 } },
 			},
 		},
 
@@ -849,7 +849,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 70 },
+				{ Kind = "Swipe", Every = 1.3, Reach = 6, Arc = 110, Damage = 70 },
 				{ Kind = "Blink", Every = 4.5, Fade = 0.6, Near = 30, Far = 55, Anim = "screech", Then = 3 },
 				{
 					Kind = "Magic",
@@ -882,7 +882,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 70 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 9, Arc = 220, Damage = 110 },
 				{ Kind = "Line", Every = 4.5, Range = 70, Windup = 1, Width = 10, Length = 65, Count = 3, Spread = 25, Damage = 90, Anim = "breath" },
 				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 24, Radius = 8, Airtime = 1.3, Height = 26, Damage = 70, Style = "Fire" },
 				{ Kind = "Leap", Every = 8, Range = 120, Windup = 0.8, Airtime = 1.3, Height = 40, Radius = 20, Damage = 90, Anim = "leap" },
@@ -965,7 +965,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(56, 196, 168),
-				Attacks = { { Kind = "Contact", Every = 1.2, Reach = 3, Damage = 25 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 110, Damage = 35 } },
 			},
 		},
 
@@ -984,7 +984,7 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 55 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 6, Arc = 270, Damage = 85 },
 				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.6, Airtime = 1, Height = 28, Radius = 17, Damage = 70, Anim = "leap", Then = 3 },
 				{ Kind = "Bombs", Linked = true, Every = 5, Count = 8, Around = true, Scatter = 8, Radius = 8, Windup = 1.2, Damage = 60, Cast = 0.5, Anim = "puff" },
 				{
@@ -1013,7 +1013,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 70 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 7, Arc = 110, Damage = 60, Swings = 2 },
 				{ Kind = "Charge", Every = 5, Range = 110, Windup = 0.9, Speed = 80, Width = 40, Damage = 90, Anim = "charge" },
 				{ Kind = "Slam", Every = 4, Range = 14, Radius = 20, Windup = 0.9, Damage = 90, Anim = "slam" },
 				{
@@ -1044,7 +1044,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Contact", Every = 1, Reach = 4, Damage = 70 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 5, Arc = 330, Damage = 100 },
 				{
 					Kind = "Magic",
 					Every = 4,
@@ -1108,7 +1108,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(140, 200, 236),
-				Attacks = { { Kind = "Contact", Every = 1.2, Reach = 3, Damage = 35 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 5, Arc = 100, Damage = 50 } },
 			},
 		},
 	},
@@ -1133,15 +1133,64 @@ return {
 		Delay = 10,
 		Rate = 0.1, -- 10% of max health a second
 	},
-	-- boss melee only hits in front (QM, Oct 27: circle round a boss and you dodge it).
-	-- Contact attacks (Server/BossAttacks) hit only fighters within Cone degrees (the whole
-	-- wedge, centred on its facing), and bosses turn at most TurnRate degrees a second
+	-- boss melee only hits in front (QM, Oct 27: circle round a boss and you dodge it):
+	-- its Swipe's Arc (Config.EnemySwipe), and bosses turn at most TurnRate degrees a second
 	-- (Server/Bosses; a boss's own TurnRate overrides it). A Horse (44 studs/s) circling
 	-- Mother Hen's reach (about 15 studs out) sweeps about 170 degrees a second, so it
 	-- outruns 120; a Fish (about 26 studs/s) can't, until it hugs closer.
 	BossMelee = {
-		Cone = 100,
 		TurnRate = 120,
+	},
+	-- every enemy's melee (QM, Oct 30): a swipe like the player's, after a red telegraph in
+	-- its shape fills on the ground for Windup seconds, so you can step out of it. Each
+	-- attack's Swipe sets its Reach, Arc and Damage (Server/BossAttacks); these are the
+	-- rest of its look, the same keys as Config.Slash (Shared/SlashFx), plus the
+	-- telegraph's (client/Swipes, styled like the bombs' landing rings: client/Bombs).
+	EnemySwipe = {
+		Windup = 0.5, -- seconds from the telegraph appearing to the hit
+		Arc = 120,
+		Ends = 0.75, -- (fat ends: it reads as an area, not a streak)
+		Belly = 0.4,
+		Skew = 1,
+		OuterSegments = 5,
+		InnerSegments = 3,
+		Jitter = 0.6,
+		RadiusJitter = 0.03,
+		MaxStrip = 0.06,
+		Variety = {
+			Arc = { 0.95, 1.05 },
+			Radius = { 0.97, 1.03 },
+			Width = { 0.9, 1.1 },
+			Belly = { 0.7, 1.3 },
+			Skew = { 0.8, 1.25 },
+			Ends = { 0.85, 1.15 },
+			OuterSegments = { 0.8, 1.2 },
+			InnerSegments = { 0.67, 1.34 },
+			Jitter = { 0.7, 1.3 },
+			RadiusJitter = { 0.5, 1.5 },
+		},
+		-- the swipe itself (white, like yours)
+		Height = 1.2, -- studs above the ground
+		Color = Color3.fromRGB(255, 255, 255),
+		Opacity = 0.35,
+		Glow = 0.8,
+		Sweep = 0.12,
+		Ease = 3,
+		Hold = 0.1,
+		Fade = 0.2,
+		Trail = 1.15,
+		Pop = 1.1,
+		-- the telegraph (red, filling from its inner edge out to the outer by the hit)
+		Warn = Color3.fromRGB(255, 50, 35),
+		Lift = 0.15, -- studs above the ground
+		Outline = 0.15, -- transparency of its outline (all round)
+		OutlineWidth = 0.4, -- studs
+		FadeBands = 4, -- inside the outer edge, faint red to clear going in
+		FadeEdge = 0.6,
+		FadeDepth = 0.6, -- of its thickness
+		Fill = 0.5, -- transparency of the fill
+		Edge = 0.15, -- the fill's leading edge
+		EdgeWidth = 0.35, -- studs
 	},
 	BossCalmDown = 6, -- seconds with nobody locked in its fight before a boss walks home and leaves
 	-- a boss arriving (QM, Oct 25: they only appear once you steal an egg): the camera of
@@ -1871,7 +1920,7 @@ return {
 	-- (Strength grows into the millions by the Lava Valley: Config.Power's log curve keeps
 	-- what it does in check.)
 	-- Mobs fight back (QM, Oct 26): hit one and it turns on you, follows you round its yard
-	-- at Chase x its Speed and bites with its Attacks (Server/BossAttacks' Contact, like
+	-- at Chase x its Speed and swipes with its Attacks (Server/BossAttacks' Swipe, like
 	-- the bosses), until you've left its yard, died, or not hit it for Calm seconds. They
 	-- hit for real (QM, Oct 26), about 40% of their biome boss's damage a second, and can
 	-- kill you: while one's biting you, Server/Regen doesn't heal you.
@@ -1897,7 +1946,7 @@ return {
 				Count = 4,
 				Strength = 2,
 				Speed = 4,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 6 } }, -- (boss: 10 a second)
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 3, Arc = 100, Damage = 8 } }, -- (boss: 10 a second)
 				Mobs = { { Pet = "Pig" }, { Pet = "Fish" } },
 			},
 			Desert = {
@@ -1907,7 +1956,7 @@ return {
 				Count = 6,
 				Strength = 5,
 				Speed = 2.5,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 10 } }, -- (boss: 16)
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 3, Arc = 110, Damage = 13 } }, -- (boss: 16)
 				Mobs = {
 					{ Pet = "Cactus", Name = "Cactus Monster" },
 					{
@@ -1935,7 +1984,7 @@ return {
 				Count = 6,
 				Strength = 15,
 				Speed = 3,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 16 } }, -- (boss: 26)
+				Attacks = { { Kind = "Swipe", Every = 2, Reach = 4, Arc = 140, Damage = 22 } }, -- (boss: 26)
 				Mobs = {
 					{ Pet = "Boar" },
 					{
@@ -1970,7 +2019,7 @@ return {
 				Count = 4,
 				Strength = 45,
 				Speed = 3.5,
-				Attacks = { { Kind = "Contact", Every = 1.5, Reach = 2, Damage = 24 } }, -- (boss: 40)
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 4, Arc = 130, Damage = 32 } }, -- (boss: 40)
 				Mobs = {
 					{ Pet = "RockHog", Name = "Fire Boar", Scale = 0.6 }, -- (QM: the yard's too small for them full size)
 					{
