@@ -9,12 +9,7 @@
 -- its corridor, "<name> Training" and Config.Training.Grounds' Cost; the player owns it
 -- with Train<Name> instead of Region<Name> (the model's Owns attribute says which).
 --
--- The region behind it sits in the dark (QM Oct 30): a see-through navy box over the
--- region's bounds (Config.Regions.Dark), from just behind the wall to the far side, in the
--- same model so it goes when the blocker does.
---
---   RegionBlocker.build(marker, groundAt, bounds?) -> Model   (marker: the gate's Part;
---   groundAt(x, z) -> floor top; bounds: the region's {x0, z0, x1, z1})
+--   RegionBlocker.build(marker, groundAt) -> Model   (marker: the gate's Part; groundAt(x, z) -> floor top)
 
 local Config = require(script.Parent.Config)
 
@@ -22,7 +17,7 @@ local RegionBlocker = {}
 
 local REGIONS = Config.Regions
 local COIN = "rbxassetid://128139739160102" -- assets/ui/CashIcon.png: the HUD's cash, cropped
-local PIXELS = 10 -- the faces: pixels per stud (text stops at 100 pixels: 10 studs)
+local PIXELS = 10 / 0.6 -- the faces: pixels per stud (QM Oct 30: everything on them 40% smaller than at 10)
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local INK = Color3.fromRGB(14, 12, 16)
 
@@ -72,7 +67,7 @@ local function face(wall, normalId, title, cost)
 	gui.Face = normalId
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	-- (a narrow wall, a training corridor's: drawn finer, so its price and button fit)
-	local pixels = if wall.Size.X * PIXELS < 400 then PIXELS * 1.6 else PIXELS
+	local pixels = if wall.Size.X * 10 < 400 then PIXELS * 1.6 else PIXELS
 	gui.PixelsPerStud = pixels
 	gui.LightInfluence = 0
 	gui.MaxDistance = 400
@@ -149,47 +144,7 @@ local function shade(holder, p0, p1, width, across)
 	beam.Parent = a0
 end
 
--- the dark over the region: its bounds, cut off at the gate (the marker's LookVector
--- points away from the region) so the floor in front of the blocker stays lit
-local function dark(model, marker, bounds, floor)
-	local look = REGIONS.Dark
-	local x0, x1 = math.min(bounds[1], bounds[3]), math.max(bounds[1], bounds[3])
-	local z0, z1 = math.min(bounds[2], bounds[4]), math.max(bounds[2], bounds[4])
-	local inward = -marker.CFrame.LookVector
-	local behind = marker.Position + inward * (marker.Size.Z / 2 + 0.25)
-	if math.abs(inward.X) > 0.7 then
-		if inward.X > 0 then
-			x0 = math.max(x0, behind.X)
-		else
-			x1 = math.min(x1, behind.X)
-		end
-	elseif math.abs(inward.Z) > 0.7 then
-		if inward.Z > 0 then
-			z0 = math.max(z0, behind.Z)
-		else
-			z1 = math.min(z1, behind.Z)
-		end
-	end
-	if x1 - x0 < 1 or z1 - z0 < 1 then
-		return
-	end
-	local y0, y1 = floor - 2, floor + look.Height
-	local part = Instance.new("Part")
-	part.Name = "Dark"
-	part.Anchored = true
-	part.CanCollide, part.CanQuery, part.CanTouch = false, false, false
-	part.CastShadow = false
-	part.Material = Enum.Material.SmoothPlastic
-	part.TopSurface, part.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
-	part.Color = look.Color
-	part.Transparency = look.Transparency
-	part.Size = Vector3.new(x1 - x0, y1 - y0, z1 - z0)
-	part.CFrame = CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)
-	part.Locked = true
-	part.Parent = model
-end
-
-function RegionBlocker.build(marker, groundAt, bounds)
+function RegionBlocker.build(marker, groundAt)
 	local region = marker:GetAttribute("Region")
 	local training = marker:GetAttribute("Training") == true
 	local ground = training and Config.Training.Grounds[region]
@@ -232,9 +187,6 @@ function RegionBlocker.build(marker, groundAt, bounds)
 		local y = groundAt(at.X + n.X * 2, at.Z + n.Z * 2)
 		local p0 = Vector3.new(at.X, y + 0.06, at.Z)
 		shade(wall, p0, p0 + n * len, size.X, right)
-	end
-	if bounds then
-		dark(model, marker, bounds, groundAt(centre.X, centre.Z))
 	end
 	return model
 end
