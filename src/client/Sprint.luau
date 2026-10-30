@@ -87,6 +87,13 @@ RunService:BindToRenderStep("Sprint", Enum.RenderPriority.Camera.Value + 3, func
 	end
 	if moving >= cfg.Delay then
 		boost = math.min(boost + (cfg.Speed - 1) * dt / cfg.Ramp, cfg.Speed)
+		-- (a charge builds on: up to Smash.MaxSpeed x the sprint over its Ramp: QM, Oct 30)
+		local ability = Config.SprintPets[player:GetAttribute("Pet") or "Horse"]
+		if ability == "Smash" or ability == "Crabwalk" then
+			local smash = Config.SprintAbility.Smash
+			local built = math.clamp((moving - cfg.Delay) / smash.Ramp, 0, 1)
+			boost = math.max(boost, cfg.Speed * (1 + (smash.MaxSpeed - 1) * built))
+		end
 	else
 		boost = 1
 	end
