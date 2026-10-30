@@ -11,7 +11,7 @@
 --   Arsenal.buy(player, id) -> ok, why  -- for its Price in cash: owned and equipped
 --                                       -- (the BuyWeapon RemoteFunction: Carl's shop)
 --   BuyWeaponRobux (RemoteEvent, id)    -- prompts its developer product (Config.Vendor.Products);
---                                       -- ProcessReceipt owns and equips it once paid
+--                                       -- once paid it owns and equips it (Server/Store)
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -21,6 +21,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Stacks = require(Shared.Stacks)
 local Weapons = require(Shared.Weapons.Weapons)
+local Store = require(script.Parent.Store)
 
 local Arsenal = {}
 
@@ -165,14 +166,10 @@ function Arsenal.start()
 		end
 	end)
 	robuxRemote.Parent = ReplicatedStorage
-	MarketplaceService.ProcessReceipt = function(receipt)
-		local player = Players:GetPlayerByUserId(receipt.PlayerId)
-		local id = weaponOf[receipt.ProductId]
-		if not (player and id) then
-			return Enum.ProductPurchaseDecision.NotProcessedYet -- (asked again when they're back)
-		end
-		Arsenal.give(player, id, true)
-		return Enum.ProductPurchaseDecision.PurchaseGranted
+	for product, id in weaponOf do
+		Store.product(product, function(player) -- (Server/Store's ProcessReceipt)
+			Arsenal.give(player, id, true)
+		end)
 	end
 
 	local function joined(player)

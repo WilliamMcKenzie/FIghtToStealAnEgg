@@ -41,6 +41,7 @@ local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local Passes = require(Shared:WaitForChild("Passes"))
 local Power = require(Shared:WaitForChild("Power"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Weapons = require(Shared:WaitForChild("Weapons"):WaitForChild("Weapons"))
@@ -66,8 +67,9 @@ function Combat.alive(player)
 	return humanoid ~= nil and humanoid.Health > 0
 end
 
+-- (x2 with the x2 Damage pass: Shared/Passes)
 function Combat.damage(player)
-	return Config.Slash.Damage * Power.damage(player:GetAttribute("Strength"))
+	return Config.Slash.Damage * Power.damage(player:GetAttribute("Strength")) * Passes.mult(player, "Damage")
 end
 
 local rng = Random.new()

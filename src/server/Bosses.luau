@@ -49,6 +49,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local BossAttacks = require(script.Parent.BossAttacks)
 local Combat = require(script.Parent.Combat)
+local Passes = require(Shared:WaitForChild("Passes"))
 local Pets = require(Shared:WaitForChild("Pets"))
 local Minions = require(script.Parent.Minions)
 
@@ -106,11 +107,11 @@ local function hurt(body, amount)
 					table.insert(winners, player)
 				end
 			end
-			-- its Cash to each of them (Config.Bosses)
+			-- its Cash to each of them (Config.Bosses; x2 with the x2 Cash pass)
 			local cash = b.c.Cash or 0
 			if cash > 0 then
 				for _, player in winners do
-					player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + cash)
+					player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + cash * Passes.mult(player, "Cash"))
 				end
 			end
 			Bosses.killed:Fire(b.kind, winners)

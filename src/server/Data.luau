@@ -35,7 +35,7 @@ local loaded = {} -- [player] = true once their data is in
 local warned = false
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "PetIndex", "IndexClaimed" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "PetIndex", "IndexClaimed", "Passes" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end

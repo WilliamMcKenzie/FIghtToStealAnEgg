@@ -279,7 +279,7 @@ end
 
 -- How big an egg is by now: it grows from 1x when placed to GrowScale x when it's ready.
 local function eggScale(s, now)
-	local total = HATCH.Time[s.kind] or HATCH.Default
+	local total = s.total or HATCH.Time[s.kind] or HATCH.Default
 	local grown = math.clamp(1 - (s.ready - now) / total, 0, 1)
 	return 1 + (HATCH.GrowScale - 1) * grown
 end
@@ -365,6 +365,7 @@ local function show(owner, e, area)
 		owner = owner,
 		kind = e.k,
 		ready = e.t,
+		total = tonumber(e.d), -- (how long it grows: shorter with x2 Growth)
 		at = floorAt(area, e.x, e.z),
 		yaw = facing(area),
 		nextTwitch = rng:NextNumber(TWITCH_EVERY[1], TWITCH_EVERY[2]),

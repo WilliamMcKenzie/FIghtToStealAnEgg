@@ -28,6 +28,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Passes = require(Shared.Passes)
 local Stacks = require(Shared.Stacks)
 local Pens = require(script.Parent.Pens)
 local Pets = require(Shared.Pets)
@@ -178,7 +179,8 @@ function PetInventory.income(player)
 	for _, kind in PetInventory.equipped(player) do
 		total += Config.Pets[kind].Cash or 0
 	end
-	return total * (1 + Config.Rebirth.CashBonus * (player:GetAttribute("Rebirths") or 0))
+	-- (x2 with the x2 Cash pass)
+	return total * (1 + Config.Rebirth.CashBonus * (player:GetAttribute("Rebirths") or 0)) * Passes.mult(player, "Cash")
 end
 
 local function pay()

@@ -3,8 +3,8 @@
 -- red Eggs and orange Pets buttons (right middle); the Power counter, with its little orange
 -- + button, and the Cash counter (bottom left); and the hotbar (bottom centre: client/Hotbar).
 -- The paw (Pets) button opens the Active Pets popup (client/PetsPanel), the egg (Eggs) one
--- the Growing Eggs popup (client/EggsPanel), the Index one the Index popup (client/IndexPanel);
--- Shop doesn't do anything yet.
+-- the Growing Eggs popup (client/EggsPanel), the Index one the Index popup (client/IndexPanel),
+-- the Shop one the Shop (client/Shop).
 --
 -- Laid out in pixels at a 1080-tall design size and scaled to the screen by a UIScale
 -- (screen height / 1080). QM's Figma frame is 2190 tall, so its numbers go through fig().
@@ -328,6 +328,7 @@ function Hud.start()
 
 	Hotbar.init(root, fig)
 	require(script.Parent.WeaponShop).init(root) -- (Carl's: opened by Talking to him)
+	require(script.Parent.Shop).init(root, root:FindFirstChild("ShopButton")) -- (the Shop button's)
 	require(script.Parent.PetsPanel).init(root, root:FindFirstChild("PetsButton")) -- (the paw button's)
 	require(script.Parent.EggsPanel).init(root, root:FindFirstChild("EggsButton")) -- (the egg button's)
 	require(script.Parent.IndexPanel).init(root, root:FindFirstChild("IndexButton")) -- (the Index button's)

@@ -13,6 +13,11 @@
 --   HudKit.button(parent, name, w, h, props, look) -- a w x h (Figma px) button on a Back of
 --     that look. Under the mouse it grows from its centre and its back darkens (QM, Oct 27),
 --     its icon and text not.
+--   HudKit.popup(root, name, title, headerLook) -> gui, close -- the shop popup (QM's Figma,
+--     Oct 27; 2268 x 1370 Figma px, centred): the dark studded panel, the header with its
+--     two shine stripes, the title over its drop shadow and the red X. The Weapon Shop's
+--     (orange Header) and the Shop's (LimeHeader) are this one. Hidden in Play till opened
+--     (client/UiFx.popIn).
 
 local TweenService = game:GetService("TweenService")
 
@@ -26,6 +31,9 @@ local FIGMA_HEIGHT = 2190 -- (QM's NewUI frame)
 local HOVER_GROW = 1.08 -- a button grows this much under the mouse (QM: snappy)
 local HOVER_DARK = Color3.fromRGB(205, 205, 205) -- its back's tint then
 local HOVER_TIME = 0.08
+local SHINE = { { at = 0.62, width = 0.07 }, { at = 0.72, width = 0.025 } } -- across the header, of its width
+local SHINE_SLANT = 22 -- degrees the stripes lean
+local SHINE_ALPHA = 0.7 -- their transparency
 
 HudKit.FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 HudKit.ITALIC = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic)
@@ -111,6 +119,20 @@ HudKit.LOOKS = {
 	IndexCard = { fill = rgb("2f3a2a"), border = { Color3.new(0, 0, 0), 5, 0.4 }, tile = { 223.5, 0.85 }, outline = 6, corner = 10 },
 	Panel = { fill = rgb("323232"), border = { Color3.new(0, 0, 0), 6, 0.5 }, tile = { 223.5, 0.9 }, outline = 8, corner = 20 },
 	Card = { fill = Color3.new(1, 1, 1), border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	-- the Shop (QM's Figma "Shop" frame, Oct 30; client/Shop): its lime header, and its
+	-- cards' backs, an angled gradient (Figma -49deg) under the studs, black edged
+	LimeHeader = {
+		across = { rgb("00ff00"), rgb("beff00"), rgb("00ff00") },
+		bevel = { 0.5, 0.5, rgb("ffe500"), rgb("b60000"), 12 },
+		tile = { 223.5, 0.8 },
+		outline = 8,
+	},
+	CashCard = { diag = { rgb("21ff00"), rgb("f3fe0d"), rgb("31ff01"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	PowerCard = { diag = { rgb("0090ff"), rgb("8ff6ff"), rgb("1aa3ff"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	LifeCard = { diag = { rgb("ff2e74"), rgb("ffb3d6"), rgb("ff4f8f"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	DamageCard = { diag = { rgb("ff3c00"), rgb("ffc04d"), rgb("ff5500"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	GoldCard = { diag = { rgb("ffae00"), rgb("fff27a"), rgb("ffa200"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
+	GrowthCard = { diag = { rgb("a83bff"), rgb("ff9cf0"), rgb("7a4dff"), -139 }, border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
 }
 
 function HudKit.fig(n)
@@ -191,7 +213,16 @@ function HudKit.back(parent, look, props)
 	round(back)
 	local fill = Instance.new("UIGradient")
 	fill.Name = "Fill"
-	if spec.across then
+	if spec.diag then
+		-- (a Figma angled gradient, three stops: its colours and the UIGradient's Rotation)
+		local c = spec.diag
+		fill.Rotation = c[4]
+		fill.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, c[1]),
+			ColorSequenceKeypoint.new(0.625, c[2]),
+			ColorSequenceKeypoint.new(1, c[3]),
+		})
+	elseif spec.across then
 		local c = spec.across
 		fill.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, c[1]),
@@ -355,6 +386,80 @@ function HudKit.hover(b)
 		hover(false)
 	end)
 	require(script.Parent.UiFx).button(b)
+end
+
+function HudKit.popup(root, name, title, headerLook)
+	local gui, fresh = Ui.make(root, name, "Frame")
+	if fresh then
+		-- (Figma: 2268 x 1370, centred on the screen)
+		gui.BackgroundTransparency = 1
+		gui.AnchorPoint = Vector2.new(0.5, 0.5)
+		gui.Position = UDim2.fromScale(0.5, 0.5)
+		gui.Size = UDim2.fromOffset(fig(2268), fig(1370))
+		gui.ZIndex = 10
+		gui.Visible = not Ui.live -- (shown in Studio to edit; in Play when it's opened)
+	end
+	Ui.make(gui, "Pop", "UIScale")
+	HudKit.back(gui, "Panel", {
+		Name = "Panel",
+		-- (tucked under the header, so only its bottom corners show rounded)
+		Position = UDim2.fromOffset(0, fig(263)),
+		Size = UDim2.fromOffset(fig(2268), fig(1107)),
+	})
+	local header = HudKit.back(gui, headerLook, {
+		Name = "Header",
+		Size = UDim2.fromOffset(fig(2268), fig(283)),
+		ZIndex = 2,
+	})
+	-- the shine: slanted white stripes, clipped to the header by a CanvasGroup (a rotated
+	-- frame isn't clipped by ClipsDescendants)
+	local shine
+	shine, fresh = Ui.make(header, "Shine", "CanvasGroup")
+	if fresh then
+		shine.BackgroundTransparency = 1
+		shine.Size = UDim2.fromScale(1, 1)
+		shine.GroupTransparency = SHINE_ALPHA
+		shine.ZIndex = 2
+		for i, st in SHINE do
+			local stripe = Instance.new("Frame")
+			stripe.Name = "Stripe" .. i
+			stripe.BackgroundColor3 = Color3.new(1, 1, 1)
+			stripe.BorderSizePixel = 0
+			stripe.AnchorPoint = Vector2.new(0.5, 0.5)
+			stripe.Position = UDim2.fromScale(st.at, 0.5)
+			stripe.Size = UDim2.new(st.width, 0, 2, 0)
+			stripe.Rotation = SHINE_SLANT
+			stripe.Parent = shine
+		end
+	end
+	HudKit.label(gui, "Title", {
+		Text = title,
+		TextSize = fig(130),
+		Position = UDim2.fromOffset(fig(70), fig(66)),
+		Size = UDim2.fromOffset(fig(1100), fig(158)),
+		ZIndex = 4,
+	})
+	-- (Figma: an 8px drop shadow under the title)
+	HudKit.label(gui, "TitleShadow", {
+		Text = title,
+		TextSize = fig(130),
+		TextColor3 = HudKit.BLACK,
+		Position = UDim2.fromOffset(fig(70), fig(66 + 8)),
+		Size = UDim2.fromOffset(fig(1100), fig(158)),
+		ZIndex = 3,
+	})
+	local close = HudKit.button(gui, "ShopClose", 174, 174, { Position = UDim2.fromOffset(fig(2046), fig(54)), ZIndex = 4 }, "Red")
+	HudKit.label(close, "X", {
+		Text = "X",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = fig(120),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 5,
+	})
+	if Ui.live then
+		gui.Visible = false
+	end
+	return gui, close
 end
 
 return HudKit
