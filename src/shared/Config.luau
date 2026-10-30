@@ -541,7 +541,7 @@ return {
 			Cash = 500,
 			Speed = 12,
 			StopAt = 6,
-			Radius = 14,
+			Radius = 18,
 			Turn = 3.5,
 			Strength = 6,
 			Respawn = 25,
