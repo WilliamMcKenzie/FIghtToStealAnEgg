@@ -16,8 +16,8 @@
 --   HudKit.popup(root, name, title, headerLook) -> gui, close -- the shop popup (QM's Figma,
 --     Oct 27; 2268 x 1370 Figma px, centred): the dark studded panel, the header with its
 --     two shine stripes, the title over its drop shadow and the red X. The Weapon Shop's
---     (orange Header) and the Shop's (LimeHeader) are this one. Hidden in Play till opened.
---   HudKit.pop(gui)                       -- shows a popup, popping it open (its Pop UIScale)
+--     (orange Header) and the Shop's (LimeHeader) are this one. Hidden in Play till opened
+--     (client/UiFx.popIn).
 
 local TweenService = game:GetService("TweenService")
 
@@ -34,7 +34,6 @@ local HOVER_TIME = 0.08
 local SHINE = { { at = 0.62, width = 0.07 }, { at = 0.72, width = 0.025 } } -- across the header, of its width
 local SHINE_SLANT = 22 -- degrees the stripes lean
 local SHINE_ALPHA = 0.7 -- their transparency
-local POP = 0.12 -- seconds a popup takes to pop open
 
 HudKit.FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 HudKit.ITALIC = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic)
@@ -451,15 +450,6 @@ function HudKit.popup(root, name, title, headerLook)
 		gui.Visible = false
 	end
 	return gui, close
-end
-
-function HudKit.pop(gui)
-	gui.Visible = true
-	local pop = gui:FindFirstChild("Pop")
-	if pop then
-		pop.Scale = 0.85
-		TweenService:Create(pop, TweenInfo.new(POP, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-	end
 end
 
 return HudKit

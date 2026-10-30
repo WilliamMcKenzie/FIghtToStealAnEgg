@@ -26,6 +26,7 @@ local Abbrev = require(Shared.Abbrev)
 local HudImages = require(script.Parent.HudImages)
 local HudKit = require(script.Parent.HudKit)
 local Ui = require(script.Parent.Ui)
+local UiFx = require(script.Parent.UiFx)
 
 local Shop = {}
 
@@ -270,7 +271,7 @@ end
 -- a Game Pass: its picture and badge on the left, its name and what it does on the right
 local function pass(row, index, order)
 	local item = SHOP.Passes[index]
-	local c, fresh = card(row, "Pass" .. index, PASS_LOOKS[item.Look] or "GoldCard", WIDE, order)
+	local c = card(row, "Pass" .. index, PASS_LOOKS[item.Look] or "GoldCard", WIDE, order)
 	local x, y = 255 - WIDE / 2, 215 -- (the picture's middle: x from the card's)
 	sunburst(c, x, y, 560)
 	art(c, "Picture", {
@@ -465,19 +466,20 @@ end
 -- ---- using it ---------------------------------------------------------------------------
 
 function Shop.isOpen()
-	return gui ~= nil and gui.Visible
+	return gui ~= nil and UiFx.isOpen(gui)
 end
 
+-- (pops in and out with its sounds: client/UiFx)
 function Shop.open()
 	if gui then
-		HudKit.pop(gui)
+		UiFx.popIn(gui)
 	end
 end
 
 function Shop.close()
 	if gui then
-		gui.Visible = false
 		picker.Visible = false
+		UiFx.popOut(gui)
 	end
 end
 
@@ -528,10 +530,10 @@ function Shop.init(root, shopButton)
 			end
 		end
 		people.Nobody.Visible = others == 0
-		picker.Visible = true
+		UiFx.popIn(picker)
 	end
 	cancel.Activated:Connect(function()
-		picker.Visible = false
+		UiFx.popOut(picker)
 	end)
 
 	for _, m in made do
@@ -562,7 +564,12 @@ function Shop.init(root, shopButton)
 	end
 	refresh()
 	for _, item in SHOP.Passes do
-		player:GetAttributeChangedSignal("Pass" .. item.Name):Connect(refresh)
+		player:GetAttributeChangedSignal("Pass" .. item.Name):Connect(function()
+			refresh()
+			if player:GetAttribute("Pass" .. item.Name) and Shop.isOpen() then
+				UiFx.play("Claim") -- (it's yours)
+			end
+		end)
 	end
 end
 
