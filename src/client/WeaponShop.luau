@@ -26,6 +26,7 @@ local Config = require(Shared.Config)
 local ItemIcons = require(Shared.ItemIcons)
 local Weapons = require(Shared.Weapons.Weapons)
 local RegionBlocker = require(Shared.RegionBlocker)
+local RarityLook = require(Shared.RarityLook)
 local HudKit = require(script.Parent.HudKit)
 local Ui = require(script.Parent.Ui)
 
@@ -38,30 +39,13 @@ local NAME_STROKE = Color3.fromRGB(70, 70, 70)
 local SHINE = { { at = 0.62, width = 0.07 }, { at = 0.72, width = 0.025 } } -- across the header, of its width
 local SHINE_SLANT = 22 -- degrees the stripes lean
 local SHINE_ALPHA = 0.7 -- their transparency
--- each rarity's card (QM's Figma, Oct 27): its back's gradient, bottom to top (reaching the
--- top colour `at` of the way up), and its rarity's text colour. From Mythic up (QM, Oct 27:
--- after their Pickaxe Shop's Divine, Cosmic, Celestial, Void and Omega cards) they `move`:
--- the back's gradient turns round with a light sheen sweeping across it (QM, Oct 27: the
--- backs should visibly move), and a band of `text2` sweeps across the rarity.
-local function hex(h)
-	return Color3.fromHex(h)
-end
-local RARITY = {
-	Common = {},
-	Uncommon = { bottom = hex("7aff2c"), top = hex("ccff25"), at = 0.736, text = hex("00ff00") },
-	Rare = { bottom = hex("36a8ff"), top = hex("00f0ff"), at = 1, text = hex("00b7ff") },
-	Epic = { bottom = hex("d950ff"), top = hex("fe4aff"), at = 1, text = hex("d300ff") },
-	Legendary = { bottom = hex("ff4c56"), top = hex("fbb8bb"), at = 1, text = hex("ff0004") },
-	Mythic = { bottom = hex("ff2f6e"), top = hex("ffa6c4"), at = 1, text = hex("ff1f5a"), text2 = hex("ffc2d4"), move = true },
-	Divine = { bottom = hex("9a6bff"), top = hex("dcf6ff"), at = 1, text = hex("9fe8ff"), text2 = hex("3d7bff"), move = true },
-	Celestial = { bottom = hex("e39a35"), top = hex("fff3cf"), at = 1, text = hex("ffd34a"), text2 = hex("a8620c"), move = true },
-	Cosmic = { bottom = hex("b04cff"), top = hex("ffa3f0"), at = 1, text = hex("e070ff"), text2 = hex("4a0a9a"), move = true },
-	Void = { bottom = hex("6a2cd8"), top = hex("cdb2ff"), at = 1, text = hex("5a3ae0"), text2 = hex("12004a"), move = true },
-	Omega = { bottom = hex("4ed46a"), top = hex("eaffd8"), at = 1, text = hex("b4ff6a"), text2 = hex("2fae3a"), move = true },
-}
+-- each rarity's card (QM's Figma, Oct 27): its back's gradient and its rarity's text
+-- colours are Config.Rarities'. From Mythic up they move: the back's gradient turns round
+-- with a light sheen sweeping across it (QM, Oct 27: the backs should visibly move), and
+-- a band sweeps across the rarity (Shared/RarityLook, as everywhere rarities show).
+local RARITY = Config.Rarities
 local SPIN = 45 -- degrees a second a moving card's back turns
 local SHEEN = 0.45 -- transparency at the middle of the sheen's band
-local SWEEP = 2.5 -- seconds a band takes across a moving rarity's text
 local ICON_OUTLINE = 3 -- px of black round the Robux icon (QM, Oct 27: like its text's)
 local POP = 0.12 -- seconds it takes to pop open
 local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
@@ -69,7 +53,7 @@ local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
 local gui -- the WeaponShop frame
 local cards -- its scrolling row
 local template
-local moving = {} -- { { back's Fill, rarity's UIGradient, sheen's UIGradient } } of the moving cards
+local moving = {} -- { { back's Fill, sheen's UIGradient } } of the moving cards
 
 -- ---- building ---------------------------------------------------------------------------
 
@@ -297,25 +281,10 @@ local function fill(card, id)
 	local w = Config.Weapons[id] or {}
 	local look = RARITY[w.Rarity] or RARITY.Common
 	card.WeaponName.Text = w.Name or id
-	card.Rarity.Text = w.Rarity or "Common"
+	RarityLook.paint(card.Rarity, w.Rarity or "Common", card.Rarity.Outline)
 	local back = card:FindFirstChild("Back")
 	if look.top then
 		-- (Figma: bottom colour up to the top one, which it reaches `at` of the way up)
-		card.Rarity.Outline.Color = look.text:Lerp(Color3.new(0, 0, 0), 0.6)
-		if look.move then
-			-- (white text, coloured by its gradient: text, a band of text2, text)
-			card.Rarity.TextColor3 = Color3.new(1, 1, 1)
-			card.Rarity.UIGradient.Enabled = true
-			card.Rarity.UIGradient.Rotation = 0
-			card.Rarity.UIGradient.Color = ColorSequence.new({
-				ColorSequenceKeypoint.new(0, look.text),
-				ColorSequenceKeypoint.new(0.5, look.text2),
-				ColorSequenceKeypoint.new(1, look.text),
-			})
-		else
-			card.Rarity.TextColor3 = look.text
-			card.Rarity.UIGradient.Enabled = false
-		end
 		if back then
 			back.Fill.Color = if look.at < 1
 				then ColorSequence.new({
@@ -348,16 +317,9 @@ local function fill(card, id)
 				band.Offset = Vector2.new(-1.5, 0)
 				band.Parent = sheen
 				sheen.Parent = back
-				table.insert(moving, { back.Fill, card.Rarity.UIGradient, band })
+				table.insert(moving, { back.Fill, band })
 			end
 		end
-	else
-		-- (Common: a white card, its rarity white at the top to grey at the bottom)
-		card.Rarity.TextColor3 = Color3.new(1, 1, 1)
-		card.Rarity.UIGradient.Enabled = true
-		card.Rarity.UIGradient.Rotation = 90
-		card.Rarity.UIGradient.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(135, 135, 135))
-		card.Rarity.Outline.Color = Config.Rarities.Common.Stroke
 	end
 	if back and back:FindFirstChild("Glow") then
 		back.Glow.Visible = look.top ~= nil
@@ -476,19 +438,17 @@ function WeaponShop.init(root)
 	end
 
 	-- the moving cards, while the shop's open: each back's gradient turns (from its light
-	-- top), and a band sweeps across its rarity (the gradient's off the text at both ends,
-	-- where it's all its first colour, so the loop doesn't jump)
+	-- top) and its sheen sweeps across in step with the band on its rarity (RarityLook)
 	RunService.RenderStepped:Connect(function()
 		if not gui.Visible or #moving == 0 then
 			return
 		end
 		local t = os.clock()
 		local turn = (90 + t * SPIN) % 360
-		local sweep = (t / SWEEP) % 1 * 2 - 1
+		local sweep = RarityLook.sweep()
 		for _, m in moving do
 			m[1].Rotation = turn
-			m[2].Offset = Vector2.new(sweep, 0)
-			m[3].Offset = Vector2.new(sweep * 1.5, 0) -- (further: its band is slanted)
+			m[2].Offset = Vector2.new(sweep * 1.5, 0) -- (further: its band is slanted)
 		end
 	end)
 
