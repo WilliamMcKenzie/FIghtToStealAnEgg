@@ -233,6 +233,7 @@ local function stored(root)
 	grow.Scale = 0
 	grow.Parent = pop
 	TweenService:Create(grow, POP_IN, { Scale = 1 }):Play()
+	require(script.Parent.UiFx).play("Claim")
 	task.delay(STORED_HOLD, function()
 		local fade = TweenInfo.new(0.4)
 		TweenService:Create(pop, fade, { TextTransparency = 1 }):Play()
@@ -330,6 +331,7 @@ function PetsPanel.init(root, petsButton)
 			end)
 			row.PetEquip.Activated:Connect(function()
 				if remote and inPen < slots then
+					require(script.Parent.UiFx).play("Equip")
 					remote:FireServer("equip", kind)
 				end
 			end)

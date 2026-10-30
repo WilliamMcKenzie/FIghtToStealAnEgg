@@ -21,6 +21,7 @@ local ItemIcons = require(Shared.ItemIcons)
 local Stacks = require(Shared.Stacks)
 local Abbrev = require(Shared.Abbrev)
 local Ui = require(script.Parent.Ui)
+local UiFx = require(script.Parent.UiFx)
 
 local Hotbar = {}
 
@@ -147,6 +148,7 @@ function Hotbar.init(root, fig)
 				slot.Count.Visible = s.count > 1
 				slot.Count.Text = "x" .. Abbrev(s.count)
 				slot.Picture.Image = (if s.kind then ItemIcons.Eggs[s.kind] else ItemIcons.Weapons[weapon or ""]) or ""
+				UiFx.button(slot) -- (its press and click)
 				slot.Activated:Connect(function()
 					pick(i)
 				end)

@@ -321,14 +321,18 @@ function HudKit.outlineArt(icon, px)
 	end
 end
 
--- wires a button's hover (in Play): its Hover UIScale grows, its Back darkens
+-- wires a button's hover (in Play): its Hover UIScale grows, its Back darkens; and its press
+-- and sounds (client/UiFx.button: it ducks in, bounces back, clicks). Once per button.
+local hovers = setmetatable({}, { __mode = "k" }) -- (not an attribute: copies would carry it)
 function HudKit.hover(b)
 	local grow, back = b:FindFirstChild("Hover"), b:FindFirstChild("Back")
-	if not (Ui.live and grow) then
+	if not (Ui.live and grow) or hovers[b] then
 		return
 	end
+	hovers[b] = true
 	local info = TweenInfo.new(HOVER_TIME, Enum.EasingStyle.Quad)
 	local function hover(on)
+		b:SetAttribute("HoverScale", if on then HOVER_GROW else 1)
 		TweenService:Create(grow, info, { Scale = if on then HOVER_GROW else 1 }):Play()
 		if back then
 			TweenService:Create(back, info, { BackgroundColor3 = if on then HOVER_DARK else Color3.new(1, 1, 1) }):Play()
@@ -340,6 +344,7 @@ function HudKit.hover(b)
 	b.MouseLeave:Connect(function()
 		hover(false)
 	end)
+	require(script.Parent.UiFx).button(b)
 end
 
 return HudKit
