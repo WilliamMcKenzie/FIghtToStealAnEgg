@@ -27,7 +27,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local ItemIcons = require(Shared.ItemIcons)
 local Pets = require(Shared.Pets)
-local RegionBlocker = require(Shared.RegionBlocker)
+local Abbrev = require(Shared.Abbrev)
 local Stacks = require(Shared.Stacks)
 local HudKit = require(script.Parent.HudKit)
 local SidePanel = require(script.Parent.SidePanel)
@@ -109,7 +109,7 @@ local function build(root)
 	countLabel = panel.title
 	local buy = button(panel.gui, "PetsBuySlot", 384, 90, { Position = UDim2.fromOffset(fig(768), fig(19)), ZIndex = 4 }, "Pink")
 	label(buy, "Text", {
-		Text = "+1 Equip [" .. Config.Backpack.SlotRobux .. "R]",
+		Text = "+1 Equip [" .. Abbrev(Config.Backpack.SlotRobux) .. "R]",
 		TextSize = fig(35),
 		Position = UDim2.fromOffset(fig(12), 0),
 		Size = UDim2.new(0, fig(290), 1, 0),
@@ -307,14 +307,14 @@ function PetsPanel.init(root, petsButton)
 		table.clear(made)
 		local list, inPen = listed()
 		local slots = Config.Backpack.PenSlots
-		countLabel.Text = string.format("%d/%d Active", inPen, slots)
+		countLabel.Text = Abbrev(inPen) .. "/" .. Abbrev(slots) .. " Active"
 		for i, entry in list do
 			local row = Ui.copy(template, "Row" .. i, rows)
 			row.LayoutOrder = i
 			local kind = entry.kind
 			row.Picture.Image = (ItemIcons.Pets or {})[kind] or ""
 			row.PetName.Text = Pets.name(kind)
-			row.PetCash.Text = "($" .. RegionBlocker.abbreviate(Config.Pets[kind].Cash or 0) .. "/s)"
+			row.PetCash.Text = "($" .. Abbrev(Config.Pets[kind].Cash or 0) .. "/s)"
 			local full = entry.slot == nil and inPen >= slots
 			row.PetRiding.Visible = entry.riding == true
 			row.PetUnequip.Visible = entry.slot ~= nil and not entry.riding

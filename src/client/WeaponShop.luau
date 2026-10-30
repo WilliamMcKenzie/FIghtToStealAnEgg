@@ -25,7 +25,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local ItemIcons = require(Shared.ItemIcons)
 local Weapons = require(Shared.Weapons.Weapons)
-local RegionBlocker = require(Shared.RegionBlocker)
+local Abbrev = require(Shared.Abbrev)
 local RarityLook = require(Shared.RarityLook)
 local HudKit = require(script.Parent.HudKit)
 local Ui = require(script.Parent.Ui)
@@ -59,7 +59,7 @@ local moving = {} -- { { back's Fill, sheen's UIGradient } } of the moving cards
 
 -- a price in cash, short: $500, $50K, $1.5M (as the Cash counter)
 local function price(n)
-	return "$" .. RegionBlocker.abbreviate(n or 0)
+	return "$" .. Abbrev(n or 0)
 end
 
 -- the Robux button's icon outlined black like the text beside it (HudKit.outlineArt)
@@ -329,7 +329,7 @@ end
 
 local function refresh(card, id, mine)
 	local dps = Weapons.dps(id, player:GetAttribute("Strength") or 0)
-	card.ShopDps.Dps.Text = string.format('<font color="%s">%s</font> DPS', DPS_COLOR, tostring(math.round(dps)))
+	card.ShopDps.Dps.Text = string.format('<font color="%s">%s</font> DPS', DPS_COLOR, Abbrev(math.round(dps)))
 	local w = Config.Weapons[id] or {}
 	local equipped = player:GetAttribute("Weapon") == id
 	card.ShopEquip.Visible = mine[id] == true
@@ -340,7 +340,7 @@ local function refresh(card, id, mine)
 		if not card.ShopBuy:GetAttribute("Failing") then
 			card.ShopBuy.Text.Text = price(w.Price)
 		end
-		card.ShopRobux.Text.Text = tostring(Weapons.robux(id) or "")
+		card.ShopRobux.Text.Text = if Weapons.robux(id) then Abbrev(Weapons.robux(id)) else ""
 		if not card.ShopRobux.Visible then
 			-- (no Robux price: the cash one takes the whole width, on the Equip button's back)
 			card.ShopBuy.Position, card.ShopBuy.Size = card.ShopEquip.Position, card.ShopEquip.Size
