@@ -85,7 +85,7 @@ def framing(parts):
     at = [(lo[i] + hi[i]) / 2 for i in range(3)]
     at[1] = lo[1] + (hi[1] - lo[1]) * 0.5
     r = math.dist(lo, hi) / 2
-    d = [0.5, 0.42, -0.76]
+    d = [float(v) for v in os.environ.get("BOSS_VIEW", "0.5,0.42,-0.76").split(",")]
     k = r * 3.3 / math.hypot(*d)
     return [at[i] + d[i] * k for i in range(3)], at, r
 
