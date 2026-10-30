@@ -1826,6 +1826,29 @@ return {
 		Omega = { bottom = Color3.fromHex("4ed46a"), top = Color3.fromHex("eaffd8"), at = 1, text = Color3.fromHex("b4ff6a"), text2 = Color3.fromHex("2fae3a"), move = true },
 	},
 
+	-- the Index (QM, Oct 30: client/IndexPanel, Server/PetIndex): every pet, a section per
+	-- biome in Order (its egg's kinds, Config.Eggs.Kinds, plus Extra), "???" until you've
+	-- owned one (player attribute PetIndex, kept through rebirths). Each pet you find has a
+	-- reward to claim once (IndexClaimed): CashSeconds of its cash a second and Power (Strength)
+	-- by its rarity. (Placeholder numbers.)
+	Index = {
+		Order = { "Meadow", "Desert", "Ice", "Lava", "Dungeon", "Castle", "Forest", "Ocean" },
+		Extra = { Meadow = { "Horse" } }, -- (pets no egg lays: the starter)
+		CashSeconds = 60,
+		Power = {
+			Common = 20, Uncommon = 40, Rare = 80, Epic = 150, Legendary = 300, Mythic = 600,
+			Divine = 1200, Celestial = 2500, Cosmic = 5000, Void = 10000, Omega = 20000,
+		},
+		-- each biome's picture's colour, under its Studio screenshot (client/HudImages
+		-- Biome<Name>) and in place of it until that's uploaded
+		Tint = {
+			Meadow = Color3.fromRGB(96, 186, 70), Desert = Color3.fromRGB(226, 186, 110),
+			Ice = Color3.fromRGB(170, 220, 245), Lava = Color3.fromRGB(230, 90, 30),
+			Dungeon = Color3.fromRGB(90, 90, 110), Castle = Color3.fromRGB(180, 40, 50),
+			Forest = Color3.fromRGB(150, 80, 220), Ocean = Color3.fromRGB(30, 80, 170),
+		},
+	},
+
 	-- the Backpack (QM, Oct 25: client/Backpack, Server/PetInventory): the pets you own
 	-- and the weapons bosses dropped you, duplicates stacked ("x5"). Pets you equip wander
 	-- in your pen, up to PenSlots of them; the weapon you equip is the one you hold.

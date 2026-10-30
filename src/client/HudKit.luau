@@ -107,6 +107,16 @@ HudKit.LOOKS = {
 	-- (its progress bar: the green across a dark track; the black border goes round the track)
 	EggTrack = { fill = rgb("1c1c1c"), outline = 6, corner = 8 },
 	EggGrow = { across = { rgb("00e900"), rgb("00b800"), rgb("008800") }, tile = { 230, 0.8, "Weld" }, corner = 8 },
+	-- the Index popup (QM's Figma Index refs, Oct 30; client/IndexPanel): the Weapon Shop's
+	-- popup with a pink and purple header, its boxes and its cards
+	PinkHeader = {
+		across = { rgb("e231ff"), rgb("c53dff"), rgb("dc6bff") },
+		bevel = { 0.5, 0.5, rgb("ffc4ff"), rgb("5a0078"), 12 },
+		tile = { 223.5, 0.8 },
+		outline = 8,
+	},
+	IndexBox = { fill = rgb("1e1e1e"), alpha = 0.15, border = { Color3.new(0, 0, 0), 5, 0.4 }, outline = 6, corner = 10 },
+	IndexCard = { fill = rgb("2f3a2a"), border = { Color3.new(0, 0, 0), 5, 0.4 }, tile = { 223.5, 0.85 }, outline = 6, corner = 10 },
 	Panel = { fill = rgb("323232"), border = { Color3.new(0, 0, 0), 6, 0.5 }, tile = { 223.5, 0.9 }, outline = 8, corner = 20 },
 	Card = { fill = Color3.new(1, 1, 1), border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
 	-- the Shop (QM's Figma "Shop" frame, Oct 30; client/Shop): its lime header, and its

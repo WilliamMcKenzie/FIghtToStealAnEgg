@@ -8,8 +8,8 @@ return {
 	PetsIcon = "rbxassetid://135122637332207",
 	PowerIcon = "rbxassetid://123860946510182",
 	CashIcon = "rbxassetid://102450910988008",
-	PowerGainIcon = "", -- assets/ui/hud/PowerGainIcon.png (the gain popups': client/GainPopups)
-	CashGainIcon = "", -- assets/ui/hud/CashGainIcon.png
+	PowerGainIcon = "rbxassetid://124462507147384", -- assets/ui/hud/PowerGainIcon.png (the gain popups': client/GainPopups)
+	CashGainIcon = "rbxassetid://96406134533444", -- assets/ui/hud/CashGainIcon.png
 	RobuxIcon = "rbxassetid://86362799525767",
 	-- the Shop's (client/Shop; assets/ui/shop): QM's Figma cash icons, a sword and pass
 	-- pictures from his icon pack, the gift icon and the sunburst behind every card
@@ -27,4 +27,18 @@ return {
 	BossAliveIcon = "rbxassetid://136700539456694", -- assets/ui/hud/BossAliveIcon.png
 	BossDeadIcon = "rbxassetid://108102901826020", -- assets/ui/hud/BossDeadIcon.png
 	BossGlow = "rbxassetid://136536336593533", -- assets/ui/hud/BossGlow.png
+	-- the Index (client/IndexPanel): the pet stats' icons (QM's icon pack: assets/ui/index) and
+	-- each biome's picture, a screenshot of it from Studio (Biome<Name>; its Config.Index.Tint
+	-- shows until it's in)
+	HealthIcon = "", -- assets/ui/index/HealthIcon.png
+	RegenIcon = "", -- assets/ui/index/RegenIcon.png
+	SpeedIcon = "", -- assets/ui/index/SpeedIcon.png
+	BiomeMeadow = "",
+	BiomeDesert = "",
+	BiomeIce = "",
+	BiomeLava = "",
+	BiomeDungeon = "",
+	BiomeCastle = "",
+	BiomeForest = "",
+	BiomeOcean = "",
 }
