@@ -109,8 +109,11 @@ class Model:
         out += ["\t},", "\tparts = {"]
         for p in self.parts:
             assert p["bone"] in pivots, self.name + ": " + p["name"] + " on unknown bone " + p["bone"]
-            R = rot(*p["r"])
-            vals = list(p["at"]) + [R[i][j] for i in range(3) for j in range(3)]
+            if "cf" in p:  # a part read back from a Blockbench drawing (boss_designs.BLOCKBENCH)
+                vals = list(p["cf"])
+            else:
+                R = rot(*p["r"])
+                vals = list(p["at"]) + [R[i][j] for i in range(3) for j in range(3)]
             line = '\t\t{{ name = "{}", bone = "{}", class = "{}", size = Vector3.new({}), cframe = CFrame.new({}), color = Color3.fromRGB({}){}{} }},'.format(
                 p["name"], p["bone"], p["class"], ", ".join(g(v) for v in p["size"]), ", ".join(g(v) for v in vals),
                 ", ".join(str(int(c)) for c in p["color"]), ", plain = true" if p["plain"] else "",
