@@ -128,6 +128,26 @@ local function holdCamera(root, humanoid, under)
 	end
 end
 
+--
+-- Never under the map (QM, Oct 30): if your HumanoidRootPart is ever below the ground
+-- (nothing under it, the floor above it), it's put straight back on top of the floor
+-- there, standing still. (Server/init's RiderBody group is what stops it happening.)
+local below = RaycastParams.new()
+below.FilterType = Enum.RaycastFilterType.Exclude
+below.RespectCanCollide = true
+local function keepAboveGround(root, humanoid)
+	below.FilterDescendantsInstances = { root.Parent, cameraAnchor }
+	local pos = root.Position
+	if workspace:Raycast(pos, Vector3.new(0, -200, 0), below) then
+		return -- (ground under you: fine)
+	end
+	local over = workspace:Raycast(pos + Vector3.new(0, 1000, 0), Vector3.new(0, -1000, 0), below)
+	if over then
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.CFrame = root.CFrame.Rotation + Vector3.new(pos.X, over.Position.Y + humanoid.HipHeight + root.Size.Y / 2 + 0.5, pos.Z)
+	end
+end
+
 local function keepUpright(root, humanoid)
 	if root.CFrame.UpVector.Y < 0.999 then
 		local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
@@ -261,6 +281,7 @@ RunService.PreSimulation:Connect(function(dt)
 		local root, horse = m.root, m.horse
 		if character == Players.LocalPlayer.Character then
 			keepUpright(root, m.humanoid)
+			keepAboveGround(root, m.humanoid)
 			steer(root, m.humanoid, dt)
 			holdCamera(root, m.humanoid, m.lift < -0.5)
 		end
