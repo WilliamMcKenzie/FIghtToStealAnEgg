@@ -16,4 +16,18 @@ return {
 	BossAliveIcon = "rbxassetid://136700539456694", -- assets/ui/hud/BossAliveIcon.png
 	BossDeadIcon = "rbxassetid://108102901826020", -- assets/ui/hud/BossDeadIcon.png
 	BossGlow = "rbxassetid://136536336593533", -- assets/ui/hud/BossGlow.png
+	-- the Index (client/IndexPanel): the pet stats' icons (QM's icon pack: assets/ui/index) and
+	-- each biome's picture, a screenshot of it from Studio (Biome<Name>; its Config.Index.Tint
+	-- shows until it's in)
+	HealthIcon = "", -- assets/ui/index/HealthIcon.png
+	RegenIcon = "", -- assets/ui/index/RegenIcon.png
+	SpeedIcon = "", -- assets/ui/index/SpeedIcon.png
+	BiomeMeadow = "",
+	BiomeDesert = "",
+	BiomeIce = "",
+	BiomeLava = "",
+	BiomeDungeon = "",
+	BiomeCastle = "",
+	BiomeForest = "",
+	BiomeOcean = "",
 }
