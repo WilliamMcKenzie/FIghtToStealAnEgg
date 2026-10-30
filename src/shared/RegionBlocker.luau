@@ -67,22 +67,13 @@ local function face(wall, normalId, title, cost)
 	gui.Face = normalId
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	-- (a narrow wall, a training corridor's: drawn finer, so its price and button fit)
-	local small = wall.Size.X * PIXELS < 400
-	local pixels = if small then PIXELS * 1.6 else PIXELS
+	local pixels = if wall.Size.X * PIXELS < 400 then PIXELS * 1.6 / 0.6 else PIXELS -- (QM Oct 30: the training ones 40% smaller)
 	gui.PixelsPerStud = pixels
 	gui.LightInfluence = 0
 	gui.MaxDistance = 400
 	local list = Instance.new("Frame")
 	list.BackgroundTransparency = 1
 	list.Size = UDim2.fromScale(1, 1)
-	if small then
-		-- (QM Oct 30: a training gate's sign 40% smaller, its wrapped name too)
-		list.AnchorPoint = Vector2.new(0.5, 0.5)
-		list.Position = UDim2.fromScale(0.5, 0.5)
-		local scale = Instance.new("UIScale")
-		scale.Scale = 0.6
-		scale.Parent = list
-	end
 	list.Parent = gui
 	local layout = Instance.new("UIListLayout")
 	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center

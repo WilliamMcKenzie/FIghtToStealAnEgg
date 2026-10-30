@@ -1324,6 +1324,15 @@ function Map.ensure()
 		if not map:GetAttribute("HiddenFacesCulled") then
 			HiddenFaces.cull(map)
 		end
+		-- (the gates' blockers are always built fresh, QM Oct 30: so a change to their signs
+		-- in Shared/RegionBlocker shows without baking the map again)
+		for _, name in { "Gates", "Blockers" } do
+			local old = map:FindFirstChild(name)
+			if old then
+				old:Destroy()
+			end
+		end
+		gates(folder("Gates", map), folder("Blockers", map))
 		return map
 	end
 	return Map.build()
