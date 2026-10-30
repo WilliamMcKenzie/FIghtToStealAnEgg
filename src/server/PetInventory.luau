@@ -143,7 +143,13 @@ local function best(player)
 		end
 		return a < b
 	end)
-	setEquipped(player, table.move(all, 1, math.min(#all, slots()), 1, {}))
+	local list = table.move(all, 1, math.min(#all, slots()), 1, {})
+	-- (mid-fight the one ridden stays: a fresh mount would be a free heal, see ride)
+	local ridden = player:GetAttribute("Pet")
+	if player:GetAttribute("LockedIn") and ridden and not table.find(list, ridden) and #list > 0 then
+		list[#list] = ridden
+	end
+	setEquipped(player, list)
 end
 
 -- cash a second from the pen's pets (Config.Income)
