@@ -1081,7 +1081,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 1.2, Reach = 12, Arc = 110, Windup = 0.6, Damage = 90, Anim = "bite" },
+				{ Kind = "Swipe", Every = 1.4, Reach = 18, Arc = 110, Windup = 0.8, Damage = 90, Anim = "bite" },
 				{
 					Kind = "Magic",
 					Linked = true, -- (fired as it surfaces, by its Burrow: Server/Bosses)
