@@ -1,5 +1,5 @@
 -- Builds the map from Shared/MapData (maps/world.map, edited in tools/mapeditor; QM, Oct 24):
--- the base (a grass square, its dirt yard round the spawn, pens, training grounds), and the
+-- the base (a grass square, its dirt yard round the spawn, pens; the training regions off its sides), and the
 -- biome arenas north of it (Meadow, Desert, Ice, Lava), walled down their sides (stone
 -- pillars at the corners and joints, big ones where one biome opens onto the next; no
 -- walls between them), a gateway (two big pillars and an arch) from the base, a barrier
@@ -514,7 +514,7 @@ local function arch(parent, style, x, z, rng)
 	return model
 end
 
--- ---- the base's furniture: pens, training grounds, spawn --------------------------------
+-- ---- the base's furniture: pens, spawn --------------------------------
 
 local SIGN_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 
@@ -614,23 +614,8 @@ local function fence(parent, cx, cz, size, top, gate)
 	return model
 end
 
--- a training dummy: a post, a straw body with a crossbar, a sack head
-local function dummy(parent, at)
-	local model = Instance.new("Model")
-	model.Name = "Dummy"
-	block("Post", model, at * CFrame.new(0, 2.5, 0), Vector3.new(1, 5, 1), "WoodDark", ALL)
-	local body = block("Body", model, at * CFrame.new(0, 5.5, 0), Vector3.new(3, 4, 2), "Straw", ALL)
-	block("Arms", model, at * CFrame.new(0, 6.6, 0), Vector3.new(7, 0.8, 0.8), "WoodDark", ALL)
-	block("Head", model, at * CFrame.new(0, 8.6, 0), Vector3.new(2.2, 2.2, 2.2), "StrawDark", ALL)
-	block("Belt", model, at * CFrame.new(0, 4.4, 0), Vector3.new(3.2, 0.6, 2.2), "Wood", SIDES)
-	model.PrimaryPart = body
-	model.Parent = parent
-	return model
-end
-
--- A yard's gate: toward the spawn, in a north or south side for a pen (they stand in a row
--- along the south wall) and an east or west side for a training ground (down the sides:
--- QM, Oct 25). Its outward direction, and a frame at the middle of that side turned to
+-- A pen's gate: toward the spawn, in a north or south side (they stand in a row along
+-- the south wall; alongX: an east or west side instead). Its outward direction, and a frame at the middle of that side turned to
 -- face out (a sign or gate part runs along its X).
 local function gateOf(base, x, z, size, alongX)
 	local dx, dz = base.Spawn[1] - x, base.Spawn[2] - z
@@ -688,41 +673,8 @@ local function baseFurniture(parent)
 		owner.Parent = pen
 		pen.Parent = pens
 	end
-	-- the training grounds: fenced yards, their gates facing the spawn (Server/Training
-	-- fills them and sells their gates; client/Barriers keeps a locked gate solid)
-	local training = folder("Training", parent)
-	for _, t in base.Training do
-		local name, x, z = t[1], t[2], t[3]
-		-- (each tier up a tile wider: Config.Training's Grow, QM Oct 27)
-		local g = Config.Training.Grounds[name]
-		local size = base.TrainSize + (g and g.Grow or 0) * Config.Training.Tile
-		local zone = Instance.new("Model")
-		zone.Name = name
-		zone:SetAttribute("X", x)
-		zone:SetAttribute("Z", z)
-		local out, side = gateOf(base, x, z, size, true)
-		fence(zone, x, z, size, 0, out)
-		if name == "Dummies" then
-			local dummies = folder("Dummies", zone)
-			for k = -1, 1 do
-				for row = 0, 1 do
-					dummy(
-						dummies,
-						CFrame.new(x + k * 12 + row * 6 - 3, 0, z - 4 + row * 12)
-							* CFrame.Angles(0, math.rad(k * -10), 0)
-					)
-				end
-			end
-		end
-		local gate = Instance.new("Part")
-		gate.Name = "Gate"
-		gate.Anchored, gate.CanCollide, gate.CanQuery, gate.CanTouch = true, false, false, false
-		gate.Transparency = 1
-		gate.Size = Vector3.new(10, 8, 1.2)
-		gate.CFrame = side * CFrame.new(0, 4, 1)
-		gate.Parent = zone
-		zone.Parent = training
-	end
+	-- (the training grounds are regions off the base now, QM Oct 30: their blockers stand in
+	-- the map's Barrier objects, built with the regions' gates)
 	-- the spawn: an invisible point in the dirt yard (QM, Oct 24: no spawn plate), you
 	-- land on the floor under it
 	local spawn = Instance.new("SpawnLocation")
@@ -1093,16 +1045,26 @@ end
 -- ---- region gates ----------------------------------------------------------------------
 
 -- Each region's gate (QM, Oct 25: regions are bought with cash): a Barrier object in the
--- map editor (MapData.RegionGates: region, x, z, yaw, width, height), so QM can move, turn
+-- map editor (MapData.RegionGates: region, x, z, yaw, width, height, training), so QM can move, turn
 -- and size it there. Here an invisible marker fills it, its Region attribute the area's
 -- name and its local X along the opening, facing away from the region, and the region's
 -- blocker stands in it (Shared/RegionBlocker; client/Regions hides it for a player who's
 -- bought it).
 gates = function(parent, blockers)
 	for _, g in MapData.RegionGates or {} do
-		local region, x, z, yaw, width, height = g[1], g[2], g[3], g[4], g[5], g[6]
+		local region, x, z, yaw, width, height, training = g[1], g[2], g[3], g[4], g[5], g[6], g[7]
 		local area = Map.area(region)
-		if not area then
+		-- (a training ground's: its bounds in the Base area's Training, QM Oct 30)
+		local bounds = area and area.Bounds
+		if training then
+			bounds = nil
+			for _, t in Map.area("Base").Training or {} do
+				if t[1] == region and #t >= 5 then
+					bounds = { t[2], t[3], t[4], t[5] }
+				end
+			end
+		end
+		if not area or (training and not bounds) then
 			continue
 		end
 		-- (the editor's yaw: the opening runs along x turned -yaw degrees, seen from above)
@@ -1110,8 +1072,8 @@ gates = function(parent, blockers)
 		local along = Vector3.new(math.cos(a), 0, math.sin(a))
 		local mid = Vector3.new(x, 0, z)
 		local normal = Vector3.new(-along.Z, 0, along.X)
-		if area.Bounds then
-			local centre = Vector3.new((area.Bounds[1] + area.Bounds[3]) / 2, 0, (area.Bounds[2] + area.Bounds[4]) / 2)
+		if bounds then
+			local centre = Vector3.new((bounds[1] + bounds[3]) / 2, 0, (bounds[2] + bounds[4]) / 2)
 			if normal:Dot(centre - mid) > 0 then
 				normal = -normal
 			end
@@ -1119,12 +1081,13 @@ gates = function(parent, blockers)
 		local floor = MapFile.groundAt(MapData, x, z)
 		local centre = mid + Vector3.new(0, floor + height / 2 - 0.5, 0)
 		local marker = Instance.new("Part")
-		marker.Name = region .. "Gate"
+		marker.Name = region .. (if training then "TrainingGate" else "Gate")
 		marker.Anchored, marker.CanCollide, marker.CanQuery, marker.CanTouch = true, false, false, false
 		marker.Transparency = 1
 		marker.Size = Vector3.new(width, height, 1.5)
 		marker.CFrame = CFrame.lookAt(centre, centre + normal)
 		marker:SetAttribute("Region", region)
+		marker:SetAttribute("Training", training or nil)
 		marker.Parent = parent
 		local blocker = RegionBlocker.build(marker, function(px, pz)
 			return MapFile.groundAt(MapData, px, pz)

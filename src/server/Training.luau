@@ -1,28 +1,29 @@
--- The training grounds (QM, Oct 24): five pen-sized yards along the south of the base,
--- the free straw dummies and one per biome (Meadow pets, Desert cactus monsters, Ice
--- pets, Lava rock hogs). Strength only ever comes from attacking (Server/Combat):
--- each hit trains the enemy's Strength (Config.Training.Grounds), so these are for
--- standing and swinging, RuneScape sand-crab style. A biome's ground is fenced off until
--- you buy it (Cost in cash, the prompt at its gate; player attribute Train<Name>, which a
--- rebirth will clear); the client keeps its gate solid for you until then
--- (client/Barriers.luau).
+-- The training grounds (QM, Oct 30: regions now, not pens): one region per biome off the
+-- base, joined to it by a corridor through the base wall (Ice and Meadow west, Lava and
+-- Desert east; the Base area's Training in the map: each one's bounds). Strength only
+-- ever comes from attacking (Server/Combat): each hit trains the enemy's Strength
+-- (Config.Training.Grounds), so these are for standing and swinging, RuneScape sand-crab
+-- style. A ground is shut off by a blocker at its corridor, like a boss region's, until
+-- you buy it (Cost in cash, the Buy button on the blocker: Server/Regions; player
+-- attribute Train<Name>, which a rebirth will clear).
 --
 -- Mobs are invisible bodies in workspace.Mobs (attributes Model, ModelSize, Tint, Name,
 -- Health, MaxHealth, Radius, Ground), drawn by client/BossView.luau like the bosses.
--- They amble about their yard; one that falls is back Respawn seconds later. Hit one and
--- it fights back (QM, Oct 26): it follows whoever last hit it round its yard and bites
+-- They roam their region's floor (never through its walls); one that falls is back
+-- Respawn seconds later somewhere else in it. Hit one and
+-- it fights back (QM, Oct 26): it follows whoever last hit it round its region and bites
 -- with its Attacks (Config.Training.Grounds, run by Server/BossAttacks like a boss's),
--- hard enough to kill you (QM, Oct 26), until you leave the yard, die, or stop hitting it
+-- hard enough to kill you (QM, Oct 26), until you leave the region, die, or stop hitting it
 -- for Config.Training.Calm seconds. Each mob is a random pet from its biome's eggs
 -- (Config.Eggs.Kinds), as big as when you ride it, or (QM, Oct 30) its ground's Mobs taking
 -- turns: Meadow pigs and fish, Desert cactus monsters and scorpions that keep their
 -- distance casting sand, Tundra boars, snowmen casting snow and penguins that run from you
--- lobbing bombs, Lava fire boars (0.6x) and firebirds casting fire. A mob's Magic and bombs
--- only ever hit whoever it's angry with (its b.foes). Higher grounds are bigger:
--- Config.Training's Grow. Only players inside a yard can hit what's in it (QM, Oct 30:
--- each body carries its yard for Shared/Yards; Server/Combat drops hits from outside).
+-- lobbing bombs, Lava fire boars and firebirds casting fire. A mob's Magic and bombs
+-- only ever hit whoever it's angry with (its b.foes). Only players inside a region can
+-- hit what's in it (QM, Oct 30: each body carries its region's bounds for Shared/Yards;
+-- Server/Combat drops hits from outside).
 --
---   Training.start(map)   -- once, after Map.ensure()
+--   Training.start()   -- once, after Map.ensure()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -31,7 +32,6 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local MapData = require(ReplicatedStorage.Shared.MapData)
 local Pets = require(ReplicatedStorage.Shared.Pets)
-local Abbrev = require(ReplicatedStorage.Shared.Abbrev)
 local Yards = require(ReplicatedStorage.Shared.Yards)
 local Combat = require(script.Parent.Combat)
 local BossAttacks = require(script.Parent.BossAttacks)
@@ -42,24 +42,90 @@ local folder = Instance.new("Folder")
 folder.Name = "Mobs"
 folder.Parent = workspace
 
-local mobs = {} -- [body] = { ground, x, z, half, goal, wait, yaw, g, rng, radius, target, angry, b }
+local mobs = {} -- [body] = { ground, zone, goal, wait, yaw, g, rng, radius, target, angry, b }
+
+-- ---- the regions' floors ------------------------------------------------------------------
+
+local GRID = MapData.Grid
+local zones = {} -- [ground] = { bounds = { x0, z0, x1, z1 }, cells = { Vector3 } (each floor cell's centre) }
+
+-- floor a mob can stand on: a tile there that isn't a wall, inside its region
+local function floorAt(zone, x, z)
+	local b = zone.bounds
+	if x < b[1] or x > b[3] or z < b[2] or z > b[4] then
+		return false
+	end
+	local c = math.floor((x - GRID.X0) / GRID.Cell) + 1
+	local r = math.floor((z - GRID.Z0) / GRID.Cell) + 1
+	local row = GRID.Rows[r]
+	local tile = row and c >= 1 and c <= GRID.Cols and GRID.Tiles[string.sub(row, c, c)]
+	return tile ~= nil and tile ~= false and not tile.wall
+end
+
+-- room for a body `radius` across at (x, z): floor under its middle and its sides
+local function room(zone, x, z, radius)
+	local r = radius * 0.7
+	return floorAt(zone, x, z)
+		and floorAt(zone, x + r, z)
+		and floorAt(zone, x - r, z)
+		and floorAt(zone, x, z + r)
+		and floorAt(zone, x, z - r)
+end
+
+-- a straight walk from a to b that stays on the floor
+local function clear(zone, a, b, radius)
+	local d = (b - a) * Vector3.new(1, 0, 1)
+	local n = math.max(1, math.ceil(d.Magnitude / 2))
+	for i = 1, n do
+		local p = a + d * (i / n)
+		if not room(zone, p.X, p.Z, radius) then
+			return false
+		end
+	end
+	return true
+end
+
+local function zoneOf(name, bounds)
+	local x0, z0 = math.min(bounds[1], bounds[3]), math.min(bounds[2], bounds[4])
+	local x1, z1 = math.max(bounds[1], bounds[3]), math.max(bounds[2], bounds[4])
+	local zone = { bounds = { x0, z0, x1, z1 }, cells = {} }
+	local half = GRID.Cell / 2
+	for x = x0 + half, x1 - half, GRID.Cell do
+		for z = z0 + half, z1 - half, GRID.Cell do
+			-- (a cell with floor all round it, so a mob there isn't half in a wall)
+			if room(zone, x, z, GRID.Cell * 1.4) then
+				table.insert(zone.cells, Vector3.new(x, 0, z))
+			end
+		end
+	end
+	zones[name] = zone
+	return zone
+end
+
+-- a random spot on the region's floor (one of its cells, anywhere in it)
+local function spotIn(zone, rng)
+	local c = zone.cells[rng:NextInteger(1, #zone.cells)]
+	return c + Vector3.new(rng:NextNumber(-1.5, 1.5), 0, rng:NextNumber(-1.5, 1.5))
+end
 
 function Training.unlocked(player, name)
 	local g = Config.Training.Grounds[name]
 	return g ~= nil and (g.Cost <= 0 or player:GetAttribute("Train" .. name) == true)
 end
 
--- where a fleeing mob runs to: of a few spots round its yard, the one furthest from `from`
-local function fleeSpot(m, from)
+-- where a fleeing mob runs to: of a few spots it can run straight to, the one furthest from `from`
+local function fleeSpot(m, at, from)
 	local best, far = nil, -1
-	for _ = 1, 8 do
-		local p = Vector3.new(m.x + m.rng:NextNumber(-m.half, m.half), 0, m.z + m.rng:NextNumber(-m.half, m.half))
-		local d = ((p - from) * Vector3.new(1, 0, 1)).Magnitude
-		if d > far then
-			best, far = p, d
+	for _ = 1, 12 do
+		local p = at + Vector3.new(m.rng:NextNumber(-30, 30), 0, m.rng:NextNumber(-30, 30))
+		if clear(m.zone, at, p, m.wide) then
+			local d = ((p - from) * Vector3.new(1, 0, 1)).Magnitude
+			if d > far then
+				best, far = p, d
+			end
 		end
 	end
-	return best
+	return best or at
 end
 
 -- the pets a biome's eggs hatch (any with odds), or none while they're only the Horse
@@ -79,19 +145,13 @@ local function petsOf(biome)
 	return list
 end
 
--- (whoever's hitting it is standing in its yard)
+-- (whoever's hitting it is standing in its region)
 local function fromInside(player, body)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	return root ~= nil and Yards.inside(body, root.Position)
 end
 
-local function markYard(body, x, z, yardHalf)
-	body:SetAttribute("YardX", x)
-	body:SetAttribute("YardZ", z)
-	body:SetAttribute("YardHalf", yardHalf)
-end
-
-local function spawnMob(name, x, z, half, slot)
+local function spawnMob(name, zone, slot)
 	local g = Config.Training.Grounds[name]
 	local rng = Random.new()
 	-- what it looks like: one of the biome's pets, as big as when you ride it
@@ -113,7 +173,7 @@ local function spawnMob(name, x, z, half, slot)
 	body.Anchored, body.CanCollide, body.CanTouch = true, false, false
 	body.Transparency = 1
 	body.Size = Vector3.new(radius * 2, 4, radius * 2)
-	local at = Vector3.new(x + rng:NextNumber(-half, half), 0 + 2, z + rng:NextNumber(-half, half))
+	local at = spotIn(zone, rng) + Vector3.new(0, 2, 0)
 	local yaw = rng:NextNumber(-math.pi, math.pi)
 	body.CFrame = CFrame.new(at) * CFrame.Angles(0, yaw, 0)
 	body:SetAttribute("Model", model)
@@ -125,13 +185,12 @@ local function spawnMob(name, x, z, half, slot)
 	body:SetAttribute("Radius", radius)
 	body:SetAttribute("Ground", name)
 	body:SetAttribute("Slot", slot) -- (client/Shots finds its Magic by it)
-	markYard(body, x, z, half + 6) -- (half is where it wanders: 6 studs in from the fence)
+	Yards.stamp(body, zone.bounds)
 	local attacks = def.Attacks or g.Attacks
 	local m = {
 		ground = name,
-		x = x,
-		z = z,
-		half = half,
+		zone = zone,
+		wide = math.min(radius, 3.5), -- (how far off a wall it keeps: a big pet's hitbox would keep it out of corridors)
 		wait = rng:NextNumber(0, 2),
 		yaw = yaw,
 		g = g,
@@ -159,104 +218,39 @@ local function spawnMob(name, x, z, half, slot)
 			mobs[body] = nil
 			Combat.remove(body)
 			task.delay(0.6, body.Destroy, body)
-			task.delay(Config.Training.Respawn, spawnMob, name, x, z, half, slot)
+			task.delay(Config.Training.Respawn, spawnMob, name, zone, slot)
 		end
 	end)
 	body.Parent = folder
 end
 
--- a straw dummy: never falls, wobbles when it's hit
-local function dummyTarget(model, x, z, yardHalf)
-	local pivot = model:GetPivot()
-	local body = Instance.new("Part")
-	body.Name = "DummyBody"
-	body.Anchored, body.CanCollide, body.CanTouch, body.CanQuery = true, false, false, false
-	body.Transparency = 1
-	body.Size = Vector3.new(4, 9, 4)
-	body.CFrame = CFrame.new(pivot.Position.X, 5.5, pivot.Position.Z)
-	body:SetAttribute("Radius", 2)
-	body:SetAttribute("Health", 1)
-	body:SetAttribute("MaxHealth", 1)
-	body:SetAttribute("Dummy", true)
-	markYard(body, x, z, yardHalf)
-	body.Parent = folder
-	local wobbling = false
-	Combat.add(body, function(player, damage)
-		if not fromInside(player, body) then
-			return
-		end
-		Combat.train(player, damage, Config.Training.Grounds.Dummies.Strength)
-		local character = player.Character
-		if wobbling or not character then
-			return
-		end
-		wobbling = true
-		local look = (pivot.Position - character:GetPivot().Position) * Vector3.new(1, 0, 1)
-		local axis = if look.Magnitude > 0.01 then Vector3.new(0, 1, 0):Cross(look.Unit) else Vector3.xAxis
-		for _, angle in { 12, -6, 3, 0 } do
-			local base = CFrame.new(pivot.Position.X, pivot.Position.Y, pivot.Position.Z)
-			model:PivotTo(base * CFrame.fromAxisAngle(axis, math.rad(angle)) * pivot.Rotation)
-			task.wait(0.06)
-		end
-		wobbling = false
-	end)
-end
-
-function Training.start(map)
+function Training.start()
 	local base
 	for _, a in MapData.Areas do
 		if a.Name == "Base" then
 			base = a
 		end
 	end
-	for _, t in base.Training do
-		local name, x, z = t[1], t[2], t[3]
+	for _, t in base.Training or {} do
+		local name = t[1]
 		local g = Config.Training.Grounds[name]
-		local zone = map.Base.Training:FindFirstChild(name)
-		if g and zone then
-			local half = base.TrainSize / 2 + (g.Grow or 0) * Config.Training.Tile / 2 - 6
-			if g.Count then
-				for slot = 1, g.Count do
-					spawnMob(name, x, z, half, slot)
+		if g and #t >= 5 then
+			local zone = zoneOf(name, { t[2], t[3], t[4], t[5] })
+			if #zone.cells > 0 then
+				for slot = 1, g.Count or 0 do
+					spawnMob(name, zone, slot)
 				end
-			end
-			local dummies = zone:FindFirstChild("Dummies")
-			for _, d in if dummies then dummies:GetChildren() else {} do
-				dummyTarget(d, x, z, half + 6)
-			end
-			-- buying it: the prompt at its gate
-			local gate = zone:FindFirstChild("Gate")
-			if gate and g.Cost > 0 then
-				local prompt = Instance.new("ProximityPrompt")
-				prompt.Name = "Unlock"
-				prompt.ActionText = "Unlock ($" .. Abbrev(g.Cost) .. ")"
-				prompt.ObjectText = (Config.Regions.Names[name] or name) .. " Training"
-				prompt.HoldDuration = 0.4
-				prompt.MaxActivationDistance = 14
-				prompt.RequiresLineOfSight = false
-				prompt.Parent = gate
-				prompt.Triggered:Connect(function(player)
-					if Training.unlocked(player, name) then
-						return
-					end
-					local cash = player:GetAttribute("Cash") or 0
-					if cash >= g.Cost then
-						player:SetAttribute("Cash", cash - g.Cost)
-						player:SetAttribute("Train" .. name, true)
-					end
-				end)
 			end
 		end
 	end
 
 	RunService.Heartbeat:Connect(function(dt)
 		for body, m in mobs do
-			-- angry: after whoever hit it, while they're alive, near its yard and still hitting
+			-- angry: after whoever hit it, while they're alive, in its region and still hitting
 			if m.target then
 				m.angry -= dt
 				local f = m.target.Parent and BossAttacks.fighter(m.target)
-				local away = f and math.max(math.abs(f.root.Position.X - m.x), math.abs(f.root.Position.Z - m.z))
-				if not f or m.angry <= 0 or away > m.half + 12 then
+				if not f or m.angry <= 0 or not Yards.inside(body, f.root.Position) then
 					m.target, m.goal, m.wait = nil, nil, m.rng:NextNumber(1, 3)
 					m.b.timers, m.b.still, m.b.foes, m.flee = nil, nil, {}, nil
 					body:SetAttribute("Target", nil)
@@ -273,7 +267,7 @@ function Training.start(map)
 					if mode == "Flee" then
 						m.fleeIn = (m.fleeIn or 0) - dt
 						if not m.flee or m.fleeIn <= 0 or ((m.flee - pos) * Vector3.new(1, 0, 1)).Magnitude < 1 then
-							m.flee, m.fleeIn = fleeSpot(m, f.root.Position), 0.8
+							m.flee, m.fleeIn = fleeSpot(m, pos, f.root.Position), 0.8
 						end
 						local to = (m.flee - pos) * Vector3.new(1, 0, 1)
 						if to.Magnitude > 0.01 then
@@ -299,16 +293,21 @@ function Training.start(map)
 						local rate = if face then 14 else 6
 						m.yaw += ((want - m.yaw + math.pi) % (2 * math.pi) - math.pi) * (1 - math.exp(-dt * rate))
 					end
+					local from = pos
 					if not hold then
 						pos += move
 					end
 					pos = Combat.pushed(body, pos, dt) -- (knocked back by a Smash sprint)
-					-- (it stays in its yard)
-					pos = Vector3.new(
-						math.clamp(pos.X, m.x - m.half, m.x + m.half),
-						pos.Y,
-						math.clamp(pos.Z, m.z - m.half, m.z + m.half)
-					)
+					-- (it stays on its region's floor: sliding along a wall it runs into)
+					if not room(m.zone, pos.X, pos.Z, m.wide) then
+						if room(m.zone, pos.X, from.Z, m.wide) then
+							pos = Vector3.new(pos.X, pos.Y, from.Z)
+						elseif room(m.zone, from.X, pos.Z, m.wide) then
+							pos = Vector3.new(from.X, pos.Y, pos.Z)
+						else
+							pos = from
+						end
+					end
 					body.CFrame = CFrame.new(pos) * CFrame.Angles(0, m.yaw, 0)
 					continue
 				end
@@ -319,8 +318,13 @@ function Training.start(map)
 			end
 			local pos = body.Position
 			if not m.goal then
-				m.goal =
-					Vector3.new(m.x + m.rng:NextNumber(-m.half, m.half), pos.Y, m.z + m.rng:NextNumber(-m.half, m.half))
+				-- (somewhere not far off it can walk straight to)
+				local goal = pos + Vector3.new(m.rng:NextNumber(-24, 24), 0, m.rng:NextNumber(-24, 24))
+				if not clear(m.zone, pos, goal, m.wide) then
+					m.wait = m.rng:NextNumber(0.2, 0.6)
+					continue
+				end
+				m.goal = goal
 			end
 			local offset = (m.goal - pos) * Vector3.new(1, 0, 1)
 			if offset.Magnitude < 0.5 then

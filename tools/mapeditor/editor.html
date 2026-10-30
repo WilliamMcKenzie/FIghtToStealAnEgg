@@ -455,6 +455,8 @@ function drawSprite(g, s, x, z, yaw, scale, alpha = 1) {
 // a ruined brick wall from above: a row of bricks along its length, its top course's colours
 // a region's barrier (QM, Oct 25): where its locked blocker stands, a navy bar its width
 const REGIONS = BUNDLE.styles.filter((st) => st !== "Base" && st !== "Meadow");
+// (a training ground's barrier, Kind Training: across its corridor off the base, QM Oct 30)
+const TRAINING = ["Meadow", "Desert", "Ice", "Lava"];
 // and a fight barrier: the red wall across a gate for whoever's locked into a fight either
 // side of it (south and north areas)
 const AREAS = BUNDLE.styles;
@@ -465,7 +467,7 @@ function drawBarrier(g, o, alpha = 1) {
   const fight = o.type === "FightBarrier";
   g.fillStyle = fight ? "rgba(255,70,60,0.85)" : css(rgb("RegionBarrier")); g.fillRect(-o.width / 2, fight ? 1.6 : -1.5, o.width, fight ? 2 : 3);
   g.fillStyle = "#fff"; g.font = "bold 6px Montserrat, sans-serif"; g.textAlign = "center"; g.textBaseline = fight ? "top" : "bottom";
-  g.fillText(fight ? `${o.south} | ${o.north}` : o.region, 0, fight ? 4 : -2.5);
+  g.fillText(fight ? `${o.south} | ${o.north}` : o.region + (o.training ? " training" : ""), 0, fight ? 4 : -2.5);
   g.restore();
 }
 function drawRuin(g, o, alpha = 1) {
@@ -516,20 +518,19 @@ function drawFurniture(g) {
   if (!base) return;
   // (each gate on the side facing spawn, as Server/Map's gateOf: the compact base, Oct 25)
   const sp = base.spawn || [0, 0];
-  // (pens: a north or south side; training grounds: east or west)
+  // (pens: a north or south side)
   const gateOf = (x, z, alongX) => { const dx = sp[0] - x, dz = sp[1] - z; return alongX ? [dx < 0 ? -1 : 1, 0] : [0, dz < 0 ? -1 : 1]; };
   for (const [x, z] of base.pens || []) drawFence(g, x, z, base.penSize, gateOf(x, z, false));
-  for (const [name, x, z] of base.training || []) {
-    drawFence(g, x, z, base.trainSize, gateOf(x, z, true));
-    if (name === "Dummies") for (let k = -1; k <= 1; k++) for (let row = 0; row <= 1; row++) {
-      const px = x + k * 12 + row * 6 - 3, pz = z - 4 + row * 12;
-      g.save(); g.translate(px, pz); g.rotate(k * 10 * Math.PI / 180);
-      g.fillStyle = css(rgb("WoodDark")); g.fillRect(-3.5, -0.4, 7, 0.8);
-      g.fillStyle = css(rgb("Straw")); g.fillRect(-1.5, -1, 3, 2);
-      g.fillStyle = css(rgb("StrawDark")); g.fillRect(-1.1, -1.1, 2.2, 2.2);
-      g.restore();
-    }
+  // (training grounds: regions off the base now, QM Oct 30: each one's bounds, dashed)
+  for (const [name, x0, z0, x1, z1] of base.training || []) {
+    if (x1 === undefined) continue;
+    g.save(); g.setLineDash([3, 2]); g.lineWidth = 0.8; g.strokeStyle = "rgba(255,255,255,0.7)";
+    g.strokeRect(Math.min(x0, x1), Math.min(z0, z1), Math.abs(x1 - x0), Math.abs(z1 - z0));
+    g.restore();
+    g.fillStyle = "#fff"; g.font = "bold 8px Montserrat, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText(name + " training", (x0 + x1) / 2, (z0 + z1) / 2);
   }
+
   if (base.spawn) {
     g.fillStyle = css(rgb("Dirt")); g.fillRect(base.spawn[0] - 5, base.spawn[1] - 5, 10, 10);
   }
@@ -1080,7 +1081,7 @@ function inspect() {
   const h = document.createElement("h2"); h.className = "title"; box.appendChild(h);
   if (selected) {
     const o = selected;
-    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : o.type === "Pillar" ? pillarLabel(o) : o.type === "Arch" ? "Arch" : o.type === "Barrier" ? `${o.region} barrier` : o.type === "FightBarrier" ? "Fight barrier" : `${o.area} ${o.type.toLowerCase()}`;
+    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : o.type === "Pillar" ? pillarLabel(o) : o.type === "Arch" ? "Arch" : o.type === "Barrier" ? `${o.region} ${o.training ? "training " : ""}barrier` : o.type === "FightBarrier" ? "Fight barrier" : `${o.area} ${o.type.toLowerCase()}`;
     const set = (k) => (v) => nudgeSelected((x) => { if (v === null) delete x[k]; else x[k] = v; });
     box.appendChild(field("X", o.x, set("x")));
     box.appendChild(field("Z", o.z, set("z")));
@@ -1125,7 +1126,8 @@ function inspect() {
       n.textContent = "The cactus vendor's stall (LassoAPet's Carl). The yellow arrow is the way his counter faces. Talk does nothing yet.";
       box.appendChild(n);
     } else if (o.type === "Barrier") {
-      box.appendChild(field("Region", o.region, set("region"), REGIONS));
+      box.appendChild(field("Kind", o.training ? "Training" : "Region", (v) => nudgeSelected((x) => { if (v === "Training") x.training = true; else delete x.training; }), ["Region", "Training"]));
+      box.appendChild(field("Region", o.region, set("region"), o.training ? TRAINING : REGIONS));
       box.appendChild(field("Yaw", o.yaw || 0, set("yaw")));
       box.appendChild(field("Width", o.width, set("width")));
       box.appendChild(field("Height", o.height || 40, set("height")));

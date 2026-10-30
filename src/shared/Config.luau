@@ -2117,9 +2117,11 @@ return {
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
 	-- trains the damage it dealt x the enemy's Strength x PerDamage (QM, Oct 25), so it
 	-- grows with your damage, and your damage grows with it on Config.Power's log curve.
-	-- The training grounds at the south of the base, one per biome, are fenced off until
-	-- bought with cash (a rebirth will lock them again); their mobs wander and come back
-	-- Respawn seconds after they fall, for AFK training (RuneScape's sand crabs).
+	-- The training grounds, one per biome, are regions off the base (QM, Oct 30: Ice and
+	-- Meadow west, Lava and Desert east, joined to it by corridors), each shut by a blocker
+	-- like a boss region's until bought with cash (a rebirth will lock them again); their
+	-- mobs roam the region and come back Respawn seconds after they fall, for AFK training
+	-- (RuneScape's sand crabs).
 	-- Balance (Oct 27): each ground costs a little more than its biome's region, so you buy it
 	-- once that biome's pets are paying. A mob's Health is about 4 seconds of swinging for the
 	-- weapon and Strength you'd have then (Meadow ~100 a second, Desert ~300, Tundra ~1,300,
@@ -2128,29 +2130,26 @@ return {
 	-- what it does in check.)
 	-- Mobs fight back (QM, Oct 26): hit one and it turns on you, follows you round its yard
 	-- at Chase x its Speed and swipes with its Attacks (Server/BossAttacks' Swipe, like
-	-- the bosses), until you've left its yard, died, or not hit it for Calm seconds. They
+	-- the bosses), until you've left its region, died, or not hit it for Calm seconds. They
 	-- hit for real (QM, Oct 26), about 40% of their biome boss's damage a second, and can
 	-- kill you (your pet's regen keeps healing you meanwhile: Server/Regen).
 	-- Each mob is a random pet from its biome's eggs (Config.Eggs.Kinds, any with odds; QM,
 	-- Oct 26), drawn at the pet's own size; Mob and Size are only for a ground whose eggs
 	-- are still the Horse placeholder. Pet (and Name) put one pet in a ground instead: the
 	-- Desert's cactus monsters (QM, Oct 27), the Lava's Rock Hogs (the Lava Whale and the
-	-- Phoenix are far too big for a yard).
-	-- Grow (QM, Oct 27): each ground's yard is the map's trainSize plus this many Tiles
-	-- of side length, a tile more each tier up.
+	-- Phoenix are far too big).
+	-- Count: how many roam it at once (more than the old pens held: the regions are big).
 	Training = {
 		PerDamage = 0.1, -- (at 0 Strength a Kendo Stick hit deals 10: Strength 2 trains 2, as before)
 		Grounds = {
-			Dummies = { Cost = 0, Strength = 1 }, -- free: straw dummies that never fall
 			-- each ground's Mobs take turns filling its Count (QM, Oct 30): Pet (its model, at
 			-- Scale x its riding size), Name, Mode and Attacks (else the ground's own). Mode is
 			-- how an angry one moves: Melee (default) runs at you, Range keeps Keep studs off
 			-- and casts, Flee runs away from you and lobs bombs back.
 			Meadow = {
 				Cost = 300,
-				Grow = 0,
 				Health = 400,
-				Count = 4,
+				Count = 8,
 				Strength = 2,
 				Speed = 4,
 				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 3, Arc = 100, Damage = 8 } }, -- (boss: 10 a second)
@@ -2158,9 +2157,8 @@ return {
 			},
 			Desert = {
 				Cost = 8000,
-				Grow = 1,
 				Health = 1500,
-				Count = 6,
+				Count = 10,
 				Strength = 5,
 				Speed = 2.5,
 				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 3, Arc = 110, Damage = 13 } }, -- (boss: 16)
@@ -2186,9 +2184,8 @@ return {
 			},
 			Ice = {
 				Cost = 150000,
-				Grow = 2,
 				Health = 6000,
-				Count = 6,
+				Count = 9,
 				Strength = 15,
 				Speed = 3,
 				Attacks = { { Kind = "Swipe", Every = 2, Reach = 4, Arc = 140, Damage = 22 } }, -- (boss: 26)
@@ -2221,14 +2218,13 @@ return {
 			},
 			Lava = {
 				Cost = 2000000,
-				Grow = 3,
 				Health = 20000,
-				Count = 4,
+				Count = 10,
 				Strength = 45,
 				Speed = 3.5,
 				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 4, Arc = 130, Damage = 32 } }, -- (boss: 40)
 				Mobs = {
-					{ Pet = "RockHog", Name = "Fire Boar", Scale = 0.6 }, -- (QM: the yard's too small for them full size)
+					{ Pet = "RockHog", Name = "Fire Boar" }, -- (full size: it was 0.6x for the old yard, QM)
 					{
 						Pet = "Firebird",
 						Mode = "Range",
@@ -2254,7 +2250,6 @@ return {
 		Chase = 2.5, -- an angry mob moves this many times its Speed
 		Calm = 8, -- seconds without being hit before it forgets you
 		MobRadius = 2.5, -- a mob's body half-width (hits and reach)
-		Tile = 4, -- studs: one map cell (a Grow step)
 	},
 
 	Slash = {

@@ -5,6 +5,9 @@
 -- shadow in the same navy across the floor either side, fading out over
 -- Config.Regions.Shadow studs.
 -- client/Regions hides it for a player who owns the region and wires up the Buy buttons.
+-- A training ground's (QM, Oct 30: its marker's Training attribute) is the same wall across
+-- its corridor, "<name> Training" and Config.Training.Grounds' Cost; the player owns it
+-- with Train<Name> instead of Region<Name> (the model's Owns attribute says which).
 --
 --   RegionBlocker.build(marker, groundAt) -> Model   (marker: the gate's Part; groundAt(x, z) -> floor top)
 
@@ -58,12 +61,14 @@ local function button(parent, props)
 	return b
 end
 
-local function face(wall, normalId, region, cost)
+local function face(wall, normalId, title, cost)
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "Face" .. normalId.Name
 	gui.Face = normalId
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	gui.PixelsPerStud = PIXELS
+	-- (a narrow wall, a training corridor's: drawn finer, so its price and button fit)
+	local pixels = if wall.Size.X * PIXELS < 400 then PIXELS * 1.6 else PIXELS
+	gui.PixelsPerStud = pixels
 	gui.LightInfluence = 0
 	gui.MaxDistance = 400
 	local list = Instance.new("Frame")
@@ -76,7 +81,18 @@ local function face(wall, normalId, region, cost)
 	layout.Padding = UDim.new(0, 12)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
-	text(list, { Text = REGIONS.Names[region] or region, TextSize = 100, Size = UDim2.new(1, 0, 0, 110), LayoutOrder = 1 })
+	-- (and a name too long for it wraps and shrinks to fit)
+	local narrow = wall.Size.X * pixels < #title * 60 + 40
+	local name = text(list, {
+		Text = title,
+		TextSize = if narrow then 101 else 100,
+		Size = if narrow then UDim2.new(1, -24, 0, 170) else UDim2.new(1, 0, 0, 110),
+		LayoutOrder = 1,
+	})
+	name.TextWrapped = narrow
+	if narrow then
+		name:FindFirstChildOfClass("UIStroke").Thickness = 5
+	end
 	local row = Instance.new("Frame")
 	row.BackgroundTransparency = 1
 	row.Size = UDim2.new(1, 0, 0, 80)
@@ -130,13 +146,21 @@ end
 
 function RegionBlocker.build(marker, groundAt)
 	local region = marker:GetAttribute("Region")
-	local cost = REGIONS.Cost[region]
+	local training = marker:GetAttribute("Training") == true
+	local ground = training and Config.Training.Grounds[region]
+	local cost = if training then ground and ground.Cost else REGIONS.Cost[region]
 	if not cost or cost <= 0 then
 		return nil
 	end
+	local title = REGIONS.Names[region] or region
 	local model = Instance.new("Model")
-	model.Name = region .. "Blocker"
+	model.Name = region .. (if training then "TrainingBlocker" else "Blocker")
 	model:SetAttribute("Region", region)
+	model:SetAttribute("Training", training or nil)
+	model:SetAttribute("Owns", (if training then "Train" else "Region") .. region) -- (the player attribute that opens it)
+	if training then
+		title ..= " Training"
+	end
 	local wall = Instance.new("Part")
 	wall.Name = "Wall"
 	wall.Anchored = true
@@ -150,8 +174,8 @@ function RegionBlocker.build(marker, groundAt)
 	wall.TopSurface, wall.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
 	wall.Locked = true
 	wall.Parent = model
-	face(wall, Enum.NormalId.Front, region, cost)
-	face(wall, Enum.NormalId.Back, region, cost)
+	face(wall, Enum.NormalId.Front, title, cost)
+	face(wall, Enum.NormalId.Back, title, cost)
 	-- the shadow: over the floor either side (QM: the floor only)
 	local cf, size = wall.CFrame, wall.Size
 	local right, out = cf.RightVector, cf.LookVector

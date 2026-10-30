@@ -112,7 +112,8 @@ function MapFile.decode(text)
 		local area = { Name = a.name, Tiles = {}, Floor = {} }
 		if a.spawn then
 			area.Spawn, area.Pens, area.PenSize = a.spawn, a.pens, a.penSize
-			area.Training, area.TrainSize = a.training, a.trainSize
+			-- (training: { name, x0, z0, x1, z1 }, each ground's region; QM Oct 30)
+			area.Training = a.training
 		end
 		if a.bounds then
 			area.Bounds, area.DaisRadius, area.Nests = a.bounds, a.daisRadius, {}
@@ -181,7 +182,11 @@ function MapFile.decode(text)
 			table.insert(data.Barriers, { o.south, o.north, o.x, o.z, o.width or 48, o.yaw or 0 })
 		elseif o.type == "Barrier" then
 			-- a region's gate, where its blocker stands (Server/Map, Shared/RegionBlocker)
-			table.insert(data.RegionGates, { o.region, o.x, o.z, o.yaw or 0, o.width or 48, o.height or 40 })
+			-- (training: a training ground's instead, QM Oct 30: its corridor off the base)
+			table.insert(
+				data.RegionGates,
+				{ o.region, o.x, o.z, o.yaw or 0, o.width or 48, o.height or 40, o.training == true }
+			)
 		elseif o.type == "Nest" and byName[o.area] and byName[o.area].Nests then
 			table.insert(byName[o.area].Nests, { o.x, o.z })
 		elseif o.type == "Boss" and byName[o.area] then

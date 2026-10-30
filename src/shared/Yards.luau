@@ -1,25 +1,37 @@
--- Training yards keep their mobs and dummies to themselves (QM, Oct 30: no attacking
--- training animals unless you're inside the training zone). Server/Training stamps each
--- body with its yard (attributes YardX, YardZ, YardHalf: the fence's centre and half
--- its side); a body without them (a boss) can be hit from anywhere. Server/Combat drops
--- hits from outside, and the client won't aim at them from outside (client/init, Shots).
+-- Training grounds keep their mobs to themselves (QM, Oct 30: no attacking training
+-- animals unless you're inside the training zone). Each ground is a region off the base
+-- (QM, Oct 30: Ice and Meadow west, Lava and Desert east), its bounds in the map (the Base
+-- area's Training: { name, x0, z0, x1, z1 }, its corridor through the base wall and all).
+-- Server/Training stamps each mob with them (attribute Yard, a Rect: x0, z0 to x1, z1); a
+-- body without one (a boss) can be hit from anywhere. Server/Combat drops hits from
+-- outside, and the client won't aim at them from outside (client/init, Shots).
 --
---   Yards.inside(body, position) -> boolean -- position is in body's yard (or it has none)
+--   Yards.inside(body, position) -> boolean -- position is in body's ground (or it has none)
+--   Yards.stamp(body, bounds)               -- { x0, z0, x1, z1 }
 
 local Yards = {}
 
-local SLACK = 0.5 -- studs past the fence that still count (standing on it)
+local SLACK = 0.5 -- studs past the bounds that still count
+
+function Yards.stamp(body, b)
+	body:SetAttribute(
+		"Yard",
+		Rect.new(math.min(b[1], b[3]), math.min(b[2], b[4]), math.max(b[1], b[3]), math.max(b[2], b[4]))
+	)
+end
 
 function Yards.inside(body, position)
-	local half = body:GetAttribute("YardHalf")
-	if not half then
+	local yard = body:GetAttribute("Yard")
+	if typeof(yard) ~= "Rect" then
 		return true
 	end
 	if not position then
 		return false
 	end
-	local x, z = body:GetAttribute("YardX") or 0, body:GetAttribute("YardZ") or 0
-	return math.abs(position.X - x) <= half + SLACK and math.abs(position.Z - z) <= half + SLACK
+	return position.X >= yard.Min.X - SLACK
+		and position.X <= yard.Max.X + SLACK
+		and position.Z >= yard.Min.Y - SLACK
+		and position.Z <= yard.Max.Y + SLACK
 end
 
 return Yards

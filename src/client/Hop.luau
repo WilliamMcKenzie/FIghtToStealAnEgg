@@ -2,9 +2,7 @@
 -- you can't jump, so when your pet's pushing into something low (a fence, a rail, a low
 -- wall: anything solid up to Config.Hop.Height studs over the ground just ahead, with
 -- room above it), it hops over it on its own: thrown up just high enough to clear it,
--- carrying on forward. Tall walls stay walls, and so do the training grounds' fences and
--- locked gates (no hopping into a yard you haven't bought: anything in
--- Map.Base.Training, or with a NoHop attribute). Only your own character (this client
+-- carrying on forward. Tall walls stay walls, and so does anything with a NoHop attribute. Only your own character (this client
 -- moves it); client/Riding keeps it upright through the hop.
 
 local Players = game:GetService("Players")
@@ -42,9 +40,7 @@ RunService.Heartbeat:Connect(function(dt)
 	if not low or low.Normal.Y > 0.7 then -- (a slope it can walk up isn't in the way)
 		return
 	end
-	local training = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Base")
-	training = training and training:FindFirstChild("Training")
-	if low.Instance:GetAttribute("NoHop") or (training and low.Instance:IsDescendantOf(training)) then
+	if low.Instance:GetAttribute("NoHop") then
 		return
 	end
 	-- ...that isn't too tall: the way's clear just over Height
