@@ -2,6 +2,7 @@
 can be opened and looked at or tweaked in Blockbench (QM, Oct 30: "send blizard owl bbmodel").
 
   python3 tools/forge_to_bbmodel.py BlizzardOwl [out.bbmodel]   # default designs/bosses/<Name>.bbmodel
+  python3 tools/forge_to_bbmodel.py CastleWyvern                # any other boss too, from its Model.luau
 
 Blocks become cubes, wedges six-vertex wedge meshes, corner wedges five-vertex pyramids
 (the shapes tools/bbmodel_to_luau.py reads back), one flat texture per colour. Bones become
@@ -18,6 +19,7 @@ import io
 import json
 import math
 import os
+import re
 import sys
 import uuid
 
@@ -65,8 +67,12 @@ def mesh(p, tex, verts, faces):
 
 
 def element(p, tex):
-    R = np.array(rot(*p["r"]))
-    c = np.array(p["at"])
+    if "cf" in p:  # a part read back from a Model.luau (tools/boss_luau.py)
+        R = np.array(p["cf"][3:]).reshape(3, 3)
+        c = np.array(p["cf"][:3])
+    else:
+        R = np.array(rot(*p["r"]))
+        c = np.array(p["at"])
     sx, sy, sz = (s / 2 for s in p["size"])
 
     def at(x, y, z):
@@ -89,18 +95,77 @@ def element(p, tex):
             "faces": {s: dict(face) for s in ("north", "east", "south", "west", "up", "down")}}
 
 
+def corner_points(p):
+    R = np.array(p["cf"][3:]).reshape(3, 3) if "cf" in p else np.array(rot(*p["r"]))
+    c = np.array(p["cf"][:3] if "cf" in p else p["at"])
+    sx, sy, sz = (s / 2 for s in p["size"])
+    return [c + R @ np.array(v) for v in ((-sx, -sy, -sz), (sx, -sy, -sz), (sx, -sy, sz), (-sx, -sy, sz), (sx, sy, -sz))]
+
+
+def pyramid(parts):
+    """A spike that tools/bbmodel_to_luau.py split into four CornerWedgeParts (a pyramid's four
+    quarters), put back together: its five corners, base first in order round, then the tip."""
+    pts = np.concatenate([corner_points(p) for p in parts])
+    centre = pts.mean(0)
+    apex = max(pts, key=lambda v: np.linalg.norm(v - centre))
+    far = [v for v in pts if np.linalg.norm(v - apex) > 1e-4]
+    # the base: the points furthest from the tip, its corners the four furthest from their middle
+    d = max(np.linalg.norm(v - apex) for v in far)
+    n = apex - np.mean(far, 0)
+    n /= np.linalg.norm(n)
+    base = [v for v in far if abs(np.dot(apex - v, n) - max(np.dot(apex - w, n) for w in far)) < 1e-3]
+    mid = np.mean(base, 0)
+    corners = []
+    for v in sorted(base, key=lambda v: -np.linalg.norm(v - mid)):
+        if all(np.linalg.norm(v - w) > 1e-3 for w in corners):
+            corners.append(v)
+        if len(corners) == 4:
+            break
+    if len(corners) < 4 or d <= 0:
+        return None
+    u = corners[0] - mid
+    w = np.cross(n, u)
+    corners.sort(key=lambda v: math.atan2(np.dot(v - mid, w), np.dot(v - mid, u)))
+    return corners + [apex]
+
+
 def bbmodel(m):
     colors, textures, elements = {}, [], []
-    for p in m.parts:
+
+    def tex(p):
         rgb = tuple(int(c) for c in p["color"])
         if rgb not in colors:
             colors[rgb] = len(textures)
             textures.append(texture(rgb, len(textures)))
-        elements.append((p["bone"], element(p, colors[rgb])))
+        return colors[rgb]
+
+    # spikes split into quarters go back in as one pyramid each (as they were drawn in Blockbench)
+    quarters = {}
+    for p in m.parts:
+        if p["class"] == "CornerWedgePart":
+            quarters.setdefault((p["bone"], re.sub(r"_\d+$", "", p["name"]), tuple(p["color"])), []).append(p)
+    merged = {}
+    for key, ps in quarters.items():
+        v = pyramid(ps) if len(ps) == 4 else None
+        if v is not None:
+            q = dict(ps[0], name=key[1], at=tuple(np.mean(v[:4], 0)))
+            q.pop("cf", None)
+            merged[id(ps[0])] = mesh(q, tex(q), v, [(0, 1, 2, 3), (0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)])
+            for p in ps[1:]:
+                merged[id(p)] = None
+    for p in m.parts:
+        if id(p) in merged:
+            if merged[id(p)] is not None:
+                elements.append((p["bone"], merged[id(p)]))
+            continue
+        elements.append((p["bone"], element(p, tex(p))))
 
     groups, nodes = [], {}
+    rests = getattr(m, "rests", {})
     for name, parent, pivot in m.bones:
-        g = {"name": name, "uuid": uid(), "origin": [round(v * UNIT, 4) + 0.0 for v in pivot], "rotation": [0, 0, 0],
+        rest = [math.degrees(a) for a in rests.get(name, (0, 0, 0))]
+        g = {"name": name, "uuid": uid(), "origin": [round(v * UNIT, 4) + 0.0 for v in pivot],
+             "rotation": zyx(rot(*rest)) if any(rest) else [0, 0, 0],
              "export": True, "visibility": True, "locked": False, "isOpen": True, "color": 0}
         groups.append(g)
         nodes[name] = {"uuid": g["uuid"], "isOpen": True, "children": []}
@@ -135,9 +200,11 @@ def bbmodel(m):
 
 if __name__ == "__main__":
     import boss_designs
+    import boss_luau
 
     name = sys.argv[1]
-    m = next(m for m in boss_designs.models() if m.name == name)
+    # a boss made in Python, or any other model by its Model.luau (the Lasso recolours, tools/boss_recolors.py)
+    m = next((m for m in boss_designs.models() if m.name == name), None) or boss_luau.load(name)
     out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "designs", "bosses", name + ".bbmodel")
     json.dump(bbmodel(m), open(out, "w"), indent=1)
     print("wrote", out, "-", len(m.bones), "bones,", len(m.parts), "blocks,", len(m.anims), "animations")
