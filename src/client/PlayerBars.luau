@@ -20,6 +20,7 @@ local WIDE = 9.4 -- studs across (QM, Oct 27: 6, then 30% up, then 20% more, to 
 -- In a boss fight (you're LockedIn) it's a fixed size on screen instead, so it doesn't go tiny
 -- under the zoomed-out fight camera (QM, Oct 30): design px across at a 1080-tall screen
 local FIGHT_WIDE = 190
+local FIGHT_LIFT = 0.6 -- in a fight, how far it's raised, in its own heights, so it sits clear of the head (QM)
 local FIGHT_RANGE = 400 -- studs it shows within in a fight (the camera's far back over a wide arena)
 local FLASH = 0.1 -- seconds the green takes to fade back from white on a hit
 local TRAIL = 0.3 -- seconds the white trail takes to catch up
@@ -33,9 +34,11 @@ local function size(gui)
 		local k = workspace.CurrentCamera.ViewportSize.Y / 1080
 		gui.Size = UDim2.fromOffset(math.round(FIGHT_WIDE * k), math.round(FIGHT_WIDE * H / W * k))
 		gui.MaxDistance = FIGHT_RANGE
+		gui.SizeOffset = Vector2.new(0, FIGHT_LIFT)
 	else
 		gui.Size = UDim2.fromScale(WIDE, WIDE * H / W) -- (studs: it shrinks with distance like the world)
 		gui.MaxDistance = 120
+		gui.SizeOffset = Vector2.zero
 	end
 end
 local function resize()
