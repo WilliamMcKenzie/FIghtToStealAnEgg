@@ -42,7 +42,7 @@ if not workspace:FindFirstChild("FightBarrierStyle") then
 	style.Name = "FightBarrierStyle"
 	style.Parent = workspace
 end
-StudStyle.ensure() -- workspace.StudStyle: every stud Texture's Transparency, kept with the place
+StudStyle.ensure() -- workspace.StudStyle: the studs' Transparency and TileScale (ground apart), kept with the place
 StudStyle.watch()
 local map = Map.ensure() -- workspace.Map (baked into the place in Studio, or built now)
 WorldColors.create() -- workspace.WorldColors: live world colours (after the map: it paints it)
