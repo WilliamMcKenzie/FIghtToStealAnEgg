@@ -2224,7 +2224,7 @@ return {
 				Speed = 3.5,
 				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 4, Arc = 130, Damage = 32 } }, -- (boss: 40)
 				Mobs = {
-					{ Pet = "RockHog", Name = "Fire Boar" }, -- (full size: it was 0.6x for the old yard, QM)
+					{ Pet = "RockHog", Name = "Fire Boar", Scale = 0.6 }, -- (40% smaller, hitbox too: QM, Oct 30)
 					{
 						Pet = "Firebird",
 						Mode = "Range",
