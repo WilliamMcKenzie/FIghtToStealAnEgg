@@ -2432,7 +2432,7 @@ return {
 		-- Damage x Count / Cooldown, from the Kendo Stick's 2 to the Genesis Staff's 1,834; prices
 		-- roughly double each step, 500 to 25B, so a new biome's cash buys the next few.)
 		-- Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, Celestial, Cosmic, Void
-		-- and Omega (Rarities above; the last three are the endgame recolours). Every Ranged one
+		-- and Omega (Rarities above; the last four are the endgame designs). Every Ranged one
 		-- shoots the same arrow (only its numbers and trail differ); Magic ones are drawn from
 		-- their numbers (client/Shots). Tune any of them live: Workspace > Weapon.
 		-- (everyone's to start: Arsenal.Start, so Carl doesn't sell it)
@@ -2714,10 +2714,10 @@ return {
 				TrailLength = 0.6,
 			},
 		},
-		-- the endgame (QM, Oct 30: recolour some weapons into higher tiers, enough to reach the
-		-- Red Castle and Ocean Trench). Each is a recolour of one QM drew (tools/weapon_recolors.py)
-		-- that fights like it, still 1.3x the one before in damage a second (Flower Staff's 133
-		-- up to the Genesis Staff's 1,834). Prices climb ~1.8x a step from 150M: the first two
+		-- the endgame (QM, Oct 30: more tiers, enough to reach the Red Castle and Ocean Trench).
+		-- Each is an original design in QM's palette (tools/weapon_designs.py) that fights like
+		-- the drawn weapon it first recoloured, still 1.3x the one before in damage a second
+		-- (Flower Staff's 133 up to the Genesis Staff's 1,834). Prices climb ~1.8x a step from 150M: the first two
 		-- are Dungeon and Magic Circle cash, the next few Red Castle and Ocean Trench, and the
 		-- Omega pair is the chase past them (placeholders).
 		SunBlade = {
