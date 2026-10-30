@@ -956,6 +956,7 @@ return {
 				Model = "Treant",
 				StandIn = { "Cactus", 1.4 },
 				Size = 1.4,
+				Scale = 1.6, -- (as the Treant pet)
 				Name = "Sapling",
 				Health = 200000,
 				Speed = 14,
