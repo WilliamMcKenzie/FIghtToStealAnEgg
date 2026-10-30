@@ -953,10 +953,10 @@ return {
 			Minions = {
 				At = 0.5,
 				Count = 4,
-				Model = "LivingBirch",
+				Model = "AncientTreant",
 				StandIn = { "Cactus", 1.4 },
 				Size = 1.4,
-				Scale = 1.2, -- (x the Living Birch pet: about the old Treant's height)
+				Scale = 1.1, -- (x the Ancient Treant pet)
 				Name = "Sapling",
 				Health = 200000,
 				Speed = 14,
