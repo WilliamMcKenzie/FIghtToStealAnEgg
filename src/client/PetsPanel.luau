@@ -122,7 +122,7 @@ local function build(root)
 	})
 	HudKit.outlineArt(robux, 3) -- (QM: outlined like its text)
 	-- Equip Best: under the panel, lined up with its right edge (the panel's 1168 x 734)
-	local best = button(panel.gui, "PetsEquipBest", 560, 150, { Position = UDim2.fromOffset(fig(608), fig(764)), ZIndex = 4 }, "Green")
+	local best = button(panel.gui, "PetsEquipBest", 560, 150, { Position = UDim2.fromOffset(fig(608), fig(764)), ZIndex = 4 }, "GreenWeld")
 	local bestText = label(best, "Text", {
 		Text = "Equip Best",
 		TextXAlignment = Enum.TextXAlignment.Center,
