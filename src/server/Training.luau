@@ -126,6 +126,7 @@ local function spawnMob(name, x, z, half, slot)
 		b = { c = { Attacks = attacks, Radius = radius }, foes = {} }, -- (for BossAttacks.update)
 	}
 	m.b.biome = m.b -- (its attacks hit only its foes: BossAttacks' fighters)
+	m.b.region = name -- (its swipes' size: Config.EnemySwipe.Scale)
 	mobs[body] = m
 	Combat.add(body, function(player, damage)
 		if not mobs[body] or not Training.unlocked(player, name) then

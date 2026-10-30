@@ -845,7 +845,8 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3.6, Reach = 30, Arc = 150, Windup = 0.85, Damage = 75, Swings = 3 },
+				-- (QM, Oct 30: each slash of the combo bigger than the last: 1x, 1.25x, 1.5x)
+				{ Kind = "Swipe", Every = 3.6, Reach = 30, Arc = 150, Windup = 0.85, Damage = 75, Swings = 3, Grow = 0.25 },
 				{ Kind = "Charge", Every = 6, Range = 120, Windup = 1, Speed = 85, Width = 28, Damage = 90, Anim = "charge" },
 				{ Kind = "Slam", Every = 4, Range = 14, Radius = 18, Windup = 0.8, Damage = 90, Anim = "slam" },
 			},
@@ -1195,6 +1196,22 @@ return {
 	EnemySwipe = {
 		Windup = 0.5, -- seconds from the telegraph appearing to the hit (bosses set longer)
 		Arc = 120,
+		-- how much bigger than its Reach (and Width) every swipe really is, by region (QM,
+		-- Oct 30: pets are fast, so dodging was trivial; about 1.6x across the board,
+		-- growing further out). Bosses, minions and training mobs alike; a training
+		-- ground goes by its name (Meadow, Desert, Ice, Lava), Dummies and anything else
+		-- by Default.
+		Scale = {
+			Default = 1.6,
+			Meadow = 1.5,
+			Desert = 1.6,
+			Ice = 1.6,
+			Lava = 1.7,
+			Dungeon = 1.8,
+			Castle = 1.9,
+			Forest = 1.9,
+			Ocean = 2,
+		},
 		-- where it sits (QM, Oct 30: out in front, never over the enemy itself): a swipe of
 		-- Narrow degrees or less is centred Ahead of the way to its front edge; Wrap or more on its
 		-- middle (it goes most of the way round); in between, in between

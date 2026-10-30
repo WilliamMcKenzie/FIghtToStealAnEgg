@@ -2,7 +2,7 @@
 -- RotMG-style "bombs" with floor indicators, then all of it). Each boss's Attacks in
 -- Config.Bosses is a list of these, each on its own timer:
 --
---   Swipe { Every, Reach, Arc, Width, Windup, Swings, Damage, Anim, Then }: its melee (QM,
+--   Swipe { Every, Reach, Arc, Width, Windup, Swings, Grow, Damage, Anim, Then }: its melee (QM,
 --         Oct 30: no more hurting you just by touching you). Once you're within Reach studs
 --         of its edge it stops and faces you, a red crescent shaped like the swipe (Arc
 --         degrees round, out to Reach past its edge straight ahead, Width thick: most of
@@ -10,8 +10,10 @@
 --         yours, the crescent sits out in front of it, never over its own body (QM: narrow
 --         ones centred on its front edge, the widest ones on its middle). Then the
 --         swipe goes through it and everyone on it takes Damage. Swings: that many in a row,
---         back and forth, each with its own telegraph. Clients draw it from the EnemySwipe
---         remote (client/Swipes); the shape is Shared/SlashFx's, rolled from one seed on
+--         back and forth, each with its own telegraph, each Grow (share of the first)
+--         bigger than the last. Reach and Width are scaled by Config.EnemySwipe.Scale for its
+--         region (it still only starts one once you're within the unscaled Reach).
+--         Clients draw it from the EnemySwipe remote (client/Swipes); the shape is Shared/SlashFx's, rolled from one seed on
 --         both sides. A leftover Contact { Every, Reach, Damage } is a plain Swipe.
 --   Slam  { Every, Range, Radius, Windup, Damage }: when a fighter is within Range, it
 --         stops, a red circle grows in front of it for Windup seconds, then everything
@@ -388,7 +390,6 @@ local function swipe(body, b, a, pos, toward)
 	local rb = b.c.Radius
 	local arc = a.Arc or S.Arc
 	local ahead = rb * S.Ahead * math.clamp((S.Wrap - arc) / (S.Wrap - S.Narrow), 0, 1)
-	local radius = rb + a.Reach - ahead
 	-- (as thick as it can be with its inner edge still clear of its body all along: the
 	-- inner radius r must keep ahead^2 + r^2 + 2 ahead r cos(half) >= (rb + Clear)^2, for
 	-- the biggest arc and width its seed can roll: Config.EnemySwipe's Variety)
@@ -400,21 +401,31 @@ local function swipe(body, b, a, pos, toward)
 	if ahead >= clear and cosHalf >= 0 then
 		inner = 0 -- (its centre's already clear of it, and the swipe faces away)
 	end
-	local width = math.min(a.Width or radius * S.Thick, (radius * v.Radius[1] - math.max(inner, 0)) / v.Width[2])
-	local look = {
-		Radius = radius,
-		Arc = arc,
-		Width = math.max(width, 1),
-	}
-	local c = table.clone(S)
-	for k, value in look do
-		c[k] = value
+	-- how big (QM, Oct 30: pets are fast, so melee has to be BIG to land): its region's
+	-- Scale (a training mob's is its ground's), and a combo's later swings Grow bigger
+	local region = if type(b.biome) == "table" then b.region else b.biome
+	local scale = S.Scale[region] or S.Scale.Default
+	local function lookAt(k)
+		local grow = scale * (1 + (k - 1) * (a.Grow or 0))
+		local radius = rb + a.Reach * grow - ahead
+		local width = math.min(if a.Width then a.Width * grow else radius * S.Thick, (radius * v.Radius[1] - math.max(inner, 0)) / v.Width[2])
+		local look = {
+			Radius = radius,
+			Arc = arc,
+			Width = math.max(width, 1),
+		}
+		local c = table.clone(S)
+		for key, value in look do
+			c[key] = value
+		end
+		return look, c
 	end
 	local centre = pos + toward * ahead
 	local origin = CFrame.new(centre.X, groundAt(centre), centre.Z) * CFrame.Angles(0, yaw, 0)
 	local start = serverNow()
 	local dir = if math.random() < 0.5 then 1 else -1
 	for k = 1, swings do
+		local look, c = lookAt(k)
 		local seed = math.random(0, 2 ^ 30 - 1)
 		local o = SlashFx.outline(c, seed)
 		swipeRemote:FireAllClients({
