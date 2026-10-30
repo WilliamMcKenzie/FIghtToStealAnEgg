@@ -29,6 +29,7 @@ local Projectiles = require(Shared.Projectiles)
 local Weapons = require(Shared.Weapons.Weapons)
 local Pets = require(Shared.Pets)
 local Riding = require(script.Parent.Riding)
+local Sfx = require(script.Parent.Sfx)
 
 local Shots = {}
 
@@ -209,26 +210,9 @@ local function ring(at, color, radius)
 	Debris:AddItem(p, 0.32)
 end
 
--- a sound from `parent` (a part), or at a point (an Attachment in Terrain, then gone)
+-- a sound from a part or a point, heard if it's on the screen (client/Sfx)
 local function sound(id, volume, parent, at)
-	if type(id) ~= "string" or id == "" or (volume or 0) <= 0 then
-		return
-	end
-	local holder = parent
-	if not holder then
-		holder = Instance.new("Attachment")
-		holder.WorldPosition = at
-		holder.Parent = workspace.Terrain
-		Debris:AddItem(holder, 4)
-	end
-	local snd = Instance.new("Sound")
-	snd.SoundId = id
-	snd.Volume = volume
-	snd.RollOffMinDistance = 10
-	snd.RollOffMaxDistance = 150
-	snd.Parent = holder
-	snd:Play()
-	Debris:AddItem(snd, 4)
+	Sfx.play(id, volume, parent or at)
 end
 
 function Shots.fire(character, id, yaw, seed)

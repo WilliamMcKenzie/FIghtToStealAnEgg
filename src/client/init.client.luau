@@ -25,6 +25,7 @@ local WorldColors = require(Shared.WorldColors)
 local Weapons = require(Shared.Weapons.Weapons)
 local Projectiles = require(Shared.Projectiles)
 local Riding = require(script.Riding)
+local Sfx = require(script.Sfx)
 local Shots = require(script.Shots)
 local SlashCam = require(script.SlashCam)
 local SwingPose = require(script.SwingPose)
@@ -104,15 +105,8 @@ local function swingSound(character, c, seed)
 		TweenService:Create(last, TweenInfo.new(c.SoundCut), { Volume = 0 }):Play()
 		Debris:AddItem(last, c.SoundCut + 0.05)
 	end
-	local sound = Instance.new("Sound")
 	local pick = c.Sounds[Random.new(seed):NextInteger(1, #c.Sounds)]
-	sound.SoundId = pick.id
-	sound.Volume = c.Volume
-	sound.Parent = root
-	sound.TimePosition = pick.start
-	sound:Play()
-	playing[character] = sound
-	Debris:AddItem(sound, 5)
+	playing[character] = Sfx.play(pick.id, c.Volume, root, pick.start) -- (heard if on screen)
 end
 
 local function play(character, dir, tool, seed, yaw)
