@@ -25,7 +25,6 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -37,6 +36,7 @@ local RarityLook = require(Shared.RarityLook)
 local HudImages = require(script.Parent.HudImages)
 local HudKit = require(script.Parent.HudKit)
 local Ui = require(script.Parent.Ui)
+local UiFx = require(script.Parent.UiFx)
 
 local IndexPanel = {}
 
@@ -51,7 +51,6 @@ local W, H = 2268, 1370
 local SHINE = { { at = 0.62, width = 0.07 }, { at = 0.72, width = 0.025 } } -- (the shop's)
 local SHINE_SLANT = 22
 local SHINE_ALPHA = 0.7
-local POP = 0.12
 local LEFT_W = 1600 -- the sections' box
 local BOX_TOP, BOX_H = 323, 800
 local RIGHT_X = 1680
@@ -723,25 +722,20 @@ local function refresh()
 	end
 end
 
+-- (popping in and out: client/UiFx)
 function IndexPanel.isOpen()
-	return gui ~= nil and gui.Visible
+	return gui ~= nil and UiFx.isOpen(gui)
 end
 
 function IndexPanel.open()
-	if not gui then
-		return
-	end
-	gui.Visible = true
-	local pop = gui:FindFirstChild("Pop")
-	if pop then
-		pop.Scale = 0.85
-		TweenService:Create(pop, TweenInfo.new(POP, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	if gui then
+		UiFx.popIn(gui)
 	end
 end
 
 function IndexPanel.close()
 	if gui then
-		gui.Visible = false
+		UiFx.popOut(gui)
 	end
 end
 
@@ -757,11 +751,7 @@ function IndexPanel.init(root, indexButton)
 	close.Activated:Connect(IndexPanel.close)
 	if indexButton then
 		indexButton.Activated:Connect(function()
-			if IndexPanel.isOpen() then
-				IndexPanel.close()
-			else
-				IndexPanel.open()
-			end
+			UiFx.toggle(gui)
 		end)
 	end
 
@@ -769,6 +759,7 @@ function IndexPanel.init(root, indexButton)
 		makeSection(name, i)
 	end
 	for kind, tile in tiles do
+		UiFx.button(tile)
 		tile.Activated:Connect(function()
 			picked = kind
 			refresh()
@@ -790,7 +781,12 @@ function IndexPanel.init(root, indexButton)
 	claimButton.Activated:Connect(function()
 		if claimRemote and picked and not claimButton:GetAttribute("Busy") then
 			claimButton:SetAttribute("Busy", true)
-			pcall(claimRemote.InvokeServer, claimRemote, picked)
+			local ok, done = pcall(claimRemote.InvokeServer, claimRemote, picked)
+			if ok and done then
+				UiFx.play("Claim")
+			else
+				UiFx.shake(claimButton)
+			end
 			claimButton:SetAttribute("Busy", nil)
 		end
 	end)
