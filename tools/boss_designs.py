@@ -7,7 +7,7 @@ The roster and each attack's windup: /mnt/project-files/boss-roster/design.md (Q
 
 import sys
 
-from boss_forge import Model, bob, wave
+from boss_forge import Model, bob, wave, write_sleep
 
 DARK = (30, 22, 34)  # eyes and mouths, as the Cactus Boss's
 WHITE = (250, 246, 236)
@@ -1166,11 +1166,77 @@ BUILDERS = [scorpion_king, frost_golem, blizzard_owl, magma_slime, bone_warden, 
             rune_mage, elder_treant, toadstool_king, crimson_knight, castle_guard, blood_bat, castle_wyvern, puffer_lord, kraken]
 
 
+# how each sleeps on its dais till its egg is stolen (Config.BossSleep.Poses; no Zzz: QM)
+# bones and breathe: (x, y, z, rx, ry, rz), drawing studs and degrees
+SLEEPS = {
+    "ScorpionKing": dict(note="belly down, pincers tucked in, tail drooped forward",
+                         bones={"root": (0, -1, 0, 0, 0, 0), "ClawL": (0.3, -0.4, 0.8, -8, -20, 0), "ClawR": (-0.3, -0.4, 0.8, -8, 20, 0),
+                                "Tail": (0, 0, 0, -12, 0, 0), "Stinger": (0, 0, 0, -30, 0, 0)},
+                         breathe={"root": (0, 0.12, 0, 0, 0, 0), "Tail": (0, 0, 0, 3, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "FrostGolem": dict(note="slumped down, fists on the ground",
+                       bones={"root": (0, -1.4, 0, -6, 0, 0), "ArmL": (0, 0, 0, 10, 0, 6), "ArmR": (0, 0, 0, 10, 0, -6)},
+                       breathe={"root": (0, 0.15, 0, 1, 0, 0)}, shut=["GlowL", "GlowR"]),
+    "BlizzardOwl": dict(note="landed, wings tucked in",
+                        bones={"root": (0, -3.4, 0, 0, 0, 0), "WingL": (0, 0, 0, 0, 0, 6), "WingR": (0, 0, 0, 0, 0, -6)},
+                        breathe={"root": (0, 0.12, 0, 0, 0, 0), "WingL": (0, 0, 0, 0, 0, 3), "WingR": (0, 0, 0, 0, 0, -3)},
+                        shut=["EyeL", "EyeR"], hide=["PupilL", "PupilR"]),
+    "MagmaSlime": dict(note="settled, its lid down",
+                       bones={"root": (0, -0.5, 0, 0, 0, 0), "Lid": (0, -0.15, 0, 0, 0, 0)},
+                       breathe={"root": (0, 0.12, 0, 0, 0, 0), "Lid": (0, 0.2, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "BoneWarden": dict(note="sat on the ground, legs out, skull drooped, sword laid forward",
+                       bones={"root": (0, -2.4, 0.6, 0, 0, 0), "LegL": (0, 0, 0, 80, 0, -8), "LegR": (0, 0, 0, 80, 0, 8),
+                              "neck": (0, 0, 0, -25, 0, 8), "ArmR": (0, 0, 0, 20, 0, 0), "ArmL": (0, 0, 0, 10, 0, -6)},
+                       breathe={"root": (0, 0.1, 0, 0, 0, 0), "neck": (0, 0, 0, 3, 0, 0)}, hide=["GlowL", "GlowR"]),
+    "DungeonWatcher": dict(note="sunk to the floor, its lid shut",
+                           bones={"root": (0, -3.6, 0, 0, 0, 0), "Lid": (0, -2.6, 0, 0, 0, 0)},
+                           breathe={"root": (0, 0.15, 0, 0, 0, 0)}, shut=["Sclera"], hide=["Iris", "Pupil"]),
+    "TreasureMimic": dict(note="just a chest, lid shut, lifting a crack with each breath",
+                          bones={"root": (0, -0.2, 0, 0, 0, 0), "Lid": (0, 0, 0, 0, 0, 0)},
+                          breathe={"root": (0, 0.08, 0, 0, 0, 0), "Lid": (0, 0, 0, 4, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "RuneMage": dict(note="settled down, hat tipped over its eyes",
+                     bones={"root": (0, -0.3, 0, -4, 0, 0), "Hat": (0, -0.3, -0.2, -14, 0, 0), "ArmR": (0, 0, 0, 4, 0, 0)},
+                     breathe={"root": (0, 0.1, 0, 0, 0, 0), "Hat": (0, 0, 0, 2, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "ElderTreant": dict(note="branches drooped, canopy sagging",
+                        bones={"root": (0, 0, 0, -2, 0, 0), "ArmL": (0, 0, 0, 0, 0, 20), "ArmR": (0, 0, 0, 0, 0, -20),
+                               "Canopy": (0, -0.3, 0, -4, 0, 0)},
+                        breathe={"Canopy": (0, 0.15, 0, 1, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "ToadstoolKing": dict(note="squat, cap tipped forward",
+                          bones={"root": (0, -0.8, 0, 0, 0, 0), "Cap": (0, -0.5, 0, -8, 0, 0)},
+                          breathe={"Cap": (0, 0.2, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "CrimsonKnight": dict(note="asleep on his feet, leaning on his lance, helm drooped",
+                          bones={"root": (0, -0.3, 0, -4, 0, 0), "neck": (0, -0.2, 0, -28, 0, 6), "ArmL": (0, 0, 0, 6, 0, 0)},
+                          breathe={"root": (0, 0.1, 0, 0, 0, 0), "neck": (0, 0, 0, 3, 0, 0)}),
+    "BloodBat": dict(note="landed, wrapped in its wings",
+                     bones={"root": (0, -3, 0, 0, 0, 0), "WingL": (0, 0, 0, 0, -50, 75), "WingR": (0, 0, 0, 0, 50, -75)},
+                     breathe={"root": (0, 0.1, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"]),
+    "CastleWyvern": dict(note="lying down, head on the ground, tail curled round, wings folded",
+                         bones={"root": (0, -1.8, 0, 0, 0, 0), "neck": (0, -1.4, 0.4, -24, 30, 0), "Tail": (0, 0, 0, 0, -50, 0),
+                                "WingL": (0, 0, 0, 0, 0, 30), "WingR": (0, 0, 0, 0, 0, -30)},
+                         breathe={"root": (0, 0.12, 0, 0, 0, 0), "WingL": (0, 0, 0, 0, 0, -4), "WingR": (0, 0, 0, 0, 0, 4)},
+                         shut=["EyeL", "EyeR"]),
+    "PufferLord": dict(note="resting on the sand, deflated",
+                       bones={"root": (0, -3.4, 0, 0, 0, 0), "Tail": (0, 0, 0, 0, 20, 0)},
+                       breathe={"root": (0, 0.15, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"], hide=["PupilL", "PupilR"]),
+    "Kraken": dict(note="sunk low, tentacles drawn down into the floor, just their tips showing",
+                   bones={"root": (0, -1, 0, 0, 0, 0), "Tent1": (0, -5.5, 0, 0, 0, -10), "Tent2": (0, -5.5, 0, 0, 0, 10),
+                          "Tent3": (0, -5.5, 0, 0, 0, -10), "Tent4": (0, -5.5, 0, 0, 0, 10)},
+                   breathe={"root": (0, 0.15, 0, 0, 0, 0)}, shut=["EyeL", "EyeR"], hide=["PupilL", "PupilR"]),
+}
+
+
 def models():
-    return [b() for b in BUILDERS]
+    out = []
+    for b in BUILDERS:
+        m = b()
+        if m.name in SLEEPS:
+            m.sleep(**SLEEPS[m.name])
+        out.append(m)
+    return out
 
 
 if __name__ == "__main__":
-    for m in models():
+    made = models()
+    for m in made:
         if len(sys.argv) < 2 or m.name in sys.argv[1:]:
             m.write()
+    write_sleep(made)
