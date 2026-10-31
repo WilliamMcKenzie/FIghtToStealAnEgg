@@ -118,6 +118,9 @@ local function setPlaced(player, list)
 end
 
 local function hold(player, kind)
+	if player:GetAttribute("LockedIn") then
+		return -- (in a boss fight it's your weapon: QM, Oct 31)
+	end
 	if kind == nil or kind == player:GetAttribute("Holding") then
 		player:SetAttribute("Holding", nil) -- (clicked again: the weapon again)
 	elseif type(kind) == "string" and Stacks.count(bag(player), kind) > 0 then
@@ -324,6 +327,9 @@ function Hatchery.start()
 		local wasLocked = player:GetAttribute("LockedIn") ~= nil
 		player:GetAttributeChangedSignal("LockedIn"):Connect(function()
 			local locked = player:GetAttribute("LockedIn") ~= nil
+			if locked and not wasLocked then
+				player:SetAttribute("Holding", nil) -- (weapon out for the fight: QM, Oct 31)
+			end
 			if wasLocked and not locked then
 				task.defer(fightOver, player) -- (after a death or respawn has emptied the bag)
 			end

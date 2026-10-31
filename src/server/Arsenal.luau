@@ -108,14 +108,15 @@ local function eggTool(kind)
 end
 
 -- the equipped weapon's tool in the backpack, or the egg they're holding (Holding) in
--- its place (any other weapon or egg tool goes)
+-- its place (any other weapon or egg tool goes). In a boss fight (LockedIn) it's always the
+-- weapon: the hotbar is hidden then (client/FightHud; QM, Oct 31).
 local function arm(player)
 	local character = player.Character
 	local backpack = player:FindFirstChildOfClass("Backpack")
 	if not (character and backpack) then
 		return
 	end
-	local egg = player:GetAttribute("Holding")
+	local egg = if player:GetAttribute("LockedIn") then nil else player:GetAttribute("Holding")
 	local id = player:GetAttribute("Weapon")
 	if not Weapons.exists(id) then
 		id = START
@@ -193,6 +194,9 @@ function Arsenal.start()
 			arm(player)
 		end)
 		player:GetAttributeChangedSignal("Holding"):Connect(function()
+			arm(player)
+		end)
+		player:GetAttributeChangedSignal("LockedIn"):Connect(function()
 			arm(player)
 		end)
 		migrate()
