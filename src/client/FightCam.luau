@@ -66,6 +66,54 @@ local function smooth(k)
 	return k * k * (3 - 2 * k)
 end
 
+-- the fight camera's shot (and the point it looks at), for a fight in `biome`
+local function shotFor(cfg, root, biome)
+	local at = root.Position + Vector3.new(0, cfg.Height, 0)
+	local pitch, yaw = math.rad(cfg.Pitch), math.rad(cfg.Yaw)
+	-- (yaw 0: the camera sits to the south, +Z, looking north)
+	local back = Vector3.new(math.sin(yaw) * math.cos(pitch), math.sin(pitch), math.cos(yaw) * math.cos(pitch))
+	local distance = cfg.Distance
+	local area = cfg.Fixed and areaOf(biome)
+	if area then
+		-- Fixed: held over the arena's middle, back far enough that its width just fits
+		-- across the screen (times Fit)
+		local b = area.Bounds
+		local width = math.abs(math.cos(yaw)) * math.abs(b[3] - b[1]) + math.abs(math.sin(yaw)) * math.abs(b[4] - b[2])
+		local view = camera.ViewportSize
+		local across = math.tan(math.rad(cfg.Fov) / 2) * view.X / math.max(view.Y, 1)
+		at = area.centre + Vector3.new(0, cfg.Height, 0)
+		distance = width / 2 * (cfg.Fit or 1) / across
+	end
+	return CFrame.lookAt(at + back * distance, at), at
+end
+
+-- The boss intro (client/BossIntro, QM Oct 31) starts from exactly this shot, the whole
+-- arena, and zooms in on the boss from it, so it never starts down by you among the
+-- trees and rocks. Returns nil when there's no fight camera to start from.
+function FightCam.shot(biome)
+	local cfg = BossTuning.camera()
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not cfg.On or not root then
+		return nil
+	end
+	return shotFor(cfg, root, biome)
+end
+
+-- Jumps straight to the fight camera (no easing in), so the boss intro's first frame
+-- and its last are both the fight shot. Only while you're locked in.
+function FightCam.snap()
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root or player:GetAttribute("LockedIn") == nil or w >= 1 then
+		return
+	end
+	if w <= 0 then
+		before = CFrame.new(root.Position):ToObjectSpace(camera.CFrame)
+	end
+	w = 1
+end
+
 RunService:BindToRenderStep("FightCam", Enum.RenderPriority.Camera.Value + 1, function(dt)
 	local cfg = BossTuning.camera() -- (Config.FightCam, with workspace.BossTuning's live values)
 	local character = player.Character
@@ -92,23 +140,7 @@ RunService:BindToRenderStep("FightCam", Enum.RenderPriority.Camera.Value + 1, fu
 		return
 	end
 
-	local at = root.Position + Vector3.new(0, cfg.Height, 0)
-	local pitch, yaw = math.rad(cfg.Pitch), math.rad(cfg.Yaw)
-	-- (yaw 0: the camera sits to the south, +Z, looking north)
-	local back = Vector3.new(math.sin(yaw) * math.cos(pitch), math.sin(pitch), math.cos(yaw) * math.cos(pitch))
-	local distance = cfg.Distance
-	local area = cfg.Fixed and areaOf(player:GetAttribute("LockedIn") or fought)
-	if area then
-		-- Fixed: held over the arena's middle, back far enough that its width just fits
-		-- across the screen (times Fit)
-		local b = area.Bounds
-		local width = math.abs(math.cos(yaw)) * math.abs(b[3] - b[1]) + math.abs(math.sin(yaw)) * math.abs(b[4] - b[2])
-		local view = camera.ViewportSize
-		local across = math.tan(math.rad(cfg.Fov) / 2) * view.X / math.max(view.Y, 1)
-		at = area.centre + Vector3.new(0, cfg.Height, 0)
-		distance = width / 2 * (cfg.Fit or 1) / across
-	end
-	local shot = CFrame.lookAt(at + back * distance, at)
+	local shot, at = shotFor(cfg, root, player:GetAttribute("LockedIn") or fought)
 	local own = camera.CFrame
 	if not on and before then
 		-- easing out: head back to where your camera was before the fight
