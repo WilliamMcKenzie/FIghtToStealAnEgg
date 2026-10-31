@@ -8,6 +8,7 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local Abbrev = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Abbrev"))
+local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config"))
 
 local DamageNumbers = require(script.Parent.DamageNumbers)
 local Riding = require(script.Parent.Riding)
@@ -28,6 +29,10 @@ local FIGHT_RANGE = 400 -- studs it shows within in a fight (the camera's far ba
 local FLASH = 0.1 -- seconds the green takes to fade back from white on a hit
 local TRAIL = 0.3 -- seconds the white trail takes to catch up
 local HURT = Color3.fromRGB(255, 60, 60) -- the damage numbers over players
+-- the level before the name, yellow and smaller (QM, Oct 31: "13 Bak"): this much of the
+-- name's size (Config.Levels.Color)
+local LEVEL_SIZE = 0.75
+local NAME_FILL = 0.8 -- the name's text height, of its 30 px box
 
 -- studs out of a fight, screen px in one (the local player's LockedIn)
 local bars = setmetatable({}, { __mode = "k" }) -- [gui] = true
@@ -114,7 +119,37 @@ local function attach(character)
 	end
 	local player = Players:GetPlayerFromCharacter(character)
 	local name, nameStroke = text("PlayerName", 0, 30, NAME_STROKE)
-	name.Text = if player then player.DisplayName else character.Name
+	-- "13 Bak": the level in yellow, smaller, before the name (QM, Oct 31). Rich text sizes
+	-- are pixels, so the name is sized by hand to its box (in outline(), below) instead of
+	-- TextScaled.
+	name.TextScaled = false
+	name.RichText = true
+	local display = if player then player.DisplayName else character.Name
+	local function drawName()
+		local px = math.max(1, math.floor(name.AbsoluteSize.Y * NAME_FILL))
+		name.TextSize = math.min(px, 100)
+		local level = player and player:GetAttribute("Level")
+		if level then
+			local c = Config.Levels.Color
+			name.Text = string.format(
+				'<font color="#%s" size="%d">%d</font> %s',
+				c:ToHex(),
+				math.max(1, math.floor(math.min(px, 100) * LEVEL_SIZE)),
+				level,
+				(display:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"))
+			)
+		else
+			name.Text = display
+		end
+	end
+	if player then
+		local levelChanged = player:GetAttributeChangedSignal("Level"):Connect(drawName)
+		gui.Destroying:Connect(function()
+			levelChanged:Disconnect()
+		end)
+	end
+	name:GetPropertyChangedSignal("AbsoluteSize"):Connect(drawName)
+	drawName()
 	local hp, hpStroke = text("Health", 30, 37, Color3.new(0, 0, 0))
 	hp.ZIndex = 3
 	-- the health bar (216 x 18 art)

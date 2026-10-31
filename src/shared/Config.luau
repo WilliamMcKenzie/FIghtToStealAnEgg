@@ -2282,10 +2282,14 @@ return {
 	-- your attack speed, both by log(1 + Strength / Scale), so each point counts for less
 	-- the more you have. Damage = Slash.Damage x (1 + Damage x log) x the weapon's Damage;
 	-- attacks come (1 + Speed x log) times faster, at most MaxSpeed.
-	-- QM's targets: Mother Hen (200 health) takes 20 Kendo Stick hits at 0 Strength, 5 at 1,000.
-	--   Strength      0     200   1,000   2,000   18,000   140,000   1M
-	--   damage       10      30      40      45       59        72   85
-	--   speed        1x   1.16x   1.25x   1.29x    1.41x     1.52x   1.62x
+	-- It counts in steps, by level (Config.Levels, QM Oct 31): you get the curve's value at
+	-- your level's Power, so it only goes up when you level up. Level 1 is below level 2's
+	-- by Levels.First, so the first level up is a big jump.
+	-- QM's targets: Mother Hen (200 health) takes 13 Kendo Stick hits at level 1, 5 at 1,000.
+	--   Level          1      2      4      7     12     17     22     27     32
+	--   Strength       0    100    250     1K    10K   100K     1M    10M   100M
+	--   damage        16     26     31     40     55     70     85    100    115
+	--   speed       0.56x  1.13x  1.18x  1.25x  1.37x  1.50x  1.62x  1.75x  1.87x
 	Power = {
 		Scale = 10,
 		Damage = 0.65, -- (3 / log(101): 4x at 1,000)
@@ -2295,6 +2299,25 @@ return {
 		-- "Log" (above), "Power" ((S / Scale) ^ Exponent), "Linear" or "Exp" (levels off)
 		Curve = "Log",
 		Exponent = 0.5,
+	},
+
+	-- levels (QM, Oct 31; Shared/Levels): your Power (Strength) puts you on a level. The HUD
+	-- counter reads "4.1K/10K" (your Power out of the next level's), "Level up!" pops over
+	-- your head when you reach it, and your level shows in yellow by your name.
+	-- Level 2 comes at First Power, then each level needs the next of Steps x 10^n:
+	--   100, 150, 250, 400, 600, 1K, 1.5K, 2.5K, 4K, 6K, 10K ... (5 levels for every x10)
+	-- That puts the Meadow at levels 1-7ish, the Desert ~7-12, the Tundra ~12-17, the Lava
+	-- Valley ~17-22 (millions), and the regions past it beyond.
+	-- What a level does: damage and attack speed are Config.Power's curve at the level's
+	-- Power (Shared/Power), so they step up each level; level 1 has Level2 / First of them,
+	-- so the first level up is a big jump (QM: about 1.6x damage and 2x attack speed).
+	-- Bonus: extra per level on top, if wanted (Damage = 0.02 is +2% damage a level).
+	Levels = {
+		First = { Power = 100, Damage = 1.6, Speed = 2 },
+		Steps = { 1, 1.5, 2.5, 4, 6 },
+		Bonus = { Damage = 0, Speed = 0 },
+		Color = Color3.fromRGB(255, 220, 0), -- the level by your name
+		PopupColor = Color3.fromRGB(90, 220, 255), -- "Level up!"
 	},
 
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit

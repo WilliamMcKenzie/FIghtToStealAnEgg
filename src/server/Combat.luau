@@ -42,6 +42,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Passes = require(Shared:WaitForChild("Passes"))
+local Levels = require(Shared:WaitForChild("Levels"))
 local Power = require(Shared:WaitForChild("Power"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Weapons = require(Shared:WaitForChild("Weapons"):WaitForChild("Weapons"))
@@ -80,9 +81,12 @@ local function roll(damage)
 	return math.max(1, math.round(damage * (lo + rng:NextNumber() * (hi - lo))))
 end
 
--- (the HUD's counter shows your Strength itself: QM, Oct 25)
+-- (the HUD's counter shows your Strength itself: QM, Oct 25; and Level, what it makes you:
+-- QM, Oct 31, Shared/Levels)
 local function showPower(player)
-	player:SetAttribute("Power", player:GetAttribute("Strength") or 0)
+	local strength = player:GetAttribute("Strength") or 0
+	player:SetAttribute("Power", strength)
+	player:SetAttribute("Level", Levels.of(strength))
 end
 
 -- a hit trains the damage it dealt x the enemy's Strength x Training.PerDamage (QM, Oct 25:

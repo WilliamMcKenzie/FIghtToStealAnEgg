@@ -39,6 +39,7 @@ local Hotbar = require(script.Parent.Hotbar)
 local Ui = require(script.Parent.Ui)
 local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config"))
 local Abbrev = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Abbrev"))
+local Levels = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Levels"))
 
 local Hud = {}
 
@@ -362,7 +363,11 @@ function Hud.start()
 
 	local function count(name)
 		local function show()
-			counters[name].Text = Abbrev((player:GetAttribute(name) or 0) - (held[name] or 0))
+			local value = (player:GetAttribute(name) or 0) - (held[name] or 0)
+			-- (Power reads out of the next level's: "4.1K/10K", QM Oct 31)
+			counters[name].Text = if name == "Power"
+				then Abbrev(value) .. "/" .. Abbrev(Levels.goal(player:GetAttribute(name) or 0))
+				else Abbrev(value)
 		end
 		show()
 		player:GetAttributeChangedSignal(name):Connect(show)
