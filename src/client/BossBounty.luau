@@ -6,6 +6,8 @@
 -- own popup skips it (GainPopups.expect).
 --
 --   BossBounty.landed   -- RBXScriptSignal: fires as a bounty lands (client/Tutorial)
+--   BossBounty.fly(amount, from, size?)  -- just the "+$X" flying into the Cash counter, from a
+--                                        -- screen point (the Offline Cash popup's Claim)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -51,11 +53,8 @@ local function bump(counter)
 	up:Play()
 end
 
-local function bounty(amount, at, height)
-	if typeof(amount) ~= "number" or typeof(at) ~= "Vector3" then
-		return
-	end
-	Banner.show("Boss Defeated!", "Boss")
+-- the popup pops up at `from` (a screen point), holds, and flies into the Cash counter
+local function fly(amount, from, size, onLanded)
 	GainPopups.expect("Cash", amount)
 	local release = Hud.holdBack("Cash", amount)
 	local parts = GainPopups.parts("Cash")
@@ -70,15 +69,12 @@ local function bounty(amount, at, height)
 	popup.AnchorPoint = Vector2.new(0.5, 0.5)
 	popup.ZIndex = 30
 	popup.Amount.Text = "+" .. Abbrev(amount)
-	local over = at + Vector3.new(0, (height or 10) * UP, 0)
-	local p, onScreen = camera:WorldToViewportPoint(over)
-	local from = if onScreen then Vector2.new(p.X, p.Y) else camera.ViewportSize * Vector2.new(0.5, 0.4)
 	popup.Position = toRoot(root, from)
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0
 	scale.Parent = popup
 	popup.Parent = root
-	TweenService:Create(scale, POP, { Scale = BIG }):Play()
+	TweenService:Create(scale, POP, { Scale = size or BIG }):Play()
 	task.delay(HOLD + 0.25, function()
 		local counter = parts.counter
 		local to = counter.AbsolutePosition + counter.AbsoluteSize * Vector2.new(0.3, 0.5)
@@ -89,9 +85,28 @@ local function bounty(amount, at, height)
 			release()
 			bump(counter)
 			UiFx.play("Claim")
-			landedEvent:Fire(amount)
+			if onLanded then
+				onLanded()
+			end
 		end)
 		fly:Play()
+	end)
+end
+
+function BossBounty.fly(amount, from, size)
+	fly(amount, from, size)
+end
+
+local function bounty(amount, at, height)
+	if typeof(amount) ~= "number" or typeof(at) ~= "Vector3" then
+		return
+	end
+	Banner.show("Boss Defeated!", "Boss")
+	local over = at + Vector3.new(0, (height or 10) * UP, 0)
+	local p, onScreen = camera:WorldToViewportPoint(over)
+	local from = if onScreen then Vector2.new(p.X, p.Y) else camera.ViewportSize * Vector2.new(0.5, 0.4)
+	fly(amount, from, BIG, function()
+		landedEvent:Fire(amount)
 	end)
 end
 

@@ -116,7 +116,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss, bossFight, bossList, swapPet, givePet, buyWeapon, giveWeapon, giveWeapons, giveCash, resetPlayer, tutorialCommand, skipTutorial -- (below)
+local requestBoss, reboss, bossFight, bossList, swapPet, givePet, buyWeapon, giveWeapon, giveWeapons, giveCash, resetPlayer, tutorialCommand, skipTutorial, offlineCash -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your Strength (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -153,6 +153,8 @@ local function joined(player)
 			giveWeapons(player, message)
 		elseif message:lower():match("^/weapon") then
 			giveWeapon(player, message)
+		elseif message:lower():match("^/offline") then
+			offlineCash(player, message)
 		elseif message:lower():match("^/cash") then
 			giveCash(player, message)
 		elseif message:lower():match("^/reset") then
@@ -583,6 +585,21 @@ function giveCash(player, message)
 	end
 	player:SetAttribute("Cash", math.max(0, (player:GetAttribute("Cash") or 0) + math.floor(n)))
 end
+-- /offline [n]: as if you'd just come back with n offline cash (a full OfflineMax stretch of
+-- your pen's pay without a number), so the Offline Cash popup shows (client/OfflineCash)
+function offlineCash(player, message)
+	if not mayReboss(player) then
+		return
+	end
+	local digits = (message:match("^/%a+%s+(.-)%s*$") or ""):gsub("[,%s_]", "")
+	local n = tonumber(digits)
+		or math.floor(PetInventory.income(player) * Config.Data.OfflineRate * Config.Data.OfflineMax)
+	if n ~= n or math.abs(n) == math.huge then
+		return
+	end
+	n = math.max(n, 1000)
+	player:SetAttribute("OfflineCash", (player:GetAttribute("OfflineCash") or 0) + math.floor(n))
+end
 function resetPlayer(player)
 	if not mayReboss(player) then
 		return
@@ -614,6 +631,7 @@ for _, cmd in {
 	{ "Staffs", giveWeapons },
 	{ "Bows", giveWeapons },
 	{ "Cash", giveCash },
+	{ "Offline", offlineCash },
 	{ "Reset", resetPlayer },
 	{ "Bossfight", bossFight },
 	{ "Bosslist", bossList },
