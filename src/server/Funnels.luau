@@ -144,7 +144,7 @@ local function watch(player)
 end
 
 function Funnels.start(bosses)
-	bosses.killed:Connect(function(_, winners)
+	bosses.killed.Event:Connect(function(_, winners)
 		for _, player in winners do
 			if player:GetAttribute("Tutorial") then
 				tutorialStep(player, 6)

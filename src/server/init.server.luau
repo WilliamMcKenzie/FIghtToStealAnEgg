@@ -61,7 +61,11 @@ WorldColors.create() -- workspace.WorldColors: live world colours (after the map
 Pens.start(map)
 PetInventory.start() -- (the pets you own and keep in your pen: the Backpack)
 PetIndex.start() -- (every pet you've owned, and its reward: the Index)
-Funnels.start(Bosses) -- (analytics: the tutorial and biome progress funnels)
+-- (analytics: the tutorial and biome progress funnels; a bug in them mustn't stop the game starting)
+local funnelsOk, funnelsErr = pcall(Funnels.start, Bosses)
+if not funnelsOk then
+	warn("Funnels.start failed: " .. tostring(funnelsErr))
+end
 Hatchery.start() -- (stolen eggs in your hotbar, put down in your pen and hatched)
 Eggs.start(map)
 Tutorial.start(Eggs) -- (the new player tutorial's server side)
