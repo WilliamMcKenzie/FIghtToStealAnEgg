@@ -1,6 +1,8 @@
 -- "Your Base" (QM, Oct 31: "add this above pen, which goes away once you actually walk in
 -- the pen", with Steal a Brainrot's floating house as the reference): QM's blue house icon
--- with "Your Base" under it floats over your own pen, only for you, bobbing gently. The
+-- with "Your Base" under it floats high over your own pen's gate, where its owner's name
+-- hangs (the name hides while it's up: "Your Base" takes its place, as in the reference),
+-- only for you, bobbing gently. The
 -- first time you walk into the pen it fades out and the server saves BaseFound, so it
 -- never shows again (a /reset brings it back). Tuning in Config.BaseMarker; the icon is
 -- HudImages.BaseHouse (assets/ui/hud/BaseHouse.png; just the text shows until it's uploaded).
@@ -35,6 +37,37 @@ end
 
 local spot, board, builtFor -- the anchored point it hangs on, its billboard, the Area
 local leaving = false
+local hidden -- your own pen's name card, hidden while the marker is up
+
+local function signOf(area)
+	local sign = area and area.Parent:FindFirstChild("OwnerSign")
+	return sign and sign:FindFirstChild("Board")
+end
+
+local function showName()
+	if hidden then
+		for _, gui in hidden:GetChildren() do
+			if gui:IsA("BillboardGui") then
+				gui.Enabled = true
+			end
+		end
+		hidden = nil
+	end
+end
+
+local function hideName(sign)
+	if hidden ~= sign then
+		showName()
+	end
+	hidden = sign
+	if sign then
+		for _, gui in sign:GetChildren() do
+			if gui:IsA("BillboardGui") then
+				gui.Enabled = false
+			end
+		end
+	end
+end
 
 local function build(area)
 	if spot then
@@ -82,6 +115,7 @@ local function build(area)
 end
 
 local function clear()
+	showName()
 	if spot then
 		spot:Destroy()
 	end
@@ -100,6 +134,7 @@ end
 
 local function leave()
 	leaving = true
+	showName()
 	ReplicatedStorage:WaitForChild("BaseFound"):FireServer()
 	local s, b = spot, board
 	spot, board, builtFor = nil, nil, nil
@@ -145,7 +180,10 @@ RunService.RenderStepped:Connect(function()
 	end
 	local bob = math.sin(os.clock() * 2 * math.pi / C.BobPeriod) * C.Bob
 	local floor = area.Position.Y - area.Size.Y / 2
-	spot.CFrame = CFrame.new(area.Position.X, floor + C.Height + bob, area.Position.Z)
+	local sign = signOf(area)
+	hideName(sign)
+	local at = if sign then sign.Position else area.Position -- (over the gate, where the name was)
+	spot.CFrame = CFrame.new(at.X, floor + C.Height + bob, at.Z)
 end)
 
 return nil

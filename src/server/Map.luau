@@ -654,7 +654,7 @@ local function baseFurniture(parent)
 		board.Anchored, board.CanCollide, board.CanQuery, board.CanTouch = true, false, false, false
 		board.Transparency = 1
 		board.Size = Vector3.new(1, 1, 1)
-		board.CFrame = side * CFrame.new(0, 9, 0)
+		board.CFrame = side * CFrame.new(0, Config.BaseMarker.SignHeight, 0) -- (high up, QM Oct 31)
 		board.Parent = owner
 		local gui = Instance.new("BillboardGui")
 		gui.Size = UDim2.fromScale(16, 2.4)
