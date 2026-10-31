@@ -484,7 +484,7 @@ return {
 			Name = "Cactus Boss",
 			Model = "CactusBoss", -- (LassoAPet's, QM Oct 24)
 			Size = 4, -- (about 49 studs tall)
-			Health = 4000,
+			Health = 7500,
 			Speed = 11,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 22,
@@ -495,7 +495,7 @@ return {
 			-- green cactus bombs at everyone (Server/BossAttacks' Lob, drawn by client/Bombs):
 			-- each lands Airtime seconds later where you stood when it was thrown, so keep moving)
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 32, Arc = 180, Windup = 1.1, Damage = 34 },
+				{ Kind = "Swipe", Every = 2.6, Reach = 32, Arc = 180, Windup = 1.1, Damage = 77 },
 				{
 					Kind = "Lob",
 					Every = 3.5, -- seconds between volleys
@@ -504,7 +504,7 @@ return {
 					Radius = 11, -- each blast's radius (studs)
 					Airtime = 1.3, -- seconds in the air (the red ring's fill time)
 					Height = 29, -- the arc's peak, studs above the straight line
-					Damage = 14,
+					Damage = 32,
 					Style = "Cactus", -- (client/Bombs' look)
 				},
 			},
@@ -526,7 +526,7 @@ return {
 				DropFrom = 60, -- studs up they start
 				Dust = Color3.fromRGB(226, 190, 128),
 				Attacks = {
-					{ Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 110, Damage = 10 },
+					{ Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 110, Damage = 23 },
 				},
 			},
 		},
@@ -538,7 +538,7 @@ return {
 			Name = "Sandworm",
 			Model = "Sandworm", -- (the Sandworm pet's model, QM's designs/desert/Sandworm.bbmodel)
 			Size = 3.12, -- (about 35 studs tall arched up out of the ground; QM Oct 30: x1.2)
-			Health = 4000,
+			Health = 7500,
 			Speed = 0, -- (it never walks: it tunnels, Burrow)
 			StopAt = 1,
 			Radius = 9.5,
@@ -551,7 +551,7 @@ return {
 					Kind = "Magic", -- (fired by its Burrow cycle, not on a timer: Every is unused)
 					Every = 4,
 					Like = "Staff", -- (one orb)
-					Damage = 16, -- each orb
+					Damage = 36, -- each orb
 					Height = 8, -- studs off the ground (about its chin)
 					Burst = 6, -- spat one after another... (QM: 6)
 					BurstGap = 0.3, -- ...this many seconds apart
@@ -604,7 +604,7 @@ return {
 			Name = "Elder Boar",
 			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
 			Size = 2.66, -- (about 36 studs tall, 53 long; QM Oct 30: x0.8)
-			Health = 30000,
+			Health = 40000,
 			Speed = 9,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 16,
@@ -614,16 +614,16 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.4, Reach = 28, Arc = 150, Windup = 1, Damage = 50 },
+				{ Kind = "Swipe", Every = 2.4, Reach = 28, Arc = 150, Windup = 1, Damage = 144 },
 				-- (tusks down, a hoof scrapes, then it charges: QM Oct 30)
-				{ Kind = "Charge", Every = 5, Range = 90, Windup = 1.1, Speed = 75, Width = 30, Damage = 34, Anim = "charge" },
+				{ Kind = "Charge", Every = 5, Range = 90, Windup = 1.1, Speed = 75, Width = 30, Damage = 98, Anim = "charge" },
 			},
 		},
 		LavaWyrm = {
 			Name = "Lava Wyrm",
 			Model = "LavaWyrm", -- (LassoAPet's, QM Oct 24)
 			Size = 2.33, -- (about 25 studs tall, 103 long)
-			Health = 200000,
+			Health = 100000,
 			Speed = 8,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 17,
@@ -633,7 +633,7 @@ return {
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 32, Arc = 230, Windup = 1.2, Damage = 75 },
+				{ Kind = "Swipe", Every = 3, Reach = 32, Arc = 230, Windup = 1.2, Damage = 285 },
 				-- (head reared back, then a gout of fireballs ahead of it: QM Oct 30, no rectangles)
 				{
 					Kind = "Magic",
@@ -641,7 +641,7 @@ return {
 					Cast = 0.7,
 					Anim = "breath",
 					Like = "Staff",
-					Damage = 25,
+					Damage = 95,
 					Height = 4,
 					Burst = 4,
 					BurstGap = 0.12,
@@ -662,7 +662,7 @@ return {
 			Model = "ScorpionKing",
 			StandIn = { "Scorpion", 3.2 },
 			Size = 3.25, -- (the Scorpion pet's drawing, 15.7 studs long: about 51 studs long, QM Oct 30: x0.8 of before)
-			Health = 4000,
+			Health = 7500,
 			Speed = 12,
 			StopAt = 6,
 			Radius = 14.5,
@@ -670,15 +670,15 @@ return {
 			Strength = 6,
 			Respawn = 25,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 24, Arc = 110, Windup = 0.8, Damage = 26, Swings = 2, Anim = "pinch" },
+				{ Kind = "Swipe", Every = 2.6, Reach = 24, Arc = 110, Windup = 0.8, Damage = 59, Swings = 2, Anim = "pinch" },
 				-- (the tail stab: a long thin swipe straight out ahead)
-				{ Kind = "Swipe", Every = 3.5, Reach = 48, Arc = 24, Width = 40, Windup = 0.9, Damage = 22, Anim = "stab", Then = 3 },
+				{ Kind = "Swipe", Every = 3.5, Reach = 48, Arc = 24, Width = 40, Windup = 0.9, Damage = 50, Anim = "stab", Then = 3 },
 				{
 					Kind = "Magic",
 					Linked = true, -- (after each stab)
 					Every = 3.5,
 					Like = "Staff",
-					Damage = 12,
+					Damage = 27,
 					Height = 6,
 					Pulse = true,
 					Shot = { Color = Color3.fromRGB(150, 230, 90), Count = 3, Spread = 40, Speed = 45, Homing = 0, Launch = 0, Range = 90, Slack = 0, Size = 1.3 },
@@ -692,7 +692,7 @@ return {
 			Model = "FrostGolem",
 			StandIn = { "IceGolem", 1.8 },
 			Size = 3.2,
-			Health = 30000,
+			Health = 40000,
 			Speed = 8,
 			StopAt = 1,
 			Radius = 15,
@@ -700,15 +700,15 @@ return {
 			Strength = 20,
 			Respawn = 30,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.6, Reach = 28, Arc = 160, Windup = 1, Damage = 50 },
-				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.7, Airtime = 1.1, Height = 30, Radius = 18, Damage = 34, Anim = "leap", Then = 4 },
-				{ Kind = "Slam", Every = 4, Range = 10, Radius = 16, Windup = 0.9, Damage = 34, Anim = "slam" },
+				{ Kind = "Swipe", Every = 2.6, Reach = 28, Arc = 160, Windup = 1, Damage = 144 },
+				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.7, Airtime = 1.1, Height = 30, Radius = 18, Damage = 98, Anim = "leap", Then = 4 },
+				{ Kind = "Slam", Every = 4, Range = 10, Radius = 16, Windup = 0.9, Damage = 98, Anim = "slam" },
 				{
 					Kind = "Magic",
 					Linked = true, -- (the ring of shards as it lands)
 					Every = 5,
 					Like = "Staff",
-					Damage = 18,
+					Damage = 52,
 					Height = 4,
 					Shot = { Color = Color3.fromRGB(170, 225, 255), Count = 10, Spread = 324, Speed = 38, Homing = 0, Launch = 0, Range = 80, Slack = 0, Size = 1.4 },
 				},
@@ -721,7 +721,7 @@ return {
 			Model = "BlizzardOwl",
 			StandIn = { "Penguin", 3.6 },
 			Size = 3.2,
-			Health = 30000,
+			Health = 40000,
 			Speed = 9,
 			StopAt = 25, -- (keeps its distance)
 			Radius = 12,
@@ -729,7 +729,7 @@ return {
 			Strength = 20,
 			Respawn = 30,
 			Attacks = {
-				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 35, Radius = 11, Airtime = 1.3, Height = 32, Damage = 24, Style = "Snow", Cast = 0.5, Anim = "throw" },
+				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 35, Radius = 11, Airtime = 1.3, Height = 32, Damage = 69, Style = "Snow", Cast = 0.5, Anim = "throw" },
 				-- (three ice lances, flung like arrows)
 				{
 					Kind = "Magic",
@@ -737,7 +737,7 @@ return {
 					Cast = 0.6,
 					Anim = "flap",
 					Like = "Staff",
-					Damage = 28,
+					Damage = 81,
 					Height = 5,
 					Shot = { Color = Color3.fromRGB(170, 225, 255), Count = 3, Spread = 22, Speed = 60, Homing = 0, Launch = 0, Range = 80, Slack = 0, Size = 1.2 },
 				},
@@ -745,7 +745,7 @@ return {
 					Kind = "Magic",
 					Every = 3,
 					Like = "Staff",
-					Damage = 14,
+					Damage = 40,
 					Height = 6,
 					Burst = 2,
 					BurstGap = 0.35,
@@ -762,7 +762,7 @@ return {
 			Model = "MagmaSlime",
 			StandIn = { "RockHog", 3 },
 			Size = 3.4,
-			Health = 200000,
+			Health = 100000,
 			Speed = 7,
 			StopAt = 1,
 			Radius = 16,
@@ -770,14 +770,14 @@ return {
 			Strength = 60,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 22, Arc = 300, Windup = 1.1, Damage = 70 },
-				{ Kind = "Leap", Every = 6, Range = 100, Windup = 0.6, Airtime = 0.9, Height = 26, Radius = 19, Damage = 50, Hops = 3, Anim = "leap", Then = 3 },
+				{ Kind = "Swipe", Every = 3, Reach = 22, Arc = 300, Windup = 1.1, Damage = 266 },
+				{ Kind = "Leap", Every = 6, Range = 100, Windup = 0.6, Airtime = 0.9, Height = 26, Radius = 19, Damage = 190, Hops = 3, Anim = "leap", Then = 3 },
 				{
 					Kind = "Magic",
 					Linked = true,
 					Every = 6,
 					Like = "Staff",
-					Damage = 26,
+					Damage = 99,
 					Height = 4,
 					Shot = { Color = Color3.fromRGB(255, 130, 40), Count = 8, Spread = 315, Speed = 34, Homing = 0, Launch = 0, Range = 70, Slack = 0, Size = 1.5 },
 				},
@@ -796,7 +796,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(90, 60, 50),
-				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 100, Damage = 26 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 100, Damage = 99 } },
 			},
 		},
 
@@ -806,7 +806,7 @@ return {
 			Name = "Volcano Tortoise",
 			Model = "VolcanoTortoise",
 			Size = 3, -- (QM Oct 30: x0.6)
-			Health = 200000,
+			Health = 100000,
 			Speed = 5,
 			StopAt = 1,
 			Radius = 11,
@@ -814,9 +814,9 @@ return {
 			Strength = 60,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 180, Windup = 1.1, Damage = 75 },
-				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 13, Airtime = 1.4, Height = 48, Damage = 40, Style = "Lava", Cast = 0.8, Anim = "erupt" },
-				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 46 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 180, Windup = 1.1, Damage = 285 },
+				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 13, Airtime = 1.4, Height = 48, Damage = 152, Style = "Lava", Cast = 0.8, Anim = "erupt" },
+				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 175 },
 			},
 			Minions = {
 				At = 0.5,
@@ -831,7 +831,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(90, 60, 50),
-				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 120, Damage = 28 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 120, Damage = 106 } },
 			},
 		},
 
@@ -841,7 +841,7 @@ return {
 			Model = "BoneWarden",
 			StandIn = { "IceGolem", 1.8 },
 			Size = 4.76, -- (QM Oct 30: x1.4)
-			Health = 1500000,
+			Health = 250000,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 19.5,
@@ -849,10 +849,10 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 30, Arc = 120, Windup = 0.9, Damage = 55, Swings = 2 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 30, Arc = 120, Windup = 0.9, Damage = 273, Swings = 2 },
 				-- (the big sword cleave: QM, a swipe like any melee)
-				{ Kind = "Swipe", Every = 4, Reach = 44, Arc = 170, Windup = 1.3, Damage = 80, Anim = "cleave" },
-				{ Kind = "Charge", Every = 6, Range = 100, Windup = 0.8, Speed = 80, Width = 26, Damage = 60, Anim = "charge" },
+				{ Kind = "Swipe", Every = 4, Reach = 44, Arc = 170, Windup = 1.3, Damage = 397, Anim = "cleave" },
+				{ Kind = "Charge", Every = 6, Range = 100, Windup = 0.8, Speed = 80, Width = 26, Damage = 297, Anim = "charge" },
 			},
 			Minions = {
 				At = 0.5,
@@ -868,7 +868,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(104, 126, 146),
-				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 5, Arc = 90, Damage = 35 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 5, Arc = 90, Damage = 173 } },
 			},
 		},
 
@@ -878,7 +878,7 @@ return {
 			Model = "DungeonWatcher",
 			StandIn = { "Fish", 5 },
 			Size = 3.2,
-			Health = 1500000,
+			Health = 250000,
 			Speed = 0,
 			Centre = true,
 			StopAt = 1,
@@ -895,7 +895,7 @@ return {
 					Cast = 0.7,
 					Anim = "stare",
 					Like = "Staff",
-					Damage = 30,
+					Damage = 149,
 					Height = 6,
 					Burst = 5,
 					BurstGap = 0.15,
@@ -905,7 +905,7 @@ return {
 					Kind = "Magic",
 					Every = 3,
 					Like = "Staff",
-					Damage = 40,
+					Damage = 198,
 					Height = 6,
 					Burst = 2,
 					BurstGap = 0.6,
@@ -921,7 +921,7 @@ return {
 			Model = "TreasureMimic",
 			StandIn = { "Pig", 5.5 },
 			Size = 4.4,
-			Health = 1500000,
+			Health = 250000,
 			Speed = 11,
 			StopAt = 1,
 			Radius = 15,
@@ -929,9 +929,9 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2, Reach = 28, Arc = 110, Windup = 0.9, Damage = 100 },
-				{ Kind = "Charge", Every = 4, Range = 100, Windup = 0.7, Speed = 90, Width = 24, Damage = 65, Anim = "charge", Then = 3 },
-				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 38.5, Radius = 11, Airtime = 1.2, Height = 35, Damage = 45, Style = "Coin", Cast = 0.5, Anim = "spit" },
+				{ Kind = "Swipe", Every = 2, Reach = 28, Arc = 110, Windup = 0.9, Damage = 496 },
+				{ Kind = "Charge", Every = 4, Range = 100, Windup = 0.7, Speed = 90, Width = 24, Damage = 322, Anim = "charge", Then = 3 },
+				{ Kind = "Lob", Linked = true, Every = 4, Count = 4, Scatter = 38.5, Radius = 11, Airtime = 1.2, Height = 35, Damage = 223, Style = "Coin", Cast = 0.5, Anim = "spit" },
 			},
 		},
 
@@ -942,7 +942,7 @@ return {
 			Model = "CrimsonKnight",
 			StandIn = { "IceGolem", 2 },
 			Size = 4.2, -- (LassoAPet's Asura, 10.9 studs tall: about 46 studs, QM Oct 30)
-			Health = 10000000,
+			Health = 600000,
 			Speed = 9,
 			StopAt = 1,
 			Radius = 15,
@@ -951,9 +951,9 @@ return {
 			Respawn = 40,
 			Attacks = {
 				-- (QM, Oct 30: each slash of the combo bigger than the last: 1x, 1.25x, 1.5x)
-				{ Kind = "Swipe", Every = 3.6, Reach = 30, Arc = 150, Windup = 0.85, Damage = 75, Swings = 3, Grow = 0.25 },
-				{ Kind = "Charge", Every = 6, Range = 120, Windup = 1, Speed = 85, Width = 28, Damage = 90, Anim = "charge" },
-				{ Kind = "Slam", Every = 4, Range = 14, Radius = 18, Windup = 0.8, Damage = 90, Anim = "slam" },
+				{ Kind = "Swipe", Every = 3.6, Reach = 30, Arc = 150, Windup = 0.85, Damage = 493, Swings = 3, Grow = 0.25 },
+				{ Kind = "Charge", Every = 6, Range = 120, Windup = 1, Speed = 85, Width = 28, Damage = 592, Anim = "charge" },
+				{ Kind = "Slam", Every = 4, Range = 14, Radius = 18, Windup = 0.8, Damage = 592, Anim = "slam" },
 			},
 			Minions = {
 				At = 0.7,
@@ -971,7 +971,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(156, 22, 42),
-				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 6, Arc = 120, Damage = 50 } },
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 6, Arc = 120, Damage = 329 } },
 			},
 		},
 
@@ -981,7 +981,7 @@ return {
 			Model = "BloodBat",
 			StandIn = { "Firebird", 2.8 },
 			Size = 3.2, -- (LassoAPet's Bat, hovering, 18 studs across the wings: about 58, QM Oct 30)
-			Health = 10000000,
+			Health = 600000,
 			Speed = 12,
 			StopAt = 15,
 			Radius = 14,
@@ -989,21 +989,21 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 1.8, Reach = 24, Arc = 120, Windup = 0.8, Damage = 85 },
+				{ Kind = "Swipe", Every = 1.8, Reach = 24, Arc = 120, Windup = 0.8, Damage = 559 },
 				{ Kind = "Blink", Every = 4.5, Fade = 0.6, Near = 30, Far = 55, Anim = "screech", Then = 3 },
 				{
 					Kind = "Magic",
 					Linked = true,
 					Every = 4.5,
 					Like = "Staff",
-					Damage = 55,
+					Damage = 362,
 					Height = 6,
 					Burst = 2,
 					BurstGap = 0.4,
 					Pulse = true,
 					Shot = { Color = Color3.fromRGB(255, 70, 90), Count = 14, Spread = 334, Speed = 36, Homing = 0, Launch = 0, Range = 100, Slack = 0, Size = 1.3 },
 				},
-				{ Kind = "Bombs", Every = 6, Count = 3, Scatter = 20, Radius = 9, Windup = 1.2, Damage = 80 },
+				{ Kind = "Bombs", Every = 6, Count = 3, Scatter = 20, Radius = 9, Windup = 1.2, Damage = 526 },
 			},
 		},
 
@@ -1013,7 +1013,7 @@ return {
 			Model = "CastleWyvern",
 			StandIn = { "Phoenix", 3.2 },
 			Size = 2.25, -- (LassoAPet's Rock Candy Dragon, 33 studs long: about 74, QM Oct 30)
-			Health = 10000000,
+			Health = 600000,
 			Speed = 10,
 			StopAt = 6,
 			Radius = 20,
@@ -1021,7 +1021,7 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 3, Reach = 34, Arc = 220, Windup = 1.2, Damage = 130 },
+				{ Kind = "Swipe", Every = 3, Reach = 34, Arc = 220, Windup = 1.2, Damage = 855 },
 				-- (fire breath: three gouts of fireballs)
 				{
 					Kind = "Magic",
@@ -1029,14 +1029,14 @@ return {
 					Cast = 0.7,
 					Anim = "breath",
 					Like = "Staff",
-					Damage = 45,
+					Damage = 296,
 					Height = 5,
 					Burst = 4,
 					BurstGap = 0.12,
 					Shot = { Color = Color3.fromRGB(255, 110, 50), Count = 3, Spread = 25, Speed = 45, Homing = 0, Launch = 0, Range = 70, Slack = 0, Size = 1.5 },
 				},
-				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 38.5, Radius = 13, Airtime = 1.3, Height = 41.5, Damage = 70, Style = "Fire" },
-				{ Kind = "Leap", Every = 8, Range = 120, Windup = 0.8, Airtime = 1.3, Height = 40, Radius = 25, Damage = 90, Anim = "leap" },
+				{ Kind = "Lob", Every = 4, Count = 3, Scatter = 38.5, Radius = 13, Airtime = 1.3, Height = 41.5, Damage = 460, Style = "Fire" },
+				{ Kind = "Leap", Every = 8, Range = 120, Windup = 0.8, Airtime = 1.3, Height = 40, Radius = 25, Damage = 592, Anim = "leap" },
 			},
 		},
 
@@ -1046,7 +1046,7 @@ return {
 			Model = "RuneMage",
 			StandIn = { "Snowman", 3.3 },
 			Size = 3.4,
-			Health = 1500000,
+			Health = 250000,
 			Speed = 6,
 			StopAt = 30,
 			Radius = 10,
@@ -1059,7 +1059,7 @@ return {
 					Kind = "Magic",
 					Every = 2.5,
 					Like = "Staff",
-					Damage = 40,
+					Damage = 198,
 					Height = 6,
 					Burst = 3,
 					BurstGap = 0.3,
@@ -1068,7 +1068,7 @@ return {
 					Anim = "cast",
 					Shot = { Color = Color3.fromRGB(249, 168, 255), Count = 3, Spread = 30, Speed = 45, Homing = 40, Launch = 10, Range = 100, Slack = 0, Size = 1.3 },
 				},
-				{ Kind = "Bombs", Every = 6, Count = 4, Scatter = 22, Radius = 9, Windup = 1.3, Damage = 60 },
+				{ Kind = "Bombs", Every = 6, Count = 4, Scatter = 22, Radius = 9, Windup = 1.3, Damage = 297 },
 			},
 		},
 
@@ -1079,7 +1079,7 @@ return {
 			Model = "ElderTreant",
 			StandIn = { "VenusFlytrap", 2.6 },
 			Size = 1.75, -- (LassoAPet's Ancient Treant, 32 studs tall: about 56, QM Oct 30)
-			Health = 1500000,
+			Health = 250000,
 			Speed = 0,
 			Centre = true,
 			StopAt = 1,
@@ -1089,12 +1089,12 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Line", Every = 4, Range = 200, Windup = 1, Width = 10, Length = 16, Segments = 6, Gap = 0.15, Count = 2, Spread = 30, Damage = 65, Anim = "roots", Style = "Root" },
+				{ Kind = "Line", Every = 4, Range = 200, Windup = 1, Width = 10, Length = 16, Segments = 6, Gap = 0.15, Count = 2, Spread = 30, Damage = 322, Anim = "roots", Style = "Root" },
 				{
 					Kind = "Magic",
 					Every = 2.5,
 					Like = "RafflesiaBloom",
-					Damage = 40,
+					Damage = 198,
 					Height = 6,
 					Shot = { Homing = 60, Launch = 30, Range = 100, Slack = 0 },
 				},
@@ -1114,7 +1114,7 @@ return {
 				Drop = 0.8,
 				DropFrom = 60,
 				Dust = Color3.fromRGB(56, 196, 168),
-				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 110, Damage = 35 } },
+				Attacks = { { Kind = "Swipe", Every = 1.6, Reach = 4, Arc = 110, Damage = 173 } },
 			},
 		},
 
@@ -1124,7 +1124,7 @@ return {
 			Model = "ToadstoolKing",
 			StandIn = { "Cactus", 3 },
 			Size = 3.4,
-			Health = 1500000,
+			Health = 250000,
 			Speed = 8,
 			StopAt = 1,
 			Radius = 14,
@@ -1132,14 +1132,14 @@ return {
 			Strength = 180,
 			Respawn = 35,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 270, Windup = 1.1, Damage = 100 },
-				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.6, Airtime = 1, Height = 28, Radius = 17, Damage = 70, Anim = "leap", Then = 3 },
-				{ Kind = "Bombs", Linked = true, Every = 5, Count = 8, Around = true, Scatter = 8, Radius = 8, Windup = 1.2, Damage = 60, Cast = 0.5, Anim = "puff" },
+				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 270, Windup = 1.1, Damage = 496 },
+				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.6, Airtime = 1, Height = 28, Radius = 17, Damage = 347, Anim = "leap", Then = 3 },
+				{ Kind = "Bombs", Linked = true, Every = 5, Count = 8, Around = true, Scatter = 8, Radius = 8, Windup = 1.2, Damage = 297, Cast = 0.5, Anim = "puff" },
 				{
 					Kind = "Magic",
 					Every = 3,
 					Like = "Staff",
-					Damage = 40,
+					Damage = 198,
 					Height = 5,
 					Pulse = true,
 					Shot = { Color = Color3.fromRGB(255, 160, 220), Count = 5, Spread = 70, Speed = 40, Homing = 30, Launch = 10, Range = 90, Slack = 0 },
@@ -1152,7 +1152,7 @@ return {
 			Name = "King Crab",
 			Model = "KingCrab",
 			Size = 7.2, -- (QM Oct 30: x0.8)
-			Health = 10000000,
+			Health = 600000,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 17.5,
@@ -1160,14 +1160,14 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 28, Arc = 120, Windup = 0.95, Damage = 75, Swings = 2 },
-				{ Kind = "Charge", Every = 5, Range = 110, Windup = 0.9, Speed = 80, Width = 40, Damage = 90, Anim = "charge" },
-				{ Kind = "Slam", Every = 4, Range = 14, Radius = 20, Windup = 0.9, Damage = 90, Anim = "slam" },
+				{ Kind = "Swipe", Every = 2.8, Reach = 28, Arc = 120, Windup = 0.95, Damage = 493, Swings = 2 },
+				{ Kind = "Charge", Every = 5, Range = 110, Windup = 0.9, Speed = 80, Width = 40, Damage = 592, Anim = "charge" },
+				{ Kind = "Slam", Every = 4, Range = 14, Radius = 20, Windup = 0.9, Damage = 592, Anim = "slam" },
 				{
 					Kind = "Magic",
 					Every = 3,
 					Like = "Staff",
-					Damage = 50,
+					Damage = 329,
 					Height = 5,
 					Burst = 3,
 					BurstGap = 0.3,
@@ -1182,7 +1182,7 @@ return {
 			Model = "PufferLord",
 			StandIn = { "Fish", 5 },
 			Size = 3.4,
-			Health = 10000000,
+			Health = 600000,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 15,
@@ -1190,12 +1190,12 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 2.8, Reach = 18, Arc = 330, Windup = 1.1, Damage = 120 },
+				{ Kind = "Swipe", Every = 2.8, Reach = 18, Arc = 330, Windup = 1.1, Damage = 789 },
 				{
 					Kind = "Magic",
 					Every = 4,
 					Like = "Staff",
-					Damage = 60,
+					Damage = 395,
 					Height = 5,
 					Burst = 2,
 					BurstGap = 0.5,
@@ -1203,7 +1203,7 @@ return {
 					Anim = "puff",
 					Shot = { Color = Color3.fromRGB(255, 230, 140), Count = 16, Spread = 337.5, Speed = 34, Homing = 0, Launch = 0, Range = 100, Slack = 0, Size = 1.2 },
 				},
-				{ Kind = "Charge", Every = 6, Range = 110, Windup = 0.9, Speed = 85, Width = 26, Damage = 90, Anim = "charge" },
+				{ Kind = "Charge", Every = 6, Range = 110, Windup = 0.9, Speed = 85, Width = 26, Damage = 592, Anim = "charge" },
 			},
 		},
 
@@ -1217,7 +1217,7 @@ return {
 			Model = "SharkBoss",
 			StandIn = { "Fish", 5 },
 			Size = 12, -- (Lasso's shark boss is a small drawing: about 60 studs long, 36 tall)
-			Health = 10000000,
+			Health = 600000,
 			Speed = 0, -- (it never walks: it swims under, Burrow)
 			StopAt = 1,
 			Radius = 18,
@@ -1226,13 +1226,13 @@ return {
 			Strength = 500,
 			Respawn = 40,
 			Attacks = {
-				{ Kind = "Swipe", Every = 1.4, Reach = 30, Arc = 120, Windup = 0.9, Damage = 90, Anim = "bite" },
+				{ Kind = "Swipe", Every = 1.4, Reach = 30, Arc = 120, Windup = 0.9, Damage = 592, Anim = "bite" },
 				{
 					Kind = "Magic",
 					Linked = true, -- (fired as it surfaces, by its Burrow: Server/Bosses)
 					Every = 4,
 					Like = "Staff",
-					Damage = 55,
+					Damage = 362,
 					Height = 5,
 					Burst = 2,
 					BurstGap = 0.5,
@@ -1250,7 +1250,7 @@ return {
 				Near = 0,
 				Far = 10,
 				Hop = 0,
-				Breach = { Radius = 22, Windup = 0.8, Damage = 90, Anim = "breach" },
+				Breach = { Radius = 22, Windup = 0.8, Damage = 592, Anim = "breach" },
 				Depth = 3.4, -- (model studs it sinks to be all under, x Size)
 				Pose = {},
 				Sand = Color3.fromRGB(220, 240, 255), -- (its wake: foam and sea)
@@ -1833,7 +1833,7 @@ return {
 		-- much bigger than a Common's)
 		RarityScale = { Common = 1, Uncommon = 1.1, Rare = 1.25, Epic = 1.45, Legendary = 1.75, Mythic = 2, Divine = 2.2, Celestial = 2.4, Cosmic = 2.6, Void = 2.8, Omega = 3 },
 		Twitch = { 3, 8 }, -- seconds between an egg's AFK twitches (random in this range)
-		Reward = { Meadow = 100, Desert = 600, Ice = 3000, Lava = 15000, Dungeon = 60000, Forest = 60000, Castle = 250000, Ocean = 250000 },
+		Reward = { Meadow = 200, Desert = 1500, Ice = 6000, Lava = 20000, Dungeon = 1500000, Forest = 1500000, Castle = 6000000, Ocean = 6000000 },
 		PenShows = 24, -- most eggs sat in a pen
 	},
 
@@ -1867,7 +1867,7 @@ return {
 		BobPeriod = 2.4, -- seconds
 	},
 	Rebirth = {
-		Cost = 10000000,
+		Cost = 400000000000,
 		Growth = 3,
 		StrengthBonus = 0.5,
 		CashBonus = 0.5,
@@ -1912,8 +1912,8 @@ return {
 		Extra = { Meadow = { "Horse" } }, -- (pets no egg lays: the starter)
 		CashSeconds = 60,
 		Power = {
-			Common = 20, Uncommon = 40, Rare = 80, Epic = 150, Legendary = 300, Mythic = 600,
-			Divine = 1200, Celestial = 2500, Cosmic = 5000, Void = 10000, Omega = 20000,
+			Common = 20, Uncommon = 100, Rare = 500, Epic = 2500, Legendary = 12000, Mythic = 60000,
+			Divine = 300000, Celestial = 1500000, Cosmic = 7500000, Void = 40000000, Omega = 200000000,
 		},
 		-- each biome's picture's colour, under its Studio screenshot (client/HudImages
 		-- Biome<Name>) and in place of it until that's uploaded
@@ -2064,16 +2064,16 @@ return {
 	PetStats = {
 		Rarity = {
 			Common = { Health = 100, Speed = 25.6 }, -- (the Horse: Roblox's default 16 x 1.6, QM Oct 23)
-			Uncommon = { Health = 300, Speed = 26.9 },
-			Rare = { Health = 901, Speed = 28.2 },
-			Epic = { Health = 2700, Speed = 29.6 },
-			Legendary = { Health = 8110, Speed = 31 },
-			Mythic = { Health = 24300, Speed = 32.5 },
-			Divine = { Health = 73000, Speed = 34 },
-			Celestial = { Health = 219000, Speed = 35.5 },
-			Cosmic = { Health = 657000, Speed = 37 },
-			Void = { Health = 1970000, Speed = 38.5 },
-			Omega = { Health = 5910000, Speed = 40 },
+			Uncommon = { Health = 150, Speed = 26.9 },
+			Rare = { Health = 225, Speed = 28.2 },
+			Epic = { Health = 340, Speed = 29.6 },
+			Legendary = { Health = 505, Speed = 31 },
+			Mythic = { Health = 760, Speed = 32.5 },
+			Divine = { Health = 1140, Speed = 34 },
+			Celestial = { Health = 1710, Speed = 35.5 },
+			Cosmic = { Health = 2565, Speed = 37 },
+			Void = { Health = 3845, Speed = 38.5 },
+			Omega = { Health = 5765, Speed = 40 },
 		},
 		Lean = 0.25, -- Lean 1: +25% health, -25% speed (Lean -1 the other way)
 		-- Regen (QM, Oct 30: pets set health and regen separately): health a second, Rate x
@@ -2272,13 +2272,13 @@ return {
 	Regions = {
 		Cost = {
 			Meadow = 0,
-			Desert = 6000,
-			Ice = 120000,
-			Lava = 1500000,
-			Dungeon = 20000000,
-			Forest = 20000000,
-			Castle = 250000000,
-			Ocean = 250000000,
+			Desert = 12000,
+			Ice = 300000,
+			Lava = 3000000,
+			Dungeon = 25000000,
+			Forest = 25000000,
+			Castle = 6000000000,
+			Ocean = 6000000000,
 		},
 		Names = { Ice = "Tundra", Lava = "Lava Valley", Castle = "Red Castle", Forest = "Magic Circle", Ocean = "Ocean Trench" }, -- (what players see, where it isn't the key)
 		Shadow = 20, -- studs its shadow spreads across the floor before it's gone
@@ -2337,7 +2337,7 @@ return {
 			-- and casts, Flee runs away from you and lobs bombs back.
 			Meadow = {
 				Cost = 300,
-				Health = 500,
+				Health = 250,
 				Count = 8,
 				Strength = 1,
 				Speed = 4,
@@ -2346,11 +2346,11 @@ return {
 			},
 			Desert = {
 				Cost = 30000,
-				Health = 10000,
+				Health = 4000,
 				Count = 10,
 				Strength = 20,
 				Speed = 2.5,
-				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 3, Arc = 110, Damage = 13 } }, -- (boss: 16)
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 3, Arc = 110, Damage = 29 } }, -- (boss: 16)
 				Mobs = {
 					{ Pet = "Cactus", Name = "Cactus Monster" },
 					{
@@ -2362,7 +2362,7 @@ return {
 								Kind = "Magic",
 								Every = 2.4,
 								Like = "Staff",
-								Damage = 9,
+								Damage = 20,
 								Height = 3,
 								Cast = 0.3,
 								Shot = { Color = Color3.fromRGB(232, 190, 116), Count = 1, Size = 1.2, Speed = 34, Homing = 40, Launch = 0, Range = 60, Slack = 0 }, -- sand
@@ -2373,11 +2373,11 @@ return {
 			},
 			Ice = {
 				Cost = 3000000,
-				Health = 200000,
+				Health = 12000,
 				Count = 9,
 				Strength = 400,
 				Speed = 3,
-				Attacks = { { Kind = "Swipe", Every = 2, Reach = 4, Arc = 140, Damage = 22 } }, -- (boss: 26)
+				Attacks = { { Kind = "Swipe", Every = 2, Reach = 4, Arc = 140, Damage = 63 } }, -- (boss: 26)
 				Mobs = {
 					{ Pet = "Boar" },
 					{
@@ -2389,7 +2389,7 @@ return {
 								Kind = "Magic",
 								Every = 2.6,
 								Like = "Staff",
-								Damage = 10,
+								Damage = 29,
 								Height = 4,
 								Cast = 0.3,
 								Shot = { Color = Color3.fromRGB(235, 245, 255), Count = 2, Spread = 20, Size = 1.2, Speed = 36, Homing = 30, Launch = 0, Range = 60, Slack = 0 }, -- snow
@@ -2400,18 +2400,18 @@ return {
 						Pet = "Penguin",
 						Mode = "Flee",
 						Attacks = {
-							{ Kind = "Lob", Every = 3, Count = 0, Scatter = 9.5, Radius = 8, Airtime = 1.2, Height = 22.5, Damage = 22 },
+							{ Kind = "Lob", Every = 3, Count = 0, Scatter = 9.5, Radius = 8, Airtime = 1.2, Height = 22.5, Damage = 63 },
 						},
 					},
 				},
 			},
 			Lava = {
 				Cost = 300000000,
-				Health = 4000000,
+				Health = 25000,
 				Count = 10,
 				Strength = 8000,
 				Speed = 3.5,
-				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 4, Arc = 130, Damage = 32 } }, -- (boss: 40)
+				Attacks = { { Kind = "Swipe", Every = 1.8, Reach = 4, Arc = 130, Damage = 122 } }, -- (boss: 40)
 				Mobs = {
 					{ Pet = "RockHog", Name = "Fire Boar", Scale = 0.6 }, -- (40% smaller, hitbox too: QM, Oct 30)
 					{
@@ -2423,7 +2423,7 @@ return {
 								Kind = "Magic",
 								Every = 2.4,
 								Like = "Staff",
-								Damage = 16,
+								Damage = 61,
 								Height = 5,
 								Burst = 2,
 								BurstGap = 0.3,
