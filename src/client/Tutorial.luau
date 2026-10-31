@@ -18,7 +18,8 @@
 --   5. bow    the bounty flies into your Cash (now shown: client/BossBounty): "Buy a bow!",
 --             arrows to Carl and the hand on him, then on the bow's Buy in his shop
 --             (buying equips it)
---   6. train  "Train with weapons to become stronger!" while the camera pans over to the
+--   6. train  the Weapon Shop shuts and the HUD hides again (Cash too), then "Train with
+--             weapons to become stronger!" while the camera pans over to the
 --             Meadow training ground and back (QM, Oct 31: no arrows, just show it). Then
 --             it's over (TutorialDone), the whole HUD comes back and you're free.
 --
@@ -525,6 +526,9 @@ local function run(thisGen)
 	-- 6. the training grounds: the camera pans over to them and back, and that's it (QM,
 	-- Oct 31: "then after that they are free to do what they want")
 	if on() then
+		-- (the bow's bought: its shop shuts and the screen's clear again for the pan, QM Oct 31)
+		WeaponShop.close()
+		hideHud()
 		say("train")
 		panTo(trainingCentre())
 		task.wait(PAN.In + PAN.Hold + PAN.Out)
