@@ -8,7 +8,7 @@ local TextChatService = game:GetService("TextChatService")
 
 task.spawn(function()
 	local commands = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
-	for _, name in { "Buy", "Weapon", "Swords", "Staffs", "Bows", "Cash", "Reset", "Bossfight", "Bosslist", "Tutorial", "Skiptutorial" } do
+	for _, name in { "Buy", "Weapon", "Swords", "Staffs", "Bows", "Cash", "Reset", "Bossfight", "Bosslist", "Tutorial", "Skiptutorial", "Offline" } do
 		local command = commands:WaitForChild(name .. "Command", 10)
 		local request = ReplicatedStorage:WaitForChild(name .. "Request", 10)
 		if command and request then

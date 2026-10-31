@@ -1819,6 +1819,13 @@ return {
 		-- offline earnings (QM, Oct 27): a tenth of the pen's income, for up to 4 hours away
 		OfflineRate = 0.1,
 		OfflineMax = 4 * 3600, -- seconds
+		-- the Offline Cash popup (QM, Oct 31; client/OfflineCash): what came in while away waits
+		-- there till Claim. Its 2x button is a Roblox developer product: put its id from the
+		-- Creator Dashboard here (till then, in Studio the button just pays 2x for free). The
+		-- price shown is the product's own once it has an id; OfflineDoubleRobux till then.
+		OfflineDoubleProduct = nil,
+		OfflineDoubleRobux = 49,
+		OfflinePopupDelay = 1.5, -- seconds after joining before it pops up
 	},
 
 	-- rebirth (Server/Data, the Rebirth popup): cash needed is Cost x Growth ^ rebirths so far;

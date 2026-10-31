@@ -10,8 +10,12 @@
 --
 -- Offline earnings (QM, Oct 27: LassoAPet's "You earn $X/Day offline!"): every save
 -- stamps LastSeen (os.time()); back again, you're paid your pen's income (PetInventory.income)
--- times Config.Data.OfflineRate for the time away, up to Config.Data.OfflineMax seconds. Player attribute OfflinePaid is
--- what came in, for client/Hud's "+$X" popup.
+-- times Config.Data.OfflineRate for the time away, up to Config.Data.OfflineMax seconds.
+-- It isn't paid straight in (QM, Oct 31: the Offline Cash popup, client/OfflineCash): it waits
+-- in the saved OfflineCash attribute (unclaimed cash adds up across visits) till the popup's
+-- Claim (OfflineClaim fired by the client) pays it, or its Robux 2x button
+-- (Config.Data.OfflineDoubleProduct) pays twice it. The server fires OfflineClaim back with
+-- the amount just before paying it, so the client can fly it into the Cash counter.
 --
 -- A brand new account (nothing saved) starts the tutorial (Server/Tutorial); TutorialDone
 -- is saved the moment it's over, so a returning player skips it. (Saves from before the
@@ -27,9 +31,11 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Combat = require(script.Parent.Combat)
+local Store = require(script.Parent.Store)
 local PetInventory = require(script.Parent.PetInventory)
 local Tutorial = require(script.Parent.Tutorial)
 
@@ -38,9 +44,11 @@ local Data = {}
 local store = nil
 local loaded = {} -- [player] = true once their data is in
 local warned = false
+local claimRemote -- (OfflineClaim: Data.start)
+local lastOffline = {} -- [player] = the offline cash they last claimed (a 2x bought after it pays that again)
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone", "OfflineCash" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end
@@ -120,10 +128,32 @@ local function load(player)
 		local away = math.clamp(os.time() - data.LastSeen, 0, Config.Data.OfflineMax)
 		local paid = math.floor(PetInventory.income(player) * Config.Data.OfflineRate * away)
 		if paid > 0 then
-			player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + paid)
-			player:SetAttribute("OfflinePaid", paid)
+			player:SetAttribute("OfflineCash", (player:GetAttribute("OfflineCash") or 0) + paid)
 		end
 	end
+end
+
+-- the offline cash waiting for them, paid in (twice it with the 2x); false if there was none
+local function claimOffline(player, double)
+	local waiting = player:GetAttribute("OfflineCash") or 0
+	local amount = waiting * (if double then 2 else 1)
+	if waiting <= 0 then
+		-- (a 2x bought just after a plain Claim: the claim gets paid once more, so it's still 2x)
+		amount = if double then lastOffline[player] or 0 else 0
+		lastOffline[player] = nil
+		if amount <= 0 then
+			return false
+		end
+	else
+		lastOffline[player] = if double then nil else waiting
+	end
+	player:SetAttribute("OfflineCash", nil)
+	if claimRemote then
+		claimRemote:FireClient(player, amount) -- (first, so the client can hold the counter back)
+	end
+	player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + amount)
+	task.spawn(save, player)
+	return true
 end
 
 function Data.rebirthCost(player)
@@ -171,6 +201,7 @@ function Data.reset(player)
 	player:SetAttribute("HeldEgg", nil)
 	player:SetAttribute("HeldEggKind", nil)
 	player:SetAttribute("LockedIn", nil)
+	player:SetAttribute("OfflineCash", nil)
 	for name, g in Config.Training.Grounds do
 		player:SetAttribute("Train" .. name, g.Cost <= 0)
 	end
@@ -196,6 +227,24 @@ function Data.start()
 	remote.OnServerInvoke = rebirth
 	remote.Parent = ReplicatedStorage
 
+	-- the Offline Cash popup's Claim (client/OfflineCash). "Double" is only taken in Studio
+	-- while the 2x has no developer product yet, so the button can be tried out.
+	claimRemote = Instance.new("RemoteEvent")
+	claimRemote.Name = "OfflineClaim"
+	claimRemote.OnServerEvent:Connect(function(player, how)
+		if how == "Double" then
+			if RunService:IsStudio() and not Config.Data.OfflineDoubleProduct then
+				claimOffline(player, true)
+			end
+			return
+		end
+		claimOffline(player, false)
+	end)
+	claimRemote.Parent = ReplicatedStorage
+	Store.product(Config.Data.OfflineDoubleProduct, function(player)
+		return claimOffline(player, true)
+	end)
+
 	local function joined(player)
 		player:SetAttribute("Rebirths", player:GetAttribute("Rebirths") or 0)
 		player:SetAttribute("Eggs", player:GetAttribute("Eggs") or 0)
@@ -214,6 +263,7 @@ function Data.start()
 	Players.PlayerRemoving:Connect(function(player)
 		save(player)
 		loaded[player] = nil
+		lastOffline[player] = nil
 	end)
 	task.spawn(function()
 		while true do

@@ -9,7 +9,7 @@
 -- after it. The icon has no outline in Figma (QM: it should match the number's 1:1), so it gets
 -- one here the same colour and thickness as the number's (HudKit.outlineArt).
 -- Popups count from the server's Loaded attribute (Server/Data), so the saved Cash and
--- Power arriving on join don't pop up, nor does the offline pay (it has its own).
+-- Power arriving on join don't pop up, nor does the offline pay (the Offline Cash popup flies it in: client/OfflineCash).
 --
 --   GainPopups.init(row, name, counter, color, band)  -- row: the counter's Frame; counter: its
 --                                                     -- Value; band: its band's Figma y

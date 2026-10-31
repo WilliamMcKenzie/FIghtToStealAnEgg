@@ -54,7 +54,6 @@ local BLACK = HudKit.BLACK
 local fig = HudKit.fig
 local TEXT_BIG = 47 -- the offline earnings line (LassoAPet's size, in design px)
 local OFFLINE_GREEN = "#57E636" -- its amount (LassoAPet's)
-local OFFLINE_HOLD = 2.5 -- seconds the "+$X" from offline earnings stays up
 local BAR_EASE = 25 -- how fast the red catches up with the health (quick, not a pop)
 local TRAIL_LAG = 0.5 -- seconds the trail bar lags behind the red (QM, Oct 24)
 local FILL_IN = 0.4 -- seconds the bar takes to fill from empty when a fight starts (QM, Oct 25)
@@ -354,6 +353,7 @@ function Hud.start()
 	require(script.Parent.PetsPanel).init(root, root:FindFirstChild("PetsButton")) -- (the paw button's)
 	require(script.Parent.EggsPanel).init(root, root:FindFirstChild("EggsButton")) -- (the egg button's)
 	require(script.Parent.IndexPanel).init(root, root:FindFirstChild("IndexButton")) -- (the Index button's)
+	require(script.Parent.OfflineCash).init(root) -- (what came in while you were away: pops up on joining)
 
 	if not Ui.live then
 		return gui
@@ -393,39 +393,6 @@ function Hud.start()
 	end
 	earn()
 	player:GetAttributeChangedSignal("Income"):Connect(earn)
-	-- back from offline (Server/Data's OfflinePaid): a big green "+$258K" pops up in the middle
-	-- of the screen, holds, and fades (LassoAPet's)
-	local function paid()
-		local amount = player:GetAttribute("OfflinePaid")
-		if not (Ui.live and amount and amount > 0) then
-			return
-		end
-		local pop = label(root, "OfflinePaidPop", {
-			Text = "+$" .. Abbrev(amount),
-			TextXAlignment = Enum.TextXAlignment.Center,
-			TextColor3 = Color3.fromHex(OFFLINE_GREEN),
-			TextSize = 110,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromScale(0.5, 0.38),
-			Size = UDim2.fromOffset(900, 130),
-			ZIndex = 20,
-		})
-		pop.Outline.Thickness = 6
-		local grow = Instance.new("UIScale")
-		grow.Scale = 0
-		grow.Parent = pop
-		TweenService:Create(grow, POP_IN, { Scale = 1 }):Play()
-		task.delay(OFFLINE_HOLD, function()
-			local fade = TweenInfo.new(0.5)
-			TweenService:Create(pop, fade, { TextTransparency = 1 }):Play()
-			TweenService:Create(pop.Outline, fade, { Transparency = 1 }):Play()
-			task.wait(0.5)
-			pop:Destroy()
-		end)
-		player:SetAttribute("OfflinePaid", nil)
-	end
-	paid()
-	player:GetAttributeChangedSignal("OfflinePaid"):Connect(paid)
 
 	-- only while you stand in your own pen (QM, Oct 27), and out of the way of the boss bar,
 	-- which shows in the same spot in a fight
