@@ -50,6 +50,12 @@ end
 StudStyle.ensure() -- workspace.StudStyle: the studs' Transparency and TileScale (ground apart), kept with the place
 StudStyle.watch()
 SkyColor.ensure() -- workspace.SkyColor: the sky's colour in each biome, kept with the place
+-- (the pet lineup is for sizing pets in Studio's Edit mode, Shared/PetLineup: not in the
+-- game, where it stands on the spawn; workspace.PetScale stays, the pets' sizes)
+local lineup = workspace:FindFirstChild("PetLineup")
+if lineup then
+	lineup:Destroy()
+end
 local map = Map.ensure() -- workspace.Map (baked into the place in Studio, or built now)
 WorldColors.create() -- workspace.WorldColors: live world colours (after the map: it paints it)
 Pens.start(map)

@@ -29,6 +29,7 @@
 
 local Config = require(script.Parent.Parent.Config)
 local Rig = require(script.Parent.Parent.Rig)
+local PetScale = require(script.Parent.Parent.PetScale)
 local HorseModel = require(script.Parent.HorseModel)
 
 -- Classic stud decal from the Creator Store (asset 7447638611), tiled at half-stud size.
@@ -129,8 +130,8 @@ local function variant(name, data, rarity, points)
 		gallopOnSprint = points.gallopOnSprint, -- gallops only while self.sprinting (Ride sets it)
 		gallopOnly = points.gallopOnly, -- never walks: gallops whenever it moves (QM, Oct 23)
 		neckLoop = points.neck or NECK_LOOP,
-		-- (x Config.AnimalScale: how big it looks, QM, Oct 11)
-		size = (points.size or tierSize(name, data)) * (Config.AnimalScale[name] or 1),
+		-- (x its scale, workspace.PetScale or Config.AnimalScale: how big it looks, QM, Oct 11/31)
+		size = (points.size or tierSize(name, data)) * PetScale.of(name),
 	}, { __index = Horse })
 	class.__index = class
 

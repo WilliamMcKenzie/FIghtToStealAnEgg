@@ -7,6 +7,8 @@ return {
 	StudMaterial = false,
 	FineStuds = {},
 	AnimalScale = { RockHog = 1.5, VolcanoTortoise = 2.5, LavaWhale = 2.5, Phoenix = 2 }, -- (LassoAPet's)
+	-- (the place's workspace.PetScale wins over AnimalScale, which only seeds it: Shared/PetScale.
+	-- Size them in Studio with the pet lineup, then tick PetScale.CopyValues and paste its line here)
 	StudTransparency = 0.5, -- every stud Texture (floor, walls, sword, horse): 0.5 = half strength (QM, Oct 24)
 	-- workspace.StudStyle's knobs for a place that has none yet (Shared/StudStyle; QM's picks, Oct 30)
 	StudStyle = { GroundTransparency = 0.5, GroundTileScale = 1, Transparency = 0.4, TileScale = 2 },

@@ -16,6 +16,10 @@ don't rebuild the place from Rojo over it.
   editor (tools/mapeditor) straight from disk. Save the place after.
   It also keeps `workspace.StudStyle` live in Edit mode: its `GroundTransparency`/`Transparency`
   and `GroundTileScale`/`TileScale` attributes hold for every stud Texture (Shared/StudStyle).
+  **Map > Pet Lineup** stands every pet in the base's dirt patch (Shared/PetLineup), a row per
+  biome; changing a pet's attribute in `workspace.PetScale` resizes it there, and ticking
+  `CopyValues` prints a `Config.AnimalScale` line to paste. `pet_lineup.luau` does the same from
+  the command bar (`python3 lu.py pet_lineup.luau`) without reinstalling the plugin.
 
 ## The UI in StarterGui (QM edits it in Studio)
 
