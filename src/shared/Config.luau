@@ -2650,6 +2650,20 @@ return {
 			LeftShoulder = { Order = "YXZ", X = -25, Y = 25, Z = 0, Breathe = 1.5, Bob = 3, Lag = 0.1 },
 			LeftElbow = { Order = "YXZ", X = 25, Y = 0, Z = 0, Breathe = 1, Bob = 4, Lag = 0.15 },
 		},
+		-- an egg in the hands (QM, Oct 31: "freeze the torso in this pose"): riding or on
+		-- foot, the upper body holds still in this pose, the egg out in front in the right
+		-- hand, the left arm down by the side. No breathing, bob or aim twist.
+		Egg = {
+			Joints = {
+				Waist = { Order = "YXZ", X = 0, Y = 0, Z = 0 },
+				Neck = { Order = "YXZ", X = 0, Y = 0, Z = 0 },
+				RightShoulder = { Order = "YXY", X = 90, Y = 0, Z = 0 },
+				RightElbow = { Order = "YXZ", X = 0, Y = 0, Z = 0 },
+				RightWrist = { Order = "YXZ", X = 0, Y = 0, Z = 0 },
+				LeftShoulder = { Order = "YXZ", X = 0, Y = 0, Z = -6 },
+				LeftElbow = { Order = "YXZ", X = 5, Y = 0, Z = 0 },
+			},
+		},
 		-- bows (every Ranged weapon) while shooting (QM's archer ref): the bow arm straight out
 		-- at the target, the body side-on, and the other hand drawing to the cheek. Each shot
 		-- releases it and draws again in time for the next, so fast bows look like arrow spam.

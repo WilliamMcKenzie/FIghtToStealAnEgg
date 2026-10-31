@@ -201,12 +201,16 @@ local function release(joints)
 	end
 end
 
--- the type of weapon out ("Melee", "Ranged", "Magic"), or nil, and its Config.WeaponPoses
+-- the type of weapon out ("Melee", "Ranged", "Magic"), "Egg" for an egg in the hands, or
+-- nil, and its Config.WeaponPoses
 local NONE = {}
 local function holding(character)
 	local tool = character:FindFirstChildOfClass("Tool")
 	if not tool then
 		return nil, NONE
+	end
+	if tool:GetAttribute("EggTool") then
+		return "Egg", NONE
 	end
 	return tool:GetAttribute("WeaponType"), Config.WeaponPoses[tool:GetAttribute("Weapon")] or NONE
 end
@@ -237,7 +241,7 @@ local function drawn(a, name, u)
 end
 
 RunService.PreSimulation:Connect(function(dt)
-	-- everyone with a weapon out takes the riding pose
+	-- everyone with a weapon out takes the riding pose (and anyone with an egg, the egg pose)
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
 		if character and not states[character] and holding(character) then
@@ -266,6 +270,13 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		local move = math.clamp(speed / ride.BobFull, 0, 1)
 		local sway = if SwingPose.still then 0 else 1
+		-- an egg in the hands (QM, Oct 31): the upper body frozen in Config.RidePose.Egg,
+		-- riding or on foot, so the run animation can't fling the arms (and the egg) about
+		local egg = kind == "Egg"
+		local joints = if egg then ride.Egg.Joints else ride.Joints
+		if egg then
+			sway = 0
+		end
 
 		-- the bow up while shooting, until a little after the next shot was due
 		local shot = if kind == "Ranged" then s.shot else nil
@@ -296,7 +307,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 
 		-- (other players' aim isn't known here: their bow arm points along their last shot)
-		local want = s.aim or (if s.shot then s.shot.aim * drawing else 0)
+		local want = if egg then 0 else s.aim or (if s.shot then s.shot.aim * drawing else 0)
 		-- the turn onto a new target (or past the twist limit) is never a snap: a critically
 		-- damped spring that settles in Config.Slash.AimTime, starting and stopping smoothly
 		local w = 5.8 / math.max(Config.Slash.AimTime, 0.02)
@@ -318,10 +329,10 @@ RunService.PreSimulation:Connect(function(dt)
 		for name, joint in s.joints do
 			local under = base(joint)
 			local pose = under
-			local j = ride.Joints[name]
+			local j = joints[name]
 			if j then
-				local bob = math.sin(2 * math.pi * (cycle - j.Lag))
-				local sx = (j.Breathe * breath * (1 - move) + j.Bob * bob * move) * sway
+				local bob = math.sin(2 * math.pi * (cycle - (j.Lag or 0)))
+				local sx = ((j.Breathe or 0) * breath * (1 - move) + (j.Bob or 0) * bob * move) * sway
 				local v = own[name] -- (this weapon's own pose for the joint)
 				local held = if v then rotation(j.Order, v.X + sx, v.Y, v.Z) else angles(j, j.X + sx)
 				pose = under:Lerp(held, stance)
