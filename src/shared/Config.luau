@@ -1958,6 +1958,18 @@ return {
 		-- the Growing Eggs popup's GROW ALL (QM's Figma, Oct 27; client/EggsPanel): every egg
 		-- in your pen ready at once, for Robux. Not sold yet: no developer product or server side.
 		GrowAllProduct = nil,
+		-- Hatch now for Robux (QM, Oct 31: LassoAPet's SpeedupEgg): by one of your eggs
+		-- that's still growing, its F prompt says "Hatch now · R$..." and holding it buys
+		-- the developer product for its time left (the first tier with Upto >= seconds
+		-- left); bought, it hatches there and then (Server/Hatchery). Robux is the price
+		-- shown, so keep it the same as the product's price on the Creator Hub. A tier
+		-- with no Product yet just hatches it for free in Studio.
+		Speedup = {
+			{ Upto = 60, Robux = 9, Product = nil }, -- up to 1 minute left
+			{ Upto = 10 * 60, Robux = 29, Product = nil }, -- up to 10 minutes
+			{ Upto = 60 * 60, Robux = 59, Product = nil }, -- up to 1 hour
+			{ Upto = math.huge, Robux = 99, Product = nil }, -- over an hour
+		},
 		PenEggs = 8, -- most eggs waiting in a pen at once
 		Range = 10, -- studs from an egg you can hatch it (LassoAPet's SpeedupEgg.Range)
 		HoldTime = 0.35, -- seconds holding F
