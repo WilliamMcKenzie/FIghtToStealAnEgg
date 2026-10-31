@@ -40,7 +40,7 @@ local loaded = {} -- [player] = true once their data is in
 local warned = false
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone", "BaseFound" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end
@@ -179,6 +179,7 @@ function Data.reset(player)
 	end
 	Combat.refresh(player)
 	player:SetAttribute("TutorialDone", nil)
+	player:SetAttribute("BaseFound", nil)
 	if Config.Tutorial.On then
 		Tutorial.begin(player, true) -- (a new account gets the tutorial)
 	end
@@ -195,6 +196,17 @@ function Data.start()
 	remote.Name = "Rebirth"
 	remote.OnServerInvoke = rebirth
 	remote.Parent = ReplicatedStorage
+
+	-- (client/BaseMarker: you've walked into your pen, so its "Your Base" marker goes for good)
+	local found = Instance.new("RemoteEvent")
+	found.Name = "BaseFound"
+	found.Parent = ReplicatedStorage
+	found.OnServerEvent:Connect(function(player)
+		if not player:GetAttribute("BaseFound") then
+			player:SetAttribute("BaseFound", true)
+			task.spawn(save, player)
+		end
+	end)
 
 	local function joined(player)
 		player:SetAttribute("Rebirths", player:GetAttribute("Rebirths") or 0)
