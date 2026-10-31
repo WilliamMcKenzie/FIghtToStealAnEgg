@@ -2412,25 +2412,25 @@ return {
 	-- they're all done it keeps saying "Train Power" towards your next level. Hidden during
 	-- the tutorial. Each is one of:
 	--   { Power = 2 }                       "Train Power": reach that level (Config.Levels)
-	--   { Steal = 5, In = { "Meadow" } }    "Steal 5 <region> eggs": eggs stolen there, ever
+	--   { Steal = 3, In = { "Meadow" } }    "Steal 3 <region> eggs": eggs stolen there, ever
 	--                                       (saved player attribute Stolen, Server/Eggs)
 	--   { Region = { "Desert" } }           "Unlock Desert": bar is your cash vs its gate;
 	--                                       with more than one, any of them (All = true: every one)
 	--   { Weapon = "Rare" }                 "Buy a Rare weapon": own one of that rarity or
 	--                                       better; bar is your cash vs the cheapest of it
 	--   { Train = "Desert" }                "Unlock Desert Training": cash vs its ground's Cost
-	-- Title = "..." replaces the made-up title. The "Steal 5 eggs" before the Desert is
+	-- Title = "..." replaces the made-up title. The "Steal 3 eggs" (QM: 5 is a full pen) before the Desert is
 	-- QM's: players learn to keep fighting the bosses first.
 	Goals = {
 		Color = Color3.fromRGB(255, 157, 0), -- the little "Goal" over the title
 		List = {
 			-- Meadow
 			{ Power = 2 },
-			{ Steal = 5, In = { "Meadow" }, Title = "Steal 5 eggs" },
+			{ Steal = 3, In = { "Meadow" }, Title = "Steal 3 eggs" },
 			{ Region = { "Desert" } },
 			-- Desert
 			{ Weapon = "Uncommon" },
-			{ Steal = 5, In = { "Desert" } },
+			{ Steal = 3, In = { "Desert" } },
 			{ Power = 8 },
 			{ Weapon = "Rare" },
 			{ Train = "Desert" },
@@ -2438,22 +2438,22 @@ return {
 			{ Region = { "Ice" } },
 			-- Tundra
 			{ Weapon = "Epic" },
-			{ Steal = 5, In = { "Ice" } },
+			{ Steal = 3, In = { "Ice" } },
 			{ Power = 16 },
 			{ Region = { "Lava" } },
 			-- Lava Valley
 			{ Weapon = "Legendary" },
-			{ Steal = 5, In = { "Lava" } },
+			{ Steal = 3, In = { "Lava" } },
 			{ Power = 21 },
 			{ Region = { "Dungeon", "Forest" }, Title = "Unlock a new region" },
 			-- Dungeon / Magic Circle
 			{ Weapon = "Mythic" },
-			{ Steal = 5, In = { "Dungeon", "Forest" }, Title = "Steal 5 eggs" },
+			{ Steal = 3, In = { "Dungeon", "Forest" }, Title = "Steal 3 eggs" },
 			{ Power = 25 },
 			{ Weapon = "Divine" },
 			{ Region = { "Castle", "Ocean" }, Title = "Unlock a new region" },
 			-- Red Castle / Ocean Trench, and the endgame
-			{ Steal = 5, In = { "Castle", "Ocean" }, Title = "Steal 5 eggs" },
+			{ Steal = 3, In = { "Castle", "Ocean" }, Title = "Steal 3 eggs" },
 			{ Weapon = "Celestial" },
 			{ Power = 30 },
 			{ Weapon = "Cosmic" },
