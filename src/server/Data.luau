@@ -47,6 +47,7 @@ local function keys()
 	for name in Config.Regions.Cost do
 		table.insert(list, "Region" .. name)
 	end
+	table.insert(list, "FreeGift") -- (the free gift's claimed: Server/FreeGift)
 	return list
 end
 
@@ -179,6 +180,7 @@ function Data.reset(player)
 	end
 	Combat.refresh(player)
 	player:SetAttribute("TutorialDone", nil)
+	player:SetAttribute("FreeGift", nil)
 	if Config.Tutorial.On then
 		Tutorial.begin(player, true) -- (a new account gets the tutorial)
 	end
@@ -202,6 +204,10 @@ function Data.start()
 		load(player)
 		-- (the tutorial's done: saved now, so leaving straight after can't lose it)
 		player:GetAttributeChangedSignal("TutorialDone"):Connect(function()
+			task.spawn(save, player)
+		end)
+		-- (and the free gift's claimed: saved now too, Server/FreeGift)
+		player:GetAttributeChangedSignal("FreeGift"):Connect(function()
 			task.spawn(save, player)
 		end)
 		-- (the HUD's gain popups count from here, so the saved Cash and Power don't pop up)

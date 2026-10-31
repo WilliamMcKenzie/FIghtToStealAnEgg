@@ -38,6 +38,7 @@ local StudStyle = require(Shared.StudStyle)
 local VendorStallModel = require(Shared.VendorStallModel)
 local Weapons = require(Shared.Weapons.Weapons)
 local Cactus = require(Shared.Animals.Cactus)
+local GiftModel = require(Shared.GiftModel)
 local HiddenFaces = require(Shared.HiddenFaces)
 
 local Map = {}
@@ -1308,6 +1309,27 @@ local function vendor(parent, name, title)
 	return model
 end
 
+-- the free gift (QM, Oct 31: Shared/GiftModel), across the gateway from Carl: at
+-- Config.FreeGift's spot, on the ground there. Built fresh on every start (Map.ensure) like
+-- the gates, so it shows without baking the map again; a Rebuild bakes it in for Edit mode.
+local function freeGift(map)
+	local old = map:FindFirstChild("FreeGift")
+	if old then
+		old:Destroy()
+	end
+	local s = Config.FreeGift
+	if not s then
+		return
+	end
+	local model = GiftModel.build()
+	if s.Scale and s.Scale ~= 1 then
+		model:ScaleTo(s.Scale)
+	end
+	local y = MapFile.groundAt(MapData, s.X, s.Z)
+	model:PivotTo(CFrame.new(s.X, y, s.Z) * CFrame.Angles(0, math.rad(s.Yaw or 0), 0))
+	model.Parent = map
+end
+
 function Map.ensure()
 	local map = workspace:FindFirstChild("Map")
 	if map and map:GetAttribute("Baked") then
@@ -1334,6 +1356,7 @@ function Map.ensure()
 			end
 		end
 		gates(folder("Gates", map), folder("Blockers", map))
+		freeGift(map)
 		return map
 	end
 	return Map.build()
@@ -1395,6 +1418,7 @@ function Map.build(data)
 		model:SetAttribute("Scale", v[5])
 		put(model, v[2], v[3], v[4], v[5], v[6])
 	end
+	freeGift(map)
 	-- (the textures on faces nobody sees, thousands of them: QM Oct 27, the game lagged)
 	HiddenFaces.cull(map)
 	map:SetAttribute("Baked", not RunService:IsRunning())
