@@ -18,7 +18,6 @@ local SlashTuning = require(Shared.SlashTuning)
 local Weapons = require(Shared.Weapons.Weapons)
 local Arsenal = require(script.Arsenal)
 local StudStyle = require(Shared.StudStyle)
-local SkyColor = require(Shared.SkyColor)
 local WorldColors = require(Shared.WorldColors)
 local Bosses = require(script.Bosses)
 local Combat = require(script.Combat)
@@ -50,7 +49,6 @@ if not workspace:FindFirstChild("FightBarrierStyle") then
 end
 StudStyle.ensure() -- workspace.StudStyle: the studs' Transparency and TileScale (ground apart), kept with the place
 StudStyle.watch()
-SkyColor.ensure() -- workspace.SkyColor: the sky's colour in each biome, kept with the place
 -- (the pet lineup is for sizing pets in Studio's Edit mode, Shared/PetLineup: not in the
 -- game, where it stands on the spawn; workspace.PetScale stays, the pets' sizes)
 local lineup = workspace:FindFirstChild("PetLineup")

@@ -2247,20 +2247,6 @@ return {
 	-- The sky flashes white as a SprintPets pet's sprint starts, fading back over Time seconds
 	-- (client/SkyFlash). Start: its see-through at the flash. Distance: studs round the camera.
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
-	-- workspace.SkyColor's colours for a place that has none yet (Shared/SkyColor, QM Oct 31):
-	-- the fog/sky colour in each area, blended over TweenTime seconds as you walk in
-	SkyColor = {
-		TweenTime = 1.5,
-		Base = Color3.fromRGB(71, 125, 166), -- (QM's steel blue fog, as before)
-		Meadow = Color3.fromRGB(96, 170, 222),
-		Desert = Color3.fromRGB(222, 178, 120),
-		Ice = Color3.fromRGB(176, 210, 234),
-		Lava = Color3.fromRGB(128, 48, 36),
-		Dungeon = Color3.fromRGB(44, 54, 74),
-		Castle = Color3.fromRGB(96, 32, 54),
-		Forest = Color3.fromRGB(112, 74, 156),
-		Ocean = Color3.fromRGB(24, 74, 126),
-	},
 
 	-- regions (QM, Oct 25): each biome past the Meadow is bought with cash. Until you own
 	-- it, its gate shows a blocker only you see (client/Regions: a navy wall with its name,
