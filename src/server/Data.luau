@@ -48,7 +48,7 @@ local claimRemote -- (OfflineClaim: Data.start)
 local lastOffline = {} -- [player] = the offline cash they last claimed (a 2x bought after it pays that again)
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone", "OfflineCash", "HatchCredits" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone", "OfflineCash", "HatchCredits", "Stolen" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end
@@ -203,6 +203,7 @@ function Data.reset(player)
 	player:SetAttribute("HeldEggKind", nil)
 	player:SetAttribute("LockedIn", nil)
 	player:SetAttribute("OfflineCash", nil)
+	player:SetAttribute("Stolen", nil)
 	for name, g in Config.Training.Grounds do
 		player:SetAttribute("Train" .. name, g.Cost <= 0)
 	end
