@@ -10,6 +10,11 @@
 --   Studs.apply(part, tile) -- the stud material for that tile size; false if there's none
 --   Studs.convert(part)     -- swaps a part's stud Textures for the material (not ground
 --                           -- with a checker: its studs lie over the checker)
+--   Studs.mesh(part, tile)  -- stud Textures on all six sides of a MeshPart (QM, Oct 31:
+--                           -- the bushes, rocks and other meshes were flat). A Texture on a
+--                           -- mesh is projected on it from that side of its box, so faces
+--                           -- square to a side get round studs and slanted ones stretched studs.
+--   Studs.meshAll(root, tile) -- Studs.mesh on every plain MeshPart under root -> how many
 
 local MaterialService = game:GetService("MaterialService")
 local RunService = game:GetService("RunService")
@@ -123,6 +128,52 @@ function Studs.convert(part)
 		texture:Destroy()
 	end
 	return true
+end
+
+-- (the stud look on meshes, not on glowing, see-through or already-studded ones)
+local function studdable(part)
+	if not part:IsA("MeshPart") or part.Transparency > 0.5 then
+		return false
+	end
+	local m = part.Material
+	if m == Enum.Material.Neon or m == Enum.Material.Glass or m == Enum.Material.ForceField then
+		return false
+	end
+	for _, child in part:GetChildren() do
+		if child:IsA("Texture") and child.Texture == Studs.IMAGE then
+			return false
+		end
+	end
+	return true
+end
+
+function Studs.mesh(part, tile, transparency)
+	if not studdable(part) then
+		return false
+	end
+	-- (workspace.StudStyle: Shared/StudStyle sets every stud Texture's transparency and scale)
+	local StudStyle = require(script.Parent.StudStyle)
+	for _, face in Enum.NormalId:GetEnumItems() do
+		local t = Instance.new("Texture")
+		t.Name = "Studs"
+		t.Face = face
+		t.Texture = Studs.IMAGE
+		t.StudsPerTileU, t.StudsPerTileV = tile, tile
+		t.ZIndex = 2
+		t.Transparency = transparency or StudStyle.transparency()
+		t.Parent = part
+	end
+	return true
+end
+
+function Studs.meshAll(root, tile)
+	local n = 0
+	for _, part in root:GetDescendants() do
+		if Studs.mesh(part, tile) then
+			n += 1
+		end
+	end
+	return n
 end
 
 return Studs

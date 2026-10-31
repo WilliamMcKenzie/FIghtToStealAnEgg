@@ -1332,6 +1332,8 @@ function Map.ensure()
 		if not map:GetAttribute("HiddenFacesCulled") then
 			HiddenFaces.cull(map)
 		end
+		-- (a map baked before meshes had studs, QM Oct 31: give them theirs now)
+		Studs.meshAll(map, 1)
 		-- (the gates' blockers are always built fresh, QM Oct 30: so a change to their signs
 		-- in Shared/RegionBlocker shows without baking the map again)
 		for _, name in { "Gates", "Blockers" } do
@@ -1404,6 +1406,9 @@ function Map.build(data)
 		put(model, v[2], v[3], v[4], v[5], v[6])
 	end
 	freeGift(map)
+	-- (studs on the meshes too, like the blocks round them: QM Oct 31, the bushes and rocks
+	-- were flat. 1-stud studs like the map's blocks; workspace.StudStyle scales them all.)
+	Studs.meshAll(map, 1)
 	-- (the textures on faces nobody sees, thousands of them: QM Oct 27, the game lagged)
 	HiddenFaces.cull(map)
 	map:SetAttribute("Baked", not RunService:IsRunning())
