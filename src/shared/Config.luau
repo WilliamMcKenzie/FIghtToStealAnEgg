@@ -1833,6 +1833,14 @@ return {
 	-- train StrengthBonus more (0.5: 1.5x after one, 2x after two) and your pen earn
 	-- CashBonus more (Config.Income). Weapons and pets are kept. (Balance, Oct 27: the first
 	-- is about an hour and a half in, after the Lava Valley.)
+	-- the "Your Base" marker (client/BaseMarker): QM's blue house and "Your Base" floating over
+	-- your own pen, only for you, until you first walk into it (BaseFound, saved)
+	BaseMarker = {
+		Height = 9, -- studs above the pen's floor to the marker's middle
+		Size = 9, -- studs: the house's width (the text sits under it)
+		Bob = 0.6, -- studs it floats up and down
+		BobPeriod = 2.4, -- seconds
+	},
 	Rebirth = {
 		Cost = 10000000,
 		Growth = 3,

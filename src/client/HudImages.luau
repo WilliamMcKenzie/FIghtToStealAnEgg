@@ -27,6 +27,7 @@ return {
 	BossAliveIcon = "rbxassetid://136700539456694", -- assets/ui/hud/BossAliveIcon.png
 	BossDeadIcon = "rbxassetid://108102901826020", -- assets/ui/hud/BossDeadIcon.png
 	BossGlow = "rbxassetid://136536336593533", -- assets/ui/hud/BossGlow.png
+	BaseHouse = "", -- assets/ui/hud/BaseHouse.png (QM's blue house over your pen: client/BaseMarker)
 	-- the Index (client/IndexPanel): the pet stats' icons (QM's icon pack: assets/ui/index) and
 	-- each biome's picture, a screenshot of it from Studio (Biome<Name>; its Config.Index.Tint
 	-- shows until it's in)
