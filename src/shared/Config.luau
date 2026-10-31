@@ -1849,7 +1849,7 @@ return {
 		-- there till Claim. Its 2x button is a Roblox developer product: put its id from the
 		-- Creator Dashboard here (till then, in Studio the button just pays 2x for free). The
 		-- price shown is the product's own once it has an id; OfflineDoubleRobux till then.
-		OfflineDoubleProduct = nil,
+		OfflineDoubleProduct = 3724925413,
 		OfflineDoubleRobux = 49,
 		OfflinePopupDelay = 1.5, -- seconds after joining before it pops up
 	},
