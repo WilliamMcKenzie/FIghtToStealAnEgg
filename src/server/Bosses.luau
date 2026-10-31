@@ -170,8 +170,9 @@ local function look(c)
 end
 Bosses.look = look
 
-local function make(kind, at, yaw)
+local function make(kind, at, yaw, health)
 	local c = Config.Bosses[kind]
+	health = health or c.Health
 	local model, modelSize = look(c)
 	local box = extent(model) * modelSize
 	local size = Vector3.new(c.Radius * 2, box.Y, c.Radius * 2)
@@ -188,8 +189,8 @@ local function make(kind, at, yaw)
 	body:SetAttribute("Model", model)
 	body:SetAttribute("ModelSize", modelSize)
 	body:SetAttribute("Name", c.Name or c.Model)
-	body:SetAttribute("Health", c.Health)
-	body:SetAttribute("MaxHealth", c.Health)
+	body:SetAttribute("Health", health)
+	body:SetAttribute("MaxHealth", health)
 	body:SetAttribute("Radius", c.Radius)
 	local b = { kind = kind, c = c, yaw = yaw, home = at, calm = 0, hitters = {} }
 	if c.Burrow then
@@ -252,7 +253,8 @@ function Bosses.arena(biome, spot, bounds)
 	return arenas[biome]
 end
 
-function Bosses.summon(biome, player, kind)
+-- (health: instead of its Config's, e.g. Config.Tutorial.BossHealth)
+function Bosses.summon(biome, player, kind, health)
 	for body, b in live do
 		if b.biome == biome then
 			return body
@@ -280,7 +282,7 @@ function Bosses.summon(biome, player, kind)
 			yaw = math.atan2(look.X, look.Z)
 		end
 	end
-	local body, b = make(kind, at, yaw)
+	local body, b = make(kind, at, yaw, health)
 	b.biome, b.bounds = biome, arena.bounds
 	body:SetAttribute("Biome", biome)
 	body:SetAttribute("Intro", true)

@@ -402,12 +402,12 @@ return {
 			Name = "Mother Hen",
 			Model = "Chicken",
 			Size = 3.84, -- (about 40 studs tall: QM, Oct 25, 1.6x)
-			Health = 200,
+			Health = 1500, -- (QM, Oct 31: 200 -> 1.5K, so training pays off; Tutorial.BossHealth in the tutorial)
 			Speed = 10,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 11,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1, -- (QM, Oct 31: was 2; at 1 a fight doesn't level you up halfway through it)
 			Respawn = 20, -- (unused now: the nests' cooldown, Eggs.Cooldown[biome], decides)
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -419,7 +419,7 @@ return {
 			Name = "Giant Rafflesia",
 			Model = "GiantRafflesia", -- (LassoAPet's, QM Oct 25: its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
 			Size = 1, -- (about 50 studs tall; QM, Oct 27: the bosses but the Mother Hen grew 1.67x with the pets)
-			Health = 200,
+			Health = 1500, -- (QM, Oct 31: 200 -> 1.5K, so training pays off; Tutorial.BossHealth in the tutorial)
 			-- a ranged boss (QM, Oct 27): rooted in the middle of its arena, it only turns to
 			-- face you and casts the Flower Staff's own orbs, with weaker homing to dodge
 			Speed = 0,
@@ -427,7 +427,7 @@ return {
 			StopAt = 1,
 			Radius = 15,
 			Turn = 3.5,
-			Strength = 2,
+			Strength = 1, -- (QM, Oct 31: was 2; at 1 a fight doesn't level you up halfway through it)
 			Respawn = 20,
 			Attacks = {
 				{
@@ -449,12 +449,12 @@ return {
 			Name = "Majestic Unicorn",
 			Model = "MajesticUnicorn", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 3.2, -- (about 42 studs tall; QM Oct 30: x0.8)
-			Health = 200,
+			Health = 1500, -- (QM, Oct 31: 200 -> 1.5K, so training pays off; Tutorial.BossHealth in the tutorial)
 			Speed = 10,
 			StopAt = 1,
 			Radius = 10.5,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1, -- (QM, Oct 31: was 2; at 1 a fight doesn't level you up halfway through it)
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Swipe", Every = 2.4, Reach = 20, Arc = 140, Windup = 0.95, Damage = 22 },
@@ -467,12 +467,12 @@ return {
 			Name = "Venus Flytrap",
 			Model = "VenusFlytrap", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 2.7, -- (about 47 studs tall; QM Oct 30: x0.9)
-			Health = 200,
+			Health = 1500, -- (QM, Oct 31: 200 -> 1.5K, so training pays off; Tutorial.BossHealth in the tutorial)
 			Speed = 10,
 			StopAt = 1,
 			Radius = 13.5,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1, -- (QM, Oct 31: was 2; at 1 a fight doesn't level you up halfway through it)
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Swipe", Every = 2.4, Reach = 34, Arc = 50, Width = 20, Windup = 1, Damage = 24 },
@@ -1263,7 +1263,7 @@ return {
 	-- re-rolls them all)
 	-- what beating a boss pays (QM, Oct 31): about Share of what the next region costs
 	-- (Config.Regions.Cost[Next[its biome]]), to everyone who beat it, x2 with the x2 Cash
-	-- pass. Past the last regions, Last x their own cost. Meadow bosses pay $120 (Desert's 6K),
+	-- pass. Past the last regions, Last x their own cost. Meadow bosses pay $40 (Desert's 2K),
 	-- Desert's 2.4K, Tundra's 30K, Lava Valley's 400K, Dungeon's and Magic Circle's 5M.
 	BossCash = {
 		Share = 1 / 50,
@@ -1284,6 +1284,7 @@ return {
 		Egg = "Horse",
 		HatchTime = 0,
 		Boss = "MotherHen",
+		BossHealth = 200, -- (its health in the tutorial: the Meadow bosses' old 200, QM Oct 31)
 		Damage = 0.02,
 		BossCash = 500, -- (the Shortbow's price)
 		Weapon = "Shortbow",
@@ -1417,6 +1418,65 @@ return {
 	-- Fixed (QM, Oct 30): held over the arena's middle instead, back far enough that the
 	-- arena's width times Fit fills the screen (Distance unused then).
 	FightCam = { On = true, Fixed = true, Fit = 1, Pitch = 62, Yaw = 0, Distance = 80, Height = 0, Fov = 55, InTime = 0.6, OutTime = 0.6 },
+	-- boss sounds (QM, Oct 31; client/BossSounds): each boss cries as it rises out of its dais
+	-- (as the intro's camera reaches it) or wakes, and cries again pitched down as it dies.
+	-- The cries are LassoAPet's (its client/Sounds boss_<Kind>, QM's picks there), reused
+	-- for the bosses with the same animal and borrowed, re-pitched, for the rest. Every
+	-- enemy swipe whooshes as it strikes, every red circle (bomb, slam, leap) thumps as it
+	-- goes off, and a minion thuds as it lands. All through client/Sfx (heard if on screen).
+	--   Cries[Kind] = { id = a Sounds name or an rbxassetid, volume, pitch, attack? }
+	--   attack: a sound as each of its attacks winds up (BossAnim), for biters
+	BossSounds = {
+		Sounds = {
+			cluck = "rbxassetid://77584650945481", -- chicken cluck (Lasso's Chicken)
+			growl = "rbxassetid://129162115855106", -- monstergrowl (Lasso's Elder Boar)
+			cactus = "rbxassetid://95169379454314", -- angry alien cat growl (Lasso's Cactus Boss)
+			roar = "rbxassetid://137419707857339", -- T-Rex Roar 2 (Lasso's Lava Wyrm)
+			rex = "rbxassetid://116844415804502", -- T-Rex Roar 1 (Lasso's Tyrant Rex)
+			bubbles = "rbxassetid://9125409840", -- Bubbles Small Underwater (Lasso's Shark Boss)
+			angel = "rbxassetid://133260252239833", -- angelic sound (Lasso's Seraph)
+			bite = "rbxassetid://136650469995272", -- Bite Sound (Lasso's Robo Shark eating)
+			whoosh = "rbxassetid://73983934702758", -- Lasso's sprint/training whoosh
+			smash = "rbxassetid://90604529915688", -- Lasso's smash through an obstacle
+			crash = "rbxassetid://94142874131984", -- Lasso's crash
+		},
+		Cries = {
+			Chicken = { id = "cluck", volume = 0.9 },
+			MotherHen = { id = "cluck", volume = 0.9, pitch = 0.85 },
+			GiantRafflesia = { id = "cactus", volume = 0.3, pitch = 0.9 },
+			MajesticUnicorn = { id = "angel", volume = 0.6 },
+			VenusFlytrap = { id = "cactus", volume = 0.3, pitch = 1.15, attack = "bite" },
+			CactusBoss = { id = "cactus", volume = 0.3 },
+			Sandworm = { id = "growl", volume = 0.6, pitch = 0.8 },
+			ScorpionKing = { id = "cactus", volume = 0.3, pitch = 1.25 },
+			ElderBoar = { id = "growl", volume = 0.6 },
+			FrostGolem = { id = "rex", volume = 0.8, pitch = 0.8 },
+			BlizzardOwl = { id = "cluck", volume = 0.9, pitch = 0.6 },
+			LavaWyrm = { id = "roar", volume = 0.8 },
+			MagmaSlime = { id = "bubbles", volume = 2.5, pitch = 0.6 },
+			VolcanoTortoise = { id = "growl", volume = 0.6, pitch = 0.7 },
+			BoneWarden = { id = "growl", volume = 0.6, pitch = 0.9 },
+			DungeonWatcher = { id = "cactus", volume = 0.3, pitch = 0.7 },
+			TreasureMimic = { id = "cactus", volume = 0.3, pitch = 0.85, attack = "bite" },
+			CrimsonKnight = { id = "growl", volume = 0.6, pitch = 1.1 },
+			BloodBat = { id = "cactus", volume = 0.3, pitch = 1.5 },
+			CastleWyvern = { id = "roar", volume = 0.8, pitch = 1.1 },
+			RuneMage = { id = "angel", volume = 0.6, pitch = 0.8 },
+			ElderTreant = { id = "growl", volume = 0.6, pitch = 0.6 },
+			ToadstoolKing = { id = "cactus", volume = 0.3, pitch = 0.8 },
+			KingCrab = { id = "bubbles", volume = 2.5 },
+			PufferLord = { id = "bubbles", volume = 2.5, pitch = 0.8 },
+			Shark = { id = "bubbles", volume = 2.5, attack = "bite" },
+		},
+		Default = { id = "cactus", volume = 0.3 }, -- (a boss with no Cries entry)
+		DeathPitch = 0.75, -- its cry on dying, slowed to this (x its own pitch)
+		DeathVolume = 1.2, -- x its cry's volume
+		Death = { id = "crash", volume = 0.5 }, -- and the thump of it going down
+		AttackVolume = 0.6, -- an `attack` sound's volume
+		Swipe = { id = "whoosh", volume = 0.5, pitch = 0.85 }, -- an enemy swipe striking
+		Splash = { id = "smash", volume = 0.35 }, -- a red circle going off (client/Bombs)
+		Land = { id = "smash", volume = 0.3, pitch = 0.8 }, -- a minion landing from the sky
+	},
 	-- a sleeping boss (client/BossView, QM Oct 25): settled low on the ground, its head
 	-- swelling a little with each snore. A Model with a pose in Poses lies down in it
 	-- instead (no sinking or swelling): eyes shut, breathing slowly, Zzz drifting up.
@@ -2278,7 +2338,7 @@ return {
 	Regions = {
 		Cost = {
 			Meadow = 0,
-			Desert = 12000,
+			Desert = 2000, -- (QM, Oct 31: 12K -> 2K, the first gate comes quick)
 			Ice = 300000,
 			Lava = 3000000,
 			Dungeon = 25000000,
@@ -2297,7 +2357,7 @@ return {
 	-- It counts in steps, by level (Config.Levels, QM Oct 31): you get the curve's value at
 	-- your level's Power, so it only goes up when you level up. Level 1 is below level 2's
 	-- by Levels.First, so the first level up is a big jump.
-	-- QM's targets: Mother Hen (200 health) takes 13 Kendo Stick hits at level 1, 5 at 1,000.
+	-- QM's targets: the tutorial's Mother Hen (200 health) takes 13 Kendo Stick hits at level 1, 5 at 1,000.
 	--   Level          1      2      4      7     12     17     22     27     32
 	--   Strength       0    100    250     1K    10K   100K     1M    10M   100M
 	--   damage        16     26     31     40     55     70     85    100    115
