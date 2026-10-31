@@ -47,7 +47,7 @@ local TAP = "rbxassetid://134865745295413" -- LassoAPet's assets/ui/TapHand.png 
 local TAP_SIZE = 96 -- px tall (it's 488 x 610)
 local TAP_TIP = Vector2.new(0.365, 0.03) -- the fingertip, in the picture
 -- (the HUD's pieces it hides, in StarterGui > Hud > Root: client/Hud)
-local HIDE = { "ShopButton", "IndexButton", "EggsButton", "PetsButton", "Power", "Cash", "Hotbar", "OfflineEarn", "PlaceEgg" }
+local HIDE = { "ShopButton", "IndexButton", "EggsButton", "PetsButton", "Power", "Cash", "Hotbar", "OfflineEarn", "PlaceEgg", "NextBoss" }
 local WORDS = {
 	place = "Place your egg!",
 	hatch = "Hatch your egg!",
