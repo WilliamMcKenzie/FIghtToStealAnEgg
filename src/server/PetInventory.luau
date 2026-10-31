@@ -2,7 +2,9 @@
 -- client/Backpack). Player attributes, saved by Server/Data:
 --   PetsOwned  every pet owned, with how many of each (Shared/Stacks: "Pig:3,Unicorn")
 --   PenPets    the ones equipped, comma separated ("Pig,Pig,Unicorn"), at most
---              Config.Backpack.PenSlots; each one wanders in their pen (Pens.setPets)
+--              Config.Backpack.PenSlots plus their ExtraSlots (bought with Robux: the
+--              Active Pets popup's +1 Equip, Server/Store); each one wanders in their
+--              pen (Pens.setPets)
 --   Pet        the one they ride (QM, Oct 27: the pet you ride IS one of your pen's
 --              pets, you just choose to ride it). Always one of PenPets: it's out of the
 --              pen while ridden (one copy, if there are more) but still pays its Cash.
@@ -41,20 +43,20 @@ local function isPet(kind)
 	return Config.Pets[kind] ~= nil
 end
 
-local function slots()
-	return Config.Backpack.PenSlots
+local function slots(player)
+	return Config.Backpack.PenSlots + (player:GetAttribute("ExtraSlots") or 0)
 end
 
 function PetInventory.owned(player)
 	return Stacks.parse(player:GetAttribute("PetsOwned"), isPet)
 end
 
--- the pen's pets, only ones they own (never more of a kind than they have), at most PenSlots
+-- the pen's pets, only ones they own (never more of a kind than they have), at most their slots
 function PetInventory.equipped(player)
 	local owned = PetInventory.owned(player)
 	local used, list = {}, {}
 	for kind in string.gmatch(player:GetAttribute("PenPets") or "", "[^,]+") do
-		if #list < slots() and (used[kind] or 0) < Stacks.count(owned, kind) then
+		if #list < slots(player) and (used[kind] or 0) < Stacks.count(owned, kind) then
 			used[kind] = (used[kind] or 0) + 1
 			table.insert(list, kind)
 		end
@@ -76,7 +78,7 @@ function PetInventory.give(player, kind, n)
 	end
 	player:SetAttribute("PetsOwned", Stacks.format(Stacks.add(PetInventory.owned(player), kind, n or 1)))
 	local list = PetInventory.equipped(player)
-	if #list < slots() then
+	if #list < slots(player) then
 		table.insert(list, kind)
 		setEquipped(player, list)
 		return true
@@ -86,7 +88,7 @@ end
 
 local function equip(player, kind)
 	local list = PetInventory.equipped(player)
-	if not isPet(kind) or #list >= slots() then
+	if not isPet(kind) or #list >= slots(player) then
 		return
 	end
 	local used = 0
@@ -135,7 +137,7 @@ function PetInventory.ride(player, kind, body)
 	end
 	local list = PetInventory.equipped(player)
 	if not table.find(list, kind) then
-		if #list >= slots() then
+		if #list >= slots(player) then
 			-- (a full pen: it takes the place of the one ridden)
 			local at = table.find(list, player:GetAttribute("Pet")) or #list
 			list[at] = kind
@@ -171,7 +173,7 @@ local function best(player)
 		end
 		return a < b
 	end)
-	local list = table.move(all, 1, math.min(#all, slots()), 1, {})
+	local list = table.move(all, 1, math.min(#all, slots(player)), 1, {})
 	-- (mid-fight the one ridden stays: a fresh mount would be a free heal, see ride)
 	local ridden = player:GetAttribute("Pet")
 	if player:GetAttribute("LockedIn") and ridden and not table.find(list, ridden) and #list > 0 then

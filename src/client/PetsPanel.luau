@@ -1,6 +1,6 @@
 -- The Active Pets popup (QM's Figma ActivePets, Oct 27), opened by the paw (Pets) button on
 -- the right: a gold header with "1/5 Active" and the pink "+1 Equip [30R]" (more pen slots
--- for Robux: not sold yet, Config.Backpack.SlotProduct), and under it a row per pet owned
+-- for Robux: Config.Backpack.SlotProduct, the ExtraSlots attribute), and under it a row per pet owned
 -- (each copy): its render (Shared/ItemIcons), its name (white: QM), its cash a second, and
 -- Riding (yellow: the one you ride, first; it's out of the pen but still counts and earns),
 -- Unequip (red, the pen's other pets), Equip (green) or Full (grey, no room in the pen). The red ">" tab on its left slides
@@ -288,10 +288,7 @@ function PetsPanel.init(root, petsButton)
 		end)
 	end
 	buy.Activated:Connect(function()
-		-- (not sold yet: needs its developer product and the server side)
-		if Config.Backpack.SlotProduct then
-			MarketplaceService:PromptProductPurchase(player, Config.Backpack.SlotProduct)
-		end
+		MarketplaceService:PromptProductPurchase(player, Config.Backpack.SlotProduct)
 	end)
 
 	local remote = ReplicatedStorage:WaitForChild("PetEquip", 10)
@@ -307,7 +304,7 @@ function PetsPanel.init(root, petsButton)
 		end
 		table.clear(made)
 		local list, inPen = listed()
-		local slots = Config.Backpack.PenSlots
+		local slots = Config.Backpack.PenSlots + (player:GetAttribute("ExtraSlots") or 0)
 		countLabel.Text = Abbrev(inPen) .. "/" .. Abbrev(slots) .. " Active"
 		for i, entry in list do
 			local row = Ui.copy(template, "Row" .. i, rows)
@@ -339,7 +336,7 @@ function PetsPanel.init(root, petsButton)
 		end
 	end
 	refresh()
-	for _, name in { "PetsOwned", "PenPets", "Pet" } do
+	for _, name in { "PetsOwned", "PenPets", "Pet", "ExtraSlots" } do
 		player:GetAttributeChangedSignal(name):Connect(refresh)
 	end
 end

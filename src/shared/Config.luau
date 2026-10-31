@@ -1892,9 +1892,9 @@ return {
 		-- pen's pets; Server/PetInventory). It still pays its Cash a second while ridden.
 		Starter = "Horse",
 		-- the Active Pets popup's "+1 Equip" (QM's Figma, Oct 27; client/PetsPanel): one more
-		-- pen slot for Robux. Not sold yet: no developer product (SlotProduct) or server side.
+		-- pen slot for Robux, for good, as many times as they like (Server/Store, saved ExtraSlots).
 		SlotRobux = 30,
-		SlotProduct = nil, -- (its product is 3724544159, QM Oct 31: set it here once the server gives the slot)
+		SlotProduct = 3724544159,
 	},
 
 	-- hatching (QM, Oct 25, LassoAPet's; Oct 27: all of it LassoAPet's 1:1, client/PenEggs):

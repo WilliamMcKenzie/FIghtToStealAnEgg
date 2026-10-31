@@ -40,7 +40,7 @@ local loaded = {} -- [player] = true once their data is in
 local warned = false
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "PetIndex", "IndexClaimed", "Passes", "TutorialDone" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end
@@ -161,6 +161,7 @@ function Data.reset(player)
 	player:SetAttribute("Weapon", Config.Arsenal.Start)
 	player:SetAttribute("PetsOwned", "")
 	player:SetAttribute("PenPets", "")
+	player:SetAttribute("ExtraSlots", nil)
 	player:SetAttribute("IndexClaimed", nil)
 	player:SetAttribute("PetIndex", "")
 	player:SetAttribute("PenEggs", nil)

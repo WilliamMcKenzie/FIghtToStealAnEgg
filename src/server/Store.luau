@@ -7,6 +7,8 @@
 --                saved Passes attribute ("Cash,Life").
 --   Cash / Power packs  a developer product each (Product): its Amount of cash, or of
 --                Strength (the Power counter). The same product is used for a gift.
+--   +1 Equip     the Active Pets popup's (Config.Backpack.SlotProduct): one more pen slot
+--                for good, each time (saved ExtraSlots attribute: Server/PetInventory).
 -- A gift: the client says who it's for first (ShopBuy with a UserId); the next receipt for
 -- that product from that buyer goes to them (to the buyer, if they've left).
 -- In Studio, anything without its id yet is simply given (so the Shop can be tried out).
@@ -155,6 +157,9 @@ function Store.start()
 			end)
 		end
 	end
+	Store.product(Config.Backpack.SlotProduct, function(player)
+		player:SetAttribute("ExtraSlots", (player:GetAttribute("ExtraSlots") or 0) + 1)
+	end)
 	MarketplaceService.ProcessReceipt = receipt
 
 	local remote = Instance.new("RemoteEvent")
