@@ -15,6 +15,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local HudImages = require(script.Parent.HudImages)
+local SprintCam = require(script.Parent.SprintCam)
 
 local player = Players.LocalPlayer
 local C = Config.PenCard
@@ -121,6 +122,9 @@ RunService.RenderStepped:Connect(function()
 		end
 		-- (yours hides during the tutorial too, QM Oct 31)
 		card.board.Enabled = not (mine and (inside(area) or player:GetAttribute("Tutorial")))
+		-- (held still on screen through the sprint look's zoom and wider view: QM, Oct 31)
+		local k = SprintCam.steady()
+		card.board.Size = UDim2.fromScale(C.Width * k, (C.Width + C.Text) * k)
 		-- over the pen's middle (or back from it, away from the gate), the text's bottom
 		-- C.Bottom up
 		local at = area.Position
