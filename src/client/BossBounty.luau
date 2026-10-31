@@ -84,6 +84,7 @@ local function fly(amount, from, size, onLanded)
 			popup:Destroy()
 			release()
 			bump(counter)
+			GainPopups.pulse("Cash")
 			UiFx.play("Claim")
 			if onLanded then
 				onLanded()

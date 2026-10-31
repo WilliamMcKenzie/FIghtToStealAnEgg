@@ -16,6 +16,10 @@
 --   GainPopups.expect(name, amount)  -- the next `amount` gained has its own popup (a boss's
 --                                    -- bounty: client/BossBounty), so it doesn't pop here
 --   GainPopups.parts(name) -> { row, template, counter } (once init'd)
+--   GainPopups.pulse(name)  -- the counter's icon (Power's sword, Cash's notes) bounces
+--
+-- Each popup also pulses the counter's icon (QM, Oct 31): a quick grow and Back settle, from
+-- its middle. A bounty pulses it as it lands (client/BossBounty), since it skips the popup.
 
 local Players = game:GetService("Players")
 local TextService = game:GetService("TextService")
@@ -37,6 +41,10 @@ local FADE = TweenInfo.new(LIFE, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 local PAD = 8 -- Figma px of room round it in the CanvasGroup, for the outlines
 -- the counter's number in QM's Figma when the popup sits where the template does
 local REFERENCE = "14K"
+-- the icon's pulse on each gain: up to PULSE in PULSE_UP, then a Back settle to 1
+local PULSE = 1.2
+local PULSE_UP = TweenInfo.new(0.06, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local PULSE_DOWN = TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
 local player = Players.LocalPlayer
 local expected = {} -- [name] = gain still to come that pops elsewhere
@@ -48,6 +56,41 @@ end
 
 function GainPopups.parts(name)
 	return parts[name]
+end
+
+-- the counter's icon (Hud > Root > Power > PowerIcon), its Pulse UIScale made on first use;
+-- the icon is re-anchored to its middle (same spot on screen) so it grows from the centre
+local function pulseScale(name)
+	local p = parts[name]
+	local icon = p and p.row:FindFirstChild(name .. "Icon")
+	if not (icon and icon:IsA("GuiObject")) then
+		return nil
+	end
+	local scale = icon:FindFirstChild("Pulse")
+	if not scale then
+		local d = Vector2.new(0.5, 0.5) - icon.AnchorPoint
+		local size = icon.Size
+		icon.AnchorPoint = Vector2.new(0.5, 0.5)
+		icon.Position += UDim2.new(size.X.Scale * d.X, size.X.Offset * d.X, size.Y.Scale * d.Y, size.Y.Offset * d.Y)
+		scale = Instance.new("UIScale")
+		scale.Name = "Pulse"
+		scale.Parent = icon
+	end
+	return scale
+end
+
+function GainPopups.pulse(name)
+	local scale = pulseScale(name)
+	if not scale then
+		return
+	end
+	local up = TweenService:Create(scale, PULSE_UP, { Scale = PULSE })
+	up.Completed:Once(function(state)
+		if state == Enum.PlaybackState.Completed then
+			TweenService:Create(scale, PULSE_DOWN, { Scale = 1 }):Play()
+		end
+	end)
+	up:Play()
 end
 
 -- the popup in its Figma px (the 25px number, then the 34px icon starting 8px before the
@@ -128,6 +171,7 @@ function GainPopups.init(row, name, counter, color, band)
 	parts[name] = { row = row, template = template, counter = counter }
 
 	local function show(amount)
+		GainPopups.pulse(name)
 		local popup = Ui.copy(template, "Gain", row)
 		popup.Amount.Text = "+" .. Abbrev(amount)
 		-- (right of the number, however long it's got: the template's spot is for "14K")
