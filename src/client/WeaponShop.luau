@@ -11,6 +11,7 @@
 --
 --   WeaponShop.init(root)   -- once, from Hud (root = its scaled frame)
 --   WeaponShop.open() / WeaponShop.close() / WeaponShop.isOpen()
+--   WeaponShop.buyButton(id) -> that weapon's cash Buy button (client/Tutorial points at it)
 --
 -- In Studio: StarterGui > Hud > Root > WeaponShop (tick its Visible to see it). Cards are
 -- copies of Panel > Cards > CardTemplate, edit that one.
@@ -278,6 +279,12 @@ local function refresh(card, id, mine)
 	end
 end
 
+local buyButtons = {} -- [weapon id] = its card's ShopBuy
+
+function WeaponShop.buyButton(id)
+	return buyButtons[id]
+end
+
 function WeaponShop.isOpen()
 	return gui ~= nil and UiFx.isOpen(gui)
 end
@@ -354,6 +361,7 @@ function WeaponShop.init(root)
 			end
 		end)
 		table.insert(made, { card, id })
+		buyButtons[id] = card.ShopBuy
 	end
 
 	local function refreshAll()

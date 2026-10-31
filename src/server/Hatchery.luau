@@ -111,7 +111,13 @@ local function place(player, x, z)
 	end
 	Stacks.add(eggs, kind, -1)
 	setBag(player, eggs)
+	if player:GetAttribute("Tutorial") then
+		player:SetAttribute("TutorialPlaced", true) -- (Server/Tutorial stops handing it back)
+	end
 	local grow = Passes.hatchTime(player, Hatchery.hatchTime(kind)) -- (halved by x2 Growth)
+	if player:GetAttribute("Tutorial") then
+		grow = Config.Tutorial.HatchTime -- (the tutorial's egg is ready at once)
+	end
 	table.insert(list, {
 		id = HttpService:GenerateGUID(false):sub(1, 8),
 		k = kind,

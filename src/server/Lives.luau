@@ -20,6 +20,9 @@ local Lives = {}
 
 function Lives.hurt(humanoid, damage)
 	local player = Players:GetPlayerFromCharacter(humanoid.Parent)
+	if player and player:GetAttribute("Tutorial") then
+		damage *= Config.Tutorial.Damage -- (the tutorial's boss barely scratches you: QM, Oct 31)
+	end
 	if
 		player
 		and humanoid.Health > 0

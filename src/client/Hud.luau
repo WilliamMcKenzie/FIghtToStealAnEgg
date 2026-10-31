@@ -26,6 +26,7 @@
 -- wires them up.
 --
 --   Hud.start()  -- in Play (on require); tools/studio/uibake.luau calls it in Edit mode
+--   Hud.holdBack(name, amount) -> release()  -- the Power/Cash counter shows amount less till release
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -69,6 +70,27 @@ local FACE_UP = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.
 local FACE_DOWN = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
 local player = Players.LocalPlayer
+local held = {} -- [counter name] = amount it's showing less than you have (Hud.holdBack)
+local shows = {} -- [counter name] = redraws it
+
+-- the counter shows `amount` less than you have till release() (a boss's bounty, still
+-- flying to it: client/BossBounty)
+function Hud.holdBack(name, amount)
+	held[name] = (held[name] or 0) + amount
+	if shows[name] then
+		shows[name]()
+	end
+	local done = false
+	return function()
+		if not done then
+			done = true
+			held[name] -= amount
+			if shows[name] then
+				shows[name]()
+			end
+		end
+	end
+end
 
 function Hud.start()
 	local gui = Ui.screen("Hud", {
@@ -339,10 +361,11 @@ function Hud.start()
 
 	local function count(name)
 		local function show()
-			counters[name].Text = Abbrev(player:GetAttribute(name) or 0)
+			counters[name].Text = Abbrev((player:GetAttribute(name) or 0) - (held[name] or 0))
 		end
 		show()
 		player:GetAttributeChangedSignal(name):Connect(show)
+		shows[name] = show
 	end
 	count("Power")
 	count("Cash")

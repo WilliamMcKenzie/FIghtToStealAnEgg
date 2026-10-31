@@ -1,5 +1,5 @@
 -- Hands the testing chat commands on to the server: /buy, /weapon, /swords, /staffs,
--- /bows, /cash, /reset, /bossfight and /bosslist (TextChatService runs a command's
+-- /bows, /cash, /reset, /bossfight, /bosslist, /tutorial and /skiptutorial (TextChatService runs a command's
 -- Triggered where it's typed), and shows what they reply (CommandReply) in your chat.
 -- (Moved out of the old WeaponSpin screen, deleted with the rest of the UI on Oct 27.)
 
@@ -8,7 +8,7 @@ local TextChatService = game:GetService("TextChatService")
 
 task.spawn(function()
 	local commands = TextChatService:FindFirstChild("TextChatCommands") or TextChatService
-	for _, name in { "Buy", "Weapon", "Swords", "Staffs", "Bows", "Cash", "Reset", "Bossfight", "Bosslist" } do
+	for _, name in { "Buy", "Weapon", "Swords", "Staffs", "Bows", "Cash", "Reset", "Bossfight", "Bosslist", "Tutorial", "Skiptutorial" } do
 		local command = commands:WaitForChild(name .. "Command", 10)
 		local request = ReplicatedStorage:WaitForChild(name .. "Request", 10)
 		if command and request then

@@ -41,4 +41,14 @@ return {
 	BiomeCastle = "rbxassetid://136212131542405",
 	BiomeForest = "rbxassetid://96591814974982",
 	BiomeOcean = "rbxassetid://112012128904341",
+	-- the banners that sweep across the top (client/Banner, QM Oct 31): QM's 2587 x 113 art
+	-- in thirds (an upload's at most 1024 wide), assets/ui/banner/<Name>1-3.png. The
+	-- tutorial's on PromptBanner, "Boss Defeated!" on BossBanner; a plain red band shows
+	-- till they're uploaded.
+	PromptBanner1 = "",
+	PromptBanner2 = "",
+	PromptBanner3 = "",
+	BossBanner1 = "",
+	BossBanner2 = "",
+	BossBanner3 = "",
 }

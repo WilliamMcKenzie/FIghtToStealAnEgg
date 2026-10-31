@@ -327,7 +327,7 @@ return {
 	-- middle until someone steals one of its eggs or hits it (Server/Eggs); /boss spawns a
 	-- Chicken in front of you. Model is a module in Shared/Animals (<Model>Model.luau),
 	-- Size times its Blockbench drawing. Strength is what each hit on it trains (x the damage
-	-- you dealt: Config.Training). Cash is paid to everyone who beat it (Server/Bosses).
+	-- you dealt: Config.Training). Cash is paid to everyone who beat it (Server/Bosses: Config.BossCash).
 	-- Balance (Oct 27): Mother Hen is 20 Kendo Stick hits at 0 Strength and 5 at 1,000
 	-- (QM, Oct 25: Config.Power). Each later boss takes about 15s, 25s and 45s solo with the
 	-- weapon and Strength you'd have reaching it (Staff at ~3K Strength, Longsword at ~100K,
@@ -349,7 +349,6 @@ return {
 			Model = "Chicken",
 			Size = 3.84, -- (about 40 studs tall: QM, Oct 25, 1.6x)
 			Health = 200,
-			Cash = 50, -- to each player who beat it
 			Speed = 10,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 11,
@@ -367,7 +366,6 @@ return {
 			Model = "GiantRafflesia", -- (LassoAPet's, QM Oct 25: its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
 			Size = 1, -- (about 50 studs tall; QM, Oct 27: the bosses but the Mother Hen grew 1.67x with the pets)
 			Health = 200,
-			Cash = 50, -- to each player who beat it
 			-- a ranged boss (QM, Oct 27): rooted in the middle of its arena, it only turns to
 			-- face you and casts the Flower Staff's own orbs, with weaker homing to dodge
 			Speed = 0,
@@ -398,7 +396,6 @@ return {
 			Model = "MajesticUnicorn", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 3.2, -- (about 42 studs tall; QM Oct 30: x0.8)
 			Health = 200,
-			Cash = 50, -- to each player who beat it
 			Speed = 10,
 			StopAt = 1,
 			Radius = 10.5,
@@ -417,7 +414,6 @@ return {
 			Model = "VenusFlytrap", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 2.7, -- (about 47 studs tall; QM Oct 30: x0.9)
 			Health = 200,
-			Cash = 50, -- to each player who beat it
 			Speed = 10,
 			StopAt = 1,
 			Radius = 13.5,
@@ -435,7 +431,6 @@ return {
 			Model = "CactusBoss", -- (LassoAPet's, QM Oct 24)
 			Size = 4, -- (about 49 studs tall)
 			Health = 4000,
-			Cash = 500, -- to each player who beat it
 			Speed = 11,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 22,
@@ -490,7 +485,6 @@ return {
 			Model = "Sandworm", -- (the Sandworm pet's model, QM's designs/desert/Sandworm.bbmodel)
 			Size = 3.12, -- (about 35 studs tall arched up out of the ground; QM Oct 30: x1.2)
 			Health = 4000,
-			Cash = 500, -- to each player who beat it
 			Speed = 0, -- (it never walks: it tunnels, Burrow)
 			StopAt = 1,
 			Radius = 9.5,
@@ -557,7 +551,6 @@ return {
 			Model = "ElderBoar", -- (LassoAPet's, QM Oct 24)
 			Size = 2.66, -- (about 36 studs tall, 53 long; QM Oct 30: x0.8)
 			Health = 30000,
-			Cash = 5000, -- to each player who beat it
 			Speed = 9,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 16,
@@ -577,7 +570,6 @@ return {
 			Model = "LavaWyrm", -- (LassoAPet's, QM Oct 24)
 			Size = 2.33, -- (about 25 studs tall, 103 long)
 			Health = 200000,
-			Cash = 40000, -- to each player who beat it
 			Speed = 8,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 17,
@@ -617,7 +609,6 @@ return {
 			StandIn = { "Scorpion", 3.2 },
 			Size = 3.25, -- (the Scorpion pet's drawing, 15.7 studs long: about 51 studs long, QM Oct 30: x0.8 of before)
 			Health = 4000,
-			Cash = 500,
 			Speed = 12,
 			StopAt = 6,
 			Radius = 14.5,
@@ -648,7 +639,6 @@ return {
 			StandIn = { "IceGolem", 1.8 },
 			Size = 3.2,
 			Health = 30000,
-			Cash = 5000,
 			Speed = 8,
 			StopAt = 1,
 			Radius = 15,
@@ -678,7 +668,6 @@ return {
 			StandIn = { "Penguin", 3.6 },
 			Size = 3.2,
 			Health = 30000,
-			Cash = 5000,
 			Speed = 9,
 			StopAt = 25, -- (keeps its distance)
 			Radius = 12,
@@ -720,7 +709,6 @@ return {
 			StandIn = { "RockHog", 3 },
 			Size = 3.4,
 			Health = 200000,
-			Cash = 40000,
 			Speed = 7,
 			StopAt = 1,
 			Radius = 16,
@@ -765,7 +753,6 @@ return {
 			Model = "VolcanoTortoise",
 			Size = 3, -- (QM Oct 30: x0.6)
 			Health = 200000,
-			Cash = 40000,
 			Speed = 5,
 			StopAt = 1,
 			Radius = 11,
@@ -801,7 +788,6 @@ return {
 			StandIn = { "IceGolem", 1.8 },
 			Size = 4.76, -- (QM Oct 30: x1.4)
 			Health = 1500000,
-			Cash = 250000,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 19.5,
@@ -839,7 +825,6 @@ return {
 			StandIn = { "Fish", 5 },
 			Size = 3.2,
 			Health = 1500000,
-			Cash = 250000,
 			Speed = 0,
 			Centre = true,
 			StopAt = 1,
@@ -883,7 +868,6 @@ return {
 			StandIn = { "Pig", 5.5 },
 			Size = 4.4,
 			Health = 1500000,
-			Cash = 250000,
 			Speed = 11,
 			StopAt = 1,
 			Radius = 15,
@@ -905,7 +889,6 @@ return {
 			StandIn = { "IceGolem", 2 },
 			Size = 4.2, -- (LassoAPet's Asura, 10.9 studs tall: about 46 studs, QM Oct 30)
 			Health = 10000000,
-			Cash = 1500000,
 			Speed = 9,
 			StopAt = 1,
 			Radius = 15,
@@ -945,7 +928,6 @@ return {
 			StandIn = { "Firebird", 2.8 },
 			Size = 3.2, -- (LassoAPet's Bat, hovering, 18 studs across the wings: about 58, QM Oct 30)
 			Health = 10000000,
-			Cash = 1500000,
 			Speed = 12,
 			StopAt = 15,
 			Radius = 14,
@@ -978,7 +960,6 @@ return {
 			StandIn = { "Phoenix", 3.2 },
 			Size = 2.25, -- (LassoAPet's Rock Candy Dragon, 33 studs long: about 74, QM Oct 30)
 			Health = 10000000,
-			Cash = 1500000,
 			Speed = 10,
 			StopAt = 6,
 			Radius = 20,
@@ -1012,7 +993,6 @@ return {
 			StandIn = { "Snowman", 3.3 },
 			Size = 3.4,
 			Health = 1500000,
-			Cash = 250000,
 			Speed = 6,
 			StopAt = 30,
 			Radius = 10,
@@ -1046,7 +1026,6 @@ return {
 			StandIn = { "VenusFlytrap", 2.6 },
 			Size = 1.75, -- (LassoAPet's Ancient Treant, 32 studs tall: about 56, QM Oct 30)
 			Health = 1500000,
-			Cash = 250000,
 			Speed = 0,
 			Centre = true,
 			StopAt = 1,
@@ -1092,7 +1071,6 @@ return {
 			StandIn = { "Cactus", 3 },
 			Size = 3.4,
 			Health = 1500000,
-			Cash = 250000,
 			Speed = 8,
 			StopAt = 1,
 			Radius = 14,
@@ -1121,7 +1099,6 @@ return {
 			Model = "KingCrab",
 			Size = 7.2, -- (QM Oct 30: x0.8)
 			Health = 10000000,
-			Cash = 1500000,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 17.5,
@@ -1152,7 +1129,6 @@ return {
 			StandIn = { "Fish", 5 },
 			Size = 3.4,
 			Health = 10000000,
-			Cash = 1500000,
 			Speed = 10,
 			StopAt = 1,
 			Radius = 15,
@@ -1188,7 +1164,6 @@ return {
 			StandIn = { "Fish", 5 },
 			Size = 12, -- (Lasso's shark boss is a small drawing: about 60 studs long, 36 tall)
 			Health = 10000000,
-			Cash = 1500000,
 			Speed = 0, -- (it never walks: it swims under, Burrow)
 			StopAt = 1,
 			Radius = 18,
@@ -1232,6 +1207,33 @@ return {
 	},
 	-- each biome's boss: one of these at random every time it (re)spawns (QM, Oct 25; /reboss
 	-- re-rolls them all)
+	-- what beating a boss pays (QM, Oct 31): about Share of what the next region costs
+	-- (Config.Regions.Cost[Next[its biome]]), to everyone who beat it, x2 with the x2 Cash
+	-- pass. Past the last regions, Last x their own cost. Meadow bosses pay $120 (Desert's 6K),
+	-- Desert's 2.4K, Tundra's 30K, Lava Valley's 400K, Dungeon's and Magic Circle's 5M.
+	BossCash = {
+		Share = 1 / 50,
+		Next = { Meadow = "Desert", Desert = "Ice", Ice = "Lava", Lava = "Dungeon", Dungeon = "Castle", Forest = "Ocean" },
+		Last = 10,
+	},
+
+	-- the new player tutorial (QM, Oct 31; client/Tutorial, Server/Tutorial): a new player
+	-- starts with Egg in hand and no UI, places it in their pen, hatches it (ready in
+	-- HatchTime seconds), steals a Meadow egg, beats its boss (always Boss in the tutorial;
+	-- every hit they take is x Damage, so they out-heal it), gets at least BossCash for it,
+	-- buys Weapon from Carl and buys Ground's training ground for free. Their first hit on a
+	-- mob there ends it (TutorialDone, saved: a returning player never sees it again).
+	-- Owner/Studio chat commands: /tutorial (run it again), /skiptutorial.
+	Tutorial = {
+		On = true,
+		Egg = "Horse",
+		HatchTime = 0,
+		Boss = "MotherHen",
+		Damage = 0.02,
+		BossCash = 500, -- (the Shortbow's price)
+		Weapon = "Shortbow",
+		Ground = "Meadow",
+	},
 	BossPools = {
 		Meadow = { "MotherHen", "GiantRafflesia", "MajesticUnicorn", "VenusFlytrap" },
 		Desert = { "CactusBoss", "Sandworm", "ScorpionKing" },

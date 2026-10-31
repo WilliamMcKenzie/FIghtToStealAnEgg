@@ -32,6 +32,7 @@
 --   Bosses.fight(kind, player)       -- that boss in its biome's arena now, whatever was
 --                                        there gone (the /bossfight command) -> body, biome
 --   Bosses.wake(biome)
+--   Bosses.bounty(kind, biome?) -> the cash beating it pays (Config.BossCash)
 --   Bosses.alive(biome) -> its boss is up or can be summoned (not dead, waiting)
 --   Bosses.defeated                  -- BindableEvent: Event(biome)
 --   Bosses.ended                     -- BindableEvent: Event(biome), when its fight's over:
@@ -86,6 +87,28 @@ local function extent(model)
 	return hi
 end
 
+-- what beating a `kind` boss pays (before the x2 Cash pass): Config.BossCash.Share of the
+-- next region's cost after its biome (the biome whose pool has it, for one /boss spawned)
+local bountyRemote = Instance.new("RemoteEvent")
+bountyRemote.Name = "BossBounty"
+bountyRemote.Parent = ReplicatedStorage
+function Bosses.bounty(kind, biome)
+	if not biome then
+		for name, list in Config.BossPools do
+			if table.find(list, kind) then
+				biome = name
+				break
+			end
+		end
+	end
+	local c = Config.BossCash
+	local nextRegion = biome and c.Next[biome]
+	local cost = if nextRegion
+		then Config.Regions.Cost[nextRegion] or 0
+		else (biome and Config.Regions.Cost[biome] or 0) * c.Last
+	return math.max(1, math.floor(cost * c.Share))
+end
+
 local function hurt(body, amount)
 	local health = math.max(0, body:GetAttribute("Health") - amount)
 	body:SetAttribute("Health", health)
@@ -107,12 +130,19 @@ local function hurt(body, amount)
 					table.insert(winners, player)
 				end
 			end
-			-- its Cash to each of them (Config.Bosses; x2 with the x2 Cash pass)
-			local cash = b.c.Cash or 0
-			if cash > 0 then
-				for _, player in winners do
-					player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + cash * Passes.mult(player, "Cash"))
+			-- its bounty to each of them (Config.BossCash; x2 with the x2 Cash pass, and at
+			-- least Config.Tutorial.BossCash in the tutorial, for the bow). Each is told first
+			-- (BossBounty: the "+$" pops up over the boss and flies to their cash, and the Boss
+			-- Defeated banner sweeps across: client/BossBounty), then paid.
+			local cash = Bosses.bounty(b.kind, b.biome)
+			local at = body.Position - Vector3.new(0, body.Size.Y / 2, 0)
+			for _, player in winners do
+				local paid = cash * Passes.mult(player, "Cash")
+				if player:GetAttribute("Tutorial") then
+					paid = math.max(paid, Config.Tutorial.BossCash)
 				end
+				bountyRemote:FireClient(player, paid, at, body.Size.Y)
+				player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + paid)
 			end
 			Bosses.killed:Fire(b.kind, winners)
 		end
