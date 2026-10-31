@@ -1,6 +1,6 @@
 -- The Goal panel, top left (QM's Figma, Oct 31): a little orange "Goal", the goal's title
 -- under it ("Train Power") and a lime bar towards it with "5.9K/10K" across it. What the
--- goal is comes from Shared/Goals (Config.Goals.List: train to level 2, steal 5 eggs,
+-- goal is comes from Shared/Goals (Config.Goals.List: train to level 2, steal 3 eggs,
 -- unlock the Desert, buy an Uncommon weapon... on through the game). A new goal pops the
 -- panel and plays the Claim sound. Hidden during the tutorial (client/Tutorial hides it
 -- too, by name).
