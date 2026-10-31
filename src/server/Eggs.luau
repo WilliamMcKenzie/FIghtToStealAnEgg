@@ -14,6 +14,11 @@
 -- (Config.Eggs.Cooldown[biome]) starts again; its end is each nest's CooldownEnds attribute
 -- (server time), shown over the nests to anyone close (client/NestTimers). A biome with
 -- nests but no boss starts its cooldown once its nests are empty.
+-- One egg per player per round (QM, Oct 31): once you've taken an egg from a biome's
+-- nests, the rest of that round's eggs there aren't yours to take; the round (and with it
+-- your turn) ends when its fight does, and the next refill lets you take one again. Kept
+-- here on the server; the player attribute Eggs.takenKey(biome) tells your client to hide
+-- those prompts (client/NestPrompts).
 -- With Config.Eggs.Carry off (for now: QM, Oct 25) there's no egg to carry: stealing one
 -- only calls up the boss and locks you into its fight.
 --
@@ -40,7 +45,24 @@ local Pens = require(script.Parent.Pens)
 local Eggs = {}
 
 local carried = {} -- [player] = egg part on their back
-local biomes = {} -- [biome] = { nests, eggs = { [egg] = true }, boss, fight, round }
+local biomes = {} -- [biome] = { nests, eggs = { [egg] = true }, boss, fight, round, taken = { [player] = true } }
+
+-- the player attribute set while you've had this round's egg from a biome
+function Eggs.takenKey(biome)
+	return "TookEgg" .. string.gsub(biome, "[^%w_]", "")
+end
+
+-- a new round in a biome: everyone may take an egg there again
+local function untake(biome)
+	local state = biomes[biome]
+	local key = Eggs.takenKey(biome)
+	for player in state.taken do
+		if player.Parent then
+			player:SetAttribute(key, nil)
+		end
+	end
+	table.clear(state.taken)
+end
 
 -- An egg is an invisible box where the egg stands (tagged "Egg", its kind in EggKind and
 -- its size in EggScale): each client draws LassoAPet's egg for that animal there, AFK
@@ -138,7 +160,7 @@ local function lay(nest, biome, popAt)
 	egg.Parent = nest
 	state.eggs[egg] = true
 	prompt.Triggered:Connect(function(player)
-		if not state.eggs[egg] or player:GetAttribute("HeldEgg") then
+		if not state.eggs[egg] or state.taken[player] or player:GetAttribute("HeldEgg") then
 			return
 		end
 		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
@@ -150,6 +172,8 @@ local function lay(nest, biome, popAt)
 		end
 		state.eggs[egg] = nil
 		egg:Destroy()
+		state.taken[player] = true -- (that's your egg from this round: QM, Oct 31)
+		player:SetAttribute(Eggs.takenKey(biome), true)
 		Hatchery.give(player, kind) -- (yours at once: in your hotbar until you die, QM Oct 25)
 		if state.boss then
 			-- (the first egg calls the boss up; later ones join its fight)
@@ -173,6 +197,7 @@ function fill(biome)
 	local state = biomes[biome]
 	state.round += 1
 	state.fight = false
+	untake(biome)
 	for egg in state.eggs do
 		egg:Destroy()
 	end
@@ -189,6 +214,7 @@ function cool(biome)
 	local state = biomes[biome]
 	state.round += 1
 	state.fight = false
+	untake(biome)
 	for egg in state.eggs do
 		-- (clients shrink it away: client/EggView)
 		egg:SetAttribute("Vanish", true)
@@ -247,7 +273,7 @@ function Eggs.start(map)
 			for _, nest in list do
 				CollectionService:AddTag(nest, "Nest")
 			end
-			biomes[biome.Name] = { nests = list, eggs = {}, boss = arena ~= nil, fight = false, round = 0 }
+			biomes[biome.Name] = { nests = list, eggs = {}, boss = arena ~= nil, fight = false, round = 0, taken = {} }
 			fill(biome.Name)
 		end
 	end
@@ -288,6 +314,9 @@ function Eggs.start(map)
 	end
 	Players.PlayerRemoving:Connect(function(player)
 		drop(player)
+		for _, state in biomes do
+			state.taken[player] = nil
+		end
 	end)
 
 	-- bringing an egg home: free of the fight and inside your own pen
