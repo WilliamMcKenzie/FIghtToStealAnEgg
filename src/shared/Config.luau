@@ -364,8 +364,8 @@ return {
 		X = 50, Z = -130, Yaw = 160, -- (Carl is at -50, -130, yaw 200: the other side of the gateway)
 		Scale = 1,
 		Amount = 500, -- Power it gives (the smallest Power pack is 1,000 for 49 Robux)
-		GroupId = nil, -- the Roblox group to join (its number from the group's page link)
-		GroupName = "our group", -- shown on the Join card
+		GroupId = 530001425, -- the Roblox group to join (Egg Hatcha: roblox.com/communities/530001425)
+		GroupName = "Egg Hatcha", -- (its name)
 		Reach = 30, -- studs from the gift the server takes a Claim from
 		OpenRadius = 7, -- walking this close (the ring) opens the popup
 		LabelTop = Color3.fromHex("eaff3c"), -- FREE!: lit lime at the top...
