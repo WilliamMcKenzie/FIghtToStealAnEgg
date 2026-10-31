@@ -348,7 +348,7 @@
   {"type":"Prop","item":"Boulders","x":52,"z":-1095,"yaw":78,"scale":1.6,"style":"Forest"},
   {"type":"Prop","item":"Boulders","x":243,"z":-1097,"yaw":140,"scale":2,"style":"Forest"},
   {"type":"Arch","style":"Base","x":0,"z":-172,"scale":2.8,"y":-64},
-  {"type":"Vendor","name":"Carl","title":"Weapon Shop","x":-50,"z":-130,"yaw":200,"scale":1},
+  {"type":"Vendor","name":"Carl","title":"Weapon Shop","x":-50,"z":-130,"yaw":200,"scale":1.6},
   {"type":"Prop","item":"Boulders","x":-125,"z":-177,"yaw":306,"scale":4.32,"style":"Base"},
   {"type":"Prop","item":"Boulders","x":131,"z":-173,"yaw":194,"scale":5.37,"style":"Base"},
   {"type":"Prop","item":"PineTall","x":213,"z":27,"yaw":238,"scale":3.35,"style":"Meadow"},

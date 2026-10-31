@@ -1294,6 +1294,43 @@ local function vendor(parent, name, title)
 	return model
 end
 
+-- every Vendor object's stall, at its map editor spot, turned and scaled (QM, Oct 31: the
+-- Weapon Shop at scale 1.6 in maps/world.map). Built fresh on every start (Map.ensure) like
+-- the gift, inside the same Vendors folder so Client/Vendor keeps watching it; a Rebuild
+-- bakes it in for Edit mode. ScaleTo grows the parts, the ring and Carl; the sign's text and
+-- the Talk reach are set here to grow with them.
+local function vendors(map)
+	local folder = map:FindFirstChild("Vendors")
+	if folder then
+		folder:ClearAllChildren()
+	else
+		folder = Instance.new("Folder")
+		folder.Name = "Vendors"
+		folder.Parent = map
+	end
+	local s = Config.Vendor
+	for _, v in MapData.Vendors or {} do
+		local scale = v[5] or 1
+		local model = vendor(nil, v[1], v[7])
+		model:SetAttribute("Scale", scale)
+		model.WorldPivot = CFrame.identity
+		if scale ~= 1 then
+			model:ScaleTo(scale)
+		end
+		model:PivotTo(CFrame.new(v[2], v[6] or 0, v[3]) * CFrame.Angles(0, math.rad(v[4] or 0), 0))
+		local gui = model:FindFirstChild("Title") and model.Title:FindFirstChildOfClass("BillboardGui")
+		if gui then
+			gui.Size = UDim2.fromScale(s.TitleHeight * 6 * scale, s.TitleHeight * scale)
+		end
+		local prompt = model:FindFirstChild("TalkPrompt", true)
+		if prompt then
+			prompt.MaxActivationDistance = s.Reach * scale
+		end
+		HiddenFaces.cull(model)
+		model.Parent = folder
+	end
+end
+
 -- the free gift (QM, Oct 31: Shared/GiftModel), across the gateway from Carl: at
 -- Config.FreeGift's spot, on the ground there. Built fresh on every start (Map.ensure) like
 -- the gates, so it shows without baking the map again; a Rebuild bakes it in for Edit mode.
@@ -1341,6 +1378,7 @@ function Map.ensure()
 			end
 		end
 		gates(folder("Gates", map), folder("Blockers", map))
+		vendors(map)
 		freeGift(map)
 		return map
 	end
@@ -1397,12 +1435,7 @@ function Map.build(data)
 	for _, r in MapData.Ruins do
 		ruin(ruins, r)
 	end
-	local vendors = folder("Vendors", map)
-	for _, v in MapData.Vendors or {} do
-		local model = vendor(vendors, v[1], v[7])
-		model:SetAttribute("Scale", v[5])
-		put(model, v[2], v[3], v[4], v[5], v[6])
-	end
+	vendors(map)
 	freeGift(map)
 	-- (the textures on faces nobody sees, thousands of them: QM Oct 27, the game lagged)
 	HiddenFaces.cull(map)
