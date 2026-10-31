@@ -78,7 +78,7 @@ local function load(player)
 	if not store then
 		loaded[player] = true
 		if Config.Tutorial.On then
-			Tutorial.begin(player) -- (no saves here: every playtest is a new account)
+			Tutorial.begin(player, true) -- (no saves here: every playtest is a new account)
 		end
 		return
 	end
@@ -97,7 +97,7 @@ local function load(player)
 	end
 	-- (a brand new account, nothing saved: the tutorial, Server/Tutorial)
 	if data == nil and Config.Tutorial.On then
-		Tutorial.begin(player)
+		Tutorial.begin(player, true)
 	end
 	if type(data) == "table" then
 		for _, key in keys() do
@@ -179,7 +179,7 @@ function Data.reset(player)
 	Combat.refresh(player)
 	player:SetAttribute("TutorialDone", nil)
 	if Config.Tutorial.On then
-		Tutorial.begin(player) -- (a new account gets the tutorial)
+		Tutorial.begin(player, true) -- (a new account gets the tutorial)
 	end
 	task.spawn(save, player)
 end

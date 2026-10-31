@@ -7,7 +7,9 @@
 --              pets, you just choose to ride it). Always one of PenPets: it's out of the
 --              pen while ridden (one copy, if there are more) but still pays its Cash.
 --              Unequip it and they ride another pen pet; the pen is never left empty.
--- A new player (owning no pets) is given Config.Backpack.Starter to ride.
+-- A new player (owning no pets) is given Config.Backpack.Starter to ride, unless they're on
+-- foot (player attribute OnFoot: the tutorial, before its first ride, Server/Tutorial):
+-- then they ride nothing (Pet is nil), every pen pet wanders, and riding one ends it.
 -- The client asks through the PetEquip remote: ("equip", kind), ("unequip", slot),
 -- ("best") for the pets earning the most cash a second, or ("ride", kind): ride that
 -- pet (client/PenRide's Ride prompt in the pen; one not in the pen goes in, swapped for
@@ -116,7 +118,11 @@ function PetInventory.ride(player, kind, body)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	local spot = body and root and humanoid and body:GetAttribute("Model") == kind and Pens.mountSpot(player, body)
-	if spot then
+	local onFoot = player:GetAttribute("OnFoot")
+	if spot and onFoot then
+		root.AssemblyLinearVelocity = Vector3.zero
+		character:PivotTo(spot + Vector3.new(0, humanoid.HipHeight + root.Size.Y / 2, 0))
+	elseif spot then
 		-- the one they're getting off stands where it was, under them
 		local old = player:GetAttribute("Pet") or "Horse"
 		local class = Pets.class(old)
@@ -138,6 +144,7 @@ function PetInventory.ride(player, kind, body)
 		end
 		setEquipped(player, list)
 	end
+	player:SetAttribute("OnFoot", nil) -- (on foot no more: Server/Tutorial)
 	player:SetAttribute("Pet", kind)
 	return true
 end
@@ -228,6 +235,11 @@ function PetInventory.start()
 	local function joined(player)
 		local function show()
 			local owned = PetInventory.owned(player)
+			if player:GetAttribute("OnFoot") then
+				-- (riding nothing: every pen pet wanders, the hatched one too)
+				Pens.setPets(player, PetInventory.equipped(player))
+				return
+			end
 			if #owned == 0 then
 				-- (a new player: their starter, which comes back round here)
 				player:SetAttribute("Pet", Config.Backpack.Starter)
@@ -261,6 +273,7 @@ function PetInventory.start()
 		player:GetAttributeChangedSignal("PenPets"):Connect(show)
 		player:GetAttributeChangedSignal("Pen"):Connect(show)
 		player:GetAttributeChangedSignal("Pet"):Connect(show)
+		player:GetAttributeChangedSignal("OnFoot"):Connect(show)
 		show()
 	end
 	Players.PlayerAdded:Connect(joined)

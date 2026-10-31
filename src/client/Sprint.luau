@@ -73,14 +73,15 @@ RunService:BindToRenderStep("Sprint", Enum.RenderPriority.Camera.Value + 3, func
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	local alive = root ~= nil and humanoid ~= nil and humanoid.Health > 0
-	local base = Pets.stats(player:GetAttribute("Pet") or "Horse").Speed * Liquid.slow()
+	local onFoot = player:GetAttribute("OnFoot") == true -- (the tutorial before its first ride: no sprinting)
+	local base = (if onFoot then Config.Tutorial.WalkSpeed else Pets.stats(player:GetAttribute("Pet") or "Horse").Speed) * Liquid.slow()
 	local speed = if alive then (root.AssemblyLinearVelocity * Vector3.new(1, 0, 1)).Magnitude else 0
 
 	-- the build-up: riding on (pushing, and going at least StopAt of your speed) counts up;
 	-- a stop drops you straight back
 	local pushing = alive and humanoid.MoveDirection.Magnitude > 0.1
 	local going = speed >= base * cfg.StopAt
-	if cfg.On and pushing and (going or moving < 0.3) then -- (a moment to get going from a stand)
+	if cfg.On and not onFoot and pushing and (going or moving < 0.3) then -- (a moment to get going from a stand)
 		moving += dt
 	else
 		moving = 0
@@ -123,7 +124,7 @@ RunService:BindToRenderStep("Sprint", Enum.RenderPriority.Camera.Value + 3, func
 	setAbility(sprinting and special)
 	wasSprinting = sprinting
 	RideSounds.setSprintWind(sprinting, 1)
-	RideSounds.setGallop(alive, speed / Pets.stats("Horse").Speed)
+	RideSounds.setGallop(alive and not onFoot, speed / Pets.stats("Horse").Speed)
 
 	-- the camera: wider, and in closer on you (after the other cameras, like SlashCam)
 	-- (not in a boss fight: its camera stays put, so the sprint look eases out)
