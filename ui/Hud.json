@@ -56098,968 +56098,6 @@
              "v": [
               [
                0,
-               0,
-               0,
-               0
-              ],
-              [
-               1,
-               0,
-               0,
-               0
-              ]
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "Outline",
-           "props": {
-            "ApplyStrokeMode": {
-             "e": "ApplyStrokeMode",
-             "t": "EnumItem",
-             "v": "Border"
-            },
-            "Thickness": 4
-           }
-          },
-          {
-           "children": [
-            {
-             "children": [],
-             "class": "UICorner",
-             "name": "UICorner",
-             "props": {
-              "CornerRadius": {
-               "t": "UDim",
-               "v": [
-                0,
-                2
-               ]
-              }
-             }
-            }
-           ],
-           "class": "ImageLabel",
-           "name": "Studs",
-           "props": {
-            "BackgroundTransparency": 1,
-            "Image": "rbxassetid://100359261064701",
-            "ImageTransparency": 0.800000011920929,
-            "ScaleType": {
-             "e": "ScaleType",
-             "t": "EnumItem",
-             "v": "Tile"
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              1,
-              0,
-              1,
-              0
-             ]
-            },
-            "TileSize": {
-             "t": "UDim2",
-             "v": [
-              0,
-              44,
-              0,
-              44
-             ]
-            },
-            "Transparency": 1
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "Back",
-         "props": {
-          "BackgroundColor3": {
-           "t": "Color3",
-           "v": [
-            1,
-            1,
-            1
-           ]
-          },
-          "BackgroundTransparency": 0.6000000238418579,
-          "BorderSizePixel": 0,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            1,
-            0,
-            1,
-            0
-           ]
-          },
-          "Transparency": 0.6000000238418579
-         }
-        },
-        {
-         "children": [],
-         "class": "UIScale",
-         "name": "Hover",
-         "props": []
-        },
-        {
-         "children": [],
-         "class": "TextLabel",
-         "name": "Icon",
-         "props": {
-          "AnchorPoint": {
-           "t": "Vector2",
-           "v": [
-            0.5,
-            0.5
-           ]
-          },
-          "BackgroundTransparency": 1,
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0.5,
-            0,
-            0.36000001430511475,
-            0
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            316,
-            0,
-            74
-           ]
-          },
-          "Text": "\ud83d\udc4d",
-          "TextSize": 64,
-          "Transparency": 1,
-          "ZIndex": 7
-         }
-        },
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "Outline",
-           "props": {
-            "Thickness": 4
-           }
-          }
-         ],
-         "class": "TextLabel",
-         "name": "Text",
-         "props": {
-          "BackgroundTransparency": 1,
-          "FontFace": {
-           "t": "Font",
-           "v": [
-            "rbxasset://fonts/families/Montserrat.json",
-            "ExtraBold",
-            "Normal"
-           ]
-          },
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0,
-            0,
-            0,
-            89
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            316,
-            0,
-            44
-           ]
-          },
-          "Text": "Like the game",
-          "TextColor3": {
-           "t": "Color3",
-           "v": [
-            1,
-            1,
-            1
-           ]
-          },
-          "TextSize": 33,
-          "Transparency": 1,
-          "ZIndex": 7
-         }
-        },
-        {
-         "children": [],
-         "class": "TextLabel",
-         "name": "Done",
-         "props": {
-          "AnchorPoint": {
-           "t": "Vector2",
-           "v": [
-            0.5,
-            0.5
-           ]
-          },
-          "BackgroundTransparency": 1,
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0,
-            301,
-            0,
-            15
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            64,
-            0,
-            64
-           ]
-          },
-          "Text": "\u2705",
-          "TextSize": 54,
-          "Transparency": 1,
-          "ZIndex": 8
-         }
-        }
-       ],
-       "class": "ImageButton",
-       "name": "LikeCard",
-       "props": {
-        "AnchorPoint": {
-         "t": "Vector2",
-         "v": [
-          0.5,
-          0.5
-         ]
-        },
-        "AutoButtonColor": false,
-        "BackgroundTransparency": 1,
-        "Position": {
-         "t": "UDim2",
-         "v": [
-          0,
-          214,
-          0,
-          496
-         ]
-        },
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          0,
-          316,
-          0,
-          143
-         ]
-        },
-        "Transparency": 1,
-        "ZIndex": 5
-       }
-      },
-      {
-       "children": [
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              2
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIGradient",
-           "name": "Fill",
-           "props": {
-            "Color": {
-             "t": "ColorSequence",
-             "v": [
-              [
-               0,
-               0,
-               0,
-               0
-              ],
-              [
-               1,
-               0,
-               0,
-               0
-              ]
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "Outline",
-           "props": {
-            "ApplyStrokeMode": {
-             "e": "ApplyStrokeMode",
-             "t": "EnumItem",
-             "v": "Border"
-            },
-            "Thickness": 4
-           }
-          },
-          {
-           "children": [
-            {
-             "children": [],
-             "class": "UICorner",
-             "name": "UICorner",
-             "props": {
-              "CornerRadius": {
-               "t": "UDim",
-               "v": [
-                0,
-                2
-               ]
-              }
-             }
-            }
-           ],
-           "class": "ImageLabel",
-           "name": "Studs",
-           "props": {
-            "BackgroundTransparency": 1,
-            "Image": "rbxassetid://100359261064701",
-            "ImageTransparency": 0.800000011920929,
-            "ScaleType": {
-             "e": "ScaleType",
-             "t": "EnumItem",
-             "v": "Tile"
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              1,
-              0,
-              1,
-              0
-             ]
-            },
-            "TileSize": {
-             "t": "UDim2",
-             "v": [
-              0,
-              44,
-              0,
-              44
-             ]
-            },
-            "Transparency": 1
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "Back",
-         "props": {
-          "BackgroundColor3": {
-           "t": "Color3",
-           "v": [
-            1,
-            1,
-            1
-           ]
-          },
-          "BackgroundTransparency": 0.6000000238418579,
-          "BorderSizePixel": 0,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            1,
-            0,
-            1,
-            0
-           ]
-          },
-          "Transparency": 0.6000000238418579
-         }
-        },
-        {
-         "children": [],
-         "class": "UIScale",
-         "name": "Hover",
-         "props": []
-        },
-        {
-         "children": [],
-         "class": "TextLabel",
-         "name": "Icon",
-         "props": {
-          "AnchorPoint": {
-           "t": "Vector2",
-           "v": [
-            0.5,
-            0.5
-           ]
-          },
-          "BackgroundTransparency": 1,
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0.5,
-            0,
-            0.36000001430511475,
-            0
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            316,
-            0,
-            74
-           ]
-          },
-          "Text": "\u2b50",
-          "TextSize": 64,
-          "Transparency": 1,
-          "ZIndex": 7
-         }
-        },
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "Outline",
-           "props": {
-            "Thickness": 4
-           }
-          }
-         ],
-         "class": "TextLabel",
-         "name": "Text",
-         "props": {
-          "BackgroundTransparency": 1,
-          "FontFace": {
-           "t": "Font",
-           "v": [
-            "rbxasset://fonts/families/Montserrat.json",
-            "ExtraBold",
-            "Normal"
-           ]
-          },
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0,
-            0,
-            0,
-            89
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            316,
-            0,
-            44
-           ]
-          },
-          "Text": "Favorite the game",
-          "TextColor3": {
-           "t": "Color3",
-           "v": [
-            1,
-            1,
-            1
-           ]
-          },
-          "TextSize": 33,
-          "Transparency": 1,
-          "ZIndex": 7
-         }
-        },
-        {
-         "children": [],
-         "class": "TextLabel",
-         "name": "Done",
-         "props": {
-          "AnchorPoint": {
-           "t": "Vector2",
-           "v": [
-            0.5,
-            0.5
-           ]
-          },
-          "BackgroundTransparency": 1,
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0,
-            301,
-            0,
-            15
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            64,
-            0,
-            64
-           ]
-          },
-          "Text": "\u2705",
-          "TextSize": 54,
-          "Transparency": 1,
-          "ZIndex": 8
-         }
-        }
-       ],
-       "class": "ImageButton",
-       "name": "FavoriteCard",
-       "props": {
-        "AnchorPoint": {
-         "t": "Vector2",
-         "v": [
-          0.5,
-          0.5
-         ]
-        },
-        "AutoButtonColor": false,
-        "BackgroundTransparency": 1,
-        "Position": {
-         "t": "UDim2",
-         "v": [
-          0,
-          559,
-          0,
-          496
-         ]
-        },
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          0,
-          316,
-          0,
-          143
-         ]
-        },
-        "Transparency": 1,
-        "ZIndex": 5
-       }
-      },
-      {
-       "children": [
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              2
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIGradient",
-           "name": "Fill",
-           "props": {
-            "Color": {
-             "t": "ColorSequence",
-             "v": [
-              [
-               0,
-               0,
-               0,
-               0
-              ],
-              [
-               1,
-               0,
-               0,
-               0
-              ]
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "Outline",
-           "props": {
-            "ApplyStrokeMode": {
-             "e": "ApplyStrokeMode",
-             "t": "EnumItem",
-             "v": "Border"
-            },
-            "Thickness": 4
-           }
-          },
-          {
-           "children": [
-            {
-             "children": [],
-             "class": "UICorner",
-             "name": "UICorner",
-             "props": {
-              "CornerRadius": {
-               "t": "UDim",
-               "v": [
-                0,
-                2
-               ]
-              }
-             }
-            }
-           ],
-           "class": "ImageLabel",
-           "name": "Studs",
-           "props": {
-            "BackgroundTransparency": 1,
-            "Image": "rbxassetid://100359261064701",
-            "ImageTransparency": 0.800000011920929,
-            "ScaleType": {
-             "e": "ScaleType",
-             "t": "EnumItem",
-             "v": "Tile"
-            },
-            "Size": {
-             "t": "UDim2",
-             "v": [
-              1,
-              0,
-              1,
-              0
-             ]
-            },
-            "TileSize": {
-             "t": "UDim2",
-             "v": [
-              0,
-              44,
-              0,
-              44
-             ]
-            },
-            "Transparency": 1
-           }
-          }
-         ],
-         "class": "Frame",
-         "name": "Back",
-         "props": {
-          "BackgroundColor3": {
-           "t": "Color3",
-           "v": [
-            1,
-            1,
-            1
-           ]
-          },
-          "BackgroundTransparency": 0.6000000238418579,
-          "BorderSizePixel": 0,
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            1,
-            0,
-            1,
-            0
-           ]
-          },
-          "Transparency": 0.6000000238418579
-         }
-        },
-        {
-         "children": [],
-         "class": "UIScale",
-         "name": "Hover",
-         "props": []
-        },
-        {
-         "children": [],
-         "class": "TextLabel",
-         "name": "Icon",
-         "props": {
-          "AnchorPoint": {
-           "t": "Vector2",
-           "v": [
-            0.5,
-            0.5
-           ]
-          },
-          "BackgroundTransparency": 1,
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0.5,
-            0,
-            0.36000001430511475,
-            0
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            316,
-            0,
-            74
-           ]
-          },
-          "Text": "\ud83d\udc65",
-          "TextSize": 64,
-          "Transparency": 1,
-          "ZIndex": 7
-         }
-        },
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UIStroke",
-           "name": "Outline",
-           "props": {
-            "Thickness": 4
-           }
-          }
-         ],
-         "class": "TextLabel",
-         "name": "Text",
-         "props": {
-          "BackgroundTransparency": 1,
-          "FontFace": {
-           "t": "Font",
-           "v": [
-            "rbxasset://fonts/families/Montserrat.json",
-            "ExtraBold",
-            "Normal"
-           ]
-          },
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0,
-            0,
-            0,
-            89
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            316,
-            0,
-            44
-           ]
-          },
-          "Text": "Join the group",
-          "TextColor3": {
-           "t": "Color3",
-           "v": [
-            1,
-            1,
-            1
-           ]
-          },
-          "TextSize": 33,
-          "Transparency": 1,
-          "ZIndex": 7
-         }
-        },
-        {
-         "children": [],
-         "class": "TextLabel",
-         "name": "Done",
-         "props": {
-          "AnchorPoint": {
-           "t": "Vector2",
-           "v": [
-            0.5,
-            0.5
-           ]
-          },
-          "BackgroundTransparency": 1,
-          "Position": {
-           "t": "UDim2",
-           "v": [
-            0,
-            301,
-            0,
-            15
-           ]
-          },
-          "Size": {
-           "t": "UDim2",
-           "v": [
-            0,
-            64,
-            0,
-            64
-           ]
-          },
-          "Text": "\u2705",
-          "TextSize": 54,
-          "Transparency": 1,
-          "ZIndex": 8
-         }
-        }
-       ],
-       "class": "ImageButton",
-       "name": "GroupCard",
-       "props": {
-        "AnchorPoint": {
-         "t": "Vector2",
-         "v": [
-          0.5,
-          0.5
-         ]
-        },
-        "AutoButtonColor": false,
-        "BackgroundTransparency": 1,
-        "Position": {
-         "t": "UDim2",
-         "v": [
-          0,
-          905,
-          0,
-          496
-         ]
-        },
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          0,
-          316,
-          0,
-          143
-         ]
-        },
-        "Transparency": 1,
-        "ZIndex": 5
-       }
-      },
-      {
-       "children": [
-        {
-         "children": [],
-         "class": "UIStroke",
-         "name": "Outline",
-         "props": {
-          "Thickness": 4
-         }
-        }
-       ],
-       "class": "TextLabel",
-       "name": "Arrow",
-       "props": {
-        "AnchorPoint": {
-         "t": "Vector2",
-         "v": [
-          0.5,
-          1
-         ]
-        },
-        "BackgroundTransparency": 1,
-        "FontFace": {
-         "t": "Font",
-         "v": [
-          "rbxasset://fonts/families/Montserrat.json",
-          "ExtraBold",
-          "Normal"
-         ]
-        },
-        "Position": {
-         "t": "UDim2",
-         "v": [
-          0,
-          214,
-          0,
-          439
-         ]
-        },
-        "Size": {
-         "t": "UDim2",
-         "v": [
-          0,
-          99,
-          0,
-          84
-         ]
-        },
-        "Text": "\u25bc",
-        "TextColor3": {
-         "t": "Color3",
-         "v": [
-          1,
-          0.16470588743686676,
-          0.16470588743686676
-         ]
-        },
-        "TextSize": 74,
-        "Transparency": 1,
-        "ZIndex": 9
-       }
-      },
-      {
-       "children": [
-        {
-         "children": [
-          {
-           "children": [],
-           "class": "UICorner",
-           "name": "UICorner",
-           "props": {
-            "CornerRadius": {
-             "t": "UDim",
-             "v": [
-              0,
-              2
-             ]
-            }
-           }
-          },
-          {
-           "children": [],
-           "class": "UIGradient",
-           "name": "Fill",
-           "props": {
-            "Color": {
-             "t": "ColorSequence",
-             "v": [
-              [
-               0,
                0.7921568751335144,
                1,
                0
@@ -57315,6 +56353,696 @@
         },
         "Transparency": 1,
         "ZIndex": 6
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UICorner",
+         "name": "UICorner",
+         "props": {
+          "CornerRadius": {
+           "t": "UDim",
+           "v": [
+            0,
+            2
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIGradient",
+         "name": "Fill",
+         "props": {
+          "Color": {
+           "t": "ColorSequence",
+           "v": [
+            [
+             0,
+             0,
+             0,
+             0
+            ],
+            [
+             1,
+             0,
+             0,
+             0
+            ]
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "ApplyStrokeMode": {
+           "e": "ApplyStrokeMode",
+           "t": "EnumItem",
+           "v": "Border"
+          },
+          "Thickness": 4
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              2
+             ]
+            }
+           }
+          }
+         ],
+         "class": "ImageLabel",
+         "name": "Studs",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://100359261064701",
+          "ImageTransparency": 0.800000011920929,
+          "ScaleType": {
+           "e": "ScaleType",
+           "t": "EnumItem",
+           "v": "Tile"
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "TileSize": {
+           "t": "UDim2",
+           "v": [
+            0,
+            44,
+            0,
+            44
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "TextLabel",
+         "name": "Icon",
+         "props": {
+          "AnchorPoint": {
+           "t": "Vector2",
+           "v": [
+            0.5,
+            0.5
+           ]
+          },
+          "BackgroundTransparency": 1,
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0.5,
+            0,
+            0.36000001430511475,
+            0
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            316,
+            0,
+            74
+           ]
+          },
+          "Text": "\ud83d\udc4d",
+          "TextSize": 64,
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "Outline",
+           "props": {
+            "Thickness": 4
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "Text",
+         "props": {
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Normal"
+           ]
+          },
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0,
+            0,
+            0,
+            89
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            316,
+            0,
+            44
+           ]
+          },
+          "Text": "Like the game",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "TextSize": 33,
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "LikeStep",
+       "props": {
+        "BackgroundColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "BackgroundTransparency": 0.6000000238418579,
+        "BorderSizePixel": 0,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          56,
+          0,
+          424
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          316,
+          0,
+          143
+         ]
+        },
+        "Transparency": 0.6000000238418579,
+        "ZIndex": 5
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UICorner",
+         "name": "UICorner",
+         "props": {
+          "CornerRadius": {
+           "t": "UDim",
+           "v": [
+            0,
+            2
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIGradient",
+         "name": "Fill",
+         "props": {
+          "Color": {
+           "t": "ColorSequence",
+           "v": [
+            [
+             0,
+             0,
+             0,
+             0
+            ],
+            [
+             1,
+             0,
+             0,
+             0
+            ]
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "ApplyStrokeMode": {
+           "e": "ApplyStrokeMode",
+           "t": "EnumItem",
+           "v": "Border"
+          },
+          "Thickness": 4
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              2
+             ]
+            }
+           }
+          }
+         ],
+         "class": "ImageLabel",
+         "name": "Studs",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://100359261064701",
+          "ImageTransparency": 0.800000011920929,
+          "ScaleType": {
+           "e": "ScaleType",
+           "t": "EnumItem",
+           "v": "Tile"
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "TileSize": {
+           "t": "UDim2",
+           "v": [
+            0,
+            44,
+            0,
+            44
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "TextLabel",
+         "name": "Icon",
+         "props": {
+          "AnchorPoint": {
+           "t": "Vector2",
+           "v": [
+            0.5,
+            0.5
+           ]
+          },
+          "BackgroundTransparency": 1,
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0.5,
+            0,
+            0.36000001430511475,
+            0
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            316,
+            0,
+            74
+           ]
+          },
+          "Text": "\u2b50",
+          "TextSize": 64,
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "Outline",
+           "props": {
+            "Thickness": 4
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "Text",
+         "props": {
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Normal"
+           ]
+          },
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0,
+            0,
+            0,
+            89
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            316,
+            0,
+            44
+           ]
+          },
+          "Text": "Favorite the game",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "TextSize": 33,
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "FavoriteStep",
+       "props": {
+        "BackgroundColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "BackgroundTransparency": 0.6000000238418579,
+        "BorderSizePixel": 0,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          401,
+          0,
+          424
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          316,
+          0,
+          143
+         ]
+        },
+        "Transparency": 0.6000000238418579,
+        "ZIndex": 5
+       }
+      },
+      {
+       "children": [
+        {
+         "children": [],
+         "class": "UICorner",
+         "name": "UICorner",
+         "props": {
+          "CornerRadius": {
+           "t": "UDim",
+           "v": [
+            0,
+            2
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIGradient",
+         "name": "Fill",
+         "props": {
+          "Color": {
+           "t": "ColorSequence",
+           "v": [
+            [
+             0,
+             0,
+             0,
+             0
+            ],
+            [
+             1,
+             0,
+             0,
+             0
+            ]
+           ]
+          }
+         }
+        },
+        {
+         "children": [],
+         "class": "UIStroke",
+         "name": "Outline",
+         "props": {
+          "ApplyStrokeMode": {
+           "e": "ApplyStrokeMode",
+           "t": "EnumItem",
+           "v": "Border"
+          },
+          "Thickness": 4
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UICorner",
+           "name": "UICorner",
+           "props": {
+            "CornerRadius": {
+             "t": "UDim",
+             "v": [
+              0,
+              2
+             ]
+            }
+           }
+          }
+         ],
+         "class": "ImageLabel",
+         "name": "Studs",
+         "props": {
+          "BackgroundTransparency": 1,
+          "Image": "rbxassetid://100359261064701",
+          "ImageTransparency": 0.800000011920929,
+          "ScaleType": {
+           "e": "ScaleType",
+           "t": "EnumItem",
+           "v": "Tile"
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            1,
+            0,
+            1,
+            0
+           ]
+          },
+          "TileSize": {
+           "t": "UDim2",
+           "v": [
+            0,
+            44,
+            0,
+            44
+           ]
+          },
+          "Transparency": 1
+         }
+        },
+        {
+         "children": [],
+         "class": "TextLabel",
+         "name": "Icon",
+         "props": {
+          "AnchorPoint": {
+           "t": "Vector2",
+           "v": [
+            0.5,
+            0.5
+           ]
+          },
+          "BackgroundTransparency": 1,
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0.5,
+            0,
+            0.36000001430511475,
+            0
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            316,
+            0,
+            74
+           ]
+          },
+          "Text": "\ud83d\udc65",
+          "TextSize": 64,
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        },
+        {
+         "children": [
+          {
+           "children": [],
+           "class": "UIStroke",
+           "name": "Outline",
+           "props": {
+            "Thickness": 4
+           }
+          }
+         ],
+         "class": "TextLabel",
+         "name": "Text",
+         "props": {
+          "BackgroundTransparency": 1,
+          "FontFace": {
+           "t": "Font",
+           "v": [
+            "rbxasset://fonts/families/Montserrat.json",
+            "ExtraBold",
+            "Normal"
+           ]
+          },
+          "Position": {
+           "t": "UDim2",
+           "v": [
+            0,
+            0,
+            0,
+            89
+           ]
+          },
+          "Size": {
+           "t": "UDim2",
+           "v": [
+            0,
+            316,
+            0,
+            44
+           ]
+          },
+          "Text": "Join the group",
+          "TextColor3": {
+           "t": "Color3",
+           "v": [
+            1,
+            1,
+            1
+           ]
+          },
+          "TextSize": 33,
+          "Transparency": 1,
+          "ZIndex": 7
+         }
+        }
+       ],
+       "class": "Frame",
+       "name": "GroupStep",
+       "props": {
+        "BackgroundColor3": {
+         "t": "Color3",
+         "v": [
+          1,
+          1,
+          1
+         ]
+        },
+        "BackgroundTransparency": 0.6000000238418579,
+        "BorderSizePixel": 0,
+        "Position": {
+         "t": "UDim2",
+         "v": [
+          0,
+          747,
+          0,
+          424
+         ]
+        },
+        "Size": {
+         "t": "UDim2",
+         "v": [
+          0,
+          316,
+          0,
+          143
+         ]
+        },
+        "Transparency": 0.6000000238418579,
+        "ZIndex": 5
        }
       }
      ],
