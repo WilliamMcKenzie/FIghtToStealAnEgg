@@ -10,6 +10,8 @@
 --
 --   SprintCam.update(dt, sprinting, speed) -> degrees to add to the field of view, x the camera's distance
 --   SprintCam.pulse()  -- the bounce, now
+--   SprintCam.steady() -> x for a studs-sized billboard's Size so it holds its size on
+--     screen through the sprint look (QM, Oct 31: name tags grew and shrank as you sprinted)
 
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Config = require(Shared.Config)
@@ -52,6 +54,7 @@ function SprintCam.update(dt, sprinting, speed)
 	local cfg = Config.SprintCam
 	if not cfg.On then
 		t = 0
+		SprintCam.added, SprintCam.zoom = 0, 1
 		return 0, 1
 	end
 	if sprinting then
@@ -73,7 +76,22 @@ function SprintCam.update(dt, sprinting, speed)
 			bounceT = nil
 		end
 	end
-	return (cfg.Fov - 70) * k, zoom
+	SprintCam.added, SprintCam.zoom = (cfg.Fov - 70) * k, zoom
+	return SprintCam.added, zoom
+end
+
+SprintCam.added, SprintCam.zoom = 0, 1 -- (what the sprint look adds right now)
+
+-- Pulled in by zoom, a billboard looks 1 / zoom bigger; widened by `added` degrees of field
+-- of view, tan(before / 2) / tan(now / 2) smaller. This undoes both.
+function SprintCam.steady()
+	local camera = workspace.CurrentCamera
+	if not camera or (SprintCam.added == 0 and SprintCam.zoom == 1) then
+		return 1
+	end
+	local now = math.rad(camera.FieldOfView) / 2
+	local before = math.rad(math.clamp(camera.FieldOfView - SprintCam.added, 1, 120)) / 2
+	return SprintCam.zoom * math.tan(now) / math.tan(before)
 end
 
 return SprintCam

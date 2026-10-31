@@ -12,6 +12,7 @@ local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared
 
 local DamageNumbers = require(script.Parent.DamageNumbers)
 local Riding = require(script.Parent.Riding)
+local SprintCam = require(script.Parent.SprintCam)
 local RunService = game:GetService("RunService")
 
 local FILL, BACK = "rbxassetid://90275415984527", "rbxassetid://133695040857929"
@@ -45,7 +46,10 @@ local function size(gui)
 		gui.MaxDistance = FIGHT_RANGE
 		gui.SizeOffset = Vector2.new(0, FIGHT_LIFT)
 	else
-		gui.Size = UDim2.fromScale(WIDE, WIDE * H / W) -- (studs: it shrinks with distance like the world)
+		-- (studs: it shrinks with distance like the world, but holds still through the sprint
+		-- look's zoom and wider view: QM, Oct 31)
+		local k = SprintCam.steady()
+		gui.Size = UDim2.fromScale(WIDE * k, WIDE * H / W * k)
 		gui.MaxDistance = 120
 		gui.SizeOffset = Vector2.zero
 	end
@@ -93,6 +97,7 @@ local function attach(character)
 		if gui.StudsOffset ~= want then
 			gui.StudsOffset = want
 		end
+		size(gui) -- (every frame: the sprint look changes it as you go)
 	end)
 	gui.Destroying:Connect(function()
 		follow:Disconnect()
