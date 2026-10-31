@@ -389,6 +389,20 @@ function Hud.start()
 	placeEgg.Outline.Thickness = offline.Outline.Thickness
 	placeEgg.Visible = not Ui.live
 
+	-- "Buy next boss" (QM, Oct 31), the same, with arrows to the gate of the cheapest boss
+	-- region you don't own yet: while you can afford it and have no egg to put down (that
+	-- reminder comes first). Hidden in fights and the tutorial too.
+	local nextBoss = label(root, "NextBoss", {
+		Text = "Buy next boss",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = TEXT_BIG,
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, PLACE_UNDER + 60), -- (in Edit: under the egg one)
+		Size = UDim2.fromOffset(1000, 60),
+	})
+	nextBoss.Outline.Thickness = offline.Outline.Thickness
+	nextBoss.Visible = not Ui.live
+
 	if not Ui.live then
 		return gui
 	end
@@ -446,8 +460,30 @@ function Hud.start()
 		return math.abs(p.X) <= area.Size.X / 2 and math.abs(p.Z) <= area.Size.Z / 2
 	end
 
-	-- the arrows home while the reminder's up, from just in front of you along the ground
-	-- (as client/Tutorial draws them); none once you're in your pen
+	-- the next boss region's gate: the cheapest one you don't own (Map's Gates markers,
+	-- Config.Regions.Cost), and its cost
+	local function nextGate()
+		local map = workspace:FindFirstChild("Map")
+		local gates = map and map:FindFirstChild("Gates")
+		local best, bestCost = nil, math.huge
+		for _, gate in if gates then gates:GetChildren() else {} do
+			local region = gate:GetAttribute("Region")
+			local cost = region and not gate:GetAttribute("Training") and Config.Regions.Cost[region]
+			if
+				gate:IsA("BasePart")
+				and cost
+				and cost > 0
+				and cost < bestCost
+				and player:GetAttribute("Region" .. region) ~= true
+			then
+				best, bestCost = gate, cost
+			end
+		end
+		return best, bestCost
+	end
+
+	-- the arrows while a reminder's up (home to your pen, or to the next gate), from just in
+	-- front of you along the ground (as client/Tutorial draws them); none once you're there
 	local ARROW_UP = 1.5 -- studs over the ground (the tutorial's)
 	local homeTrail = require(script.Parent.ArrowTrail).new()
 	local homeRay = RaycastParams.new()
@@ -455,13 +491,18 @@ function Hud.start()
 	RunService.RenderStepped:Connect(function()
 		local character = player.Character
 		local me = character and character:FindFirstChild("HumanoidRootPart")
-		local area = placeEgg.Visible and me and not inPen() and myArea()
-		if not area then
+		local target
+		if me and placeEgg.Visible and not inPen() then
+			target = myArea()
+		elseif me and nextBoss.Visible then
+			target = nextGate()
+		end
+		if not target then
 			homeTrail.draw()
 			return
 		end
 		local from = Vector3.new(me.Position.X, 0, me.Position.Z)
-		local to = Vector3.new(area.Position.X, 0, area.Position.Z)
+		local to = Vector3.new(target.Position.X, 0, target.Position.Z)
 		local along = to - from
 		if along.Magnitude <= 8 then
 			homeTrail.draw()
@@ -480,6 +521,13 @@ function Hud.start()
 				offline.Visible = inPen() and not bar.Visible
 				placeEgg.Visible = player:GetAttribute("EggBag") ~= nil and not bar.Visible
 				placeEgg.Position = UDim2.new(0.5, 0, 0, if offline.Visible then PLACE_UNDER else PLACE_TOP)
+				local gate, cost = nextGate()
+				nextBoss.Visible = gate ~= nil
+					and not placeEgg.Visible
+					and player:GetAttribute("EggBag") == nil
+					and not bar.Visible
+					and (player:GetAttribute("Cash") or 0) >= cost
+				nextBoss.Position = placeEgg.Position
 				task.wait(0.2)
 			end
 		end)
