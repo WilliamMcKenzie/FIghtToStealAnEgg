@@ -1,5 +1,5 @@
 -- Hopping over low things (QM, Oct 30: it was easy to get stuck outside your pen). Riding,
--- you can't jump, so when your pet's pushing into something low (a fence, a rail, a low
+-- besides jumping (Space), when your pet's pushing into something low (a fence, a rail, a low
 -- wall: anything solid up to Config.Hop.Height studs over the ground just ahead, with
 -- room above it), it hops over it on its own: thrown up just high enough to clear it,
 -- carrying on forward. Tall walls stay walls, and so does anything with a NoHop attribute. Only your own character (this client

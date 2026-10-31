@@ -231,10 +231,11 @@ local function mount(character)
 			})
 		end
 	end
-	-- no jumping while riding (the server also sets JumpHeight 0; this stops the jump
-	-- state itself on the client that drives this character)
+	-- jumping while riding works as on foot (QM, Oct 31: Space / the mobile jump button;
+	-- the server sets JumpHeight from Config.Jump.Height, and the pet's welded on, so it
+	-- goes up with you)
 	if character == Players.LocalPlayer.Character then
-		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
 		-- (and never tipped over: QM, Oct 30, a ridden pet ended up upside down and stuck.
 		-- These are the states a knock or a shove puts a Humanoid into; with them off it
 		-- can only stand, run and fall. keepUpright below catches anything else.)
