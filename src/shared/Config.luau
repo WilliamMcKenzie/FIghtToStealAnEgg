@@ -1418,6 +1418,65 @@ return {
 	-- Fixed (QM, Oct 30): held over the arena's middle instead, back far enough that the
 	-- arena's width times Fit fills the screen (Distance unused then).
 	FightCam = { On = true, Fixed = true, Fit = 1, Pitch = 62, Yaw = 0, Distance = 80, Height = 0, Fov = 55, InTime = 0.6, OutTime = 0.6 },
+	-- boss sounds (QM, Oct 31; client/BossSounds): each boss cries as it rises out of its dais
+	-- (as the intro's camera reaches it) or wakes, and cries again pitched down as it dies.
+	-- The cries are LassoAPet's (its client/Sounds boss_<Kind>, QM's picks there), reused
+	-- for the bosses with the same animal and borrowed, re-pitched, for the rest. Every
+	-- enemy swipe whooshes as it strikes, every red circle (bomb, slam, leap) thumps as it
+	-- goes off, and a minion thuds as it lands. All through client/Sfx (heard if on screen).
+	--   Cries[Kind] = { id = a Sounds name or an rbxassetid, volume, pitch, attack? }
+	--   attack: a sound as each of its attacks winds up (BossAnim), for biters
+	BossSounds = {
+		Sounds = {
+			cluck = "rbxassetid://77584650945481", -- chicken cluck (Lasso's Chicken)
+			growl = "rbxassetid://129162115855106", -- monstergrowl (Lasso's Elder Boar)
+			cactus = "rbxassetid://95169379454314", -- angry alien cat growl (Lasso's Cactus Boss)
+			roar = "rbxassetid://137419707857339", -- T-Rex Roar 2 (Lasso's Lava Wyrm)
+			rex = "rbxassetid://116844415804502", -- T-Rex Roar 1 (Lasso's Tyrant Rex)
+			bubbles = "rbxassetid://9125409840", -- Bubbles Small Underwater (Lasso's Shark Boss)
+			angel = "rbxassetid://133260252239833", -- angelic sound (Lasso's Seraph)
+			bite = "rbxassetid://136650469995272", -- Bite Sound (Lasso's Robo Shark eating)
+			whoosh = "rbxassetid://73983934702758", -- Lasso's sprint/training whoosh
+			smash = "rbxassetid://90604529915688", -- Lasso's smash through an obstacle
+			crash = "rbxassetid://94142874131984", -- Lasso's crash
+		},
+		Cries = {
+			Chicken = { id = "cluck", volume = 0.9 },
+			MotherHen = { id = "cluck", volume = 0.9, pitch = 0.85 },
+			GiantRafflesia = { id = "cactus", volume = 0.3, pitch = 0.9 },
+			MajesticUnicorn = { id = "angel", volume = 0.6 },
+			VenusFlytrap = { id = "cactus", volume = 0.3, pitch = 1.15, attack = "bite" },
+			CactusBoss = { id = "cactus", volume = 0.3 },
+			Sandworm = { id = "growl", volume = 0.6, pitch = 0.8 },
+			ScorpionKing = { id = "cactus", volume = 0.3, pitch = 1.25 },
+			ElderBoar = { id = "growl", volume = 0.6 },
+			FrostGolem = { id = "rex", volume = 0.8, pitch = 0.8 },
+			BlizzardOwl = { id = "cluck", volume = 0.9, pitch = 0.6 },
+			LavaWyrm = { id = "roar", volume = 0.8 },
+			MagmaSlime = { id = "bubbles", volume = 2.5, pitch = 0.6 },
+			VolcanoTortoise = { id = "growl", volume = 0.6, pitch = 0.7 },
+			BoneWarden = { id = "growl", volume = 0.6, pitch = 0.9 },
+			DungeonWatcher = { id = "cactus", volume = 0.3, pitch = 0.7 },
+			TreasureMimic = { id = "cactus", volume = 0.3, pitch = 0.85, attack = "bite" },
+			CrimsonKnight = { id = "growl", volume = 0.6, pitch = 1.1 },
+			BloodBat = { id = "cactus", volume = 0.3, pitch = 1.5 },
+			CastleWyvern = { id = "roar", volume = 0.8, pitch = 1.1 },
+			RuneMage = { id = "angel", volume = 0.6, pitch = 0.8 },
+			ElderTreant = { id = "growl", volume = 0.6, pitch = 0.6 },
+			ToadstoolKing = { id = "cactus", volume = 0.3, pitch = 0.8 },
+			KingCrab = { id = "bubbles", volume = 2.5 },
+			PufferLord = { id = "bubbles", volume = 2.5, pitch = 0.8 },
+			Shark = { id = "bubbles", volume = 2.5, attack = "bite" },
+		},
+		Default = { id = "cactus", volume = 0.3 }, -- (a boss with no Cries entry)
+		DeathPitch = 0.75, -- its cry on dying, slowed to this (x its own pitch)
+		DeathVolume = 1.2, -- x its cry's volume
+		Death = { id = "crash", volume = 0.5 }, -- and the thump of it going down
+		AttackVolume = 0.6, -- an `attack` sound's volume
+		Swipe = { id = "whoosh", volume = 0.5, pitch = 0.85 }, -- an enemy swipe striking
+		Splash = { id = "smash", volume = 0.35 }, -- a red circle going off (client/Bombs)
+		Land = { id = "smash", volume = 0.3, pitch = 0.8 }, -- a minion landing from the sky
+	},
 	-- a sleeping boss (client/BossView, QM Oct 25): settled low on the ground, its head
 	-- swelling a little with each snore. A Model with a pose in Poses lies down in it
 	-- instead (no sinking or swelling): eyes shut, breathing slowly, Zzz drifting up.

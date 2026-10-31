@@ -22,6 +22,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local BossSounds = require(script.Parent.BossSounds)
+
 local RING_COLOR = Color3.fromRGB(255, 50, 35) -- (TargetRing's)
 local RING_TRANSPARENCY = 0.15
 local RING_WIDTH = 0.07 -- of the radius
@@ -184,6 +187,7 @@ end
 -- Kingdom's radiate: a ring of SPLASH_SPOKES squares, then another a step further out,
 -- out to the blast's edge (the last ring right on it)
 local function splash(at, radius, style)
+	BossSounds.play(Config.BossSounds.Splash, at) -- (its thump: client/BossSounds)
 	local turn = math.random() * math.pi * 2
 	local r = SPLASH_STEP
 	while true do
