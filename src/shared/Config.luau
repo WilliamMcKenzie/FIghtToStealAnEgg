@@ -355,11 +355,10 @@ return {
 	-- the free gift (QM, Oct 31: like his reference's FREE! present): a red studded present with
 	-- a yellow bow, "FREE!" over it, a glowing ring and sparkles, across the gateway from Carl's
 	-- stall (Shared/GiftModel; Server/Map builds it fresh on every start, like the gates).
-	-- Walking into its ring opens the Free Reward! popup (client/FreeReward): like the game,
-	-- favorite it and join the group, then Claim gives Amount Power (Strength), once per
-	-- player (saved: FreeGift). Roblox can't tell a game if you liked it, so Like is on your
-	-- word; Favorite opens Roblox's favorite prompt; only the group is checked, by the server
-	-- (Server/FreeGift), once GroupId is set (till then it's on your word too).
+	-- Walking into its ring opens the Free Reward! popup (client/FreeReward): it shows the
+	-- three steps (like the game, favorite it, join the group) and Claim, which gives Amount
+	-- Power (Strength), once per player (saved: FreeGift). Only the group can be checked
+	-- (Server/FreeGift): not in it, Claim pops a red "Steps not complete!".
 	FreeGift = {
 		X = 50, Z = -130, Yaw = 160, -- (Carl is at -50, -130, yaw 200: the other side of the gateway)
 		Scale = 1,
