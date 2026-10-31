@@ -301,6 +301,7 @@ function WeaponShop.init(root)
 		return
 	end
 	gui.Visible = false
+	UiFx.menu(gui) -- (one menu at a time: client/UiFx)
 	close.Activated:Connect(WeaponShop.close)
 	-- (the template's buttons got hovers when it was made; they'd only show in Studio)
 

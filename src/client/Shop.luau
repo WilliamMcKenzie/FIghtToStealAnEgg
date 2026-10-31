@@ -498,6 +498,7 @@ function Shop.init(root, shopButton)
 	end
 	gui.Visible = false
 	picker.Visible = false
+	UiFx.menu(gui, Shop.close) -- (one menu at a time: client/UiFx)
 	local remote = ReplicatedStorage:WaitForChild("ShopBuy", 10)
 	close.Activated:Connect(Shop.close)
 	if shopButton then

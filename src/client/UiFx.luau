@@ -20,6 +20,13 @@
 --   UiFx.popOut(gui, sound?)     -- shrinks it away quickly (POP_OUT) and hides it, with Close
 --   UiFx.toggle(gui) -> open     -- popIn if hidden, else popOut
 --   UiFx.isOpen(gui)
+--   UiFx.menu(gui, close?)       -- marks a popup as a menu: only one menu is open at a time
+--                                -- (QM, Oct 31), so popping one in first closes the open one
+--                                -- (with its `close`, default popOut). Popups over a menu
+--                                -- (the Shop's Gift To picker) aren't menus
+--   UiFx.opening(gui, close)     -- for a menu that doesn't use popIn (the side panels): closes
+--                                -- the open menu and makes this one it
+--   UiFx.closed(gui)             -- and tells UiFx it's gone again
 --   UiFx.shake(guiObject)        -- a quick no-no wiggle sideways (a failed buy), with Error
 --
 -- popIn/popOut scale the popup's UIScale (its Pop, made if it has none), so its Size and
@@ -197,6 +204,29 @@ local function popScale(gui)
 end
 
 local closing = setmetatable({}, { __mode = "k" }) -- [gui] = the tween hiding it
+local menus = setmetatable({}, { __mode = "k" }) -- [gui] = how it closes (UiFx.menu)
+local current -- the menu open now: { gui, close }
+
+function UiFx.menu(gui, close)
+	menus[gui] = close or function()
+		UiFx.popOut(gui)
+	end
+end
+
+function UiFx.opening(gui, close)
+	local was = current
+	current = nil
+	if was and was.gui ~= gui then
+		was.close()
+	end
+	current = { gui = gui, close = close or menus[gui] }
+end
+
+function UiFx.closed(gui)
+	if current and current.gui == gui then
+		current = nil
+	end
+end
 
 function UiFx.isOpen(gui)
 	return gui.Visible and not closing[gui]
@@ -205,6 +235,9 @@ end
 function UiFx.popIn(gui, sound)
 	if UiFx.isOpen(gui) then
 		return
+	end
+	if menus[gui] then
+		UiFx.opening(gui)
 	end
 	local out = closing[gui]
 	closing[gui] = nil
@@ -224,6 +257,7 @@ function UiFx.popOut(gui, sound)
 	if not UiFx.isOpen(gui) then
 		return
 	end
+	UiFx.closed(gui)
 	local s = popScale(gui)
 	local out = TweenService:Create(s, POP_OUT, { Scale = POP_TO })
 	closing[gui] = out

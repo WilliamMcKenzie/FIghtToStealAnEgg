@@ -748,6 +748,7 @@ function IndexPanel.init(root, indexButton)
 		return
 	end
 	gui.Visible = false
+	UiFx.menu(gui) -- (one menu at a time: client/UiFx)
 	close.Activated:Connect(IndexPanel.close)
 	if indexButton then
 		indexButton.Activated:Connect(function()

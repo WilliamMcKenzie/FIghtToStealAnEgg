@@ -1,7 +1,8 @@
 -- The popups that slide in on the right (QM's Figma ActivePets and EggsPopup, Oct 27): a
 -- header (its `look`, with a title), a dark panel under it holding a scrolling column of
 -- rows, and the red ">" tab on its left that slides it away. client/PetsPanel and
--- client/EggsPanel each fill one in; only one is open at a time.
+-- client/EggsPanel each fill one in; only one is open at a time, and they count as menus
+-- (client/UiFx: opening one closes the Shop, Index or Weapon Shop, and the other way round).
 --
 --   SidePanel.new(root, name, look, title, titleOutline) -> panel
 --     panel.gui, panel.header, panel.rows (the ScrollingFrame), panel.title (its label)
@@ -24,8 +25,6 @@ local W, H = 1168, 734
 local SLIDE = TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local SLIDE_OUT = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 local POP_FROM = 0.85 -- it grows from this as it slides in (QM, Oct 30: popups pop)
-
-local current -- the one open
 
 function SidePanel.new(root, name, look, title, titleOutline)
 	local self = setmetatable({}, SidePanel)
@@ -109,11 +108,10 @@ function SidePanel:open()
 		return
 	end
 	self.shown = true
-	if current and current ~= self then
-		current:close()
-	end
-	current = self
 	local gui = self.gui
+	UiFx.opening(gui, function()
+		self:close()
+	end)
 	gui.Visible = true
 	gui.Position = self.shownAt + UDim2.fromOffset(fig(W) + fig(60), 0)
 	TweenService:Create(gui, SLIDE, { Position = self.shownAt }):Play()
@@ -129,9 +127,7 @@ function SidePanel:close()
 		return
 	end
 	self.shown = false
-	if current == self then
-		current = nil
-	end
+	UiFx.closed(gui)
 	local out = TweenService:Create(gui, SLIDE_OUT, { Position = self.shownAt + UDim2.fromOffset(fig(W) + fig(60), 0) })
 	out.Completed:Connect(function(how)
 		if how == Enum.PlaybackState.Completed and not self.shown then
