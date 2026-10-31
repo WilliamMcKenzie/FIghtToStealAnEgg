@@ -127,7 +127,12 @@ function Rig.build(spec)
 				continue -- studs as a material (Config.StudMaterial): no textures
 			end
 			if part:IsA("MeshPart") then
-				continue -- (a Texture can't follow a mesh's faces)
+				-- (a Texture is projected on a mesh from each side of its box: QM, Oct 31, the
+				-- meshes were flat. Metal keeps its plain finish.)
+				if not def.metal then
+					Studs.mesh(part, spec.studTexture.tile, StudStyle.transparency())
+				end
+				continue
 			end
 			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
 				if part.ClassName == "Part" and Rig.covered(part, face, byBone[def.parent]) then
