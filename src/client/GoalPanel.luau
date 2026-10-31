@@ -3,7 +3,7 @@
 -- goal is comes from Shared/Goals (Config.Goals.List: train to level 2, steal 3 eggs,
 -- unlock the Desert, buy an Uncommon weapon... on through the game). A new goal pops the
 -- panel and plays the Claim sound. Hidden during the tutorial (client/Tutorial hides it
--- too, by name).
+-- too, by name), and gone once every goal's done (the last: Collect Pets).
 --
 -- Real objects in StarterGui > Hud > Root > Goal for QM to edit (client/Ui): Band, Label,
 -- Title, Track (Clip > Fill, Progress). Laid out in design px (1080 tall: the Root's UIScale).
@@ -126,12 +126,16 @@ function GoalPanel.init(root)
 	end
 	local shown = nil -- (Visible as last set here: the tutorial's hide is left alone otherwise)
 	local function refresh()
-		local want = player:GetAttribute("Tutorial") ~= true
+		local g = Goals.current(player)
+		-- (gone during the tutorial, and for good once every goal's done: QM)
+		local want = player:GetAttribute("Tutorial") ~= true and g ~= nil
 		if want ~= shown then
 			shown = want
 			panel.Visible = want
 		end
-		local g = Goals.current(player)
+		if not g then
+			return
+		end
 		local fraction = if g.need > 0 then math.clamp(g.have / g.need, 0, 1) else 1
 		if g.title ~= lastTitle then
 			title.Text = g.title

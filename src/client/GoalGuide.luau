@@ -4,12 +4,13 @@
 --   - a stolen egg in your bag: home to your pen, to put it down (then on with the goal)
 --   - Train Power: the best training ground you own (the dearest open one)
 --   - Steal eggs: the nearest egg waiting in that goal's regions (else their boss's spot)
+--   - Collect Pets: the nearest egg in the regions you own whose pets you haven't all found
 --   - Unlock a region / a training ground, buy a weapon: once you've the cash, its gate (or
 --     Carl, the weapon vendor); till then the eggs (and boss) of the best region you own,
 --     where the cash comes from
 --
 --   GoalGuide.target(player, goalState, penArea) -> Instance | Vector3 | nil, stopWithin
---     goalState: Shared/Goals.current(player); penArea: your pen's Area part (or nil);
+--     goalState: Shared/Goals.current(player) (nil: all done, no arrows); penArea: your pen's Area part (or nil);
 --     stopWithin: studs from it the arrows stop
 
 local CollectionService = game:GetService("CollectionService")
@@ -17,6 +18,8 @@ local CollectionService = game:GetService("CollectionService")
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local MapData = require(Shared:WaitForChild("MapData"))
+local Goals = require(Shared:WaitForChild("Goals"))
+local IndexList = require(Shared:WaitForChild("IndexList"))
 
 local GoalGuide = {}
 
@@ -154,7 +157,8 @@ end
 function GoalGuide.target(player, state, penArea)
 	local character = player.Character
 	local me = character and character:FindFirstChild("HumanoidRootPart")
-	if not me or player:GetAttribute("Tutorial") == true or player:GetAttribute("LockedIn") then
+	-- (no goal left, QM: every pet collected, so no arrows at all)
+	if not state or not me or player:GetAttribute("Tutorial") == true or player:GetAttribute("LockedIn") then
 		return nil
 	end
 	-- (a stolen egg to put down first: home)
@@ -180,6 +184,19 @@ function GoalGuide.target(player, state, penArea)
 		return groundCentre(name)
 	elseif g.Steal then
 		return eggsIn(player, g.In or {}, from), NEAR
+	elseif g.Collect then
+		local found, regions = Goals.found(player), {}
+		for name in Config.Regions.Cost do
+			if ownsRegion(player, name) then
+				for _, kind in IndexList.biome(name) do
+					if not found[kind] then
+						table.insert(regions, name)
+						break
+					end
+				end
+			end
+		end
+		return eggsIn(player, if #regions > 0 then regions else bestRegions(player), from), NEAR
 	end
 	-- the rest cost cash: where to spend it once you've enough
 	if state.have >= state.need then
