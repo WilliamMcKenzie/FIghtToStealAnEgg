@@ -24,6 +24,9 @@
 --
 --   Hatchery.start()                -- once, after Pens.start and PetInventory.start
 --   Hatchery.give(player, kind)     -- one more egg in their bag (a steal)
+--
+-- When your boss fight ends (LockedIn cleared) and you're alive with eggs in your bag, the
+-- egg you stole goes in your hand (Holding), so the hotbar's selected slot is the egg (QM, Oct 31).
 
 local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
@@ -64,10 +67,32 @@ local function setBag(player, list)
 	end
 end
 
+local lastStolen = {} -- [player] = the kind of egg they stole last (this life)
+
 function Hatchery.give(player, kind)
 	if isPet(kind) then
+		lastStolen[player] = kind
 		setBag(player, Stacks.add(bag(player), kind, 1))
 	end
+end
+
+-- a boss fight over (won, or ended any other way) with an egg in your bag: it goes in
+-- your hand, the egg you stole for that fight if you still have it (QM, Oct 31)
+local function fightOver(player)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.Health <= 0 or player:GetAttribute("LockedIn") then
+		return
+	end
+	local eggs = bag(player)
+	if #eggs == 0 then
+		return
+	end
+	local kind = lastStolen[player]
+	if not (kind and Stacks.count(eggs, kind) > 0) then
+		kind = eggs[#eggs].id
+	end
+	player:SetAttribute("Holding", kind)
 end
 
 function Hatchery.hatchTime(kind)
@@ -287,13 +312,23 @@ function Hatchery.start()
 	end
 	Players.PlayerRemoving:Connect(function(player)
 		speedupTarget[player] = nil
+		lastStolen[player] = nil
 	end)
 
 	local function joined(player)
 		local function lose()
 			player:SetAttribute("EggBag", nil)
 			player:SetAttribute("Holding", nil)
+			lastStolen[player] = nil
 		end
+		local wasLocked = player:GetAttribute("LockedIn") ~= nil
+		player:GetAttributeChangedSignal("LockedIn"):Connect(function()
+			local locked = player:GetAttribute("LockedIn") ~= nil
+			if wasLocked and not locked then
+				task.defer(fightOver, player) -- (after a death or respawn has emptied the bag)
+			end
+			wasLocked = locked
+		end)
 		player.CharacterAdded:Connect(function(character)
 			lose() -- (a new life: whatever eggs you'd stolen are gone)
 			character:WaitForChild("Humanoid").Died:Connect(lose)
