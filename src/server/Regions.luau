@@ -11,6 +11,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Funnels = require(script.Parent.Funnels)
 
 local Regions = {}
 
@@ -38,6 +39,9 @@ local function buy(player, name, training)
 	end
 	player:SetAttribute("Cash", cash - cost)
 	player:SetAttribute(owns, true)
+	if training ~= true then
+		Funnels.regionBought(player, name) -- (the biome progress funnel)
+	end
 	return true
 end
 

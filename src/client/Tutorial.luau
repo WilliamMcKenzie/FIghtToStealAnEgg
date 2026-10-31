@@ -16,7 +16,11 @@
 --             once if they're empty: TutorialEggs)
 --   4. fight  its boss (always Config.Tutorial.Boss, all but harmless): "Fight boss!".
 --             Dying sends you back to 3
---   5. bow    the bounty flies into your Cash (now shown: client/BossBounty): "Buy a bow!",
+--   4b. egg   the bounty flies into your Cash (now shown: client/BossBounty), and the egg
+--             you stole is in your hand (Server/Hatchery): "Place your egg!" again, the
+--             hand and arrows on your pen, then "Hatch your egg!" (any egg you put down
+--             in the tutorial is ready at once) (QM, Oct 31)
+--   5. bow    "Buy a bow!",
 --             arrows to Carl and the hand on him, then on the bow's Buy in his shop
 --             (buying equips it)
 --   6. train  the Weapon Shop shuts and the HUD hides again (Cash too), then "Train with
@@ -54,6 +58,8 @@ local WORDS = {
 	ride = "Ride your horse!",
 	steal = "Steal an egg!",
 	fight = "Fight boss!",
+	place2 = "Place your egg!",
+	hatch2 = "Hatch your egg!",
 	bow = "Buy a bow!",
 	train = "Train with weapons to become stronger!",
 }
@@ -549,6 +555,41 @@ local function run(thisGen)
 	end
 	revealHud("Cash")
 	task.wait(AFTER_BOSS)
+
+	-- 4b. put the egg you just stole in your pen and hatch it (QM, Oct 31). It's in your
+	-- hand once the fight's over (Server/Hatchery); put away (the hotbar's hidden), it's
+	-- handed back. No egg at all (lost somehow): on to the bow.
+	local before = #penEggs()
+	local held = 0
+	till(function()
+		return #penEggs() > before or (not player:GetAttribute("Holding") and not player:GetAttribute("EggBag"))
+	end, function()
+		local area = myArea()
+		if area and player:GetAttribute("Holding") then
+			say("place2")
+			local floor = area.Position - Vector3.new(0, area.Size.Y / 2, 0)
+			point(floor + Vector3.new(0, 1, 0), floor)
+		else
+			point(nil, nil)
+			local kind = string.match(player:GetAttribute("EggBag") or "", "^([^:,]+)")
+			if kind and os.clock() - held > 1 then
+				held = os.clock()
+				ReplicatedStorage:WaitForChild("HoldEgg"):FireServer(kind)
+			end
+		end
+	end)
+	point(nil, nil)
+	if #penEggs() > before then
+		local waiting = #penEggs()
+		till(function()
+			return #penEggs() < waiting
+		end, function()
+			say("hatch2")
+			point(nil, lastEgg())
+		end)
+		point(nil, nil)
+		task.wait(1.6) -- (the pet jumps out)
+	end
 
 	-- 5. buy a bow from Carl
 	till(function()

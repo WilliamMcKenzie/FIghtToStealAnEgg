@@ -26,6 +26,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Funnels = require(script.Parent.Funnels)
 
 local Tutorial = {}
 
@@ -45,6 +46,7 @@ end
 function Tutorial.begin(player, fresh)
 	player:SetAttribute("OnFoot", true) -- (first: Server/PetInventory then hands out no starter)
 	if fresh then
+		Funnels.tutorialJoined(player) -- (the tutorial funnel's "Joined game")
 		player:SetAttribute("PetsOwned", "")
 		player:SetAttribute("PenPets", "")
 	end
