@@ -2407,6 +2407,63 @@ return {
 		PopupColor = Color3.fromRGB(90, 220, 255), -- "Level up!"
 	},
 
+	-- goals (QM, Oct 31, from their Figma): the top-left Goal panel (client/GoalPanel,
+	-- Shared/Goals) shows the first of these you haven't done, with a bar towards it. Once
+	-- they're all done it keeps saying "Train Power" towards your next level. Hidden during
+	-- the tutorial. Each is one of:
+	--   { Power = 2 }                       "Train Power": reach that level (Config.Levels)
+	--   { Steal = 5, In = { "Meadow" } }    "Steal 5 <region> eggs": eggs stolen there, ever
+	--                                       (saved player attribute Stolen, Server/Eggs)
+	--   { Region = { "Desert" } }           "Unlock Desert": bar is your cash vs its gate;
+	--                                       with more than one, any of them (All = true: every one)
+	--   { Weapon = "Rare" }                 "Buy a Rare weapon": own one of that rarity or
+	--                                       better; bar is your cash vs the cheapest of it
+	--   { Train = "Desert" }                "Unlock Desert Training": cash vs its ground's Cost
+	-- Title = "..." replaces the made-up title. The "Steal 5 eggs" before the Desert is
+	-- QM's: players learn to keep fighting the bosses first.
+	Goals = {
+		Color = Color3.fromRGB(255, 157, 0), -- the little "Goal" over the title
+		List = {
+			-- Meadow
+			{ Power = 2 },
+			{ Steal = 5, In = { "Meadow" }, Title = "Steal 5 eggs" },
+			{ Region = { "Desert" } },
+			-- Desert
+			{ Weapon = "Uncommon" },
+			{ Steal = 5, In = { "Desert" } },
+			{ Power = 8 },
+			{ Weapon = "Rare" },
+			{ Train = "Desert" },
+			{ Power = 11 },
+			{ Region = { "Ice" } },
+			-- Tundra
+			{ Weapon = "Epic" },
+			{ Steal = 5, In = { "Ice" } },
+			{ Power = 16 },
+			{ Region = { "Lava" } },
+			-- Lava Valley
+			{ Weapon = "Legendary" },
+			{ Steal = 5, In = { "Lava" } },
+			{ Power = 21 },
+			{ Region = { "Dungeon", "Forest" }, Title = "Unlock a new region" },
+			-- Dungeon / Magic Circle
+			{ Weapon = "Mythic" },
+			{ Steal = 5, In = { "Dungeon", "Forest" }, Title = "Steal 5 eggs" },
+			{ Power = 25 },
+			{ Weapon = "Divine" },
+			{ Region = { "Castle", "Ocean" }, Title = "Unlock a new region" },
+			-- Red Castle / Ocean Trench, and the endgame
+			{ Steal = 5, In = { "Castle", "Ocean" }, Title = "Steal 5 eggs" },
+			{ Weapon = "Celestial" },
+			{ Power = 30 },
+			{ Weapon = "Cosmic" },
+			{ Region = { "Dungeon", "Forest", "Castle", "Ocean" }, All = true, Title = "Unlock every region" },
+			{ Weapon = "Void" },
+			{ Power = 35 },
+			{ Weapon = "Omega" },
+		},
+	},
+
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
 	-- trains the damage it dealt x the enemy's Strength x PerDamage (QM, Oct 25), so it
 	-- grows with your damage, and your damage grows with it on Config.Power's log curve.

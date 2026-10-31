@@ -1,7 +1,8 @@
 -- The HUD (QM's NewUI Figma page, Oct 27, after the old UI was wiped): the boss bar with the
 -- boss's name over it (top centre); the green Shop and blue Index buttons (left middle); the
 -- red Eggs and orange Pets buttons (right middle); the Power counter, with its little orange
--- + button, and the Cash counter (bottom left); and the hotbar (bottom centre: client/Hotbar).
+-- + button, and the Cash counter (bottom left); the hotbar (bottom centre: client/Hotbar); and
+-- the Goal panel (top left: client/GoalPanel, hidden during the tutorial).
 -- The paw (Pets) button opens the Active Pets popup (client/PetsPanel), the egg (Eggs) one
 -- the Growing Eggs popup (client/EggsPanel), the Index one the Index popup (client/IndexPanel),
 -- the Shop one the Shop (client/Shop).
@@ -349,6 +350,7 @@ function Hud.start()
 	end
 
 	Hotbar.init(root, fig)
+	require(script.Parent.GoalPanel).init(root) -- (the Goal panel, top left: QM, Oct 31)
 	require(script.Parent.FreeReward).init(root) -- (the free gift's popup: walk into its ring)
 	require(script.Parent.WeaponShop).init(root) -- (Carl's: opened by Talking to him)
 	require(script.Parent.Shop).init(root, root:FindFirstChild("ShopButton")) -- (the Shop button's)
