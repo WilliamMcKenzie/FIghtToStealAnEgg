@@ -1,14 +1,15 @@
 -- Goals (QM, Oct 31): what the top-left Goal panel (client/GoalPanel) asks of you next.
--- Config.Goals.List in order; the first one you haven't done is yours. After the last,
--- it's "Train Power" towards your next level, for good.
+-- Config.Goals.List in order; the first one you haven't done is yours. After the last
+-- (Collect Pets: every pet in the Index, QM) there's none, and the panel goes.
 --
---   Goals.current(player) -> {
---     index = its place in the list (0 once past the end),
+--   Goals.current(player) -> nil once every goal's done, else {
+--     index = its place in the list,
 --     goal = its Config.Goals.List entry (client/GoalGuide points the arrows by it),
 --     title = "Train Power" (RichText: a rarity's name is in its colour),
 --     have, need = the bar's numbers (have can pass need),
 --     text = "5.9K/10K" (or "$1.2K/$2K" for cash),
 --   }
+--   Goals.found(player) -> { [pet] = true } for the pets in your Index
 --   Goals.stolen(player, region) -> eggs stolen there ever (saved attribute Stolen)
 --   Goals.RANKS                  -- the rarities, worst to best
 
@@ -16,6 +17,7 @@ local Config = require(script.Parent:WaitForChild("Config"))
 local Abbrev = require(script.Parent:WaitForChild("Abbrev"))
 local Levels = require(script.Parent:WaitForChild("Levels"))
 local Stacks = require(script.Parent:WaitForChild("Stacks"))
+local IndexList = require(script.Parent:WaitForChild("IndexList"))
 
 local Goals = {}
 
@@ -27,6 +29,15 @@ end
 
 local function regionName(name)
 	return Config.Regions.Names[name] or name
+end
+
+-- the pets you've found, for the Index (PetIndex: Server/PetIndex): { [kind] = true }
+function Goals.found(player)
+	local out = {}
+	for id in string.gmatch(player:GetAttribute("PetIndex") or "", "[^,%s]+") do
+		out[id] = true
+	end
+	return out
 end
 
 function Goals.stolen(player, region)
@@ -122,6 +133,19 @@ local function check(player, g)
 				g.Weapon
 			)
 		return { title = title, have = cash, need = cheapest, text = cashText(cash, cheapest) }
+	elseif g.Collect then
+		local found = Goals.found(player)
+		local have, need = 0, 0
+		for _, kind in IndexList.all() do
+			need += 1
+			if found[kind] then
+				have += 1
+			end
+		end
+		if have >= need then
+			return nil
+		end
+		return { title = g.Title or "Collect Pets", have = have, need = need, text = have .. "/" .. need }
 	elseif g.Train then
 		local ground = Config.Training.Grounds[g.Train]
 		if not ground or ground.Cost <= 0 or player:GetAttribute("Train" .. g.Train) == true then
@@ -146,10 +170,7 @@ function Goals.current(player)
 			return state
 		end
 	end
-	-- (all done: the next level, for good)
-	local power = player:GetAttribute("Power") or player:GetAttribute("Strength") or 0
-	local need = Levels.goal(power)
-	return { index = 0, goal = { Power = 0 }, title = "Train Power", have = power, need = need, text = Abbrev(power) .. "/" .. Abbrev(need) }
+	return nil -- (all done: the panel's gone for good)
 end
 
 return Goals

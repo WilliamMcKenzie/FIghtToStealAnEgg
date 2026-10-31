@@ -2408,9 +2408,9 @@ return {
 	},
 
 	-- goals (QM, Oct 31, from their Figma): the top-left Goal panel (client/GoalPanel,
-	-- Shared/Goals) shows the first of these you haven't done, with a bar towards it. Once
-	-- they're all done it keeps saying "Train Power" towards your next level. Hidden during
-	-- the tutorial. Each is one of:
+	-- Shared/Goals) shows the first of these you haven't done, with a bar towards it. Hidden
+	-- during the tutorial; once they're all done (the last is Collect Pets, QM) the panel
+	-- and its arrows are gone for good. Each is one of:
 	--   { Power = 2 }                       "Train Power": reach that level (Config.Levels)
 	--   { Steal = 3, In = { "Meadow" } }    "Steal 3 <region> eggs": eggs stolen there, ever
 	--                                       (saved player attribute Stolen, Server/Eggs)
@@ -2419,6 +2419,7 @@ return {
 	--   { Weapon = "Rare" }                 "Buy a Rare weapon": own one of that rarity or
 	--                                       better; bar is your cash vs the cheapest of it
 	--   { Train = "Desert" }                "Unlock Desert Training": cash vs its ground's Cost
+	--   { Collect = true }                  "Collect Pets": pets found (Index) vs all of them
 	-- Title = "..." replaces the made-up title. The "Steal 3 eggs" (QM: 5 is a full pen) before the Desert is
 	-- QM's: players learn to keep fighting the bosses first.
 	Goals = {
@@ -2461,6 +2462,8 @@ return {
 			{ Weapon = "Void" },
 			{ Power = 35 },
 			{ Weapon = "Omega" },
+			-- (the last, QM: every pet in the Index; once that's done the panel's gone for good)
+			{ Collect = true, Title = "Collect Pets" },
 		},
 	},
 
