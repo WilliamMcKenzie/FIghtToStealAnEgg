@@ -100,7 +100,7 @@ local function riderBody(character)
 end
 
 -- Everyone rides (client/Riding.luau): their pet's health and speed (QM, Oct 25: nothing
--- else adds to them), and no jumping
+-- else adds to them). Jumping works riding as on foot (QM, Oct 31: Config.Jump.Height)
 local function ride(character)
 	local player = Players:GetPlayerFromCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
@@ -114,7 +114,7 @@ local function ride(character)
 	humanoid.Health = math.max(1, pet.Health - hurt)
 	humanoid.WalkSpeed = pet.Speed -- (client/Liquid slows it in water)
 	humanoid.UseJumpPower = false
-	humanoid.JumpHeight = 0
+	humanoid.JumpHeight = Config.Jump.Height
 end
 local requestBoss, reboss, bossFight, bossList, swapPet, givePet, buyWeapon, giveWeapon, giveWeapons, giveCash, resetPlayer, tutorialCommand, skipTutorial, offlineCash -- (below)
 local function joined(player)

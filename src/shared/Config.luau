@@ -2203,6 +2203,9 @@ return {
 	-- (a fence: 4) within Ahead studs past your pet's hitbox, it hops over, Clear studs
 	-- higher than it, with Push studs/s more forward. Taller walls stop you as before.
 	Hop = { On = true, Height = 6, Ahead = 1.5, Clear = 1.5, Push = 6 },
+	-- Jumping (QM, Oct 31): riding, Space (or the mobile jump button) jumps the same as on
+	-- foot; Height is studs (Roblox's own on-foot default is 7.2; 0 turns jumping off).
+	Jump = { Height = 7.2 },
 	-- Sprint abilities (QM, Oct 30; client/SprintAbility draws them, Server/SprintAbility
 	-- runs them): these pets' sprint is a special move instead. It starts once, the moment
 	-- you've ridden Sprint.Delay seconds without stopping (whatever your speed), with the
