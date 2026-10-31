@@ -2,18 +2,21 @@
 -- the right: a tan header with "Growing Eggs" and the yellow GROW ALL (every egg ready at
 -- once, for Robux: not sold yet, Config.Hatch.GrowAllProduct), and under it a row per egg
 -- in your pen (your PenEggs attribute: Server/Hatchery): its render (Shared/ItemIcons) and
--- a green bar filling as it grows, with the time left over it ("12s", "4:05", "2h", then
--- "Ready"). The red ">" tab on its left slides it away (client/SidePanel).
+-- a green bar filling as it grows, with the time left over it ("12s", "4:05", "2h"); once
+-- it's grown the bar pops into a green HATCH button (GROW ALL's look) that hatches it from
+-- wherever you are (HatchEgg). The red ">" tab on its left slides it away (client/SidePanel).
 --
 --   EggsPanel.init(root, eggsButton)   -- once, from Hud
 --
--- In Studio: StarterGui > Hud > Root > EggsPanel. Rows are copies of Rows > RowTemplate.
+-- In Studio: StarterGui > Hud > Root > EggsPanel. Rows are copies of Rows > RowTemplate
+-- (its HatchPop > Hatch button sits over the bar, hidden till the egg's ready).
 
 local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -28,6 +31,7 @@ local player = Players.LocalPlayer
 local fig, label, button = HudKit.fig, HudKit.label, HudKit.button
 local TITLE_OUTLINE = Color3.fromHex("8a3a00")
 local TICK = 0.2 -- seconds between the bars' updates while it's open
+local POP = TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out) -- (HATCH growing in)
 
 -- (Figma px, through fig: the popup itself is client/SidePanel's)
 -- a row (Figma Card: 876 x 207): the egg, then the bar (639 x 72 with its 6px border)
@@ -69,6 +73,34 @@ local function rowTemplate()
 	return row
 end
 
+-- the HATCH button over the bar (made missing only, so a baked RowTemplate gets it too): in a
+-- holder whose Pop UIScale grows it in from its middle, as the button's own UIScale is its hover
+local function hatchButton(row)
+	local pop, fresh = Ui.make(row, "HatchPop", "Frame")
+	if fresh then
+		pop.BackgroundTransparency = 1
+		pop.AnchorPoint = Vector2.new(0.5, 0.5)
+		pop.Position = UDim2.fromOffset(fig(202 + 639 / 2), fig(67 + 72 / 2))
+		pop.Size = UDim2.fromOffset(fig(639), fig(90))
+		pop.ZIndex = 6
+		pop.Visible = false
+	end
+	Ui.make(pop, "Pop", "UIScale")
+	local b = button(pop, "Hatch", 639, 90, {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		ZIndex = 6,
+	}, "GreenYellow")
+	label(b, "Text", {
+		Text = "HATCH",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = fig(40),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 7,
+	})
+	return b
+end
+
 -- time left: "12s" under a minute, "4:05" under an hour, then whole hours ("2h")
 local function left(seconds)
 	seconds = math.max(0, math.ceil(seconds))
@@ -96,6 +128,7 @@ function EggsPanel.init(root, eggsButton)
 		ZIndex = 5,
 	})
 	local template = Ui.template(panel.rows, "RowTemplate", rowTemplate)
+	hatchButton(template)
 	if not Ui.live then
 		return
 	end
@@ -104,6 +137,7 @@ function EggsPanel.init(root, eggsButton)
 			panel:toggle()
 		end)
 	end
+	local hatchRemote = ReplicatedStorage:WaitForChild("HatchEgg")
 	grow.Activated:Connect(function()
 		-- (not sold yet: needs its developer product and the server side)
 		if Config.Hatch.GrowAllProduct then
@@ -111,7 +145,7 @@ function EggsPanel.init(root, eggsButton)
 		end
 	end)
 
-	local made = {} -- { { row, egg } }
+	local made = {} -- { { row, egg, ready } }
 	local function update()
 		local now = workspace:GetServerTimeNow()
 		for _, m in made do
@@ -121,6 +155,23 @@ function EggsPanel.init(root, eggsButton)
 			local done = math.clamp(1 - rest / math.max(total, 1), 0, 1)
 			row.Track.Clip.Size = UDim2.fromScale(done, 1)
 			row.Track.Left.Text = if rest <= 0 then "Ready" else left(rest)
+			local ready = rest <= 0
+			local was = m[3]
+			if ready ~= was then
+				m[3] = ready
+				local pop = row.HatchPop
+				row.Track.Visible = not ready
+				pop.Visible = ready
+				if ready then
+					-- (it grows in where you can see it; it's just there if it was ready already)
+					if panel:isOpen() and was ~= nil then
+						pop.Pop.Scale = 0
+						TweenService:Create(pop.Pop, POP, { Scale = 1 }):Play()
+					else
+						pop.Pop.Scale = 1
+					end
+				end
+			end
 		end
 	end
 	local function refresh()
@@ -137,6 +188,15 @@ function EggsPanel.init(root, eggsButton)
 			local row = Ui.copy(template, "Row" .. i, panel.rows)
 			row.LayoutOrder = i
 			row.Picture.Image = ItemIcons.Eggs[egg.k] or ""
+			local hatch = row.HatchPop.Hatch
+			HudKit.hover(hatch) -- (copies aren't wired: the template's wiring stays with it)
+			local sent = false
+			hatch.Activated:Connect(function()
+				if not sent and (tonumber(egg.t) or 0) <= workspace:GetServerTimeNow() then
+					sent = true -- (once: the row goes when PenEggs drops it)
+					hatchRemote:FireServer(egg.id)
+				end
+			end)
 			table.insert(made, { row, egg })
 		end
 		update()

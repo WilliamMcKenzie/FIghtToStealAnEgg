@@ -7,7 +7,8 @@
 -- Click an egg there to hold it instead of your weapon (HoldEgg: player attribute
 -- Holding = its kind; Server/Arsenal swaps the tool), click in your pen to put it down
 -- (PlaceEgg). A placed egg is ready Config.Hatch.Time seconds later; stand by it and hold
--- F (client/PenEggs) to hatch it (HatchEgg) into its pet, which goes in your Backpack
+-- F (client/PenEggs), or press its HATCH in the Growing Eggs panel (client/EggsPanel), to
+-- hatch it (HatchEgg) into its pet, which goes in your Backpack
 -- (Server/PetInventory) and into your pen if there's room, jumping out of the egg onto
 -- its spot (Pens.hatching). Everyone sees the hatch (Hatched, to every client).
 --
@@ -134,15 +135,15 @@ storedRemote.Parent = ReplicatedStorage
 local function hatch(player, id)
 	local pen = Pens.of(player)
 	local area = pen and pen:FindFirstChild("Area")
-	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not (area and root and type(id) == "string") then
+	if not (area and type(id) == "string") then
 		return
 	end
 	local list = placed(player)
 	for i, e in list do
 		if e.id == id then
 			local at = area.CFrame:PointToWorldSpace(Vector3.new(e.x, -area.Size.Y / 2, e.z))
-			if os.time() < e.t or ((root.Position - at) * Vector3.new(1, 0, 1)).Magnitude > Config.Hatch.Range + 4 then
+			-- (from anywhere: the F prompt by the egg, or the Growing Eggs panel's HATCH)
+			if workspace:GetServerTimeNow() < e.t then
 				return
 			end
 			table.remove(list, i)

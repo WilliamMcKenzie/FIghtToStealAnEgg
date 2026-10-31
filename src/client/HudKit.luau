@@ -103,6 +103,8 @@ HudKit.LOOKS = {
 		outline = 8,
 	},
 	Yellow = { top = rgb("fff000"), bottom = rgb("ff8a00"), bevel = { 0.5, 0.5 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
+	-- (a ready egg's HATCH: GROW ALL's (Yellow's) studs and bevel in Green's colours, QM)
+	GreenYellow = { top = rgb("caff00"), bottom = rgb("0aff00"), bevel = { 0.5, 0.5 }, base = BUTTON, tile = { 230, 0.8, "Weld" } },
 	EggCard = { fill = rgb("3f3f3f"), bevel = { 0.75, 0.75 }, base = BUTTON, tile = false },
 	-- (its progress bar: the green across a dark track; the black border goes round the track)
 	EggTrack = { fill = rgb("1c1c1c"), outline = 6, corner = 8 },
