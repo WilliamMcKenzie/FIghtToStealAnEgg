@@ -45,10 +45,10 @@ return {
 	-- in thirds (an upload's at most 1024 wide), assets/ui/banner/<Name>1-3.png. The
 	-- tutorial's on PromptBanner, "Boss Defeated!" on BossBanner; a plain red band shows
 	-- till they're uploaded.
-	PromptBanner1 = "",
-	PromptBanner2 = "",
-	PromptBanner3 = "",
-	BossBanner1 = "",
-	BossBanner2 = "",
-	BossBanner3 = "",
+	PromptBanner1 = "rbxassetid://94058909154953",
+	PromptBanner2 = "rbxassetid://119576300026393",
+	PromptBanner3 = "rbxassetid://118436197826900",
+	BossBanner1 = "rbxassetid://94486153125848",
+	BossBanner2 = "rbxassetid://99661704347673",
+	BossBanner3 = "rbxassetid://135693206047238",
 }
