@@ -372,7 +372,8 @@ function Hud.start()
 	offline.Outline.Thickness = 4
 	offline.Visible = not Ui.live -- (shown while baking in Edit, so QM sees it)
 
-	-- "Place your egg in your pen" (QM, Oct 31), top centre, pulsing: while you've a stolen egg
+	-- "Place your egg in your pen" (QM, Oct 31), top centre, still (QM: no pulse), with guide
+	-- arrows on the ground back to your pen (client/ArrowTrail, the tutorial's): while you've a stolen egg
 	-- in your bag (EggBag: Server/Hatchery). Styled exactly like the offline line above; sits
 	-- under it when that one's up too. Hidden in a fight (the boss bar's spot) and during the
 	-- tutorial, which says "Place your egg!" itself (client/Tutorial hides it).
@@ -387,14 +388,6 @@ function Hud.start()
 	})
 	placeEgg.Outline.Thickness = offline.Outline.Thickness
 	placeEgg.Visible = not Ui.live
-	local placePulse = Ui.make(placeEgg, "Pulse", "UIScale")
-	if Ui.live then
-		TweenService:Create(
-			placePulse,
-			TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-			{ Scale = 1.08 }
-		):Play()
-	end
 
 	if not Ui.live then
 		return gui
@@ -428,24 +421,59 @@ function Hud.start()
 
 	-- only while you stand in your own pen (QM, Oct 27), and out of the way of the boss bar,
 	-- which shows in the same spot in a fight
-	local function inPen()
+	local function myArea()
 		local index = player:GetAttribute("Pen")
 		local map = workspace:FindFirstChild("Map")
 		local pens = map and map:FindFirstChild("Base") and map.Base:FindFirstChild("Pens")
-		local character = player.Character
-		local me = character and character:FindFirstChild("HumanoidRootPart")
-		if not (index and pens and me) then
-			return false
+		if not (index and pens) then
+			return nil
 		end
 		for _, pen in pens:GetChildren() do
-			local area = pen:GetAttribute("Index") == index and pen:FindFirstChild("Area")
-			if area then
-				local p = area.CFrame:PointToObjectSpace(me.Position)
-				return math.abs(p.X) <= area.Size.X / 2 and math.abs(p.Z) <= area.Size.Z / 2
+			if pen:GetAttribute("Index") == index then
+				return pen:FindFirstChild("Area")
 			end
 		end
-		return false
+		return nil
 	end
+	local function inPen()
+		local area = myArea()
+		local character = player.Character
+		local me = character and character:FindFirstChild("HumanoidRootPart")
+		if not (area and me) then
+			return false
+		end
+		local p = area.CFrame:PointToObjectSpace(me.Position)
+		return math.abs(p.X) <= area.Size.X / 2 and math.abs(p.Z) <= area.Size.Z / 2
+	end
+
+	-- the arrows home while the reminder's up, from just in front of you along the ground
+	-- (as client/Tutorial draws them); none once you're in your pen
+	local ARROW_UP = 1.5 -- studs over the ground (the tutorial's)
+	local homeTrail = require(script.Parent.ArrowTrail).new()
+	local homeRay = RaycastParams.new()
+	homeRay.FilterType = Enum.RaycastFilterType.Exclude
+	RunService.RenderStepped:Connect(function()
+		local character = player.Character
+		local me = character and character:FindFirstChild("HumanoidRootPart")
+		local area = placeEgg.Visible and me and not inPen() and myArea()
+		if not area then
+			homeTrail.draw()
+			return
+		end
+		local from = Vector3.new(me.Position.X, 0, me.Position.Z)
+		local to = Vector3.new(area.Position.X, 0, area.Position.Z)
+		local along = to - from
+		if along.Magnitude <= 8 then
+			homeTrail.draw()
+			return
+		end
+		homeRay.FilterDescendantsInstances = { character, workspace:FindFirstChild("ArrowTrail") }
+		local hit = workspace:Raycast(me.Position, Vector3.new(0, -60, 0), homeRay)
+		local y = (if hit then hit.Position.Y else me.Position.Y - 5) + ARROW_UP
+		from += along.Unit * 4
+		homeTrail.draw(Vector3.new(from.X, y, from.Z), Vector3.new(to.X, y, to.Z))
+	end)
+
 	if Ui.live then
 		task.spawn(function()
 			while true do
