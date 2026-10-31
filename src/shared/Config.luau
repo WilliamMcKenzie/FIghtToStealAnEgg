@@ -1860,11 +1860,11 @@ return {
 	-- is about an hour and a half in, after the Lava Valley.)
 	-- the "Your Base" marker (client/BaseMarker): QM's blue house and "Your Base" floating over
 	-- your own pen, only for you, until you first walk into it (BaseFound, saved)
-	-- (QM, Oct 31: both float well above the pen, as in QM's reference.) It hangs where the
-	-- owner's name does, over the gate, and stands in for your own name while it shows.
+	-- (QM, Oct 31: both a bit higher than the name card's first 9 studs.) It hangs over the
+	-- gate, just above your own pen's name card.
 	BaseMarker = {
-		SignHeight = 16, -- studs above the ground: every pen's owner name card (Server/Map)
-		Height = 21, -- studs above the pen's floor to the marker's middle ("Your Base" ends up about where the name was)
+		SignHeight = 12, -- studs above the ground: every pen's owner name card (Server/Map; same size as ever)
+		Height = 20, -- studs above the pen's floor to the marker's middle ("Your Base" sits just over the name card)
 		Size = 9, -- studs: the house's width (the text sits under it)
 		Bob = 0.6, -- studs it floats up and down
 		BobPeriod = 2.4, -- seconds
