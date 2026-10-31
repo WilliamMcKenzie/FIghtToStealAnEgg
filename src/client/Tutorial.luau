@@ -57,7 +57,7 @@ local WORDS = {
 }
 local ARROW_UP = 1.5 -- studs the guide arrows float over the ground (QM, Oct 31: raised)
 local PAN = { In = 1.2, Hold = 2.5, Out = 1, Back = 45, Up = 55 } -- the camera's trip to the training grounds: seconds, and studs back and up from their middle
-local AFTER_BOSS = 2.2 -- seconds after the bounty lands till "Buy a bow!" (the Boss Defeated banner's sweep)
+local AFTER_BOSS = 0.3 -- seconds after the bounty lands till "Buy a bow!" (no Boss Defeated banner in the tutorial: client/BossBounty)
 
 local gen = 0 -- bumped by every (re)start ("/tutorial" mid-way starts over)
 local myGen = 0 -- the run going now's

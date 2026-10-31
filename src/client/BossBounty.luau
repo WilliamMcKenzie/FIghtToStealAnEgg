@@ -102,7 +102,10 @@ local function bounty(amount, at, height)
 	if typeof(amount) ~= "number" or typeof(at) ~= "Vector3" then
 		return
 	end
-	Banner.show("Boss Defeated!", "Boss")
+	-- (not in the tutorial, QM Oct 31: its "Buy a bow!" prompt comes straight after)
+	if game:GetService("Players").LocalPlayer:GetAttribute("Tutorial") ~= true then
+		Banner.show("Boss Defeated!", "Boss")
+	end
 	local over = at + Vector3.new(0, (height or 10) * UP, 0)
 	local p, onScreen = camera:WorldToViewportPoint(over)
 	local from = if onScreen then Vector2.new(p.X, p.Y) else camera.ViewportSize * Vector2.new(0.5, 0.4)
