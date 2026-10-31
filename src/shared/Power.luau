@@ -9,8 +9,20 @@ local Config = require(script.Parent:WaitForChild("Config"))
 
 local Power = {}
 
+-- the curve's shape (Config.Power.Curve, set from the powerscaling dashboard): Log (each
+-- point counts for less, never stops growing), Power ((S / Scale) ^ Exponent: 0.5 is a
+-- square root), Linear (S / Scale), Exp (1 - e^(-S / Scale): fast, then levels off at 1)
 local function curve(strength)
-	return math.log(1 + math.max(strength or 0, 0) / Config.Power.Scale)
+	local tune = Config.Power
+	local x = math.max(strength or 0, 0) / tune.Scale
+	if tune.Curve == "Power" then
+		return x ^ (tune.Exponent or 0.5)
+	elseif tune.Curve == "Linear" then
+		return x
+	elseif tune.Curve == "Exp" then
+		return 1 - math.exp(-x)
+	end
+	return math.log(1 + x)
 end
 
 function Power.damage(strength)

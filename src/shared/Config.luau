@@ -2065,6 +2065,10 @@ return {
 		-- MountSpeed x Speed. Horse 44, Unicorn 84, Snake 114, Icebringer 134, Phoenix 178.
 		MaxSpeed = 200,
 		TopSpeed = 10,
+		-- the curve from MountSpeed to MaxSpeed (QM, Oct 31: the powerscaling dashboard):
+		-- "Log" (above), "Linear", or "Power" (SpeedExponent: under 1 rises fast then slows)
+		SpeedCurve = "Log",
+		SpeedExponent = 0.5,
 		Hitbox = 0.5, -- 0: size doesn't matter; 1: twice the hitbox, twice the health
 		TierGrowth = 1.6, -- each size tier reads this much bigger than the one below (LassoAPet's)
 		SmallSize = 10.4, -- studs a tier 1 pet reads (LassoAPet's PetSmallSize: the Horse at 1x its drawing)
@@ -2268,6 +2272,10 @@ return {
 		Damage = 0.65, -- (3 / log(101): 4x at 1,000)
 		Speed = 0.054, -- (1.25x at 1,000)
 		MaxSpeed = 2,
+		-- the curve's shape (Shared/Power; the powerscaling dashboard, tools/powerscale):
+		-- "Log" (above), "Power" ((S / Scale) ^ Exponent), "Linear" or "Exp" (levels off)
+		Curve = "Log",
+		Exponent = 0.5,
 	},
 
 	-- training (Server/Training, Server/Combat): Strength comes from attacking. Every hit
