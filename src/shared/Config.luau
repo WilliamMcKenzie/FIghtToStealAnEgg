@@ -3198,8 +3198,8 @@ return {
 	-- in as the fight starts and back to Ambient when it ends. The mp3s are in assets/music/
 	-- in the repo; upload them as Audio and paste the ids here. An empty id plays nothing.
 	Music = {
-		Ambient = { id = "", volume = 0.35 }, -- assets/music/ambient_music.mp3
-		Battle = { id = "", volume = 0.4 }, -- assets/music/battle_music.mp3
+		Ambient = { id = "rbxassetid://90782967010339", volume = 0.35 }, -- assets/music/ambient_music.mp3
+		Battle = { id = "rbxassetid://131329497801469", volume = 0.4 }, -- assets/music/battle_music.mp3
 		FadeIn = 1.5, -- seconds the incoming track takes to fade up
 		FadeOut = 1.5, -- seconds the outgoing track takes to fade out
 		Restart = true, -- the battle track starts from the top each fight (ambient resumes where it was)
