@@ -1,9 +1,11 @@
 -- The sky's colour per biome (QM, Oct 31): workspace.SkyColor, a Configuration with a
 -- Color3 attribute per area (Base, Meadow, Desert, Ice, Lava, Dungeon, Castle, Forest =
 -- the Magic Forest, Ocean) and TweenTime, the seconds it takes to blend into the next.
--- The sky you see is the fog (Lighting.FogStart = FogEnd, so everything past it, the
--- skybox too, is FogColor), so on the client Lighting.FogColor tweens to the colour of
--- the area you're standing in: a biome's Bounds, or a training ground's (its biome's
+-- Fog doesn't cover the skybox (QM, Oct 31: only the distant world changed colour), so
+-- the client hides the skybox behind a box of plain parts round the camera, past
+-- Lighting.FogEnd, which the fog paints FogColor like everything else that far off: the
+-- sky is then the fog, and the world fades into it at the horizon. Lighting.FogColor
+-- tweens to the colour of the area you're standing in: a biome's Bounds, or a training ground's (its biome's
 -- colour), Base north of the Meadow; in the corridors between areas it keeps the last.
 -- Change them in the Properties panel, in Edit mode to keep them or during Play to try
 -- them out; they're kept with the place, so your values win over Config.SkyColor, which
@@ -14,6 +16,7 @@
 
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local SkyColor = {}
@@ -106,7 +109,51 @@ local function areaAt(p)
 	return nil
 end
 
+-- the box over the skybox: six walls round the camera, just past the fog (as far as a
+-- part's 2048 studs still close the corners), in the fog's colour should it be nearer
+local SIDES = { Vector3.xAxis, -Vector3.xAxis, Vector3.zAxis, -Vector3.zAxis, Vector3.yAxis, -Vector3.yAxis }
+local function skyBox()
+	local walls = {}
+	local folder = nil
+	local function build()
+		folder = Instance.new("Folder")
+		folder.Name = "SkyBox"
+		table.clear(walls)
+		for _ in SIDES do
+			local p = Instance.new("Part")
+			p.Anchored = true
+			p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
+			p.CastShadow = false
+			p.Material = Enum.Material.Neon
+			p.Size = Vector3.new(2048, 2048, 1) -- (the biggest a part can be)
+			p.Parent = folder
+			table.insert(walls, p)
+		end
+		folder.Parent = workspace.CurrentCamera
+	end
+	RunService.RenderStepped:Connect(function()
+		local camera = workspace.CurrentCamera
+		if not camera then
+			return
+		end
+		if not folder or folder.Parent ~= camera then
+			build()
+		end
+		local at = camera.CFrame.Position
+		local d = math.clamp(Lighting.FogEnd + 50, 100, 1000)
+		local colour = Lighting.FogColor
+		for i, side in SIDES do
+			local wall = walls[i]
+			wall.CFrame = CFrame.lookAt(at + side * d, at, if math.abs(side.Y) > 0.5 then Vector3.zAxis else Vector3.yAxis)
+			if wall.Color ~= colour then
+				wall.Color = colour
+			end
+		end
+	end)
+end
+
 function SkyColor.watch()
+	skyBox()
 	local player = Players.LocalPlayer
 	local current = "Base"
 	local tween = nil
