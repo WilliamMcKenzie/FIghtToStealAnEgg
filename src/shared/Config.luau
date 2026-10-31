@@ -352,6 +352,32 @@ return {
 		},
 	},
 
+	-- the free gift (QM, Oct 31: like his reference's FREE! present): a red studded present with
+	-- a yellow bow, "FREE!" over it, a glowing ring and sparkles, across the gateway from Carl's
+	-- stall (Shared/GiftModel; Server/Map builds it fresh on every start, like the gates).
+	-- Walking into its ring opens the Free Reward! popup (client/FreeReward): like the game,
+	-- favorite it and join the group, then Claim gives Amount Power (Strength), once per
+	-- player (saved: FreeGift). Roblox can't tell a game if you liked it, so Like is on your
+	-- word; Favorite opens Roblox's favorite prompt; only the group is checked, by the server
+	-- (Server/FreeGift), once GroupId is set (till then it's on your word too).
+	FreeGift = {
+		X = 50, Z = -130, Yaw = 160, -- (Carl is at -50, -130, yaw 200: the other side of the gateway)
+		Scale = 1,
+		Amount = 500, -- Power it gives (the smallest Power pack is 1,000 for 49 Robux)
+		GroupId = nil, -- the Roblox group to join (its number from the group's page link)
+		GroupName = "our group", -- shown on the Join card
+		Reach = 30, -- studs from the gift the server takes a Claim from
+		OpenRadius = 7, -- walking this close (the ring) opens the popup
+		LabelTop = Color3.fromHex("eaff3c"), -- FREE!: lit lime at the top...
+		LabelBottom = Color3.fromHex("38d41a"), -- ...to green at the bottom
+		LabelHeight = 3.2, -- studs tall
+		RingColor = Color3.fromRGB(255, 226, 60),
+		RingRadius = 6,
+		BoxColor = Color3.fromRGB(226, 26, 36),
+		RibbonColor = Color3.fromRGB(255, 205, 30),
+		Bob = 0.35, -- studs it floats up and down (client/FreeGift)
+	},
+
 	-- bosses (server/Bosses.luau, client/BossView.luau). Each biome's sleeps in its arena's
 	-- middle until someone steals one of its eggs or hits it (Server/Eggs); /boss spawns a
 	-- Chicken in front of you. Model is a module in Shared/Animals (<Model>Model.luau),

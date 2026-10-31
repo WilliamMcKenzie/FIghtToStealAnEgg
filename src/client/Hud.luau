@@ -348,6 +348,7 @@ function Hud.start()
 	end
 
 	Hotbar.init(root, fig)
+	require(script.Parent.FreeReward).init(root) -- (the free gift's popup: walk into its ring)
 	require(script.Parent.WeaponShop).init(root) -- (Carl's: opened by Talking to him)
 	require(script.Parent.Shop).init(root, root:FindFirstChild("ShopButton")) -- (the Shop button's)
 	require(script.Parent.PetsPanel).init(root, root:FindFirstChild("PetsButton")) -- (the paw button's)
