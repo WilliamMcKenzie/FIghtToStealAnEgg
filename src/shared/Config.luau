@@ -243,46 +243,46 @@ return {
 	--   Cash packs sit 3 then 2 (wider), like QM's reference; Power packs 3 and 3.
 	Shop = {
 		Passes = {
-			{ Name = "Life", Title = "Extra Life", Text = 'Come back once with <font color="#7CFF4D">full HP</font>!', Badge = "+1", Icon = "PassLife", Look = "Life", Robux = 149, Id = nil, Gift = nil },
-			{ Name = "Damage", Title = "x2 Damage", Text = 'Deal <font color="#7CFF4D">2x</font> Damage!', Badge = "x2", Icon = "ShopSword", Look = "Damage", Robux = 299, Id = nil, Gift = nil },
-			{ Name = "Cash", Title = "x2 Cash", Text = 'Earn <font color="#7CFF4D">2x</font> Money!', Badge = "x2", Icon = "CashStack", Look = "Gold", Robux = 199, Id = nil, Gift = nil },
-			{ Name = "Growth", Title = "x2 Growth", Text = 'Eggs grow <font color="#7CFF4D">2x</font> Faster!', Badge = "x2", Icon = "PassGrowth", Look = "Growth", Robux = 149, Id = nil, Gift = nil },
+			{ Name = "Life", Title = "Extra Life", Text = 'Come back once with <font color="#7CFF4D">full HP</font>!', Badge = "+1", Icon = "PassLife", Look = "Life", Robux = 149, Id = nil, Gift = 3724543631 },
+			{ Name = "Damage", Title = "x2 Damage", Text = 'Deal <font color="#7CFF4D">2x</font> Damage!', Badge = "x2", Icon = "ShopSword", Look = "Damage", Robux = 299, Id = nil, Gift = 3724543964 },
+			{ Name = "Cash", Title = "x2 Cash", Text = 'Earn <font color="#7CFF4D">2x</font> Money!', Badge = "x2", Icon = "CashStack", Look = "Gold", Robux = 199, Id = nil, Gift = 3724544026 },
+			{ Name = "Growth", Title = "x2 Growth", Text = 'Eggs grow <font color="#7CFF4D">2x</font> Faster!', Badge = "x2", Icon = "PassGrowth", Look = "Growth", Robux = 149, Id = nil, Gift = 3724544080 },
 		},
 		Cash = {
-			{ Amount = 200000, Robux = 59, Product = nil, Icons = { { "Stack", 0, 229, 256 } } },
-			{ Amount = 2000000, Robux = 79, Product = nil, Icons = {
+			{ Amount = 200000, Robux = 59, Product = 3724541539, Icons = { { "Stack", 0, 229, 256 } } },
+			{ Amount = 2000000, Robux = 79, Product = 3724542219, Icons = {
 				{ "Stack", -111, 175, 219 }, { "StackFlip", 136, 191, 219 }, { "Stack", 13, 229, 294 },
 			} },
-			{ Amount = 10000000, Robux = 299, Product = nil, Icons = {
+			{ Amount = 10000000, Robux = 299, Product = 3724542603, Icons = {
 				{ "Stack", -111, 194, 219 }, { "Stack", 245, 247, 219 }, { "StackFlip", 154, 138, 219 },
 				{ "StackFlip", -240, 266, 219 }, { "Bills", 16, 229, 294 },
 			} },
-			{ Amount = 50000000, Robux = 599, Product = nil, Icons = {
+			{ Amount = 50000000, Robux = 599, Product = 3724542685, Icons = {
 				{ "Stack", -150, 130, 219 }, { "StackFlip", 150, 130, 219 }, { "StackFlip", -330, 240, 219 },
 				{ "Stack", 330, 240, 219 }, { "Stack", -150, 255, 240 }, { "StackFlip", 150, 255, 240 },
 				{ "Bills", 0, 220, 294 },
 			} },
-			{ Amount = 250000000, Robux = 1199, Product = nil, Icons = {
+			{ Amount = 250000000, Robux = 1199, Product = 3724542761, Icons = {
 				{ "Stack", -230, 110, 210 }, { "StackFlip", 0, 95, 210 }, { "StackFlip", 230, 110, 210 },
 				{ "StackFlip", -400, 240, 219 }, { "Stack", 400, 240, 219 }, { "Stack", -250, 250, 240 },
 				{ "StackFlip", 250, 250, 240 }, { "Bills", -110, 215, 294 }, { "Bills", 110, 225, 294 },
 			} },
 		},
 		Power = {
-			{ Amount = 1000, Robux = 49, Product = nil, Icons = { { "Sword", 0, 229, 280 } } },
-			{ Amount = 5000, Robux = 99, Product = nil, Icons = { { "SwordFlip", -70, 220, 260 }, { "Sword", 70, 220, 260 } } },
-			{ Amount = 25000, Robux = 199, Product = nil, Icons = {
+			{ Amount = 1000, Robux = 49, Product = 3724542839, Icons = { { "Sword", 0, 229, 280 } } },
+			{ Amount = 5000, Robux = 99, Product = 3724543307, Icons = { { "SwordFlip", -70, 220, 260 }, { "Sword", 70, 220, 260 } } },
+			{ Amount = 25000, Robux = 199, Product = 3724543392, Icons = {
 				{ "SwordFlip", -120, 205, 230 }, { "Sword", 120, 205, 230 }, { "Sword", 0, 235, 290 },
 			} },
-			{ Amount = 100000, Robux = 459, Product = nil, Icons = {
+			{ Amount = 100000, Robux = 459, Product = 3724543489, Icons = {
 				{ "Sword", -200, 235, 210 }, { "SwordFlip", 200, 235, 210 }, { "SwordFlip", -75, 200, 260 },
 				{ "Sword", 75, 200, 260 },
 			} },
-			{ Amount = 500000, Robux = 799, Product = nil, Icons = {
+			{ Amount = 500000, Robux = 799, Product = 3724543534, Icons = {
 				{ "Sword", -215, 250, 210 }, { "SwordFlip", 215, 250, 210 }, { "SwordFlip", -110, 165, 230 },
 				{ "Sword", 110, 165, 230 }, { "Sword", 0, 240, 300 },
 			} },
-			{ Amount = 2500000, Robux = 1499, Product = nil, Icons = {
+			{ Amount = 2500000, Robux = 1499, Product = 3724543583, Icons = {
 				{ "SwordFlip", -235, 140, 190 }, { "Sword", 235, 140, 190 }, { "Sword", -225, 265, 210 },
 				{ "SwordFlip", 225, 265, 210 }, { "SwordFlip", -110, 175, 240 }, { "Sword", 110, 175, 240 },
 				{ "Sword", 0, 240, 310 },
@@ -322,7 +322,34 @@ return {
 			Common = 30, Uncommon = 75, Rare = 150, Epic = 400, Legendary = 700, Mythic = 1000,
 			Divine = 1500, Celestial = 2000, Cosmic = 2500, Void = 3000, Omega = 3500,
 		},
-		Products = {},
+		Products = {
+			Shortbow = 3724544244,
+			Shortsword = 3724544324,
+			Staff = 3724544784,
+			Axe = 3724544883,
+			Longbow = 3724544961,
+			LightningStaff = 3724545053,
+			Longsword = 3724545134,
+			WindStaff = 3724545215,
+			WaterStaff = 3724545583,
+			Waraxe = 3724545659,
+			Club = 3724545740,
+			UnholyLance = 3724545809,
+			NatureBow = 3724545890,
+			BloodBow = 3724545936,
+			FireStaff = 3724546310,
+			RafflesiaBloom = 3724546371,
+			SunBlade = 3724546432,
+			StarlightBow = 3724546471,
+			NebulaStaff = 3724546497,
+			CometLance = 3724546540,
+			GalaxyBow = 3724546828,
+			VoidReaver = 3724546854,
+			AbyssStaff = 3724546888,
+			EclipseBow = 3724546933,
+			Worldbreaker = 3724546996,
+			GenesisStaff = 3724547071,
+		},
 	},
 
 	-- bosses (server/Bosses.luau, client/BossView.luau). Each biome's sleeps in its arena's
@@ -1864,7 +1891,7 @@ return {
 		-- the Active Pets popup's "+1 Equip" (QM's Figma, Oct 27; client/PetsPanel): one more
 		-- pen slot for Robux. Not sold yet: no developer product (SlotProduct) or server side.
 		SlotRobux = 30,
-		SlotProduct = nil,
+		SlotProduct = nil, -- (its product is 3724544159, QM Oct 31: set it here once the server gives the slot)
 	},
 
 	-- hatching (QM, Oct 25, LassoAPet's; Oct 27: all of it LassoAPet's 1:1, client/PenEggs):
