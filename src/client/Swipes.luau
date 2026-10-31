@@ -15,6 +15,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local SlashFx = require(Shared:WaitForChild("SlashFx"))
+local BossSounds = require(script.Parent.BossSounds)
 
 local folder = Instance.new("Folder")
 folder.Name = "SwipeFx"
@@ -151,6 +152,7 @@ local function strike(a)
 		return
 	end
 	SlashFx.play(a.info.origin + Vector3.new(0, S.Height, 0), a.info.dir, a.c, nil, a.info.seed)
+	BossSounds.play(Config.BossSounds.Swipe, a.info.origin.Position) -- (its whoosh: client/BossSounds)
 end
 
 ReplicatedStorage:WaitForChild("EnemySwipe").OnClientEvent:Connect(function(info)
