@@ -2593,7 +2593,7 @@ return {
 		Sounds = {
 			{ id = "rbxassetid://130345020654442", start = 0.04 }, -- Sword-Slash
 		},
-		Volume = 1,
+		Volume = 0.5, -- (QM: half)
 		SoundCut = 0.06, -- seconds a new slash takes to fade out the last one's sound
 
 		-- auto-attack (client/init.client.luau): no clicking
