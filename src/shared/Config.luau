@@ -1858,23 +1858,14 @@ return {
 	-- train StrengthBonus more (0.5: 1.5x after one, 2x after two) and your pen earn
 	-- CashBonus more (Config.Income). Weapons and pets are kept. (Balance, Oct 27: the first
 	-- is about an hour and a half in, after the Lava Valley.)
-	-- the "Your Base" marker (client/BaseMarker): QM's blue house and "Your Base" floating over
-	-- your own pen, only for you, until you first walk into it (BaseFound, saved)
-	-- (QM, Oct 31: both a bit higher than the name card's first 9 studs.) It hangs over the
-	-- gate, just above your own pen's name card.
-	BaseMarker = {
-		SignHeight = 12, -- studs above the ground: every pen's owner name card (Server/Map; same size as ever)
-		Height = 20, -- studs above the pen's floor to the marker's middle ("Your Base" sits just over the name card)
-		Size = 9, -- studs: the house's width (the text sits under it)
-		Bob = 0.6, -- studs it floats up and down
-		BobPeriod = 2.4, -- seconds
-	},
-	-- where you spawn (QM, Oct 31): in front of your own pen's gate, turned to face it, the
-	-- camera behind you looking at it too (Shared/PenSpawn, Server/Pens, client/SpawnCam)
-	PenSpawn = {
-		Distance = 14, -- studs out from the pen's gate
-		CamPitch = 22, -- degrees the camera looks down on you
-		CamDistance = 18, -- studs from you to the camera (only the first spawn: after that it keeps your zoom)
+	-- every pen's card (client/PenCards; QM's reference, Oct 31): its owner's avatar with
+	-- "@name" under it, high over the pen; over your own, the blue house and "Your Base"
+	-- instead, same size and place. Yours hides while you're inside your pen.
+	PenCard = {
+		Width = 24, -- studs: the picture's width (the text is as wide)
+		Text = 5, -- studs: the text's height
+		Bottom = 9, -- studs above the pen's floor to the text's bottom
+		Back = 0, -- studs from the pen's middle toward its back (away from the gate)
 	},
 	Rebirth = {
 		Cost = 400000000000,

@@ -48,7 +48,7 @@ local claimRemote -- (OfflineClaim: Data.start)
 local lastOffline = {} -- [player] = the offline cash they last claimed (a 2x bought after it pays that again)
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone", "OfflineCash", "BaseFound" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone", "OfflineCash" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end
@@ -211,7 +211,6 @@ function Data.reset(player)
 	end
 	Combat.refresh(player)
 	player:SetAttribute("TutorialDone", nil)
-	player:SetAttribute("BaseFound", nil)
 	player:SetAttribute("FreeGift", nil)
 	if Config.Tutorial.On then
 		Tutorial.begin(player, true) -- (a new account gets the tutorial)
@@ -246,17 +245,6 @@ function Data.start()
 	claimRemote.Parent = ReplicatedStorage
 	Store.product(Config.Data.OfflineDoubleProduct, function(player)
 		return claimOffline(player, true)
-	end)
-
-	-- (client/BaseMarker: you've walked into your pen, so its "Your Base" marker goes for good)
-	local found = Instance.new("RemoteEvent")
-	found.Name = "BaseFound"
-	found.Parent = ReplicatedStorage
-	found.OnServerEvent:Connect(function(player)
-		if not player:GetAttribute("BaseFound") then
-			player:SetAttribute("BaseFound", true)
-			task.spawn(save, player)
-		end
 	end)
 
 	local function joined(player)

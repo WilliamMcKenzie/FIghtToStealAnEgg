@@ -35,17 +35,10 @@ local Pens = {}
 local pens = {} -- [index] = Model
 local owners = {} -- [index] = player
 
-local function setSign(pen, text)
-	local sign = pen:FindFirstChild("OwnerSign")
-	local board = sign and sign:FindFirstChild("Board")
-	if board then
-		for _, gui in board:GetChildren() do
-			local label = gui:FindFirstChild("Text")
-			if label then
-				label.Text = text
-			end
-		end
-	end
+-- who owns it, for client/PenCards: OwnerId (a UserId) and OwnerName (@name), or neither
+local function setOwner(pen, player)
+	pen:SetAttribute("OwnerId", player and player.UserId)
+	pen:SetAttribute("OwnerName", player and player.Name)
 end
 
 function Pens.of(player)
@@ -323,7 +316,7 @@ function Pens.start(map)
 			if not owners[i] then
 				owners[i] = player
 				player:SetAttribute("Pen", i)
-				setSign(pens[i], player.DisplayName .. "'s Pen")
+				setOwner(pens[i], player)
 				return
 			end
 		end
@@ -337,7 +330,7 @@ function Pens.start(map)
 		for i, owner in owners do
 			if owner == player then
 				owners[i] = nil
-				setSign(pens[i], "")
+				setOwner(pens[i], nil)
 				clearEggs(pens[i])
 				clearPets(player)
 			end

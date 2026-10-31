@@ -645,8 +645,9 @@ local function baseFurniture(parent)
 		marker.Size = Vector3.new(base.PenSize, 12, base.PenSize)
 		marker.CFrame = CFrame.new(x, 6, z)
 		marker.Parent = pen
-		-- (no sign board, QM Oct 25: the owner's name floats over the gate instead; Server/
-		-- Pens writes it into OwnerSign.Board's label)
+		-- (no sign board: each pen's card, its owner's avatar and @name, or your house and
+		-- "Your Base", floats over it from client/PenCards (QM, Oct 31). OwnerSign.Board just
+		-- marks the gate, which the pens' eggs and pets face.)
 		local owner = Instance.new("Model")
 		owner.Name = "OwnerSign"
 		local board = Instance.new("Part")
@@ -654,24 +655,8 @@ local function baseFurniture(parent)
 		board.Anchored, board.CanCollide, board.CanQuery, board.CanTouch = true, false, false, false
 		board.Transparency = 1
 		board.Size = Vector3.new(1, 1, 1)
-		board.CFrame = side * CFrame.new(0, Config.BaseMarker.SignHeight, 0) -- (high up, QM Oct 31)
+		board.CFrame = side * CFrame.new(0, 9, 0)
 		board.Parent = owner
-		local gui = Instance.new("BillboardGui")
-		gui.Size = UDim2.fromScale(16, 2.4)
-		gui.MaxDistance = 120
-		gui.Parent = board
-		local label = Instance.new("TextLabel")
-		label.Name = "Text"
-		label.Size = UDim2.fromScale(1, 1)
-		label.BackgroundTransparency = 1
-		label.FontFace = SIGN_FONT
-		label.TextScaled = true
-		label.TextColor3 = Color3.new(1, 1, 1)
-		label.Text = ""
-		local stroke = Instance.new("UIStroke")
-		stroke.Thickness = 2
-		stroke.Parent = label
-		label.Parent = gui
 		owner.Parent = pen
 		pen.Parent = pens
 	end

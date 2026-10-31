@@ -614,7 +614,6 @@ end
 -- Oct 31: Server/Tutorial)
 function tutorialCommand(player)
 	if mayReboss(player) then
-		player:SetAttribute("BaseFound", nil) -- (the "Your Base" marker shows again: client/BaseMarker)
 		Tutorial.begin(player)
 	end
 end
