@@ -46,8 +46,17 @@ local function rideSpeed(mult)
 	if mult <= 1 then
 		return tune.MountSpeed * mult
 	end
-	local k = (tune.MaxSpeed - tune.MountSpeed) / math.log(tune.TopSpeed)
-	return math.min(tune.MountSpeed + k * math.log(mult), tune.MaxSpeed)
+	local span = tune.MaxSpeed - tune.MountSpeed
+	local curve = tune.SpeedCurve -- (the powerscaling dashboard's preset; Log by default)
+	local t
+	if curve == "Linear" then
+		t = (mult - 1) / (tune.TopSpeed - 1)
+	elseif curve == "Power" then
+		t = ((mult - 1) / (tune.TopSpeed - 1)) ^ (tune.SpeedExponent or 0.5)
+	else
+		t = math.log(mult) / math.log(tune.TopSpeed)
+	end
+	return math.min(tune.MountSpeed + span * t, tune.MaxSpeed)
 end
 local stats = {}
 function Pets.stats(kind)
