@@ -176,7 +176,7 @@ local function lay(nest, biome, popAt)
 		state.taken[player] = true -- (that's your egg from this round: QM, Oct 31)
 		player:SetAttribute(Eggs.takenKey(biome), true)
 		Hatchery.give(player, kind) -- (yours at once: in your hotbar until you die, QM Oct 25)
-		-- (counted for the Goal panel's "Steal 5 eggs", saved: Shared/Goals)
+		-- (counted for the Goal panel's "Steal 3 eggs", saved: Shared/Goals)
 		player:SetAttribute("Stolen", Stacks.format(Stacks.add(Stacks.parse(player:GetAttribute("Stolen")), biome, 1)))
 		if state.boss then
 			-- (the first egg calls the boss up; later ones join its fight)
