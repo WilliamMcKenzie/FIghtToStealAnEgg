@@ -4,6 +4,7 @@
 --
 --   Goals.current(player) -> {
 --     index = its place in the list (0 once past the end),
+--     goal = its Config.Goals.List entry (client/GoalGuide points the arrows by it),
 --     title = "Train Power" (RichText: a rarity's name is in its colour),
 --     have, need = the bar's numbers (have can pass need),
 --     text = "5.9K/10K" (or "$1.2K/$2K" for cash),
@@ -141,13 +142,14 @@ function Goals.current(player)
 		local state = check(player, g)
 		if state then
 			state.index = i
+			state.goal = g
 			return state
 		end
 	end
 	-- (all done: the next level, for good)
 	local power = player:GetAttribute("Power") or player:GetAttribute("Strength") or 0
 	local need = Levels.goal(power)
-	return { index = 0, title = "Train Power", have = power, need = need, text = Abbrev(power) .. "/" .. Abbrev(need) }
+	return { index = 0, goal = { Power = 0 }, title = "Train Power", have = power, need = need, text = Abbrev(power) .. "/" .. Abbrev(need) }
 end
 
 return Goals
