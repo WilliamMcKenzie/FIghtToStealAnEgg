@@ -57078,6 +57078,135 @@
       "Transparency": 1,
       "ZIndex": 10
      }
+    },
+    {
+     "children": [
+      {
+       "children": [],
+       "class": "UIStroke",
+       "name": "Outline",
+       "props": {
+        "Thickness": 4
+       }
+      }
+     ],
+     "class": "TextLabel",
+     "name": "OfflineEarn",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        0.5,
+        0
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "FontFace": {
+       "t": "Font",
+       "v": [
+        "rbxasset://fonts/families/Montserrat.json",
+        "ExtraBold",
+        "Normal"
+       ]
+      },
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        0.5,
+        0,
+        0,
+        14
+       ]
+      },
+      "RichText": true,
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        1000,
+        0,
+        60
+       ]
+      },
+      "Text": "You earn $0/Day offline! \ud83d\ude08",
+      "TextColor3": {
+       "t": "Color3",
+       "v": [
+        1,
+        1,
+        1
+       ]
+      },
+      "TextSize": 47,
+      "Transparency": 1
+     }
+    },
+    {
+     "children": [
+      {
+       "children": [],
+       "class": "UIStroke",
+       "name": "Outline",
+       "props": {
+        "Thickness": 4
+       }
+      },
+      {
+       "children": [],
+       "class": "UIScale",
+       "name": "Pulse",
+       "props": []
+      }
+     ],
+     "class": "TextLabel",
+     "name": "PlaceEgg",
+     "props": {
+      "AnchorPoint": {
+       "t": "Vector2",
+       "v": [
+        0.5,
+        0
+       ]
+      },
+      "BackgroundTransparency": 1,
+      "FontFace": {
+       "t": "Font",
+       "v": [
+        "rbxasset://fonts/families/Montserrat.json",
+        "ExtraBold",
+        "Normal"
+       ]
+      },
+      "Position": {
+       "t": "UDim2",
+       "v": [
+        0.5,
+        0,
+        0,
+        74
+       ]
+      },
+      "Size": {
+       "t": "UDim2",
+       "v": [
+        0,
+        1000,
+        0,
+        60
+       ]
+      },
+      "Text": "Place your egg in your pen",
+      "TextColor3": {
+       "t": "Color3",
+       "v": [
+        1,
+        1,
+        1
+       ]
+      },
+      "TextSize": 47,
+      "Transparency": 1
+     }
     }
    ],
    "class": "Frame",
