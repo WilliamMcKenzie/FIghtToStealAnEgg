@@ -3,7 +3,8 @@
 -- black outline, readable from the zoomed-out camera. Over your own pen it's the same card
 -- at the same size and place with QM's blue house and "Your Base" instead (QM: "on your own
 -- base swap for the base icon with the same scale"). Yours goes away while you're inside your
--- pen (QM: "goes away once you actually walk in the pen") and comes back when you leave.
+-- pen (QM: "goes away once you actually walk in the pen") and comes back when you leave,
+-- and stays hidden while the tutorial's running.
 -- An empty pen has no card. The server names each pen's owner (OwnerId, OwnerName:
 -- Server/Pens). Tuning in Config.PenCard; the house is HudImages.BaseHouse
 -- (assets/ui/hud/BaseHouse.png).
@@ -118,7 +119,8 @@ RunService.RenderStepped:Connect(function()
 				headshot(userId, card.picture)
 			end
 		end
-		card.board.Enabled = not (mine and inside(area))
+		-- (yours hides during the tutorial too, QM Oct 31)
+		card.board.Enabled = not (mine and (inside(area) or player:GetAttribute("Tutorial")))
 		-- over the pen's middle (or back from it, away from the gate), the text's bottom
 		-- C.Bottom up
 		local at = area.Position
