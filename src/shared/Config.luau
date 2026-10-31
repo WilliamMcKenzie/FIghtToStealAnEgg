@@ -2317,6 +2317,7 @@ return {
 		Steps = { 1, 1.5, 2.5, 4, 6 },
 		Bonus = { Damage = 0, Speed = 0 },
 		Color = Color3.fromRGB(255, 220, 0), -- the level by your name
+		Stroke = Color3.fromHex("875800"), -- its outline (QM)
 		PopupColor = Color3.fromRGB(90, 220, 255), -- "Level up!"
 	},
 

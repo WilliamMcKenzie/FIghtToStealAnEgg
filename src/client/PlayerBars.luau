@@ -132,7 +132,9 @@ local function attach(character)
 		if level then
 			local c = Config.Levels.Color
 			name.Text = string.format(
-				'<font color="#%s" size="%d">%d</font> %s',
+				'<stroke color="#%s" thickness="%d" joins="round"><font color="#%s" size="%d">%d</font></stroke> %s',
+				(Config.Levels.Stroke or Color3.new(0, 0, 0)):ToHex(),
+				math.max(1, math.round(nameStroke.Thickness)),
 				c:ToHex(),
 				math.max(1, math.floor(math.min(px, 100) * LEVEL_SIZE)),
 				level,
@@ -246,6 +248,7 @@ local function attach(character)
 	local function outline()
 		local t = math.max(1, bar.AbsoluteSize.Y * 4 / 18)
 		nameStroke.Thickness, hpStroke.Thickness = t, t
+		drawName() -- (the level's own outline matches it)
 	end
 	bar:GetPropertyChangedSignal("AbsoluteSize"):Connect(outline)
 	outline()
