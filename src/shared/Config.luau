@@ -1866,6 +1866,13 @@ return {
 		Bob = 0.6, -- studs it floats up and down
 		BobPeriod = 2.4, -- seconds
 	},
+	-- where you spawn (QM, Oct 31): in front of your own pen's gate, turned to face it, the
+	-- camera behind you looking at it too (Shared/PenSpawn, Server/Pens, client/SpawnCam)
+	PenSpawn = {
+		Distance = 14, -- studs out from the pen's gate
+		CamPitch = 22, -- degrees the camera looks down on you
+		CamDistance = 18, -- studs from you to the camera (only the first spawn: after that it keeps your zoom)
+	},
 	Rebirth = {
 		Cost = 400000000000,
 		Growth = 3,
