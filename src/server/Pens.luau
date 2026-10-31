@@ -16,6 +16,8 @@
 --                                  -- the pet where it is, no teleporting)
 --   Pens.dismountAt(player, kind, cframe) -- the next pet of this kind to come into their
 --                                  -- pen stands here (the one they got off), not anywhere
+--   (every spawn, on join and after dying, puts the player in front of their own pen's
+--   gate facing it: Shared/PenSpawn; client/SpawnCam turns the camera to match)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -26,6 +28,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Pets = require(Shared:WaitForChild("Pets"))
 local Horse = require(Shared:WaitForChild("Animals"):WaitForChild("Horse"))
+local PenSpawn = require(Shared:WaitForChild("PenSpawn"))
 
 local Pens = {}
 
@@ -275,11 +278,47 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 end)
 
+-- Each spawn (QM, Oct 31): in front of their own pen, turned to face it, standing on
+-- whatever floor is there. The tutorial's on-foot start lands there too.
+local function spawnAtPen(player, character)
+	local root = character:WaitForChild("HumanoidRootPart", 10)
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	if not (root and humanoid) then
+		return
+	end
+	if not character.Parent then
+		character.AncestryChanged:Wait()
+	end
+	task.wait() -- (after the engine has put it on the SpawnLocation)
+	local waited = 0
+	while not Pens.of(player) and waited < 5 and player.Parent do
+		waited += task.wait(0.1)
+	end
+	local spot = PenSpawn.spot(Pens.of(player))
+	if not spot or player.Character ~= character or not character.Parent then
+		return
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.RespectCanCollide = true
+	params.FilterDescendantsInstances = { character, petFolder, workspace:FindFirstChild("Bosses") }
+	local hit = workspace:Raycast(spot.Position + Vector3.new(0, 100, 0), Vector3.new(0, -200, 0), params)
+	local ground = if hit then hit.Position.Y else 0
+	root.AssemblyLinearVelocity = Vector3.zero
+	character:PivotTo(spot.Rotation + Vector3.new(spot.X, ground + humanoid.HipHeight + root.Size.Y / 2, spot.Z))
+end
+
 function Pens.start(map)
 	for _, pen in map.Base.Pens:GetChildren() do
 		pens[pen:GetAttribute("Index")] = pen
 	end
 	local function joined(player)
+		player.CharacterAdded:Connect(function(character)
+			spawnAtPen(player, character)
+		end)
+		if player.Character then
+			task.spawn(spawnAtPen, player, player.Character)
+		end
 		for i = 1, #pens do
 			if not owners[i] then
 				owners[i] = player
