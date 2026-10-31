@@ -11,7 +11,8 @@
 --             it; PenEggs' big arrow is over it and its prompt hatches it
 --   2b. ride  "Ride your horse!": the hand and arrows on what hatched; its Ride prompt
 --             puts you on it (QM, Oct 31: "after hatching they must ride")
---   3. steal  "Steal an egg!", arrows to the nearest egg in the Meadow's nests (filled at
+--   3. steal  "Steal an egg!", arrows to the Meadow egg in a clear straight line from your
+--             pen (stealTarget; QM Oct 31), else the nearest one (nests filled at
 --             once if they're empty: TutorialEggs)
 --   4. fight  its boss (always Config.Tutorial.Boss, all but harmless): "Fight boss!".
 --             Dying sends you back to 3
@@ -34,6 +35,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local MapData = require(Shared.MapData)
+local PenSpawn = require(Shared.PenSpawn)
 local Banner = require(script.Parent.Banner)
 local WeaponShop = require(script.Parent.WeaponShop)
 
@@ -289,6 +291,45 @@ local function meadowEggs()
 	return list
 end
 
+-- The egg the arrows lead to (QM, Oct 31): from every pen one of the Meadow's eggs is in a
+-- straight line, not blocked by the base's walls or the gateway's pillars; the arrows are
+-- straight, so that's the one (from the far left pen it's the rightmost egg). Seen from
+-- the spot in front of your pen's gate (Shared/PenSpawn), chest high; if none is clear
+-- (no pen yet, or that egg's gone), the nearest egg.
+local sightParams = RaycastParams.new()
+sightParams.FilterType = Enum.RaycastFilterType.Include
+local SIGHT_UP = 5 -- studs over the ground the line of sight runs
+
+local function clearFromPen(egg)
+	local map = workspace:FindFirstChild("Map")
+	local spot = PenSpawn.spot(PenSpawn.pen(player:GetAttribute("Pen")))
+	local at = where(egg)
+	if not (map and spot and at) then
+		return false
+	end
+	local blockers = {}
+	for _, name in { "Walls", "Pillars" } do
+		local f = map:FindFirstChild(name)
+		if f then
+			table.insert(blockers, f)
+		end
+	end
+	sightParams.FilterDescendantsInstances = blockers
+	local from = spot.Position + Vector3.new(0, SIGHT_UP, 0)
+	local to = Vector3.new(at.X, math.max(at.Y, 0) + SIGHT_UP, at.Z)
+	return workspace:Raycast(from, to - from, sightParams) == nil
+end
+
+local function stealTarget(list)
+	local clear = {}
+	for _, egg in list do
+		if clearFromPen(egg) then
+			table.insert(clear, egg)
+		end
+	end
+	return nearest(if #clear > 0 then clear else list)
+end
+
 local function meadowBoss()
 	local folder = workspace:FindFirstChild("Bosses")
 	for _, body in if folder then folder:GetChildren() else {} do
@@ -481,7 +522,7 @@ local function run(thisGen)
 				asked = os.clock()
 				ReplicatedStorage:WaitForChild("TutorialEggs"):FireServer()
 			end
-			point(nil, nearest(list))
+			point(nil, stealTarget(list))
 		end)
 		point(nil, nil)
 		till(function()
