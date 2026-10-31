@@ -22,6 +22,7 @@
 --
 --   Eggs.start(map)   -- once, after Map.ensure()
 --   Eggs.refill()     -- every nest full again now, no fight on (the /reboss command)
+--   Eggs.ensure(biome) -- its nests full again if they're empty and no fight's on
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -153,7 +154,11 @@ local function lay(nest, biome, popAt)
 		if state.boss then
 			-- (the first egg calls the boss up; later ones join its fight)
 			lock(player, biome) -- (first, so their screen knows the boss that appears is theirs)
-			if Bosses.summon(biome, player) then
+			-- (the tutorial's boss is always Config.Tutorial.Boss)
+			local kind = if player:GetAttribute("Tutorial") and table.find(Config.BossPools[biome] or {}, Config.Tutorial.Boss)
+				then Config.Tutorial.Boss
+				else nil
+			if Bosses.summon(biome, player, kind) then
 				state.fight = true
 			end
 		end
@@ -205,6 +210,15 @@ function cool(biome)
 			fill(biome)
 		end
 	end)
+end
+
+-- a biome's nests full again now if they're empty and no fight's on there (the tutorial's
+-- "Steal an egg!" mustn't wait out a cooldown: Server/Tutorial)
+function Eggs.ensure(biome)
+	local state = biomes[biome]
+	if state and not state.fight and next(state.eggs) == nil then
+		fill(biome)
+	end
 end
 
 function Eggs.refill()

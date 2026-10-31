@@ -13,6 +13,10 @@
 -- times Config.Data.OfflineRate for the time away, up to Config.Data.OfflineMax seconds. Player attribute OfflinePaid is
 -- what came in, for client/Hud's "+$X" popup.
 --
+-- A brand new account (nothing saved) starts the tutorial (Server/Tutorial); TutorialDone
+-- is saved the moment it's over, so a returning player skips it. (Saves from before the
+-- tutorial have no TutorialDone, but they aren't new: no tutorial for them either.)
+--
 -- Rebirth lives here too: with enough cash (Config.Rebirth), your cash, Strength,
 -- training grounds and regions reset, and every hit trains StrengthBonus more for each rebirth.
 --
@@ -27,6 +31,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Combat = require(script.Parent.Combat)
 local PetInventory = require(script.Parent.PetInventory)
+local Tutorial = require(script.Parent.Tutorial)
 
 local Data = {}
 
@@ -35,7 +40,7 @@ local loaded = {} -- [player] = true once their data is in
 local warned = false
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "PetIndex", "IndexClaimed", "Passes" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "PetIndex", "IndexClaimed", "Passes", "TutorialDone" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end
@@ -72,6 +77,9 @@ end
 local function load(player)
 	if not store then
 		loaded[player] = true
+		if Config.Tutorial.On then
+			Tutorial.begin(player) -- (no saves here: every playtest is a new account)
+		end
 		return
 	end
 	local ok, data = pcall(function()
@@ -86,6 +94,10 @@ local function load(player)
 	end
 	if player.Parent == nil then
 		return
+	end
+	-- (a brand new account, nothing saved: the tutorial, Server/Tutorial)
+	if data == nil and Config.Tutorial.On then
+		Tutorial.begin(player)
 	end
 	if type(data) == "table" then
 		for _, key in keys() do
@@ -165,6 +177,10 @@ function Data.reset(player)
 		player:SetAttribute("Region" .. name, nil)
 	end
 	Combat.refresh(player)
+	player:SetAttribute("TutorialDone", nil)
+	if Config.Tutorial.On then
+		Tutorial.begin(player) -- (a new account gets the tutorial)
+	end
 	task.spawn(save, player)
 end
 
@@ -183,6 +199,10 @@ function Data.start()
 		player:SetAttribute("Rebirths", player:GetAttribute("Rebirths") or 0)
 		player:SetAttribute("Eggs", player:GetAttribute("Eggs") or 0)
 		load(player)
+		-- (the tutorial's done: saved now, so leaving straight after can't lose it)
+		player:GetAttributeChangedSignal("TutorialDone"):Connect(function()
+			task.spawn(save, player)
+		end)
 		-- (the HUD's gain popups count from here, so the saved Cash and Power don't pop up)
 		player:SetAttribute("Loaded", true)
 	end

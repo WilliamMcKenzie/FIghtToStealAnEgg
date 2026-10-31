@@ -33,6 +33,7 @@ local Regen = require(script.Regen)
 local Regions = require(script.Regions)
 require(script.SprintAbility) -- (the SprintPets' sprints: burrowing, flying, smashing, bombs)
 local Training = require(script.Training)
+local Tutorial = require(script.Tutorial)
 local Lives = require(script.Lives)
 local Store = require(script.Store)
 
@@ -56,6 +57,7 @@ PetInventory.start() -- (the pets you own and keep in your pen: the Backpack)
 PetIndex.start() -- (every pet you've owned, and its reward: the Index)
 Hatchery.start() -- (stolen eggs in your hotbar, put down in your pen and hatched)
 Eggs.start(map)
+Tutorial.start(Eggs) -- (the new player tutorial's server side)
 Training.start()
 Regions.start()
 Regen.start() -- (always healing, at your pet's Regen)
@@ -104,7 +106,7 @@ local function ride(character)
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = 0
 end
-local requestBoss, reboss, bossFight, bossList, swapPet, givePet, buyWeapon, giveWeapon, giveWeapons, giveCash, resetPlayer -- (below)
+local requestBoss, reboss, bossFight, bossList, swapPet, givePet, buyWeapon, giveWeapon, giveWeapons, giveCash, resetPlayer, tutorialCommand, skipTutorial -- (below)
 local function joined(player)
 	-- the HUD's counters (client/Hud.luau): Power is your Strength (Server/Combat
 	-- keeps it), Cash starts at 0 (no saving yet)
@@ -143,6 +145,10 @@ local function joined(player)
 			giveCash(player, message)
 		elseif message:lower():match("^/reset") then
 			resetPlayer(player)
+		elseif message:lower():match("^/skiptutorial") then
+			skipTutorial(player)
+		elseif message:lower():match("^/tutorial") then
+			tutorialCommand(player)
 		end
 	end)
 	if player.Character then
@@ -575,7 +581,21 @@ function resetPlayer(player)
 		player:LoadCharacter() -- (a fresh start: off any fight, back at the spawn)
 	end
 end
+-- /tutorial: the new player tutorial again from the start; /skiptutorial: it's over (QM,
+-- Oct 31: Server/Tutorial)
+function tutorialCommand(player)
+	if mayReboss(player) then
+		Tutorial.begin(player)
+	end
+end
+function skipTutorial(player)
+	if mayReboss(player) then
+		Tutorial.finish(player)
+	end
+end
 for _, cmd in {
+	{ "Tutorial", tutorialCommand },
+	{ "Skiptutorial", skipTutorial },
 	{ "Buy", buyWeapon },
 	{ "Weapon", giveWeapon },
 	{ "Swords", giveWeapons },

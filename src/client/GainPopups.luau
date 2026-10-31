@@ -13,6 +13,9 @@
 --
 --   GainPopups.init(row, name, counter, color, band)  -- row: the counter's Frame; counter: its
 --                                                     -- Value; band: its band's Figma y
+--   GainPopups.expect(name, amount)  -- the next `amount` gained has its own popup (a boss's
+--                                    -- bounty: client/BossBounty), so it doesn't pop here
+--   GainPopups.parts(name) -> { row, template, counter } (once init'd)
 
 local Players = game:GetService("Players")
 local TextService = game:GetService("TextService")
@@ -36,6 +39,16 @@ local PAD = 8 -- Figma px of room round it in the CanvasGroup, for the outlines
 local REFERENCE = "14K"
 
 local player = Players.LocalPlayer
+local expected = {} -- [name] = gain still to come that pops elsewhere
+local parts = {} -- [name] = { row, template, counter }
+
+function GainPopups.expect(name, amount)
+	expected[name] = (expected[name] or 0) + amount
+end
+
+function GainPopups.parts(name)
+	return parts[name]
+end
 
 -- the popup in its Figma px (the 25px number, then the 34px icon starting 8px before the
 -- number's end), scaled up so the number is the counter's size, 60 (QM, Oct 30)
@@ -112,6 +125,7 @@ function GainPopups.init(row, name, counter, color, band)
 	if not Ui.live then
 		return
 	end
+	parts[name] = { row = row, template = template, counter = counter }
 
 	local function show(amount)
 		local popup = Ui.copy(template, "Gain", row)
@@ -146,6 +160,12 @@ function GainPopups.init(row, name, counter, color, band)
 		end
 		local gain = value - last
 		last = value
+		if gain <= 0 then
+			return
+		end
+		local skip = math.min(gain, expected[name] or 0)
+		expected[name] = (expected[name] or 0) - skip
+		gain -= skip
 		if gain <= 0 then
 			return
 		end
