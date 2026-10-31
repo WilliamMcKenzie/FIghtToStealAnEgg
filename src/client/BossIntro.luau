@@ -1,7 +1,9 @@
 -- A boss arriving (QM, Oct 25): when one appears in workspace.Bosses for the fight you're
--- locked into (you, or someone with you, stole one of its eggs), the camera swings over
--- to its dais, it rises up there (client/BossView) while the screen's edges pulse red,
--- and the camera swings back. The fight starts once it's back (the server holds the boss
+-- locked into (you, or someone with you, stole one of its eggs), the camera jumps to the
+-- fight camera's view of the whole arena (client/FightCam), zooms straight in on the boss
+-- in the middle as it rises there (client/BossView) while the screen's edges pulse red,
+-- and zooms back out to the arena (QM, Oct 31: it used to start from behind you, where
+-- trees and rocks got in the way). The fight starts once it's back (the server holds the boss
 -- still and unhittable till then: Server/Bosses). Timings and looks: Config.BossIntro.
 --
 -- The camera isn't taken over: each frame this blends whatever camera is active toward
@@ -12,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local FightCam = require(script.Parent:WaitForChild("FightCam"))
 
 local INTRO = Config.BossIntro
 
@@ -70,19 +73,17 @@ end
 
 local showing = nil -- { body, start }
 
--- where the camera looks from: back toward wherever you were looking from, raised up
-local function shot(body, from)
+-- the shot of the boss: the arena shot's angle, moved in until it's close on the boss
+local function shot(body, arena)
 	local size = math.max(body.Size.Y, (body:GetAttribute("Radius") or 4) * 2)
 	local distance = size * INTRO.Distance + 10
-	local centre = body.Position
-	local away = (from - centre) * Vector3.new(1, 0, 1)
-	away = if away.Magnitude > 1e-3 then away.Unit else Vector3.new(0, 0, 1)
-	local eye = centre + away * distance + Vector3.new(0, distance * INTRO.Height, 0)
-	return CFrame.lookAt(eye, centre)
+	local look = arena.LookVector
+	return CFrame.lookAt(body.Position - look * distance, body.Position)
 end
 
-local function play(body, start)
-	showing = { body = body, start = start, from = camera.CFrame.Position }
+local function play(body, start, biome)
+	FightCam.snap() -- (straight to the arena view, no easing in from behind you)
+	showing = { body = body, start = start, biome = biome, from = camera.CFrame }
 end
 
 RunService:BindToRenderStep("BossIntro", Enum.RenderPriority.Camera.Value + 5, function()
@@ -100,7 +101,11 @@ RunService:BindToRenderStep("BossIntro", Enum.RenderPriority.Camera.Value + 5, f
 		then smooth(t / INTRO.PanIn)
 		elseif t < INTRO.PanIn + INTRO.Hold then 1
 		else 1 - smooth((t - INTRO.PanIn - INTRO.Hold) / INTRO.PanOut)
-	camera.CFrame = camera.CFrame:Lerp(shot(showing.body, showing.from), w)
+	-- (from the fight camera's arena shot, so both ends match it exactly; without one,
+	-- from wherever the camera was)
+	local arena = FightCam.shot(showing.biome) or showing.from
+	camera.CFrame = arena:Lerp(shot(showing.body, arena), w)
+	camera.Focus = CFrame.new(showing.body.Position)
 	-- red pulses once it's in view, as it rises
 	local p = (t - INTRO.PanIn) / INTRO.PulseTime
 	if p > 0 and p < INTRO.Pulses then
@@ -120,7 +125,7 @@ task.spawn(function()
 		-- (yours if you're in its fight; give the lock a moment to arrive alongside it)
 		for _ = 1, 10 do
 			if player:GetAttribute("LockedIn") == biome then
-				play(body, arrived)
+				play(body, arrived, biome)
 				return
 			end
 			task.wait(0.05)

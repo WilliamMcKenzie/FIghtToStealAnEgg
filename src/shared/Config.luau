@@ -1397,12 +1397,13 @@ return {
 	-- edges pulse red (it's after you), then the camera pans back and the fight starts
 	-- (client/BossIntro; till then it can't be hit and does nothing: Server/Bosses)
 	BossIntro = {
-		PanIn = 0.8, -- seconds the camera takes to swing over to it
+		-- (it starts from the fight camera's whole-arena view, zooms in on the boss and back out)
+		PanIn = 0.8, -- seconds the camera takes to zoom in on it
 		Hold = 1.6, -- seconds looking at it (it appears at the start of this)
-		PanOut = 0.6, -- seconds back to your own camera; the fight starts once it's back
+		PanOut = 0.6, -- seconds back out to the arena view; the fight starts once it's back
 		Appear = 0.5, -- seconds it takes to grow from nothing to full size
-		Distance = 2.2, -- the shot's distance from it, in its own sizes (plus 10 studs)
-		Height = 0.6, -- how high the camera sits, of that distance
+		Distance = 2.2, -- the close shot's distance from it, in its own sizes (plus 10 studs),
+		-- along the fight camera's angle
 		Pulses = 2, -- red pulses round the screen's edge
 		PulseTime = 0.55, -- seconds each pulse takes
 		VignetteColor = Color3.fromRGB(255, 30, 30),
