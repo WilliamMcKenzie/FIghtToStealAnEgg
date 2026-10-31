@@ -357,6 +357,45 @@ function Hud.start()
 	require(script.Parent.IndexPanel).init(root, root:FindFirstChild("IndexButton")) -- (the Index button's)
 	require(script.Parent.OfflineCash).init(root) -- (what came in while you were away: pops up on joining)
 
+	-- "You earn $1.2B/Day offline! 😈" (QM, Oct 27: LassoAPet's, 1:1), top centre: the most a
+	-- day offline pays (Server/Data: Config.Data.OfflineRate of your pen's income, the Income
+	-- attribute, for up to OfflineMax seconds)
+	local offline = label(root, "OfflineEarn", {
+		RichText = true,
+		Text = "You earn $0/Day offline! 😈",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = TEXT_BIG,
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 14),
+		Size = UDim2.fromOffset(1000, 60),
+	})
+	offline.Outline.Thickness = 4
+	offline.Visible = not Ui.live -- (shown while baking in Edit, so QM sees it)
+
+	-- "Place your egg in your pen" (QM, Oct 31), top centre, pulsing: while you've a stolen egg
+	-- in your bag (EggBag: Server/Hatchery). Styled exactly like the offline line above; sits
+	-- under it when that one's up too. Hidden in a fight (the boss bar's spot) and during the
+	-- tutorial, which says "Place your egg!" itself (client/Tutorial hides it).
+	local PLACE_TOP, PLACE_UNDER = 14, 74 -- design px from the top: alone, under the offline line
+	local placeEgg = label(root, "PlaceEgg", {
+		Text = "Place your egg in your pen",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = TEXT_BIG,
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, PLACE_UNDER),
+		Size = UDim2.fromOffset(1000, 60),
+	})
+	placeEgg.Outline.Thickness = offline.Outline.Thickness
+	placeEgg.Visible = not Ui.live
+	local placePulse = Ui.make(placeEgg, "Pulse", "UIScale")
+	if Ui.live then
+		TweenService:Create(
+			placePulse,
+			TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+			{ Scale = 1.08 }
+		):Play()
+	end
+
 	if not Ui.live then
 		return gui
 	end
@@ -376,19 +415,6 @@ function Hud.start()
 	count("Power")
 	count("Cash")
 
-	-- "You earn $1.2B/Day offline! 😈" (QM, Oct 27: LassoAPet's, 1:1), top centre: the most a
-	-- day offline pays (Server/Data: Config.Data.OfflineRate of your pen's income, the Income
-	-- attribute, for up to OfflineMax seconds)
-	local offline = label(root, "OfflineEarn", {
-		RichText = true,
-		Text = "You earn $0/Day offline! 😈",
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextSize = TEXT_BIG,
-		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 14),
-		Size = UDim2.fromOffset(1000, 60),
-	})
-	offline.Outline.Thickness = 4
 	local function earn()
 		local day = (player:GetAttribute("Income") or 0) * Config.Data.OfflineRate * Config.Data.OfflineMax
 		offline.Text = string.format(
@@ -420,11 +446,12 @@ function Hud.start()
 		end
 		return false
 	end
-	offline.Visible = not Ui.live
 	if Ui.live then
 		task.spawn(function()
 			while true do
 				offline.Visible = inPen() and not bar.Visible
+				placeEgg.Visible = player:GetAttribute("EggBag") ~= nil and not bar.Visible
+				placeEgg.Position = UDim2.new(0.5, 0, 0, if offline.Visible then PLACE_UNDER else PLACE_TOP)
 				task.wait(0.2)
 			end
 		end)
