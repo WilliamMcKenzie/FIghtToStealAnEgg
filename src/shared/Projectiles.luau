@@ -20,6 +20,11 @@
 --                                  -- Flower Staff's orbs, say), then its own Shot over them
 --   Projectiles.step(shot, dt, targets) -> { target, ... } -- what it hit this step;
 --                                                         -- shot.dead once it's spent
+--   Projectiles.forgiving(r) -> r  -- an enemy attack's real reach for a drawn radius r:
+--                                  -- Config.EnemyHit.Forgive smaller, at most halved
+--   Projectiles.forgive(shots) -> shots -- an enemy's volley: each only hits a player whose
+--                                  -- middle it passes over (targets of radius 0), and then
+--                                  -- only well inside it (Server/BossAttacks, client/Shots)
 
 local Config = require(script.Parent.Config)
 local Weapons = require(script.Parent.Weapons.Weapons)
@@ -130,6 +135,17 @@ local function closest(a, b, p)
 	local len2 = ab:Dot(ab)
 	local t = if len2 > 1e-6 then math.clamp((p - a):Dot(ab) / len2, 0, 1) else 0
 	return a + ab * t
+end
+
+function Projectiles.forgiving(r)
+	return math.max(r * 0.5, r - Config.EnemyHit.Forgive)
+end
+
+function Projectiles.forgive(shots)
+	for _, shot in shots do
+		shot.slack = Projectiles.forgiving(shot.radius) - shot.radius
+	end
+	return shots
 end
 
 function Projectiles.step(shot, dt, targets)

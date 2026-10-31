@@ -67,8 +67,10 @@
 -- Only players locked into its fight (LockedIn = its biome) are hit, so someone passing
 -- through is never caught. A sprint ability (Server/SprintAbility: the player's
 -- SprintAbility attribute) dodges too: burrowed, nothing hits you; flying (or up on a
--- Leap), only homing Magic shots do (QM, Oct 30). All of it is server parts in workspace.BossFx. A pet bigger
--- than the Horse is easier to hit: everything reaches its hitbox's extra (Shared/Pets).
+-- Leap), only homing Magic shots do (QM, Oct 30). All of it is server parts in workspace.BossFx.
+-- Every hit is forgiving (QM, Oct 31): only the player's middle (their root) counts, never
+-- the rider's or pet's edges, and it has to be inside an area Config.EnemyHit.Forgive
+-- smaller than what's drawn (forgiving(r)), so a near miss never lands.
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
 --         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too, with
@@ -129,8 +131,8 @@ local bossShot = Instance.new("RemoteEvent")
 bossShot.Name = "BossShot"
 bossShot.Parent = ReplicatedStorage
 
--- how wide a player is to a boss's Magic shot (studs, plus their pet's extra hitbox)
-local PLAYER_RADIUS = 1
+-- an enemy attack's real reach for a drawn radius: a little inside it (Config.EnemyHit)
+local forgiving = Projectiles.forgiving
 
 -- a living player's root, humanoid and extra: how much further their pet's hitbox reaches
 -- than the Horse's
@@ -196,7 +198,7 @@ local function blast(biome, centre, radius, damage, hit)
 		if hit and hit[f.humanoid] then
 			continue
 		end
-		if flat(f.root.Position - centre).Magnitude <= radius + 1 + f.extra and not dodges(f) then
+		if flat(f.root.Position - centre).Magnitude <= forgiving(radius) and not dodges(f) then
 			if hit then
 				hit[f.humanoid] = true
 			end
@@ -352,7 +354,7 @@ local function cast(body, b, i, a)
 	local origin = Vector3.new(from.X, groundAt(from) + (a.Height or 4), from.Z)
 	local seed = math.random(0, 2 ^ 30 - 1)
 	local s = Projectiles.bossShot(a)
-	for _, shot in Projectiles.volley(s, true, origin, yaw, seed) do
+	for _, shot in Projectiles.forgive(Projectiles.volley(s, true, origin, yaw, seed)) do
 		table.insert(magic, { shot = shot, damage = a.Damage, biome = b.biome })
 	end
 	bossShot:FireAllClients(body, i, yaw, seed, origin)
@@ -443,8 +445,10 @@ local function swipe(body, b, a, pos, toward)
 				return
 			end
 			for _, f in fighters(b.biome) do
-				-- (solid: right up against it, inside the crescent, counts too)
-				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), 1 + f.extra, true) and not dodges(f) then
+				-- (solid: right up against it, inside the crescent, counts too; your middle has
+				-- to be Forgive studs inside its edges, Config.EnemyHit)
+				local inside = -Config.EnemyHit.Forgive
+				if SlashFx.contains(o, d, origin:PointToObjectSpace(f.root.Position), inside, true) and not dodges(f) then
 					Lives.hurt(f.humanoid, a.Damage)
 				end
 			end
@@ -698,7 +702,7 @@ function BossAttacks.move(body, b, dt, pos)
 		for _, f in fighters(b.biome) do
 			if not m.hit[f.humanoid] then
 				local off = flat(f.root.Position - at)
-				if off.Magnitude <= b.c.Radius + 1 + f.extra and not dodges(f) then
+				if off.Magnitude <= forgiving(b.c.Radius) and not dodges(f) then
 					m.hit[f.humanoid] = true
 					Lives.hurt(f.humanoid, m.damage)
 				end
@@ -783,7 +787,7 @@ RunService.Heartbeat:Connect(function(dt)
 			if not targets then
 				targets = { homing = {}, plain = {} }
 				for _, f in fighters(m.biome) do
-					local t = { body = f.root, pos = f.root.Position, radius = PLAYER_RADIUS + f.extra, f = f }
+					local t = { body = f.root, pos = f.root.Position, radius = 0, f = f } -- (its middle: Projectiles.forgive)
 					if not dodges(f, true) then
 						table.insert(targets.homing, t)
 					end
@@ -809,7 +813,7 @@ RunService.Heartbeat:Connect(function(dt)
 		s.travelled += step
 		local hit = false
 		for _, f in fighters(s.biome) do
-			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + 1.5 + f.extra and not dodges(f) then
+			if flat(f.root.Position - ball.Position).Magnitude <= forgiving(s.radius) and not dodges(f) then
 				Lives.hurt(f.humanoid, s.damage)
 				hit = true
 				break
