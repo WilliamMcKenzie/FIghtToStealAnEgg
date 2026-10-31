@@ -29,10 +29,11 @@ local FIGHT_RANGE = 400 -- studs it shows within in a fight (the camera's far ba
 local FLASH = 0.1 -- seconds the green takes to fade back from white on a hit
 local TRAIL = 0.3 -- seconds the white trail takes to catch up
 local HURT = Color3.fromRGB(255, 60, 60) -- the damage numbers over players
--- the level before the name, yellow and smaller (QM, Oct 31: "13 Bak"): this much of the
--- name's size (Config.Levels.Color)
-local LEVEL_SIZE = 0.75
+-- the level before the name, yellow and a little smaller (QM, Oct 31: "13 Bak"): LEVEL_LESS
+-- px under the name's size (Config.Levels.Color)
+local LEVEL_LESS = 1
 local NAME_FILL = 0.8 -- the name's text height, of its 30 px box
+local NAME_MORE = 1 -- px on top of that (QM)
 
 -- studs out of a fight, screen px in one (the local player's LockedIn)
 local bars = setmetatable({}, { __mode = "k" }) -- [gui] = true
@@ -126,7 +127,7 @@ local function attach(character)
 	name.RichText = true
 	local display = if player then player.DisplayName else character.Name
 	local function drawName()
-		local px = math.max(1, math.floor(name.AbsoluteSize.Y * NAME_FILL))
+		local px = math.max(1, math.floor(name.AbsoluteSize.Y * NAME_FILL) + NAME_MORE)
 		name.TextSize = math.min(px, 100)
 		local level = player and player:GetAttribute("Level")
 		if level then
@@ -136,7 +137,7 @@ local function attach(character)
 				(Config.Levels.Stroke or Color3.new(0, 0, 0)):ToHex(),
 				math.max(1, math.round(nameStroke.Thickness)),
 				c:ToHex(),
-				math.max(1, math.floor(math.min(px, 100) * LEVEL_SIZE)),
+				math.max(1, math.min(px, 100) - LEVEL_LESS),
 				level,
 				(display:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"))
 			)
