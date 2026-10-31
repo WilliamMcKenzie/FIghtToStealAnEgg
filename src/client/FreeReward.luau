@@ -1,27 +1,26 @@
 -- The free gift (QM, Oct 31: his reference's FREE! present, but Power, not Speed). The present
 -- by the gateway (Shared/GiftModel, across from Carl) bobs gently; walking into its ring opens
 -- the Free Reward! popup: a lime header with the red X, crossed swords on a turning sunburst,
--- "LIMITED TIME!" over "+500 Power", three cards (Like the game, Favorite the game, Join the
--- group) with a red arrow bobbing over the next one to do, each ticked once done, and Claim!.
--- Claimed (Server/FreeGift, once per player, saved), the Power goes in (its "+500" pops by the
--- Power counter: client/GainPopups) and the gift's FREE!, ring and sparkles go, for you.
+-- "LIMITED TIME!" over "+500 Power", the three steps (Like the game, Favorite the game, Join the
+-- group) and Claim!. Claimed (Server/FreeGift, once per player, saved), the Power goes in (its
+-- "+500" pops by the Power counter: client/GainPopups) and the gift's FREE!, ring and sparkles
+-- go, for you.
 --
--- The steps: Roblox doesn't tell a game who liked it, so Like ticks when pressed (on your
--- word). Favorite opens Roblox's own favorite prompt and ticks when you favorite (in Studio,
--- where there's no prompt, it just ticks). Join opens Roblox's join prompt for
--- Config.FreeGift.GroupId and the server checks you're in it on Claim (no GroupId yet: on your
--- word, like Like). Claim with a step left shakes and points the arrow at it.
+-- The steps are only shown, not ticked off (QM, Oct 31): Claim asks the server, which checks
+-- you're in Config.FreeGift.GroupId's group (Roblox doesn't tell a game who liked or favorited
+-- it, so those can't be checked). Not in it: a red "Steps not complete!" pops up where you
+-- clicked, floats up and fades.
 --
 -- Built like the other popups (client/HudKit, Figma px through HudKit.fig) with Ui.make, so
 -- it's a real object in StarterGui > Hud > Root > FreeReward for QM to edit in Studio.
 --
 --   FreeReward.init(root)  -- client/Hud, in Play and in Edit (tools/studio/uibake.luau)
 
-local AvatarEditorService = game:GetService("AvatarEditorService")
-local GroupService = game:GetService("GroupService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Abbrev = require(Shared:WaitForChild("Abbrev"))
@@ -43,7 +42,9 @@ local TEXT_X = 1500 -- the middle of "LIMITED TIME!" and the amount
 local CARD_W, CARD_H, CARD_Y, CARD_GAP = 640, 290, 860, 60
 local CLAIM_W, CLAIM_H, CLAIM_Y = 760, 165, 1172
 local SPIN = 12 -- degrees a second the sunburst turns
-local ARROW_BOB = 18 -- Figma px the arrow bobs
+local TOAST_SIZE = 0.045 -- "Steps not complete!": its text, of the screen's height
+local TOAST_RISE = 0.08 -- how far it floats up, of the screen's height
+local TOAST_LIFE = 0.9 -- seconds it takes to float up and fade
 local RED_TOP, RED_BOTTOM = Color3.fromHex("ff6a6a"), Color3.fromHex("e00000")
 local BLUE_TOP, BLUE_BOTTOM = Color3.fromHex("00ebff"), Color3.fromHex("0090ff") -- (the Power packs' blue)
 local STEPS = {
@@ -124,13 +125,20 @@ local function build(root)
 	end
 	gradient(amount, BLUE_TOP, BLUE_BOTTOM)
 
-	-- the three steps
-	local cards = {}
+	-- the three steps: just shown (QM, Oct 31: not ticked off one by one; Claim checks)
+	for _, old in { "LikeCard", "FavoriteCard", "GroupCard", "Arrow" } do
+		local was = gui:FindFirstChild(old) -- (the first try's clickable cards and arrow)
+		if was then
+			was:Destroy()
+		end
+	end
 	for i, step in STEPS do
-		local card = HudKit.button(gui, step.name .. "Card", CARD_W, CARD_H, {
+		local card = HudKit.back(gui, "Dark", {
+			Name = step.name .. "Step",
 			Position = UDim2.fromOffset(fig(cardX(i)), fig(CARD_Y)),
+			Size = UDim2.fromOffset(fig(CARD_W), fig(CARD_H)),
 			ZIndex = 5,
-		}, "Dark")
+		})
 		local icon
 		icon, fresh = Ui.make(card, "Icon", "TextLabel")
 		if fresh then
@@ -150,31 +158,7 @@ local function build(root)
 			Size = UDim2.fromOffset(fig(CARD_W), fig(90)),
 			ZIndex = 7,
 		})
-		local tick
-		tick, fresh = Ui.make(card, "Done", "TextLabel")
-		if fresh then
-			tick.BackgroundTransparency = 1
-			tick.AnchorPoint = Vector2.new(0.5, 0.5)
-			tick.Position = UDim2.fromOffset(fig(CARD_W - 30), fig(30))
-			tick.Size = UDim2.fromOffset(fig(130), fig(130))
-			tick.TextSize = fig(110)
-			tick.Text = "✅"
-			tick.ZIndex = 8
-			tick.Visible = not Ui.live -- (shown in Studio to edit)
-		end
-		cards[step.name] = card
 	end
-	-- the red arrow over the next step
-	local arrow = label(gui, "Arrow", {
-		Text = "▼",
-		TextSize = fig(150),
-		TextColor3 = Color3.fromHex("ff2a2a"),
-		TextXAlignment = Enum.TextXAlignment.Center,
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.fromOffset(fig(cardX(1) + CARD_W / 2), fig(CARD_Y + 30)),
-		Size = UDim2.fromOffset(fig(200), fig(170)),
-		ZIndex = 9,
-	})
 
 	-- Claim!
 	local claim = HudKit.button(gui, "Claim", CLAIM_W, CLAIM_H, {
@@ -188,7 +172,7 @@ local function build(root)
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 8,
 	})
-	return gui, close, claim, cards, arrow, clip.Sunburst
+	return gui, close, claim, clip.Sunburst
 end
 
 -- ---- the gift in the world ----------------------------------------------------------------
@@ -239,41 +223,55 @@ end
 
 -- ---- the popup ------------------------------------------------------------------------------
 
-local function wire(gui, close, claim, cards, arrow, burst)
+-- "Steps not complete!" in red where you clicked, floating up and fading (QM, Oct 31)
+local toastGui
+local function toast(text, at)
+	if not toastGui then
+		toastGui = Instance.new("ScreenGui")
+		toastGui.Name = "FreeRewardToast"
+		toastGui.IgnoreGuiInset = true
+		toastGui.ResetOnSpawn = false
+		toastGui.DisplayOrder = 50
+		toastGui.Parent = player:WaitForChild("PlayerGui")
+	end
+	local height = workspace.CurrentCamera.ViewportSize.Y
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.FontFace = HudKit.FONT
+	l.Text = text
+	l.TextSize = math.round(height * TOAST_SIZE)
+	l.TextColor3 = Color3.new(1, 1, 1)
+	l.AnchorPoint = Vector2.new(0.5, 1)
+	l.Size = UDim2.fromOffset(height, l.TextSize * 1.3)
+	l.Position = UDim2.fromOffset(at.X, at.Y - 6)
+	local g = Instance.new("UIGradient")
+	g.Rotation = 90
+	g.Color = ColorSequence.new(RED_TOP, RED_BOTTOM)
+	g.Parent = l
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = HudKit.BLACK
+	stroke.Thickness = math.max(2, math.round(l.TextSize / 12))
+	stroke.LineJoinMode = Enum.LineJoinMode.Round
+	stroke.Parent = l
+	local grow = Instance.new("UIScale")
+	grow.Scale = 0.6
+	grow.Parent = l
+	l.Parent = toastGui
+	TweenService:Create(grow, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	local float = TweenInfo.new(TOAST_LIFE, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(l, float, { Position = UDim2.fromOffset(at.X, at.Y - 6 - height * TOAST_RISE) }):Play()
+	local fade = TweenInfo.new(TOAST_LIFE, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	TweenService:Create(l, fade, { TextTransparency = 1 }):Play()
+	TweenService:Create(stroke, fade, { Transparency = 1 }):Play()
+	task.delay(TOAST_LIFE, function()
+		l:Destroy()
+	end)
+end
+
+local function wire(gui, close, claim, burst)
 	local remote = ReplicatedStorage:WaitForChild("FreeGiftClaim", 10)
 	local s = Config.FreeGift
-	local done = {}
 	local spinning
-	local arrowAt = UDim2.fromOffset(0, 0)
-
-	local function refresh()
-		local next
-		for _, step in STEPS do
-			cards[step.name].Done.Visible = done[step.name] == true
-			if not next and not done[step.name] then
-				next = step.name
-			end
-		end
-		arrow.Visible = next ~= nil
-		if next then
-			local card = cards[next]
-			arrowAt = UDim2.new(
-				0,
-				card.Position.X.Offset + (if card.AnchorPoint.X == 0.5 then 0 else card.Size.X.Offset / 2),
-				0,
-				fig(CARD_Y + 30)
-			)
-		end
-	end
-
-	local function isDone()
-		for _, step in STEPS do
-			if not done[step.name] then
-				return false, step.name
-			end
-		end
-		return true
-	end
 
 	local function shut()
 		if spinning then
@@ -287,31 +285,10 @@ local function wire(gui, close, claim, cards, arrow, burst)
 		if player:GetAttribute("FreeGift") or UiFx.isOpen(gui) then
 			return
 		end
-		-- (already favorited, or in the group: ticked straight away)
-		task.spawn(function()
-			local ok, fav = pcall(AvatarEditorService.GetFavorite, AvatarEditorService, game.PlaceId, Enum.AvatarItemType.Asset)
-			if ok and fav then
-				done.Favorite = true
-				refresh()
-			end
-		end)
-		if s.GroupId then
-			task.spawn(function()
-				local ok, member = pcall(player.IsInGroup, player, s.GroupId)
-				if ok and member then
-					done.Group = true
-					refresh()
-				end
-			end)
-		end
-		refresh()
 		UiFx.popIn(gui)
 		if not spinning then
-			local t = 0
 			spinning = RunService.RenderStepped:Connect(function(dt)
-				t += dt
 				burst.Rotation = (burst.Rotation + SPIN * dt) % 360
-				arrow.Position = arrowAt + UDim2.fromOffset(0, math.round(math.sin(t * 6) * fig(ARROW_BOB) / 2))
 			end)
 		end
 	end
@@ -320,50 +297,13 @@ local function wire(gui, close, claim, cards, arrow, burst)
 	UiFx.menu(gui, shut)
 	close.Activated:Connect(shut)
 
-	cards.Like.Activated:Connect(function()
-		done.Like = true -- (Roblox can't tell us: on your word)
-		refresh()
-	end)
-	cards.Favorite.Activated:Connect(function()
-		local ok = pcall(AvatarEditorService.PromptSetFavorite, AvatarEditorService, game.PlaceId, Enum.AvatarItemType.Asset, true)
-		if not ok or RunService:IsStudio() then
-			done.Favorite = true -- (no prompt here: Studio, or a place that isn't published)
-			refresh()
-		end
-	end)
-	AvatarEditorService.PromptSetFavoriteCompleted:Connect(function(result)
-		if result == Enum.AvatarPromptResult.Success then
-			done.Favorite = true
-			refresh()
-		end
-	end)
-	cards.Group.Activated:Connect(function()
-		if not s.GroupId then
-			done.Group = true -- (no group set yet: on your word)
-			refresh()
-			return
-		end
-		task.spawn(function()
-			local ok, status = pcall(GroupService.PromptJoinAsync, GroupService, s.GroupId)
-			local name = ok and typeof(status) == "EnumItem" and status.Name or ""
-			if name == "Joined" or name == "AlreadyMember" then
-				done.Group = true
-				refresh()
-			end
-		end)
-	end)
-
+	-- Claim: the server checks the group (likes and favorites can't be checked)
 	local claiming = false
 	claim.Activated:Connect(function()
-		local all, missing = isDone()
-		if not all then
-			UiFx.shake(claim)
-			UiFx.shake(cards[missing])
-			return
-		end
 		if claiming or not remote then
 			return
 		end
+		local at = UserInputService:GetMouseLocation()
 		claiming = true
 		local ok, got, why = pcall(remote.InvokeServer, remote)
 		claiming = false
@@ -371,15 +311,12 @@ local function wire(gui, close, claim, cards, arrow, burst)
 			UiFx.play("Claim")
 			shut()
 			hideGift()
-			return
-		end
-		if why == "claimed" then
+		elseif why == "claimed" then
 			shut()
 			hideGift()
 		elseif why == "group" then
-			done.Group = false
-			refresh()
-			UiFx.shake(cards.Group)
+			UiFx.play("Error")
+			toast("Steps not complete!", at)
 		else
 			UiFx.shake(claim)
 		end
@@ -425,12 +362,12 @@ local function wire(gui, close, claim, cards, arrow, burst)
 end
 
 function FreeReward.init(root)
-	local gui, close, claim, cards, arrow, burst = build(root)
+	local gui, close, claim, burst = build(root)
 	if not Ui.live then
 		return
 	end
 	gui.Visible = false
-	task.spawn(wire, gui, close, claim, cards, arrow, burst)
+	task.spawn(wire, gui, close, claim, burst)
 	task.spawn(function()
 		local map = workspace:FindFirstChild("Map") or workspace:WaitForChild("Map", 60)
 		if map then

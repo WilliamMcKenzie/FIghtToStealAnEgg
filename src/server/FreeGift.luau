@@ -2,10 +2,9 @@
 -- present by the gateway): Config.FreeGift.Amount Power (Strength), once per player. Saved
 -- as the player attribute FreeGift (Server/Data keeps it, and saves the moment it's set).
 --
--- Of the popup's three steps only the group can be checked: Roblox doesn't tell a game who
--- liked it, and favoriting happens in Roblox's own prompt on the client. So the server
--- checks the group (once Config.FreeGift.GroupId is set) and that you're by the gift, and
--- takes the like and favorite on the popup's word.
+-- Of the popup's three steps only the group can be checked (Roblox doesn't tell a game who
+-- liked or favorited it): the server checks you're in Config.FreeGift.GroupId's group and by
+-- the gift.
 --
 --   FreeGift.start()   -- once: the FreeGiftClaim RemoteFunction -> ok, why
 --                      -- (why: "claimed", "far", "group", "busy")
