@@ -3193,6 +3193,18 @@ return {
 		Error = { id = "rbxassetid://6895079853", volume = 0.6, speed = 0.55 }, -- the click, low: can't buy
 	},
 
+	-- Music (QM, Oct 31; client/Music): QM's soundtrack. Ambient loops everywhere; Battle
+	-- takes over while you're locked into a boss fight (your LockedIn attribute), crossfading
+	-- in as the fight starts and back to Ambient when it ends. The mp3s are in assets/music/
+	-- in the repo; upload them as Audio and paste the ids here. An empty id plays nothing.
+	Music = {
+		Ambient = { id = "", volume = 0.35 }, -- assets/music/ambient_music.mp3
+		Battle = { id = "", volume = 0.4 }, -- assets/music/battle_music.mp3
+		FadeIn = 1.5, -- seconds the incoming track takes to fade up
+		FadeOut = 1.5, -- seconds the outgoing track takes to fade out
+		Restart = true, -- the battle track starts from the top each fight (ambient resumes where it was)
+	},
+
 	Arsenal = {
 		Start = "KendoStick", -- everyone owns this one (QM, Oct 25: the Sword's gone)
 	},
