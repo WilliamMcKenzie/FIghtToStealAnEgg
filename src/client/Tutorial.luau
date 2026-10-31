@@ -5,10 +5,12 @@
 -- button, counter and the hotbar; the boss bar still shows in the fight), and it comes
 -- back piece by piece as it's needed.
 --
---   1. place  you start holding a Horse egg (Server/Tutorial) and your pen glows
---             (client/PenGlow): "Place your egg!", the hand and arrows on your pen
+--   1. place  you start on foot with no pets (OnFoot), holding a Horse egg (Server/Tutorial),
+--             and your pen glows (client/PenGlow): "Place your egg!", the hand and arrows on your pen
 --   2. hatch  it's ready at once (Config.Tutorial.HatchTime): "Hatch your egg!", arrows to
 --             it; PenEggs' big arrow is over it and its prompt hatches it
+--   2b. ride  "Ride your horse!": the hand and arrows on what hatched; its Ride prompt
+--             puts you on it (QM, Oct 31: "after hatching they must ride")
 --   3. steal  "Steal an egg!", arrows to the nearest egg in the Meadow's nests (filled at
 --             once if they're empty: TutorialEggs)
 --   4. fight  its boss (always Config.Tutorial.Boss, all but harmless): "Fight boss!".
@@ -16,10 +18,9 @@
 --   5. bow    the bounty flies into your Cash (now shown: client/BossBounty): "Buy a bow!",
 --             arrows to Carl and the hand on him, then on the bow's Buy in his shop
 --             (buying equips it)
---   6. train  "Train with weapons to become stronger!": arrows to the Meadow training
---             ground's blocker, its price reading FREE, the hand on its Buy; then arrows
---             to the nearest mob in there. Your first hit on one ends it (Server/Tutorial
---             clears the Tutorial attribute), and the whole HUD comes back.
+--   6. train  "Train with weapons to become stronger!" while the camera pans over to the
+--             Meadow training ground and back (QM, Oct 31: no arrows, just show it). Then
+--             it's over (TutorialDone), the whole HUD comes back and you're free.
 --
 -- Runs whenever your Tutorial attribute is on (a new account, or "/tutorial").
 
@@ -31,7 +32,7 @@ local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
-local Abbrev = require(Shared.Abbrev)
+local MapData = require(Shared.MapData)
 local Banner = require(script.Parent.Banner)
 local WeaponShop = require(script.Parent.WeaponShop)
 
@@ -47,15 +48,19 @@ local HIDE = { "ShopButton", "IndexButton", "EggsButton", "PetsButton", "Power",
 local WORDS = {
 	place = "Place your egg!",
 	hatch = "Hatch your egg!",
+	ride = "Ride your horse!",
 	steal = "Steal an egg!",
 	fight = "Fight boss!",
 	bow = "Buy a bow!",
 	train = "Train with weapons to become stronger!",
 }
+local ARROW_UP = 1.5 -- studs the guide arrows float over the ground (QM, Oct 31: raised)
+local PAN = { In = 1.2, Hold = 2.5, Out = 1, Back = 45, Up = 55 } -- the camera's trip to the training grounds: seconds, and studs back and up from their middle
 local AFTER_BOSS = 2.2 -- seconds after the bounty lands till "Buy a bow!" (the Boss Defeated banner's sweep)
 
 local gen = 0 -- bumped by every (re)start ("/tutorial" mid-way starts over)
 local myGen = 0 -- the run going now's
+local myPenPets, trainingCentre, panTo -- (below)
 local function on()
 	return player:GetAttribute("Tutorial") == true and gen == myGen
 end
@@ -193,7 +198,7 @@ RunService.RenderStepped:Connect(function()
 		if along.Magnitude > 8 then
 			rayParams.FilterDescendantsInstances = { character, workspace:FindFirstChild("ArrowTrail") }
 			local hit = workspace:Raycast(root.Position, Vector3.new(0, -60, 0), rayParams)
-			local y = (if hit then hit.Position.Y else root.Position.Y - 5) + 0.3
+			local y = (if hit then hit.Position.Y else root.Position.Y - 5) + ARROW_UP
 			from += along.Unit * 4
 			trail.draw(Vector3.new(from.X, y, from.Z), Vector3.new(to.X, y, to.Z))
 		else
@@ -314,80 +319,61 @@ local function ownsWeapon(id)
 	return false
 end
 
--- the Meadow training ground's blocker (Map.Blockers; client/Regions takes it out of the
--- world once you own it)
-local function groundBlocker()
-	local map = workspace:FindFirstChild("Map")
-	local blockers = map and map:FindFirstChild("Blockers")
-	for _, model in if blockers then blockers:GetChildren() else {} do
-		if model:GetAttribute("Training") and model:GetAttribute("Region") == T.Ground then
-			return model
+-- your pets wandering in your pen (workspace.PenPets, client/PenRide's Ride prompt on each)
+function myPenPets()
+	local folder = workspace:FindFirstChild("PenPets")
+	local list = {}
+	for _, body in if folder then folder:GetChildren() else {} do
+		if body:GetAttribute("Owner") == player.UserId then
+			table.insert(list, body)
+		end
+	end
+	return list
+end
+
+-- the middle of the Meadow training ground (the map's Base area's Training bounds), or nil
+function trainingCentre()
+	for _, area in MapData.Areas do
+		for _, t in area.Training or {} do
+			if t[1] == T.Ground and #t >= 5 then
+				return Vector3.new((t[2] + t[4]) / 2, 0, (t[3] + t[5]) / 2)
+			end
 		end
 	end
 	return nil
 end
 
--- the world spot of the blocker's Buy button on the face toward you (its SurfaceGui's
--- layout: centred across, its height from the top read off the button)
-local function buyButtonSpot(model)
-	local wall = model:FindFirstChild("Wall")
+-- the camera flies over to `centre`, looks at it a moment and comes back (as BossIntro's:
+-- blended over the usual camera, so it's back as it was after)
+local panning -- { centre, from (your spot), start }
+local function smooth(x)
+	return x * x * (3 - 2 * x)
+end
+RunService:BindToRenderStep("TutorialPan", Enum.RenderPriority.Camera.Value + 6, function()
+	if not panning then
+		return
+	end
+	local t = os.clock() - panning.start
+	if t >= PAN.In + PAN.Hold + PAN.Out then
+		panning = nil
+		return
+	end
+	local w = if t < PAN.In
+		then smooth(t / PAN.In)
+		elseif t < PAN.In + PAN.Hold then 1
+		else 1 - smooth((t - PAN.In - PAN.Hold) / PAN.Out)
+	local c = panning.centre
+	local away = (panning.from - c) * Vector3.new(1, 0, 1)
+	away = if away.Magnitude > 1 then away.Unit else Vector3.new(0, 0, 1)
+	local eye = c + away * PAN.Back + Vector3.new(0, PAN.Up, 0)
+	camera.CFrame = camera.CFrame:Lerp(CFrame.lookAt(eye, c), w)
+end)
+function panTo(centre)
 	local root = myRoot()
-	if not (wall and root) then
-		return nil
+	if centre and root then
+		local floor = root.Position.Y - 4
+		panning = { centre = Vector3.new(centre.X, floor, centre.Z), from = root.Position, start = os.clock() }
 	end
-	local toward = (root.Position - wall.Position):Dot(wall.CFrame.LookVector) >= 0
-	local face = wall:FindFirstChild(if toward then "FaceFront" else "FaceBack")
-	local button = face and face:FindFirstChild("Buy", true)
-	local down = wall.Size.Y * 0.2 -- (a guess till the button's laid out)
-	if button and button.AbsoluteSize.Y > 0 and face.PixelsPerStud > 0 then
-		local fromTop = (button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2) / face.PixelsPerStud
-		down = fromTop - wall.Size.Y / 2
-	end
-	local out = wall.CFrame.LookVector * (if toward then 1 else -1) * (wall.Size.Z / 2 + 0.2)
-	return wall.Position - wall.CFrame.UpVector * down + out
-end
-
--- the blocker's price reads FREE in the tutorial (Server/Regions doesn't charge for it);
--- put back after
-local freed = {} -- { { label, text } } or { { coin } }
-local function setFree(model, free)
-	if free then
-		local cost = Config.Training.Grounds[T.Ground] and Config.Training.Grounds[T.Ground].Cost
-		local price = cost and Abbrev(cost)
-		for _, d in model:GetDescendants() do
-			if d:IsA("TextLabel") and d.Text == price then
-				table.insert(freed, { d, d.Text })
-				d.Text = "FREE"
-				d.Size = UDim2.fromOffset(4 * 52, d.Size.Y.Offset)
-				local coin = d.Parent and d.Parent:FindFirstChildWhichIsA("ImageLabel")
-				if coin and coin.Visible then
-					table.insert(freed, { coin })
-					coin.Visible = false
-				end
-			end
-		end
-	else
-		for _, f in freed do
-			if f[2] then
-				f[1].Text = f[2]
-				f[1].Size = UDim2.fromOffset(#f[2] * 52, f[1].Size.Y.Offset)
-			else
-				f[1].Visible = true
-			end
-		end
-		table.clear(freed)
-	end
-end
-
-local function trainingMobs()
-	local folder = workspace:FindFirstChild("Mobs")
-	local list = {}
-	for _, body in if folder then folder:GetChildren() else {} do
-		if body:GetAttribute("Ground") == T.Ground and (body:GetAttribute("Health") or 0) > 0 then
-			table.insert(list, body)
-		end
-	end
-	return list
 end
 
 -- ---- the steps ------------------------------------------------------------------------------
@@ -465,7 +451,21 @@ local function run(thisGen)
 		point(nil, lastEgg())
 	end)
 	point(nil, nil)
-	task.wait(2) -- (the pet jumps out)
+
+	-- 2b. ride what hatched (you've been on foot till now: OnFoot, Server/Tutorial)
+	task.wait(1.6) -- (the pet jumps out)
+	till(function()
+		return not player:GetAttribute("OnFoot")
+	end, function()
+		local pet = nearest(myPenPets())
+		if pet then
+			say("ride")
+			point(where(pet) + Vector3.new(0, 6, 0), pet)
+		else
+			point(nil, nil)
+		end
+	end)
+	point(nil, nil)
 
 	-- 3. steal an egg, 4. fight its boss (back to 3 if you die)
 	local asked = 0
@@ -522,34 +522,20 @@ local function run(thisGen)
 	end)
 	point(nil, nil)
 
-	-- 6. buy the Meadow training ground (FREE), then hit something in it
-	local blocker = groundBlocker()
-	if blocker then
-		setFree(blocker, true)
+	-- 6. the training grounds: the camera pans over to them and back, and that's it (QM,
+	-- Oct 31: "then after that they are free to do what they want")
+	if on() then
+		say("train")
+		panTo(trainingCentre())
+		task.wait(PAN.In + PAN.Hold + PAN.Out)
+		ReplicatedStorage:WaitForChild("TutorialDone"):FireServer()
+		till(function()
+			return false
+		end)
 	end
-	till(function()
-		return player:GetAttribute("Train" .. T.Ground) == true
-	end, function()
-		say("train")
-		if blocker and blocker.Parent then
-			local spot = buyButtonSpot(blocker)
-			point(spot, blocker:FindFirstChild("Wall"))
-		else
-			point(nil, nil)
-		end
-	end)
-	till(function()
-		return false
-	end, function()
-		say("train")
-		point(nil, nearest(trainingMobs()))
-	end)
 
 	-- done (Server/Tutorial turned it off)
 	point(nil, nil)
-	if blocker then
-		setFree(blocker, false)
-	end
 	if not player:GetAttribute("Tutorial") then
 		revealAll()
 	end

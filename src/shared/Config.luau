@@ -1247,8 +1247,9 @@ return {
 	},
 
 	-- the new player tutorial (QM, Oct 31; client/Tutorial, Server/Tutorial): a new player
-	-- starts with Egg in hand and no UI, places it in their pen, hatches it (ready in
-	-- HatchTime seconds), steals a Meadow egg, beats its boss (always Boss in the tutorial;
+	-- starts on foot with no pets (OnFoot: WalkSpeed, FootHealth), Egg in hand and no UI,
+	-- places it in their pen, hatches it (ready in HatchTime seconds), rides what hatched
+	-- (QM, Oct 31: "after hatching they must ride"), steals a Meadow egg, beats its boss (always Boss in the tutorial;
 	-- every hit they take is x Damage, so they out-heal it), gets at least BossCash for it,
 	-- buys Weapon from Carl and buys Ground's training ground for free. Their first hit on a
 	-- mob there ends it (TutorialDone, saved: a returning player never sees it again).
@@ -1262,6 +1263,8 @@ return {
 		BossCash = 500, -- (the Shortbow's price)
 		Weapon = "Shortbow",
 		Ground = "Meadow",
+		WalkSpeed = 16, -- on foot, before the first ride
+		FootHealth = 100,
 	},
 	BossPools = {
 		Meadow = { "MotherHen", "GiantRafflesia", "MajesticUnicorn", "VenusFlytrap" },

@@ -1,5 +1,7 @@
 -- Everyone is always riding their pet (QM, Oct 23; the player attribute Pet, the Horse to
--- start: Shared/Pets. A new pet swaps in under you). Also passes /ride <pet> to the server.
+-- start: Shared/Pets. A new pet swaps in under you), except a player on foot (their OnFoot
+-- attribute: the tutorial before its first ride, QM Oct 31), who just walks. Also passes
+-- /ride <pet> to the server.
 --
 -- The character still walks with its normal Humanoid (so movement, collisions and the
 -- sword all work as before); the horse is a client-side model under it, and the rider
@@ -170,6 +172,11 @@ end
 
 local mounts = {} -- [character] = { horse, kind, root, humanoid, joint, legs, yaw }
 
+local function onFoot(character)
+	local player = Players:GetPlayerFromCharacter(character)
+	return player ~= nil and player:GetAttribute("OnFoot") == true
+end
+
 local function petOf(character)
 	local player = Players:GetPlayerFromCharacter(character)
 	return player and player:GetAttribute("Pet") or "Horse"
@@ -261,12 +268,12 @@ end
 RunService.PreSimulation:Connect(function(dt)
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
-		if character and not mounts[character] and character.Parent then
+		if character and not mounts[character] and character.Parent and not onFoot(character) then
 			mount(character)
 		end
 	end
 	for character, m in mounts do
-		if not character.Parent or m.humanoid.Health <= 0 or not m.root.Parent then
+		if not character.Parent or m.humanoid.Health <= 0 or not m.root.Parent or onFoot(character) then
 			dismount(character)
 			continue
 		end

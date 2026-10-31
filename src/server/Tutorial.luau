@@ -2,19 +2,23 @@
 -- player is in it while their Tutorial attribute is on: Server/Data turns it on for a
 -- brand new account (no save at all) and TutorialDone (saved) keeps it off for good.
 -- While it's on:
+--   on foot       riding nothing (OnFoot; a new account owns no pets at all) till they
+--                 ride what hatches (PetInventory.ride clears it)
 --   their egg     Config.Tutorial.Egg in their bag and in hand (EggBag, Holding), given
 --                 again each life till it's placed (Hatchery sets TutorialPlaced)
 --   hatching      Config.Tutorial.HatchTime (Server/Hatchery)
 --   the boss      always Config.Tutorial.Boss (Server/Eggs), hits on them x
 --                 Config.Tutorial.Damage (Server/Lives), and it pays at least
 --                 Config.Tutorial.BossCash (Server/Bosses)
---   training      Config.Tutorial.Ground's ground is free (Server/Regions); their first hit
---                 on a mob there ends it (Server/Training calls Tutorial.hit)
+--   the end       the client says TutorialDone once it's shown the training grounds (a
+--                 first hit on a Meadow training mob ends it too: Server/Training calls
+--                 Tutorial.hit; that ground is free while it runs: Server/Regions)
 -- TutorialEggs (client asks, at "Steal an egg!"): the Meadow's nests fill now if they're
 -- empty with no fight on, so a new player never waits out a cooldown.
 --
 --   Tutorial.start()            -- once, after Hatchery.start and Eggs.start
---   Tutorial.begin(player)      -- (re)starts it (a new account; /tutorial)
+--   Tutorial.begin(player, fresh) -- (re)starts it; fresh: a new account (its starter pet
+--                                  -- taken away), else /tutorial (pets kept, but on foot)
 --   Tutorial.finish(player)     -- it's over, for good (/skiptutorial too)
 --   Tutorial.hit(player, ground) -- a hit on a training mob
 
@@ -38,7 +42,13 @@ local function giveEgg(player)
 	player:SetAttribute("Holding", T.Egg)
 end
 
-function Tutorial.begin(player)
+function Tutorial.begin(player, fresh)
+	player:SetAttribute("OnFoot", true) -- (first: Server/PetInventory then hands out no starter)
+	if fresh then
+		player:SetAttribute("PetsOwned", "")
+		player:SetAttribute("PenPets", "")
+	end
+	player:SetAttribute("Pet", nil)
 	player:SetAttribute("TutorialPlaced", nil)
 	player:SetAttribute("Tutorial", nil) -- (off then on: one already running starts over)
 	player:SetAttribute("Tutorial", true)
@@ -50,6 +60,7 @@ function Tutorial.finish(player)
 		player:SetAttribute("Tutorial", nil)
 	end
 	player:SetAttribute("TutorialPlaced", nil)
+	player:SetAttribute("OnFoot", nil) -- (skipped before riding: Server/PetInventory puts them on a pet)
 	player:SetAttribute("TutorialDone", true) -- (Server/Data saves it straight away)
 end
 
@@ -72,6 +83,15 @@ function Tutorial.start(eggs)
 	for _, player in Players:GetPlayers() do
 		joined(player)
 	end
+
+	local done = Instance.new("RemoteEvent")
+	done.Name = "TutorialDone"
+	done.Parent = ReplicatedStorage
+	done.OnServerEvent:Connect(function(player)
+		if player:GetAttribute("Tutorial") and not player:GetAttribute("OnFoot") then
+			Tutorial.finish(player)
+		end
+	end)
 
 	local remote = Instance.new("RemoteEvent")
 	remote.Name = "TutorialEggs"

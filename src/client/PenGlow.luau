@@ -12,7 +12,7 @@ local player = Players.LocalPlayer
 
 local COLOR = Color3.fromRGB(255, 226, 110)
 local HEIGHT = 7 -- studs the sides' glow rises
-local INSET = 0.3 -- studs in from the pen's sides
+local INSET = 2 -- studs in from the pen's Area sides: just inside its fence (Server/Map puts it 1 in, posts 1 thick)
 local SIDE = 0.25 -- the sides' glow at its strongest, at the bottom (transparency)
 local FLOOR = 0.82 -- the floor's wash (transparency)
 local BREATHE = 0.25 -- how much it fades in and out, of what's left to see-through

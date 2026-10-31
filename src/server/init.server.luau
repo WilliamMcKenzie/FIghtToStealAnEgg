@@ -105,6 +105,10 @@ local function ride(character)
 	local player = Players:GetPlayerFromCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
 	local pet = Pets.stats(player and player:GetAttribute("Pet") or "Horse")
+	if player and player:GetAttribute("OnFoot") then
+		-- (the tutorial, before your first ride: Server/Tutorial)
+		pet = { Health = Config.Tutorial.FootHealth, Speed = Config.Tutorial.WalkSpeed }
+	end
 	local hurt = humanoid.MaxHealth - humanoid.Health -- (a swap mid-fight keeps your damage)
 	humanoid.MaxHealth = pet.Health
 	humanoid.Health = math.max(1, pet.Health - hurt)
@@ -122,11 +126,13 @@ local function joined(player)
 	if player.Character then
 		riderBody(player.Character)
 	end
-	player:GetAttributeChangedSignal("Pet"):Connect(function()
-		if player.Character then
-			ride(player.Character)
-		end
-	end)
+	for _, name in { "Pet", "OnFoot" } do
+		player:GetAttributeChangedSignal(name):Connect(function()
+			if player.Character then
+				ride(player.Character)
+			end
+		end)
+	end
 	-- (/boss typed in chat also works when the place uses the legacy chat)
 	player.Chatted:Connect(function(message)
 		if message:lower():match("^/reboss") then
