@@ -34,6 +34,7 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local placeRemote = ReplicatedStorage:WaitForChild("PlaceEgg")
 local hatchRemote = ReplicatedStorage:WaitForChild("HatchEgg")
+local speedupRemote = ReplicatedStorage:WaitForChild("SpeedupEgg")
 
 local HATCH = Config.Hatch
 local EGG_CENTER = 1.6 -- an egg's middle above its base, at 1x (LassoAPet's Egg.luau)
@@ -52,6 +53,16 @@ local HELD_UP, HELD_FORWARD = 0, 1.1
 local READY_ARROW = "rbxassetid://127821178410489" -- LassoAPet's assets/ui/TutorialArrow.png
 
 local rng = Random.new()
+
+-- the paid hatch's tier for an egg with secondsLeft to go (as Server/Hatchery's)
+local function speedupTier(secondsLeft)
+	for _, tier in HATCH.Speedup do
+		if secondsLeft <= tier.Upto then
+			return tier
+		end
+	end
+	return HATCH.Speedup[#HATCH.Speedup]
+end
 
 local folder = Instance.new("Folder")
 folder.Name = "PenEggs"
@@ -373,8 +384,9 @@ local function show(owner, e, area)
 	shown[e.id] = s
 	s.timer = newTimer(egg.model.PrimaryPart)
 	if owner == player then
-		-- Hold F by it once it's ready. (Kept outside the growing model: ScaleTo would
-		-- scale its range too.)
+		-- Hold F by it once it's ready, or before that to hatch it now for Robux (LassoAPet's
+		-- SpeedupEgg: "Hatch now · R$29", its price by the time left, Config.Hatch.Speedup;
+		-- Server/Hatchery). (Kept outside the growing model: ScaleTo would scale its range too.)
 		local rarity = Config.Pets[e.k] and Config.Pets[e.k].Rarity
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.Name = "HatchEgg"
@@ -394,8 +406,13 @@ local function show(owner, e, area)
 		attachment.Parent = area
 		prompt.Parent = attachment
 		prompt.Triggered:Connect(function()
-			if not s.hatching and s.ready <= workspace:GetServerTimeNow() then
+			if s.hatching then
+				return
+			end
+			if s.ready <= workspace:GetServerTimeNow() then
 				hatchRemote:FireServer(e.id)
+			elseif not player:GetAttribute("Tutorial") then
+				speedupRemote:FireServer(e.id)
 			end
 		end)
 		s.prompt, s.attachment = prompt, attachment
@@ -431,6 +448,8 @@ local function refresh(owner)
 				want[e.id] = true
 				if not shown[e.id] then
 					show(owner, e, area)
+				elseif tonumber(e.t) then
+					shown[e.id].ready = tonumber(e.t) -- (a hatch bought: ready now)
 				end
 			end
 		end
@@ -564,7 +583,12 @@ RunService.RenderStepped:Connect(function(dt)
 		local ready = s.ready <= now
 		s.timer.Text = if ready then "Ready" else countdown(s.ready - now)
 		if s.prompt then
-			s.prompt.Enabled = ready
+			s.prompt.Enabled = ready or not player:GetAttribute("Tutorial") -- (the tutorial: hatch it, no buying)
+			-- (still growing: the paid hatch, its price by the time left)
+			local action = if ready then "Hatch" else "Hatch now · R$" .. speedupTier(s.ready - now).Robux
+			if s.prompt.ActionText ~= action then
+				s.prompt.ActionText = action
+			end
 		end
 		readyArrow(s, ready and s.owner == player and not player:GetAttribute("EggPromptUp"))
 		nearTimer(s, root)

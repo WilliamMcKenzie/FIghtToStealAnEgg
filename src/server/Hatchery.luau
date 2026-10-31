@@ -16,10 +16,18 @@
 -- os.time() it's ready } }, x and z in studs from the middle of the pen's Area (in its
 -- frame), drawn for everyone by client/PenEggs.
 --
+-- Hatch now for Robux (QM, Oct 31: LassoAPet's SpeedupEgg): holding F by one of your eggs
+-- that's still growing (SpeedupEgg) prompts the developer product for its time left
+-- (Config.Hatch.Speedup, Hatchery.speedupTier); bought, that egg hatches at once. A
+-- receipt whose egg is gone (hatched meanwhile, or the player left) goes to the egg with
+-- the most time left, or is kept for the next one (saved HatchCredits attribute).
+--
 --   Hatchery.start()                -- once, after Pens.start and PetInventory.start
 --   Hatchery.give(player, kind)     -- one more egg in their bag (a steal)
 
 local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -29,6 +37,7 @@ local Passes = require(Shared.Passes)
 local Stacks = require(Shared.Stacks)
 local Pens = require(script.Parent.Pens)
 local PetInventory = require(script.Parent.PetInventory)
+local Store = require(script.Parent.Store)
 
 local Hatchery = {}
 
@@ -168,6 +177,100 @@ local function hatch(player, id)
 	end
 end
 
+-- ---- hatch now, for Robux ---------------------------------------------------------------
+
+local SPEEDUP = Config.Hatch.Speedup
+
+-- the tier (Config.Hatch.Speedup) for an egg with secondsLeft to go
+function Hatchery.speedupTier(secondsLeft)
+	for _, tier in SPEEDUP do
+		if secondsLeft <= tier.Upto then
+			return tier
+		end
+	end
+	return SPEEDUP[#SPEEDUP]
+end
+
+local speedupTarget = {} -- [player] = the egg id they're buying a hatch for
+
+-- one of their eggs still growing that a bought hatch goes to: `id` if it still is, else
+-- the one with the most time left
+local function growingEgg(player, id)
+	local now = workspace:GetServerTimeNow()
+	local best, left = nil, 0
+	for _, e in placed(player) do
+		if e.t > now then
+			if e.id == id then
+				return e.id
+			end
+			if e.t - now > left then
+				best, left = e.id, e.t - now
+			end
+		end
+	end
+	return best
+end
+
+-- a bought hatch: the egg's ready now, and hatches
+local function hatchNow(player, id)
+	local list = placed(player)
+	for _, e in list do
+		if e.id == id then
+			e.t = math.min(e.t, os.time())
+			setPlaced(player, list)
+			hatch(player, id)
+			return true
+		end
+	end
+	return false
+end
+
+local function speedup(player, id)
+	if type(id) ~= "string" or player:GetAttribute("Tutorial") then
+		return
+	end
+	local pen = Pens.of(player)
+	local area = pen and pen:FindFirstChild("Area")
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not (area and root) then
+		return
+	end
+	for _, e in placed(player) do
+		if e.id == id then
+			local left = e.t - workspace:GetServerTimeNow()
+			if left <= 0 then
+				return -- (ready: plain F hatches it)
+			end
+			local at = area.CFrame:PointToWorldSpace(Vector3.new(e.x, -area.Size.Y / 2, e.z))
+			if ((root.Position - at) * Vector3.new(1, 0, 1)).Magnitude > Config.Hatch.Range + 4 then
+				return
+			end
+			local credits = player:GetAttribute("HatchCredits") or 0
+			if credits > 0 then
+				player:SetAttribute("HatchCredits", if credits > 1 then credits - 1 else nil)
+				hatchNow(player, id)
+				return
+			end
+			local tier = Hatchery.speedupTier(left)
+			if tier.Product then
+				speedupTarget[player] = id
+				pcall(MarketplaceService.PromptProductPurchase, MarketplaceService, player, tier.Product)
+			elseif RunService:IsStudio() then
+				hatchNow(player, id) -- (no product yet: free in Studio, to try it out)
+			end
+			return
+		end
+	end
+end
+
+local function bought(player)
+	local id = growingEgg(player, speedupTarget[player])
+	speedupTarget[player] = nil
+	if not (id and hatchNow(player, id)) then
+		player:SetAttribute("HatchCredits", (player:GetAttribute("HatchCredits") or 0) + 1)
+	end
+end
+
 function Hatchery.start()
 	local function remote(name, fn)
 		local r = Instance.new("RemoteEvent")
@@ -178,6 +281,13 @@ function Hatchery.start()
 	remote("HoldEgg", hold)
 	remote("PlaceEgg", place)
 	remote("HatchEgg", hatch)
+	remote("SpeedupEgg", speedup)
+	for _, tier in SPEEDUP do
+		Store.product(tier.Product, bought)
+	end
+	Players.PlayerRemoving:Connect(function(player)
+		speedupTarget[player] = nil
+	end)
 
 	local function joined(player)
 		local function lose()
