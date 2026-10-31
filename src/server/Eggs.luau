@@ -182,7 +182,8 @@ local function lay(nest, biome, popAt)
 			local kind = if player:GetAttribute("Tutorial") and table.find(Config.BossPools[biome] or {}, Config.Tutorial.Boss)
 				then Config.Tutorial.Boss
 				else nil
-			if Bosses.summon(biome, player, kind) then
+			-- (and keeps its old 200 health there: QM Oct 31, only the others got tougher)
+			if Bosses.summon(biome, player, kind, if kind then Config.Tutorial.BossHealth else nil) then
 				state.fight = true
 			end
 		end

@@ -402,12 +402,12 @@ return {
 			Name = "Mother Hen",
 			Model = "Chicken",
 			Size = 3.84, -- (about 40 studs tall: QM, Oct 25, 1.6x)
-			Health = 200,
+			Health = 1500, -- (QM, Oct 31: 200 -> 1.5K, so training pays off; Tutorial.BossHealth in the tutorial)
 			Speed = 10,
 			StopAt = 1, -- (walks right up to you, into its Swipe's Reach)
 			Radius = 11,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1, -- (QM, Oct 31: was 2; at 1 a fight doesn't level you up halfway through it)
 			Respawn = 20, -- (unused now: the nests' cooldown, Eggs.Cooldown[biome], decides)
 			-- (QM, Oct 24: every boss just chases you and hurts on contact for now; Server/
 			-- BossAttacks also has Slam, Shot, Nova and Bombs for later)
@@ -419,7 +419,7 @@ return {
 			Name = "Giant Rafflesia",
 			Model = "GiantRafflesia", -- (LassoAPet's, QM Oct 25: its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
 			Size = 1, -- (about 50 studs tall; QM, Oct 27: the bosses but the Mother Hen grew 1.67x with the pets)
-			Health = 200,
+			Health = 1500, -- (QM, Oct 31: 200 -> 1.5K, so training pays off; Tutorial.BossHealth in the tutorial)
 			-- a ranged boss (QM, Oct 27): rooted in the middle of its arena, it only turns to
 			-- face you and casts the Flower Staff's own orbs, with weaker homing to dodge
 			Speed = 0,
@@ -427,7 +427,7 @@ return {
 			StopAt = 1,
 			Radius = 15,
 			Turn = 3.5,
-			Strength = 2,
+			Strength = 1, -- (QM, Oct 31: was 2; at 1 a fight doesn't level you up halfway through it)
 			Respawn = 20,
 			Attacks = {
 				{
@@ -449,12 +449,12 @@ return {
 			Name = "Majestic Unicorn",
 			Model = "MajesticUnicorn", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 3.2, -- (about 42 studs tall; QM Oct 30: x0.8)
-			Health = 200,
+			Health = 1500, -- (QM, Oct 31: 200 -> 1.5K, so training pays off; Tutorial.BossHealth in the tutorial)
 			Speed = 10,
 			StopAt = 1,
 			Radius = 10.5,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1, -- (QM, Oct 31: was 2; at 1 a fight doesn't level you up halfway through it)
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Swipe", Every = 2.4, Reach = 20, Arc = 140, Windup = 0.95, Damage = 22 },
@@ -467,12 +467,12 @@ return {
 			Name = "Venus Flytrap",
 			Model = "VenusFlytrap", -- (LassoAPet's pet, scaled up to a boss: QM Oct 25)
 			Size = 2.7, -- (about 47 studs tall; QM Oct 30: x0.9)
-			Health = 200,
+			Health = 1500, -- (QM, Oct 31: 200 -> 1.5K, so training pays off; Tutorial.BossHealth in the tutorial)
 			Speed = 10,
 			StopAt = 1,
 			Radius = 13.5,
 			Turn = 4,
-			Strength = 2,
+			Strength = 1, -- (QM, Oct 31: was 2; at 1 a fight doesn't level you up halfway through it)
 			Respawn = 20,
 			Attacks = {
 				{ Kind = "Swipe", Every = 2.4, Reach = 34, Arc = 50, Width = 20, Windup = 1, Damage = 24 },
@@ -1263,7 +1263,7 @@ return {
 	-- re-rolls them all)
 	-- what beating a boss pays (QM, Oct 31): about Share of what the next region costs
 	-- (Config.Regions.Cost[Next[its biome]]), to everyone who beat it, x2 with the x2 Cash
-	-- pass. Past the last regions, Last x their own cost. Meadow bosses pay $120 (Desert's 6K),
+	-- pass. Past the last regions, Last x their own cost. Meadow bosses pay $40 (Desert's 2K),
 	-- Desert's 2.4K, Tundra's 30K, Lava Valley's 400K, Dungeon's and Magic Circle's 5M.
 	BossCash = {
 		Share = 1 / 50,
@@ -1284,6 +1284,7 @@ return {
 		Egg = "Horse",
 		HatchTime = 0,
 		Boss = "MotherHen",
+		BossHealth = 200, -- (its health in the tutorial: the Meadow bosses' old 200, QM Oct 31)
 		Damage = 0.02,
 		BossCash = 500, -- (the Shortbow's price)
 		Weapon = "Shortbow",
@@ -2278,7 +2279,7 @@ return {
 	Regions = {
 		Cost = {
 			Meadow = 0,
-			Desert = 12000,
+			Desert = 2000, -- (QM, Oct 31: 12K -> 2K, the first gate comes quick)
 			Ice = 300000,
 			Lava = 3000000,
 			Dungeon = 25000000,
@@ -2297,7 +2298,7 @@ return {
 	-- It counts in steps, by level (Config.Levels, QM Oct 31): you get the curve's value at
 	-- your level's Power, so it only goes up when you level up. Level 1 is below level 2's
 	-- by Levels.First, so the first level up is a big jump.
-	-- QM's targets: Mother Hen (200 health) takes 13 Kendo Stick hits at level 1, 5 at 1,000.
+	-- QM's targets: the tutorial's Mother Hen (200 health) takes 13 Kendo Stick hits at level 1, 5 at 1,000.
 	--   Level          1      2      4      7     12     17     22     27     32
 	--   Strength       0    100    250     1K    10K   100K     1M    10M   100M
 	--   damage        16     26     31     40     55     70     85    100    115
