@@ -1846,18 +1846,20 @@ return {
 	-- Divine, Cosmic, Celestial, Void and Omega cards): a card's back turns with a sheen
 	-- across it, and a band of `text2` sweeps across the rarity's name (Shared/RarityLook
 	-- paints and animates the text). Common is white to grey with a grey outline.
+	-- (QM, Oct 31: every other colour here is at full saturation, no white or pastel stops;
+	-- a gradient's two ends differ only in hue, so keep it that way when tuning.)
 	Rarities = {
 		Common = { text = Color3.new(1, 1, 1), text2 = Color3.fromRGB(135, 135, 135), stroke = Color3.fromRGB(70, 70, 70) },
-		Uncommon = { bottom = Color3.fromHex("7aff2c"), top = Color3.fromHex("ccff25"), at = 0.736, text = Color3.fromHex("00ff00") },
-		Rare = { bottom = Color3.fromHex("36a8ff"), top = Color3.fromHex("00f0ff"), at = 1, text = Color3.fromHex("00b7ff") },
-		Epic = { bottom = Color3.fromHex("d950ff"), top = Color3.fromHex("fe4aff"), at = 1, text = Color3.fromHex("d300ff") },
-		Legendary = { bottom = Color3.fromHex("ff4c56"), top = Color3.fromHex("fbb8bb"), at = 1, text = Color3.fromHex("ff0004") },
-		Mythic = { bottom = Color3.fromHex("ff2f6e"), top = Color3.fromHex("ffa6c4"), at = 1, text = Color3.fromHex("ff1f5a"), text2 = Color3.fromHex("ffc2d4"), move = true },
-		Divine = { bottom = Color3.fromHex("9a6bff"), top = Color3.fromHex("dcf6ff"), at = 1, text = Color3.fromHex("9fe8ff"), text2 = Color3.fromHex("3d7bff"), move = true },
-		Celestial = { bottom = Color3.fromHex("e39a35"), top = Color3.fromHex("fff3cf"), at = 1, text = Color3.fromHex("ffd34a"), text2 = Color3.fromHex("a8620c"), move = true },
-		Cosmic = { bottom = Color3.fromHex("b04cff"), top = Color3.fromHex("ffa3f0"), at = 1, text = Color3.fromHex("e070ff"), text2 = Color3.fromHex("4a0a9a"), move = true },
-		Void = { bottom = Color3.fromHex("6a2cd8"), top = Color3.fromHex("cdb2ff"), at = 1, text = Color3.fromHex("5a3ae0"), text2 = Color3.fromHex("12004a"), move = true },
-		Omega = { bottom = Color3.fromHex("4ed46a"), top = Color3.fromHex("eaffd8"), at = 1, text = Color3.fromHex("b4ff6a"), text2 = Color3.fromHex("2fae3a"), move = true },
+		Uncommon = { bottom = Color3.fromHex("40ff00"), top = Color3.fromHex("c8ff00"), at = 0.736, text = Color3.fromHex("00ff00") },
+		Rare = { bottom = Color3.fromHex("0070ff"), top = Color3.fromHex("00e6ff"), at = 1, text = Color3.fromHex("00b7ff") },
+		Epic = { bottom = Color3.fromHex("9000ff"), top = Color3.fromHex("ff00f0"), at = 1, text = Color3.fromHex("d300ff") },
+		Legendary = { bottom = Color3.fromHex("ff0020"), top = Color3.fromHex("ff8c00"), at = 1, text = Color3.fromHex("ff0004") },
+		Mythic = { bottom = Color3.fromHex("ff0040"), top = Color3.fromHex("ff00c0"), at = 1, text = Color3.fromHex("ff0050"), text2 = Color3.fromHex("ff00d0"), move = true },
+		Divine = { bottom = Color3.fromHex("6a00ff"), top = Color3.fromHex("00d0ff"), at = 1, text = Color3.fromHex("00dcff"), text2 = Color3.fromHex("0040ff"), move = true },
+		Celestial = { bottom = Color3.fromHex("ff6a00"), top = Color3.fromHex("ffe600"), at = 1, text = Color3.fromHex("ffd000"), text2 = Color3.fromHex("ff5a00"), move = true },
+		Cosmic = { bottom = Color3.fromHex("3000ff"), top = Color3.fromHex("ff00e0"), at = 1, text = Color3.fromHex("d000ff"), text2 = Color3.fromHex("3000ff"), move = true },
+		Void = { bottom = Color3.fromHex("3a00b0"), top = Color3.fromHex("a000ff"), at = 1, text = Color3.fromHex("5a00ff"), text2 = Color3.fromHex("22009a"), move = true },
+		Omega = { bottom = Color3.fromHex("00ff40"), top = Color3.fromHex("ffee00"), at = 1, text = Color3.fromHex("7dff00"), text2 = Color3.fromHex("00ffb0"), move = true },
 	},
 
 	-- the Index (QM, Oct 30: client/IndexPanel, Server/PetIndex): every pet, a section per
