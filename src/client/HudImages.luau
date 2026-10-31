@@ -33,14 +33,14 @@ return {
 	HealthIcon = "rbxassetid://99839625403183", -- assets/ui/index/HealthIcon.png
 	RegenIcon = "rbxassetid://112079382579969", -- assets/ui/index/RegenIcon.png
 	SpeedIcon = "rbxassetid://122906677557167", -- assets/ui/index/SpeedIcon.png
-	BiomeMeadow = "rbxassetid://79812227529304",
-	BiomeDesert = "rbxassetid://103503350057440",
-	BiomeIce = "rbxassetid://111038564328066",
-	BiomeLava = "rbxassetid://79255303738300",
-	BiomeDungeon = "rbxassetid://129748354260063",
-	BiomeCastle = "rbxassetid://136212131542405",
-	BiomeForest = "rbxassetid://96591814974982",
-	BiomeOcean = "rbxassetid://112012128904341",
+	BiomeMeadow = "rbxassetid://139337197595520",
+	BiomeDesert = "rbxassetid://97315736124697",
+	BiomeIce = "rbxassetid://124244390098510",
+	BiomeLava = "rbxassetid://111108179475916",
+	BiomeDungeon = "rbxassetid://132962071166702",
+	BiomeCastle = "rbxassetid://97026154183303",
+	BiomeForest = "rbxassetid://133300550274882",
+	BiomeOcean = "rbxassetid://102204872903218",
 	-- the banners that sweep across the top (client/Banner, QM Oct 31): QM's 2587 x 113 art
 	-- in thirds (an upload's at most 1024 wide), assets/ui/banner/<Name>1-3.png. The
 	-- tutorial's on PromptBanner, "Boss Defeated!" on BossBanner; a plain red band shows
