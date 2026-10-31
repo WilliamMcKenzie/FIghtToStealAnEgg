@@ -3,8 +3,7 @@
 -- the Free Reward! popup: a lime header with the red X, crossed swords on a turning sunburst,
 -- "LIMITED TIME!" over "+500 Power", the three steps (Like the game, Favorite the game, Join the
 -- group) and Claim!. Claimed (Server/FreeGift, once per player, saved), the Power goes in (its
--- "+500" pops by the Power counter: client/GainPopups) and the gift's FREE!, ring and sparkles
--- go, for you.
+-- "+500" pops by the Power counter: client/GainPopups) and the whole present goes, for you.
 --
 -- The steps are only shown, not ticked off (QM, Oct 31): Claim asks the server, which checks
 -- you're in Config.FreeGift.GroupId's group (Roblox doesn't tell a game who liked or favorited
@@ -180,31 +179,19 @@ end
 local gift -- workspace.Map.FreeGift
 local base -- its Present's pivot as built
 
+local home -- the folder it was in, to put it back (a /reset)
+
+-- claimed: the whole present goes, for you only (QM, Oct 31): taken out of your copy of the map
 local function hideGift()
-	if not gift then
-		return
+	if gift and gift.Parent then
+		home = gift.Parent
+		gift.Parent = nil
 	end
-	local free = gift:FindFirstChild("Label")
-	local billboard = free and free:FindFirstChildOfClass("BillboardGui")
-	if billboard then
-		billboard.Enabled = false
-	end
-	local sparkles = gift:FindFirstChild("Sparkles")
-	if sparkles then
-		for _, fx in sparkles:GetChildren() do
-			if fx:IsA("ParticleEmitter") or fx:IsA("Light") then
-				fx.Enabled = false
-			end
-		end
-	end
-	local ring = gift:FindFirstChild("Ring")
-	if ring then
-		for _, part in ring:GetDescendants() do
-			if part:IsA("BasePart") then
-				part.LocalTransparencyModifier = 1
-				part.Transparency = 1
-			end
-		end
+end
+
+local function showGift()
+	if gift and not gift.Parent and home and home.Parent then
+		gift.Parent = home
 	end
 end
 
@@ -324,6 +311,8 @@ local function wire(gui, close, claim, burst)
 	player:GetAttributeChangedSignal("FreeGift"):Connect(function()
 		if player:GetAttribute("FreeGift") then
 			hideGift()
+		else
+			showGift() -- (/reset: it's back to claim again)
 		end
 	end)
 
