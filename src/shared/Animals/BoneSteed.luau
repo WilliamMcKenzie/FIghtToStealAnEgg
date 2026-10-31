@@ -5,7 +5,4 @@
 local Horse = require(script.Parent.Horse)
 local BoneSteedModel = require(script.Parent.BoneSteedModel)
 
-return Horse.variant("BoneSteed", BoneSteedModel, "Divine", {
-	seat = points.seat or SEAT,
-	neck = byName.neckBone,
-})
+return Horse.variant("BoneSteed", BoneSteedModel, "Divine")
