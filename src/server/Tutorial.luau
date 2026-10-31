@@ -12,7 +12,7 @@
 --                 Config.Tutorial.BossCash (Server/Bosses)
 --   the end       the client says TutorialDone once it's shown the training grounds (a
 --                 first hit on a Meadow training mob ends it too: Server/Training calls
---                 Tutorial.hit; that ground is free while it runs: Server/Regions)
+--                 Tutorial.hit)
 -- TutorialEggs (client asks, at "Steal an egg!"): the Meadow's nests fill now if they're
 -- empty with no fight on, so a new player never waits out a cooldown.
 --

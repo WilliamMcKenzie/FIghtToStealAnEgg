@@ -2325,7 +2325,7 @@ return {
 			-- how an angry one moves: Melee (default) runs at you, Range keeps Keep studs off
 			-- and casts, Flee runs away from you and lobs bombs back.
 			Meadow = {
-				Cost = 300,
+				Cost = 0, -- (free for everyone, QM Oct 31: no blocker, open from the start and after a rebirth)
 				Health = 250,
 				Count = 8,
 				Strength = 1,

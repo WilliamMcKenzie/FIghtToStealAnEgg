@@ -29,10 +29,6 @@ local function buy(player, name, training)
 		return false, "no such region"
 	end
 	local owns = (if training == true then "Train" else "Region") .. name
-	if training == true and name == Config.Tutorial.Ground and player:GetAttribute("Tutorial") then
-		player:SetAttribute(owns, true) -- (FREE in the tutorial: client/Tutorial)
-		return true
-	end
 	if cost <= 0 or player:GetAttribute(owns) == true then
 		return true
 	end
