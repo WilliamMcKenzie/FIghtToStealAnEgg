@@ -19,8 +19,10 @@ local StudioService = game:GetService("StudioService")
 local toolbar = plugin:CreateToolbar("Map")
 local rebuild = toolbar:CreateButton("MapBakerRebuild", "Bake Shared/MapData into workspace.Map", "", "Rebuild")
 local import = toolbar:CreateButton("MapBakerImport", "Bake a .map file from disk into workspace.Map", "", "Import .map")
+local petLineup = toolbar:CreateButton("MapBakerPetLineup", "Line up every pet in the base, sized by workspace.PetScale", "", "Pet Lineup")
 rebuild.ClickableWhenViewportHidden = true
 import.ClickableWhenViewportHidden = true
+petLineup.ClickableWhenViewportHidden = true
 
 -- Fresh copies of Server.Map and Shared, side by side (Map finds Shared beside it): a
 -- module required from a plugin stays cached, so the originals would bake stale code.
@@ -272,5 +274,70 @@ workspace.ChildRemoved:Connect(function(child)
 			studConn:Disconnect()
 			studConn = nil
 		end
+	end
+end)
+
+-- ---- the pet lineup, in Edit mode ----------------------------------------------------------
+-- (QM, Oct 31) Pet Lineup (re)builds every pet in the base's dirt patch (Shared/PetLineup,
+-- from a fresh copy of Shared); while workspace.PetLineup is there, changing a pet's
+-- workspace.PetScale resizes it in the lineup, and ticking CopyValues prints the values as a
+-- Config.AnimalScale line.
+local lineupConn, lineupTmp = nil, nil
+
+local function lineupCode()
+	if lineupConn then
+		lineupConn:Disconnect()
+		lineupConn = nil
+	end
+	if lineupTmp then
+		lineupTmp:Destroy()
+		lineupTmp = nil
+	end
+	local shared = ReplicatedStorage:FindFirstChild("Shared")
+	if not (shared and shared:FindFirstChild("PetLineup")) then
+		return nil
+	end
+	lineupTmp = Instance.new("Folder")
+	lineupTmp.Name = "PetLineupTemp"
+	shared:Clone().Parent = lineupTmp
+	lineupTmp.Parent = ServerStorage
+	local ok, code = pcall(require, lineupTmp.Shared.PetLineup)
+	lineupTmp.Parent = nil -- (kept for the watcher, not saved with the place)
+	if not ok then
+		warn("[Map Baker] PetLineup: " .. tostring(code))
+		return nil
+	end
+	return code
+end
+
+local function lineupHook(rebuildIt)
+	if RunService:IsRunning() then
+		return
+	end
+	local code = lineupCode()
+	if not code then
+		return
+	end
+	local ok, err = pcall(function()
+		if rebuildIt then
+			code.build()
+		end
+		lineupConn = code.watch()
+	end)
+	if not ok then
+		warn("[Map Baker] PetLineup: " .. tostring(err))
+	end
+end
+
+petLineup.Click:Connect(function()
+	local recording = ChangeHistoryService:TryBeginRecording("Pet Lineup")
+	lineupHook(true)
+	if recording then
+		ChangeHistoryService:FinishRecording(recording, Enum.FinishRecordingOperation.Commit)
+	end
+end)
+task.defer(function()
+	if workspace:FindFirstChild("PetLineup") then
+		lineupHook(false)
 	end
 end)
