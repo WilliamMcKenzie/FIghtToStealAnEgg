@@ -57211,67 +57211,6 @@
     {
      "children": [
       {
-       "children": [],
-       "class": "UIStroke",
-       "name": "Outline",
-       "props": {
-        "Thickness": 4
-       }
-      }
-     ],
-     "class": "TextLabel",
-     "name": "NextBoss",
-     "props": {
-      "AnchorPoint": {
-       "t": "Vector2",
-       "v": [
-        0.5,
-        0
-       ]
-      },
-      "BackgroundTransparency": 1,
-      "FontFace": {
-       "t": "Font",
-       "v": [
-        "rbxasset://fonts/families/Montserrat.json",
-        "ExtraBold",
-        "Normal"
-       ]
-      },
-      "Position": {
-       "t": "UDim2",
-       "v": [
-        0.5,
-        0,
-        0,
-        134
-       ]
-      },
-      "Size": {
-       "t": "UDim2",
-       "v": [
-        0,
-        1000,
-        0,
-        60
-       ]
-      },
-      "Text": "Buy next boss",
-      "TextColor3": {
-       "t": "Color3",
-       "v": [
-        1,
-        1,
-        1
-       ]
-      },
-      "TextSize": 47,
-      "Transparency": 1
-     }
-    },
-    {
-     "children": [
-      {
        "children": [
         {
          "children": [],
