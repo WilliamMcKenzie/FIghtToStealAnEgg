@@ -18,7 +18,6 @@ local SlashTuning = require(Shared.SlashTuning)
 local Weapons = require(Shared.Weapons.Weapons)
 local Arsenal = require(script.Arsenal)
 local StudStyle = require(Shared.StudStyle)
-local SkyColor = require(Shared.SkyColor)
 local WorldColors = require(Shared.WorldColors)
 local Bosses = require(script.Bosses)
 local Combat = require(script.Combat)
@@ -48,7 +47,6 @@ if not workspace:FindFirstChild("FightBarrierStyle") then
 end
 StudStyle.ensure() -- workspace.StudStyle: the studs' Transparency and TileScale (ground apart), kept with the place
 StudStyle.watch()
-SkyColor.ensure() -- workspace.SkyColor: the sky's colour in each biome, kept with the place
 local map = Map.ensure() -- workspace.Map (baked into the place in Studio, or built now)
 WorldColors.create() -- workspace.WorldColors: live world colours (after the map: it paints it)
 Pens.start(map)
