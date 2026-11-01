@@ -12,6 +12,9 @@ economy curve in `src/shared/Config.luau` as a graph you can edit.
   dots, type numbers in the table, or multiply everything. Grey dashed = the game now.
 - **Formulas** (Strength -> damage / attack speed, pet ride speed, bounty, rebirth): edit the
   parameters, including the curve shape (`Config.Power.Curve`, `Config.PetStats.SpeedCurve`).
+- **Biome unlock time** (top of Economy, http://localhost:3001/#Economy): estimated minutes to
+  afford each region. Pick Exponential or drag dots and it solves the region prices for those
+  times.
 - **Pacing**: seconds to kill each region's boss and a training mob, and minutes of pen
   income to afford the next region, from your unsaved edits.
 - **Save to game** writes only the changed values into Config.luau (comments and layout stay)

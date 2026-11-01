@@ -206,6 +206,56 @@ function bossPaths(boss, leaf) {
 }
 const tierBosses = (t) => t.flatMap((b) => (CFG.BossPools[b] || []).filter((x) => CFG.Bosses[x]));
 
+// ---------------------------------------------------------------- biome unlock time
+// A rough solo player in region `i` saving for the next: a boss run (nest refill + UNLOCK.extra
+// seconds of fighting and carrying home) pays the bounty and UNLOCK.eggs egg rewards, and the
+// eggs hatch into the pen, replacing the last region's pets. The fork uses its first side.
+const UNLOCK = { extra: 45, eggs: 2 };
+function tierAvgCash(t, g) {
+  const kinds = CFG.Eggs.Kinds[t[0]] || {};
+  const sum = Object.values(kinds).reduce((a, b) => a + b, 0) || 1;
+  return Object.entries(kinds).reduce((a, [k, w]) => a + w * (g(`Pets.${k}.Cash`) || 0), 0) / sum;
+}
+function tierHatch(t) {
+  const kinds = CFG.Eggs.Kinds[t[0]] || {};
+  const sum = Object.values(kinds).reduce((a, b) => a + b, 0) || 1;
+  return Object.entries(kinds).reduce((a, [k, w]) => a + w * (CFG.Hatch.Time[k] ?? CFG.Hatch.Default), 0) / sum;
+}
+function unlockMinutes(i, cost, g) {
+  const t = TIERS[i], slots = g("Backpack.PenSlots"), avg = tierAvgCash(t, g), hatch = tierHatch(t);
+  const run = g(`Eggs.Cooldown.${t[0]}`) + UNLOCK.extra;
+  const pay = (g("BossCash.Share") * cost + UNLOCK.eggs * g(`Eggs.Reward.${t[0]}`)) / run;
+  const start = i ? tierAvgCash(TIERS[i - 1], g) : 0;
+  const pen = Array(slots).fill(start);
+  if (!i) pen[0] = g(`Pets.${CFG.Backpack.Starter}.Cash`);
+  let cash = 0, time = 0, queue = [];
+  for (;;) {
+    const rate = pen.reduce((a, b) => a + b, 0) + pay;
+    const settled = !queue.length && pen.every((c) => c >= avg);
+    if (settled || cash + rate * run >= cost) return (time + (cost - cash) / rate) / 60;
+    cash += rate * run; time += run;
+    for (let e = 0; e < UNLOCK.eggs; e++) queue.push(time + hatch);
+    while (queue.length && queue[0] <= time) { queue.shift(); pen.sort((a, b) => a - b); if (pen[0] < avg) pen[0] = avg; }
+    if (pen.every((c) => c >= avg)) queue = [];
+  }
+}
+const UNLOCK_MAX_COST = 1e18;
+const unlockLimit = (i, g) => unlockMinutes(i, UNLOCK_MAX_COST, g);
+// the price that takes `minutes` to save for (the time only grows with the price)
+function unlockCost(i, minutes, g) {
+  const target = Math.min(minutes, unlockLimit(i, g) * 0.98);
+  let lo = 0, hi = Math.log10(UNLOCK_MAX_COST);
+  for (let n = 0; n < 50; n++) {
+    const mid = (lo + hi) / 2;
+    if (unlockMinutes(i, Math.pow(10, mid), g) < target) lo = mid; else hi = mid;
+  }
+  return Math.pow(10, (lo + hi) / 2);
+}
+function unlockAssume() {
+  const num = (label, key) => h("label", {}, label + " ", h("input", { type: "number", value: UNLOCK[key], min: key === "eggs" ? 1 : 0, onchange: (e) => { if (+e.target.value >= (key === "eggs" ? 1 : 0)) UNLOCK[key] = +e.target.value; render(); } }));
+  return h("div", { class: "assume" }, num("Seconds a boss run takes, on top of the nest refill", "extra"), num("Eggs stolen each run", "eggs"));
+}
+
 // ---------------------------------------------------------------- curve presets (for lists)
 const PRESETS = {
   hand: { name: "As is" },
@@ -292,6 +342,16 @@ function lists() {
       note: "The biggest hit among the region's bosses. Changing it scales every attack, orb and minion hit of every boss there by the same amount.",
       items: TIERS.map((t) => ({ label: tierName(t), color: biomeColor(t[0]), targets: tierBosses(t).flatMap((b) => bossPaths(b, "Damage")),
         read: (g) => Math.max(...tierBosses(t).flatMap((b) => bossPaths(b, "Damage").map(g))) })),
+    },
+    regionTime: {
+      page: "Economy", title: "Biome unlock time", unit: "minutes", log: false, sig: 3, assume: unlockAssume,
+      note: `Roughly how many minutes you spend in the region before you can afford each one, from pen cash/s, boss bounties and egg rewards. Pick Exponential, or drag the dots: it works out the region's price from the time you want and writes Regions.Cost. Bounties are a share of the price, so a gate tops out near ${abbr(Math.max(...TIERS.slice(1).map((_, i) => unlockLimit(i, get))))} min at the current Share (lower it in Boss bounty below to go longer).`,
+      items: TIERS.slice(1).map((t, i) => {
+        const targets = t.map((b) => `Regions.Cost.${b}`).filter((p) => p in PATHS);
+        return { label: tierName(t), color: biomeColor(t[0]), tag: `${abbr(TIERS.slice(1, i + 2).reduce((a, _, j) => a + unlockMinutes(j, cur(`Regions.Cost.${TIERS[j + 1][0]}`), cur), 0))} min from the start`,
+          targets, read: (g) => unlockMinutes(i, g(`Regions.Cost.${t[0]}`), g),
+          write: (v) => { const c = Math.round(sig(unlockCost(i, v, cur), 3)); targets.forEach((p) => setVal(p, c)); } };
+      }),
     },
     regionCost: {
       page: "Economy", title: "Region prices", unit: "cash", log: true, sig: 2,
@@ -417,6 +477,7 @@ function listSaved(L) {
 }
 function setItem(L, i, v) {
   const it = L.items[i];
+  if (it.write) return it.write(v);
   const old = it.read ? it.read(saved) : saved(it.targets[0]);
   const ratio = old ? v / old : 1;
   for (const p of it.targets) {
@@ -563,6 +624,7 @@ function listCard(key, L) {
   const changed = vals.some((v, i) => Math.abs(v - old[i]) > 1e-9 * Math.max(1, Math.abs(old[i])));
   card.append(h("h2", {}, L.title, changed ? h("span", { class: "changed" }, "edited") : null));
   if (L.note) card.append(h("p", { class: "note" }, L.note));
+  if (L.assume) card.append(L.assume());
   const g = (GEN[key] ||= { preset: "hand", a: 0, r: 0, round: true, ylog: L.log });
   const chartBox = h("div", { class: "chart" });
   const controls = h("div", { class: "controls" });
@@ -630,7 +692,7 @@ function listCard(key, L) {
   requestAnimationFrame(redrawOnly);
   return card;
 }
-const openTables = new Set();
+const openTables = new Set(["regionTime"]);
 
 function formulaCard(key, F) {
   const card = h("section", { class: "card" });
@@ -779,6 +841,8 @@ async function load() {
   if (!r.ok) { $("#status").textContent = await r.text(); return; }
   const j = await r.json();
   CFG = j.tree; PATHS = j.paths; VERSION = j.version;
+  const want = decodeURIComponent(location.hash.slice(1));
+  if (PAGES.some((p) => p[0] === want)) page = want;
   for (const p of Object.keys(EDIT)) if (!(p in PATHS)) delete EDIT[p];
   refreshStatus(); render();
 }
