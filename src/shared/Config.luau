@@ -359,6 +359,13 @@ return {
 	-- three steps (like the game, favorite it, join the group) and Claim, which gives Amount
 	-- Power (Strength), once per player (saved: FreeGift). Only the group can be checked
 	-- (Server/FreeGift): not in it, Claim pops a red "Steps not complete!".
+	-- Roblox's native favourite prompt (QM, Nov 1): shown once per player, right after they
+	-- buy this region (Server/Regions -> client/Favorite). Delay = seconds after the buy.
+	Favorite = {
+		AfterRegion = "Desert",
+		Delay = 1.5,
+	},
+
 	FreeGift = {
 		X = 50, Z = -130, Yaw = 160, -- (Carl is at -50, -130, yaw 200: the other side of the gateway)
 		Scale = 1,

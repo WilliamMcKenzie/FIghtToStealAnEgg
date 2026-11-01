@@ -57,6 +57,7 @@ local function keys()
 		table.insert(list, "Region" .. name)
 	end
 	table.insert(list, "FreeGift") -- (the free gift's claimed: Server/FreeGift)
+	table.insert(list, "FavPrompted") -- (the favourite prompt's been shown: Server/Regions)
 	return list
 end
 

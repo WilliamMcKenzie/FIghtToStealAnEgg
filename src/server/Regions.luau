@@ -15,6 +15,10 @@ local Funnels = require(script.Parent.Funnels)
 
 local Regions = {}
 
+local favRemote = Instance.new("RemoteEvent")
+favRemote.Name = "PromptFavorite" -- (client/Favorite shows the prompt)
+favRemote.Parent = ReplicatedStorage
+
 function Regions.owns(player, name)
 	local cost = Config.Regions.Cost[name]
 	return cost == nil or cost <= 0 or player:GetAttribute("Region" .. name) == true
@@ -41,6 +45,12 @@ local function buy(player, name, training)
 	player:SetAttribute(owns, true)
 	if training ~= true then
 		Funnels.regionBought(player, name) -- (the biome progress funnel)
+		-- (QM, Nov 1: unlocking the Desert asks for a favourite, Roblox's own prompt, once per
+		-- player ever: FavPrompted is saved by Server/Data and kept through rebirths)
+		if name == Config.Favorite.AfterRegion and not player:GetAttribute("FavPrompted") then
+			player:SetAttribute("FavPrompted", true)
+			favRemote:FireClient(player)
+		end
 	end
 	return true
 end
