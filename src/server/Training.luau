@@ -153,6 +153,27 @@ local function fromInside(player, body)
 	return root ~= nil and Yards.inside(body, root.Position)
 end
 
+-- a ground's attacks with their Damage cut to Config.Training.DamageScale (QM, Nov 1: training
+-- mobs hit 4x softer), one copy per list so every mob shares it
+local softened = {}
+local function soft(attacks)
+	if not attacks then
+		return nil
+	end
+	if not softened[attacks] then
+		local list = {}
+		for i, a in attacks do
+			local c = table.clone(a)
+			if c.Damage then
+				c.Damage *= Config.Training.DamageScale
+			end
+			list[i] = c
+		end
+		softened[attacks] = list
+	end
+	return softened[attacks]
+end
+
 local function spawnMob(name, zone, slot)
 	local g = Config.Training.Grounds[name]
 	local rng = Random.new()
@@ -188,7 +209,7 @@ local function spawnMob(name, zone, slot)
 	body:SetAttribute("Ground", name)
 	body:SetAttribute("Slot", slot) -- (client/Shots finds its Magic by it)
 	Yards.stamp(body, zone.bounds)
-	local attacks = def.Attacks or g.Attacks
+	local attacks = soft(def.Attacks or g.Attacks)
 	local m = {
 		ground = name,
 		zone = zone,

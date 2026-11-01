@@ -378,11 +378,22 @@ local function serverNow()
 	return workspace:GetServerTimeNow()
 end
 
+-- a swipe's windup: Desert and later bosses and minions wind up slower (Config.EnemySwipe.Slow);
+-- a training mob (its biome is a table) as written
+local function swipeWindup(b, a)
+	local S = Config.EnemySwipe
+	local windup = a.Windup or S.Windup
+	if type(b.biome) == "string" then
+		windup *= S.Slow[b.biome] or S.Slow.Default
+	end
+	return windup
+end
+
 -- a Swipe (or an old Contact): it faces `toward` and holds still while each swing's red
 -- crescent fills, then hits everyone on it
 local function swipe(body, b, a, pos, toward)
 	local S = Config.EnemySwipe
-	local windup = a.Windup or S.Windup
+	local windup = swipeWindup(b, a)
 	local swings = math.max(1, a.Swings or 1)
 	local yaw = math.atan2(-toward.X, -toward.Z)
 	animate(body, a, windup)
@@ -550,7 +561,7 @@ go = function(body, b, i, list)
 		end
 		swipe(body, b, a, pos, toward)
 		if a.Then then
-			task.delay((a.Windup or Config.EnemySwipe.Windup) * math.max(1, a.Swings or 1), go, body, b, a.Then)
+			task.delay(swipeWindup(b, a) * math.max(1, a.Swings or 1), go, body, b, a.Then)
 		end
 	elseif a.Kind == "Slam" then
 		if edge > a.Range then

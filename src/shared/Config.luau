@@ -1333,6 +1333,13 @@ return {
 	-- telegraph's (client/Swipes, styled like the bombs' landing rings: client/Bombs).
 	EnemySwipe = {
 		Windup = 0.5, -- seconds from the telegraph appearing to the hit (bosses set longer)
+		-- a boss's (and its minions') swipe windups take this many times longer, by region
+		-- (QM, Nov 1: Desert and later melee 1.4x slower, easier to dodge). Meadow stays as
+		-- written; training mobs aren't slowed.
+		Slow = {
+			Default = 1.4,
+			Meadow = 1,
+		},
 		Arc = 120,
 		-- how much bigger than its Reach (and Width) every swipe really is, by region (QM,
 		-- Oct 30: pets are fast, so dodging was trivial; about 1.6x across the board,
@@ -2501,6 +2508,9 @@ return {
 	-- Count: how many roam it at once (more than the old pens held: the regions are big).
 	Training = {
 		PerDamage = 0.1, -- (at 0 Strength a Kendo Stick hit deals 10: Strength 2 trains 2, as before)
+		-- every training mob's hits (swipes, magic, lobs) deal this share of the Damage written
+		-- below (QM, Nov 1: training mobs hit 4x softer; Server/Training)
+		DamageScale = 0.25,
 		Grounds = {
 			-- each ground's Mobs take turns filling its Count (QM, Oct 30): Pet (its model, at
 			-- Scale x its riding size), Name, Mode and Attacks (else the ground's own). Mode is
