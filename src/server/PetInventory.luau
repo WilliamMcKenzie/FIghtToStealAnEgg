@@ -36,6 +36,7 @@ local Passes = require(Shared.Passes)
 local Stacks = require(Shared.Stacks)
 local Pens = require(script.Parent.Pens)
 local Pets = require(Shared.Pets)
+local Stats = require(script.Parent.Stats)
 
 local PetInventory = {}
 
@@ -207,6 +208,7 @@ local function pay()
 			carry[player] = due - whole
 			if whole > 0 then
 				player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + whole)
+				Stats.earned(player, whole, "PenIncome")
 			end
 		end
 		for player in carry do

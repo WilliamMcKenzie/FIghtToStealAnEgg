@@ -38,6 +38,7 @@ local Combat = require(script.Parent.Combat)
 local Store = require(script.Parent.Store)
 local PetInventory = require(script.Parent.PetInventory)
 local Tutorial = require(script.Parent.Tutorial)
+local Stats = require(script.Parent.Stats)
 
 local Data = {}
 
@@ -48,7 +49,7 @@ local claimRemote -- (OfflineClaim: Data.start)
 local lastOffline = {} -- [player] = the offline cash they last claimed (a 2x bought after it pays that again)
 
 local function keys()
-	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone", "OfflineCash", "HatchCredits", "Stolen" }
+	local list = { "Cash", "Strength", "Eggs", "Rebirths", "Weapons", "Weapon", "PetsOwned", "PenPets", "Pet", "PenEggs", "ExtraSlots", "PetIndex", "IndexClaimed", "Passes", "TutorialDone", "OfflineCash", "HatchCredits", "Stolen", "PlayTime", "GoalAt", "GoalSince" }
 	for name in Config.Training.Grounds do
 		table.insert(list, "Train" .. name)
 	end
@@ -153,6 +154,7 @@ local function claimOffline(player, double)
 		claimRemote:FireClient(player, amount) -- (first, so the client can hold the counter back)
 	end
 	player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + amount)
+	Stats.earned(player, amount, "OfflineCash")
 	task.spawn(save, player)
 	return true
 end

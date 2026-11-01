@@ -53,6 +53,7 @@ local Combat = require(script.Parent.Combat)
 local Passes = require(Shared:WaitForChild("Passes"))
 local Pets = require(Shared:WaitForChild("Pets"))
 local Minions = require(script.Parent.Minions)
+local Stats = require(script.Parent.Stats)
 
 local Bosses = {}
 Bosses.defeated = Instance.new("BindableEvent")
@@ -143,6 +144,7 @@ local function hurt(body, amount)
 				end
 				bountyRemote:FireClient(player, paid, at, body.Size.Y)
 				player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + paid)
+				Stats.earned(player, paid, "BossBounty")
 			end
 			Bosses.killed:Fire(b.kind, winners)
 		end
