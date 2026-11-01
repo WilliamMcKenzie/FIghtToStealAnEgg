@@ -359,6 +359,13 @@ return {
 	-- three steps (like the game, favorite it, join the group) and Claim, which gives Amount
 	-- Power (Strength), once per player (saved: FreeGift). Only the group can be checked
 	-- (Server/FreeGift): not in it, Claim pops a red "Steps not complete!".
+	-- Roblox's native favourite prompt (QM, Nov 1): shown once per player, right after they
+	-- buy this region (Server/Regions -> client/Favorite). Delay = seconds after the buy.
+	Favorite = {
+		AfterRegion = "Desert",
+		Delay = 1.5,
+	},
+
 	FreeGift = {
 		X = 50, Z = -130, Yaw = 160, -- (Carl is at -50, -130, yaw 200: the other side of the gateway)
 		Scale = 1,
@@ -801,7 +808,7 @@ return {
 		},
 
 		-- Lava: the Volcano Tortoise pet grown huge. Slow; lava bombs out of its shell, eruptions
-		-- under everyone, and rock hogs at half health
+		-- under everyone, and mini tortoises at half health
 		VolcanoTortoise = {
 			Name = "Volcano Tortoise",
 			Model = "VolcanoTortoise",
@@ -821,9 +828,9 @@ return {
 			Minions = {
 				At = 0.5,
 				Count = 3,
-				Model = "RockHog",
-				Name = "Rock Hog",
-				Scale = 0.8, -- (QM: half the size they were)
+				Model = "VolcanoTortoise", -- (QM Nov 1: mini Volcano Tortoises, not rock hogs)
+				Name = "Mini Tortoise",
+				Scale = 0.5, -- (x the pet's 2.5 riding size: about 40% of the boss)
 				Health = 40000,
 				Speed = 15,
 				Strength = 20,
