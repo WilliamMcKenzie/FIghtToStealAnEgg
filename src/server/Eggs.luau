@@ -42,6 +42,7 @@ local Bosses = require(script.Parent.Bosses)
 local Map = require(script.Parent.Map)
 local Hatchery = require(script.Parent.Hatchery)
 local Pens = require(script.Parent.Pens)
+local Stats = require(script.Parent.Stats)
 
 local Eggs = {}
 
@@ -343,7 +344,9 @@ function Eggs.start(map)
 				player:SetAttribute("HeldEgg", nil)
 				player:SetAttribute("HeldEggKind", nil)
 				player:SetAttribute("Eggs", (player:GetAttribute("Eggs") or 0) + 1)
-				player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + (Config.Eggs.Reward[biome] or 0) * Passes.mult(player, "Cash"))
+				local reward = (Config.Eggs.Reward[biome] or 0) * Passes.mult(player, "Cash")
+				player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + reward)
+				Stats.earned(player, reward, "EggReward")
 				Pens.addEgg(player, function()
 					return Eggs.make(biome, kind, Config.Eggs.Scale.Pen)
 				end)

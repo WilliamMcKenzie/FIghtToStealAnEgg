@@ -25,6 +25,7 @@ local Data = require(script.Data)
 local Eggs = require(script.Eggs)
 local FreeGift = require(script.FreeGift)
 local Funnels = require(script.Funnels)
+local Stats = require(script.Stats)
 local Hatchery = require(script.Hatchery)
 local Map = require(script.Map)
 local Pens = require(script.Pens)
@@ -65,6 +66,11 @@ PetIndex.start() -- (every pet you've owned, and its reward: the Index)
 local funnelsOk, funnelsErr = pcall(Funnels.start, Bosses)
 if not funnelsOk then
 	warn("Funnels.start failed: " .. tostring(funnelsErr))
+end
+-- (analytics: boss death rates and bottlenecks, Server/Stats; same rule)
+local statsOk, statsErr = pcall(Stats.start, Bosses)
+if not statsOk then
+	warn("Stats.start failed: " .. tostring(statsErr))
 end
 Hatchery.start() -- (stolen eggs in your hotbar, put down in your pen and hatched)
 Eggs.start(map)

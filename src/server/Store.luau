@@ -25,6 +25,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Combat = require(script.Parent.Combat)
+local Stats = require(script.Parent.Stats)
 
 local Store = {}
 
@@ -66,6 +67,7 @@ end
 local function givePack(player, kind, pack)
 	if kind == "Cash" then
 		player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + pack.Amount)
+		Stats.earned(player, pack.Amount, "CashPack")
 	else
 		player:SetAttribute("Strength", (player:GetAttribute("Strength") or 0) + pack.Amount)
 		Combat.refresh(player)

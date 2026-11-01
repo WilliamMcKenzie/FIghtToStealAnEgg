@@ -36,6 +36,7 @@ local Yards = require(ReplicatedStorage.Shared.Yards)
 local Combat = require(script.Parent.Combat)
 local BossAttacks = require(script.Parent.BossAttacks)
 local Tutorial = require(script.Parent.Tutorial)
+local Stats = require(script.Parent.Stats)
 
 local Training = {}
 
@@ -209,6 +210,7 @@ local function spawnMob(name, zone, slot)
 		end
 		Combat.train(player, damage, g.Strength)
 		Tutorial.hit(player, name) -- (the tutorial's last step: Server/Tutorial)
+		Stats.trained(player, name) -- (training time, for the stats: Server/Stats)
 		-- (it turns on whoever hit it last)
 		if attacks then
 			m.target, m.angry = player, Config.Training.Calm

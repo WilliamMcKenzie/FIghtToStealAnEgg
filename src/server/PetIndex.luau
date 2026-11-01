@@ -15,6 +15,7 @@ local Config = require(Shared.Config)
 local IndexList = require(Shared.IndexList)
 local Stacks = require(Shared.Stacks)
 local Combat = require(script.Parent.Combat)
+local Stats = require(script.Parent.Stats)
 
 local PetIndex = {}
 
@@ -64,6 +65,7 @@ local function claim(player, kind)
 	player:SetAttribute("IndexClaimed", list(claimed))
 	local cash, power = IndexList.reward(kind)
 	player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + cash)
+	Stats.earned(player, cash, "IndexReward")
 	player:SetAttribute("Strength", (player:GetAttribute("Strength") or 0) + power)
 	Combat.refresh(player)
 	return true
