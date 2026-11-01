@@ -203,6 +203,23 @@ local function popScale(gui)
 	return s
 end
 
+-- the size a popup rests at: 1, or smaller if it wouldn't fit on the screen at the HUD's
+-- scale (a phone's short screen: QM, Nov 1, with the HUD bigger there; Config.HudScale)
+function UiFx.fitScale(gui)
+	local screen = gui:FindFirstAncestorOfClass("ScreenGui")
+	local fit = gui.Parent and gui.Parent:FindFirstChild("Fit")
+	if not screen or not (fit and fit:IsA("UIScale")) then
+		return 1
+	end
+	local margin = (Config.HudScale and Config.HudScale.PopupMargin or 12) * 2
+	local avail = screen.AbsoluteSize - Vector2.new(margin, margin)
+	local w, h = gui.Size.X.Offset * fit.Scale, gui.Size.Y.Offset * fit.Scale
+	if w < 1 or h < 1 or avail.X < 1 or avail.Y < 1 then
+		return 1
+	end
+	return math.min(1, avail.X / w, avail.Y / h)
+end
+
 local closing = setmetatable({}, { __mode = "k" }) -- [gui] = the tween hiding it
 local menus = setmetatable({}, { __mode = "k" }) -- [gui] = how it closes (UiFx.menu)
 local current -- the menu open now: { gui, close }
@@ -246,8 +263,9 @@ function UiFx.popIn(gui, sound)
 	end
 	local s = popScale(gui)
 	gui.Visible = true
-	s.Scale = POP_FROM
-	TweenService:Create(s, POP_IN, { Scale = 1 }):Play()
+	local rest = UiFx.fitScale(gui)
+	s.Scale = POP_FROM * rest
+	TweenService:Create(s, POP_IN, { Scale = rest }):Play()
 	if sound ~= false then
 		UiFx.play(sound or "Open")
 	end
@@ -259,7 +277,7 @@ function UiFx.popOut(gui, sound)
 	end
 	UiFx.closed(gui)
 	local s = popScale(gui)
-	local out = TweenService:Create(s, POP_OUT, { Scale = POP_TO })
+	local out = TweenService:Create(s, POP_OUT, { Scale = POP_TO * UiFx.fitScale(gui) })
 	closing[gui] = out
 	out.Completed:Connect(function(how)
 		if how == Enum.PlaybackState.Completed and closing[gui] == out then

@@ -8,7 +8,7 @@
 -- the Shop one the Shop (client/Shop).
 --
 -- Laid out in pixels at a 1080-tall design size and scaled to the screen by a UIScale
--- (screen height / 1080). QM's Figma frame is 2190 tall, so its numbers go through fig().
+-- (softer than screen height / 1080 so phones get bigger buttons: Config.HudScale). QM's Figma frame is 2190 tall, so its numbers go through fig().
 -- The buttons' backs are built natively to QM's Figma (client/HudKit); the icons are its layers exported as they are
 -- (assets/ui/hud, ids in client/HudImages; the icons at 64px, QM: less lag). Text is
 -- Montserrat ExtraBold, white with a black outline; the counters' is italic. Shop's and
@@ -93,6 +93,13 @@ function Hud.holdBack(name, amount)
 	end
 end
 
+-- the Root's scale on a screen h px tall (Config.HudScale)
+function Hud.scaleFor(h)
+	local cfg = Config.HudScale or {}
+	local k = (h / DESIGN_HEIGHT) ^ (cfg.Curve or 1)
+	return math.clamp(k, cfg.Min or 0, cfg.Max or math.huge)
+end
+
 function Hud.start()
 	local gui = Ui.screen("Hud", {
 		IgnoreGuiInset = true,
@@ -108,15 +115,22 @@ function Hud.start()
 		root.Size = UDim2.fromScale(1, 1)
 	end
 	local uiScale = Ui.make(root, "Fit", "UIScale")
+	-- (QM, Nov 1: not 1:1 with the screen's height, which left the buttons tiny on phones:
+	-- Config.HudScale's softer curve. Everything in the root is pinned to a screen edge by
+	-- its AnchorPoint and Position, so it follows the edges at any size.)
 	local function fit()
-		local h = workspace.CurrentCamera.ViewportSize.Y
-		uiScale.Scale = h / DESIGN_HEIGHT
+		local h = gui.AbsoluteSize.Y
+		if h < 1 then -- (not laid out yet, or in Studio's StarterGui)
+			h = workspace.CurrentCamera.ViewportSize.Y
+		end
+		uiScale.Scale = Hud.scaleFor(h)
 		-- (the root is scaled down, so it's made bigger by the same factor to fill the screen)
 		root.Size = UDim2.fromScale(1 / uiScale.Scale, 1 / uiScale.Scale)
 	end
 	fit()
 	if Ui.live then
 		workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
+		gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
 	end
 
 	-- boss bar
