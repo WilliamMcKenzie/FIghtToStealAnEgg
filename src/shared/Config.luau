@@ -801,7 +801,7 @@ return {
 		},
 
 		-- Lava: the Volcano Tortoise pet grown huge. Slow; lava bombs out of its shell, eruptions
-		-- under everyone, and rock hogs at half health
+		-- under everyone, and mini tortoises at half health
 		VolcanoTortoise = {
 			Name = "Volcano Tortoise",
 			Model = "VolcanoTortoise",
@@ -821,9 +821,9 @@ return {
 			Minions = {
 				At = 0.5,
 				Count = 3,
-				Model = "RockHog",
-				Name = "Rock Hog",
-				Scale = 0.8, -- (QM: half the size they were)
+				Model = "VolcanoTortoise", -- (QM Nov 1: mini Volcano Tortoises, not rock hogs)
+				Name = "Mini Tortoise",
+				Scale = 0.5, -- (x the pet's 2.5 riding size: about 40% of the boss)
 				Health = 40000,
 				Speed = 15,
 				Strength = 20,
