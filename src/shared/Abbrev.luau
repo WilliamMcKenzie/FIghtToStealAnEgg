@@ -1,7 +1,7 @@
 -- The one way every number the player sees is written (QM, Oct 30): 950, 1K, 1.5K, 15K,
--- 2.3M, 4B, 1T, then Qa, Qi, Sx, Sp, Oc, No, Dc and on past that. Under 10 of a suffix it
--- keeps one decimal (1.5K), above it whole (15K, 150K); it rounds down, so a price never
--- shows less than it costs. Cash, Power, prices, HP, damage, DPS, bounties, counts all use it.
+-- 2.3M, 4B, 1T, then Qa, Qi, Sx, Sp, Oc, No, Dc and on past that. From 1K up it keeps one
+-- decimal (1.5K, 20.4K, 109.3K; QM Nov 1), dropping a bare .0 (25K); it rounds down, so a
+-- price never shows less than it costs. Cash, Power, prices, HP, damage, DPS, bounties, counts all use it.
 --
 --   Abbrev(n) -> string   (also Abbrev.format(n))
 
@@ -25,9 +25,9 @@ local function format(n)
 		n /= 1000
 		i += 1
 	end
-	-- (floored, not rounded: 1,999 reads 1.9K and 999,999 reads 999K, never 1000K)
+	-- (floored, not rounded: 1,999 reads 1.9K and 999,999 reads 999.9K, never 1000K)
 	local s
-	if i > 1 and n < 10 then
+	if i > 1 then
 		s = string.format("%.1f", math.floor(n * 10 + 1e-9) / 10)
 	else
 		s = tostring(math.floor(n + 1e-9))
