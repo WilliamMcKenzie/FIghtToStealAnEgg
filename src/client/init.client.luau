@@ -1,7 +1,7 @@
 -- Your weapon (the sword to start; bosses drop more: Server/Arsenal): it's always
 -- out, and it attacks by itself (QM, Oct 24, Archero-style). Melee weapons slash as
 -- below; Ranged and Magic ones shoot at the nearest target (anywhere in a boss arena, else within Config.Shots.Reach) (client/Shots
--- draws the shots, the server runs them for the damage), but only while you stand still.
+-- draws the shots, the server runs them for the damage), moving or not (Config.Shots.StillOnly).
 -- While a boss (or a training mob or dummy) is within AimRange the torso turns toward it, eased (not snapped), and
 -- whenever one is within AttackRange and the cooldown allows, it slashes along that aim:
 -- the upper body swings the held sword (SwingPose) along the arc (SlashFx). It plays
@@ -235,7 +235,7 @@ RunService.Heartbeat:Connect(function(dt)
 		return
 	end
 	if Weapons.get(id).Shot then
-		-- (Archero: bows and staffs hold fire while you're moving, and shoot as soon as you stop)
+		-- (off since QM, Nov 1: with StillOnly on, bows and staffs hold fire while you move)
 		if Config.Shots.StillOnly and humanoid.MoveDirection.Magnitude > 0.1 then
 			return
 		end

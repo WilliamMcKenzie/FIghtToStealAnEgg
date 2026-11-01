@@ -3314,7 +3314,7 @@ return {
 		-- the nearest enemy anywhere in the arena, and a shot flies until it hits or leaves the
 		-- arena. Outside a fight (training yards) they reach this far instead
 		Reach = 90, -- studs
-		StillOnly = true, -- bows and staffs only shoot while you stand still (QM, Oct 26, Archero); melee always swings
+		StillOnly = false, -- true = bows and staffs only shoot while you stand still (Archero); QM, Nov 1: they shoot on the move too, like melee
 		-- the held bow pulses on each shot, as in Kingdom Crushers' Shoot (QM, Oct 26): it snaps
 		-- small as it fires, swells big toward the next shot, and settles if none comes.
 		-- Times are in shot gaps (the Cooldown, or quicker with Strength). client/BowPulse
