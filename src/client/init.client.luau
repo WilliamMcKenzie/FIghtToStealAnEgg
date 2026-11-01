@@ -52,6 +52,7 @@ require(script.BossBounty) -- (a beaten boss's "+$" flies to your cash, and its 
 require(script.PenGlow) -- (your pen glows while you hold an egg)
 require(script.SpawnCam) -- (each spawn: the camera behind you, looking at your pen)
 require(script.PenCards) -- (each pen's owner card high over it: avatar and @name, or "Your Base")
+require(script.PetPlates) -- (pen pets' nameplates up close, and "+$N" popups as they pay)
 require(script.Tutorial) -- (the new player tutorial)
 require(script.Barriers)
 require(script.FightBarrierFx)

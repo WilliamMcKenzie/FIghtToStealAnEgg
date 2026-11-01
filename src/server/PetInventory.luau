@@ -194,6 +194,9 @@ function PetInventory.income(player)
 end
 
 local function pay()
+	local paid = Instance.new("RemoteEvent") -- (each pay out: the pets' "+$N" popups, client/PetPlates)
+	paid.Name = "PetIncome"
+	paid.Parent = ReplicatedStorage
 	local carry = {} -- [player] = cash under 1 left over (rebirth bonuses aren't whole)
 	while true do
 		local every = Config.Income.Every
@@ -209,6 +212,7 @@ local function pay()
 			if whole > 0 then
 				player:SetAttribute("Cash", (player:GetAttribute("Cash") or 0) + whole)
 				Stats.earned(player, whole, "PenIncome")
+				paid:FireClient(player)
 			end
 		end
 		for player in carry do

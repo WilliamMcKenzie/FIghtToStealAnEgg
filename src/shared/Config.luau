@@ -1945,6 +1945,17 @@ return {
 		Bottom = 9, -- studs above the pen's floor to the text's bottom
 		Back = 0, -- studs from the pen's middle toward its back (away from the gate)
 	},
+	-- pen pets' overhead UI (client/PetPlates; QM, Nov 1: LassoAPet's): the nearest few get a
+	-- nameplate, and your others pop "+$N" each time they pay
+	PetPlate = {
+		Reach = 16, -- studs from you to a pet where its plate shows
+		Leave = 19, -- and where it goes again (a bit further, so it doesn't flicker at the edge)
+		Most = 4, -- plates at once, nearest first
+		Height = 3, -- studs: the rarity and speed lines' height
+		TierGrowth = 1.2, -- the plate's size per size tier up
+		Above = 0.6, -- studs between the pet's top and the plate
+		PopupDistance = 150, -- studs from the camera where a pet's popups stop showing
+	},
 	-- where you spawn (QM, Oct 31): in front of your own pen's gate, turned to face it, the
 	-- camera behind you looking at it too (Shared/PenSpawn, Server/Pens, client/SpawnCam)
 	PenSpawn = {
