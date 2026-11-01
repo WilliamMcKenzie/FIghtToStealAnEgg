@@ -2437,7 +2437,7 @@ return {
 	-- during the tutorial; once they're all done (the last is Collect Pets, QM) the panel
 	-- and its arrows are gone for good. Each is one of:
 	--   { Power = 2 }                       "Train Power": reach that level (Config.Levels)
-	--   { Steal = 3, In = { "Meadow" } }    "Steal 3 <region> eggs": eggs stolen there, ever
+	--   { Steal = 2, In = { "Meadow" } }    "Steal 2 <region> eggs": eggs stolen there, ever
 	--                                       (saved player attribute Stolen, Server/Eggs)
 	--   { Region = { "Desert" } }           "Unlock Desert": bar is your cash vs its gate;
 	--                                       with more than one, any of them (All = true: every one)
@@ -2445,7 +2445,7 @@ return {
 	--                                       better; bar is your cash vs the cheapest of it
 	--   { Train = "Desert" }                "Unlock Desert Training": cash vs its ground's Cost
 	--   { Collect = true }                  "Collect Pets": pets found (Index) vs all of them
-	-- Title = "..." replaces the made-up title. The "Steal 3 eggs" (QM: 5 is a full pen) before the Desert is
+	-- Title = "..." replaces the made-up title. The "Steal 2 eggs" (QM) before the Desert is
 	-- QM's: players learn to keep fighting the bosses first.
 	-- Session stats (QM, Nov 1; Server/Stats): a session under Short minutes is a QuickLeave,
 	-- and session lengths are bucketed at these edges (minutes) for the Length field.
@@ -2459,11 +2459,11 @@ return {
 		List = {
 			-- Meadow
 			{ Power = 2 },
-			{ Steal = 3, In = { "Meadow" }, Title = "Steal 3 eggs" },
+			{ Steal = 2, In = { "Meadow" }, Title = "Steal 2 eggs" },
 			{ Region = { "Desert" } },
 			-- Desert
 			{ Weapon = "Uncommon" },
-			{ Steal = 3, In = { "Desert" } },
+			{ Steal = 2, In = { "Desert" } },
 			{ Power = 8 },
 			{ Weapon = "Rare" },
 			{ Train = "Desert" },
@@ -2471,22 +2471,22 @@ return {
 			{ Region = { "Ice" } },
 			-- Tundra
 			{ Weapon = "Epic" },
-			{ Steal = 3, In = { "Ice" } },
+			{ Steal = 2, In = { "Ice" } },
 			{ Power = 16 },
 			{ Region = { "Lava" } },
 			-- Lava Valley
 			{ Weapon = "Legendary" },
-			{ Steal = 3, In = { "Lava" } },
+			{ Steal = 2, In = { "Lava" } },
 			{ Power = 21 },
 			{ Region = { "Dungeon", "Forest" }, Title = "Unlock a new region" },
 			-- Dungeon / Magic Circle
 			{ Weapon = "Mythic" },
-			{ Steal = 3, In = { "Dungeon", "Forest" }, Title = "Steal 3 eggs" },
+			{ Steal = 2, In = { "Dungeon", "Forest" }, Title = "Steal 2 eggs" },
 			{ Power = 25 },
 			{ Weapon = "Divine" },
 			{ Region = { "Castle", "Ocean" }, Title = "Unlock a new region" },
 			-- Red Castle / Ocean Trench, and the endgame
-			{ Steal = 3, In = { "Castle", "Ocean" }, Title = "Steal 3 eggs" },
+			{ Steal = 2, In = { "Castle", "Ocean" }, Title = "Steal 2 eggs" },
 			{ Weapon = "Celestial" },
 			{ Power = 30 },
 			{ Weapon = "Cosmic" },
