@@ -2422,6 +2422,13 @@ return {
 	--   { Collect = true }                  "Collect Pets": pets found (Index) vs all of them
 	-- Title = "..." replaces the made-up title. The "Steal 3 eggs" (QM: 5 is a full pen) before the Desert is
 	-- QM's: players learn to keep fighting the bosses first.
+	-- Session stats (QM, Nov 1; Server/Stats): a session under Short minutes is a QuickLeave,
+	-- and session lengths are bucketed at these edges (minutes) for the Length field.
+	Sessions = {
+		Short = 3,
+		Lengths = { 1, 3, 5, 10, 20, 40 },
+	},
+
 	Goals = {
 		Color = Color3.fromRGB(255, 157, 0), -- the little "Goal" over the title
 		List = {

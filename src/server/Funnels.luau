@@ -27,6 +27,8 @@
 --   Funnels.start(bosses)              -- once, after Server/Bosses
 --   Funnels.tutorialJoined(player)     -- a new account's tutorial begins
 --   Funnels.regionBought(player, name) -- a region gate bought
+--   Funnels.TUTORIAL                   -- the tutorial's step names (player attribute
+--                                         TutorialStepAt = the last one done, unsaved)
 
 local AnalyticsService = game:GetService("AnalyticsService")
 local HttpService = game:GetService("HttpService")
@@ -49,6 +51,7 @@ local TUTORIAL = {
 	"Bought bow",
 	"Tutorial complete",
 }
+Funnels.TUTORIAL = TUTORIAL
 local BIOME_FUNNEL = "BiomeProgress"
 local BIOMES = { -- [region] = { step, name }
 	Desert = { 2, "Desert" },
@@ -72,6 +75,8 @@ local function tutorialStep(player, step)
 		return
 	end
 	mine[step] = true
+	-- (Server/Stats names where a player in the tutorial left: "Tutorial 3/10: Hatched egg")
+	pcall(player.SetAttribute, player, "TutorialStepAt", step)
 	pcall(AnalyticsService.LogOnboardingFunnelStepEvent, AnalyticsService, player, step, TUTORIAL[step])
 end
 

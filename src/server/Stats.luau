@@ -24,7 +24,26 @@
 --   WeaponBought       minutes played;     Weapon, Rebirth, Level
 --   Rebirth            minutes played;     Rebirth, Level
 --   GoalComplete       minutes on it;      Goal ("3. Unlock Desert"), Level
---   SessionEnd         session minutes;    Goal (the one they were on), Region (furthest), Level
+--
+-- Sessions (QM, Nov 1: Roblox's own session numbers lag ~3 days). A session runs from
+-- joining to leaving; the saved Sessions attribute counts them, so "Session 1" is a brand
+-- new player's first visit. (Players from before Nov 1 with the tutorial done count as
+-- "Session 4+".)
+--   SessionStart       1;                  Session ("Session 1".."Session 3", "Session 4+"), Level
+--   SessionLength      session minutes;    Session, Length ("3-5 min"), Tutorial ("In tutorial" / "Past tutorial")
+--   SessionLeave       session minutes;    Goal, Progress, Session      -- every leave
+--   Bounce             session minutes;    Goal, Progress, Length       -- a first session ending
+--   QuickLeave         session minutes;    Goal, Progress, Session      -- under Config.Sessions.Short
+--     Goal is the Goal panel goal they were on ("2. Steal 3 Meadow eggs"), or in the
+--     tutorial its last step done ("Tutorial 4/10: Rode pet"); Progress is the bar ("1/3"
+--     for small counts, else "50-75%"). "Not loaded" = left before their save came in.
+--   How to read them (Custom Events, pick the event, value = average):
+--     p1 / p2 / p3 avg  SessionLength split by Session (filter one to see it alone)
+--     overall avg       SessionLength, no split
+--     bounce rate       1 - (SessionStart "Session 2" count / SessionStart "Session 1" count),
+--                       over the same days (give returners a day or two to come back)
+--     where they bounce Bounce split by Goal, then Progress (also SessionLeave filtered
+--                       to "Session 1"); QuickLeave the same for the very short ones
 -- "Minutes played" is all-time play (the saved PlayTime attribute, from Nov 1 on), so with
 -- Rebirth "Rebirth 0" picked, RegionUnlocked's average value is how long the gate takes.
 --
@@ -53,10 +72,13 @@ local function safe(name, fn, ...)
 end
 
 -- (required inside a pcall: a broken shared module mustn't stop the server)
-local Goals, Levels
+local Goals, Levels, Funnels
 safe("require", function()
 	Goals = require(Shared:WaitForChild("Goals"))
 	Levels = require(Shared:WaitForChild("Levels"))
+end)
+safe("requireFunnels", function()
+	Funnels = require(script.Parent:WaitForChild("Funnels"))
 end)
 
 local TICK = 5 -- seconds between play time / goal / training checks
@@ -104,17 +126,6 @@ local function regionName(name)
 	return Config.Regions.Names[name] or name
 end
 
--- the furthest region they own (the dearest one)
-local function furthest(player)
-	local best, bestCost = "Meadow", -1
-	for name, cost in Config.Regions.Cost do
-		if cost > bestCost and (cost <= 0 or player:GetAttribute("Region" .. name) == true) then
-			best, bestCost = name, cost
-		end
-	end
-	return regionName(best)
-end
-
 -- a goal's name for the funnel and GoalComplete: "3. Unlock Desert"
 local function goalName(i, g)
 	local name
@@ -152,13 +163,94 @@ local function goalIndex(player)
 	return if now then now.index else #Config.Goals.List + 1
 end
 
-local function goalText(player)
-	local i = player:GetAttribute("GoalAt")
-	local g = i and Config.Goals.List[i]
-	if g then
-		return goalName(i, g)
+---------------------------------------------------------------------------------------
+-- sessions: p1/p2/p3 lengths, bounces, and what they were on when they left
+
+local joinedAt = {} -- [player] = os.clock() they joined
+local sessionNo = {} -- [player] = "Session 2" once their save's in
+
+local SESSIONS = Config.Sessions or {}
+local SHORT = SESSIONS.Short or 3 -- minutes: a QuickLeave under this
+local LENGTHS = SESSIONS.Lengths or { 1, 3, 5, 10, 20, 40 } -- the Length buckets' edges, minutes
+
+local function sessionText(n)
+	return if n >= 4 then "Session 4+" else "Session " .. n
+end
+
+local function lengthText(minutes)
+	local lo = 0
+	for _, edge in LENGTHS do
+		if minutes < edge then
+			return if lo == 0 then "<" .. edge .. " min" else lo .. "-" .. edge .. " min"
+		end
+		lo = edge
 	end
-	return if i then "All done" else "None yet"
+	return lo .. "+ min"
+end
+
+-- the save's in: count this session (Server/Data saves Sessions)
+local function countSession(player)
+	local n = player:GetAttribute("Sessions")
+	if type(n) ~= "number" then
+		-- before Nov 1 nobody was counted: a done tutorial means they've been before
+		n = if player:GetAttribute("TutorialDone") then 3 else 0
+	end
+	n += 1
+	player:SetAttribute("Sessions", n)
+	sessionNo[player] = sessionText(n)
+	event(player, "SessionStart", 1, sessionNo[player], levelText(player))
+end
+
+local function progressText(have, need)
+	have, need = tonumber(have) or 0, tonumber(need) or 0
+	if need <= 0 then
+		return "?"
+	end
+	if need <= 10 and have == math.floor(have) then
+		return math.min(have, need) .. "/" .. need
+	end
+	local pct = math.clamp(have / need, 0, 0.9999) * 100
+	local lo = math.floor(pct / 25) * 25
+	return lo .. "-" .. (lo + 25) .. "%"
+end
+
+-- where they are: Goal, Progress
+local function standing(player)
+	if not sessionNo[player] then
+		return "Not loaded", "-"
+	end
+	if player:GetAttribute("Tutorial") then
+		local step = player:GetAttribute("TutorialStepAt") or 1
+		local names = Funnels and Funnels.TUTORIAL or {}
+		local total = math.max(#names, step)
+		return string.format("Tutorial %d/%d: %s", step, total, names[step] or "?"), step .. "/" .. total
+	end
+	local now = Goals and Goals.current(player)
+	if not now then
+		return (if Goals then "All goals done" else "?"), "-"
+	end
+	return goalName(now.index, now.goal), progressText(now.have, now.need)
+end
+
+local function sessionEnd(player)
+	local from = joinedAt[player]
+	if not from then
+		return
+	end
+	local minutes = round((os.clock() - from) / 60, 0.1)
+	local which = sessionNo[player] or "Not loaded"
+	local tutorial = if player:GetAttribute("Tutorial") then "In tutorial" else "Past tutorial"
+	local goal, progress = standing(player)
+	local length = lengthText(minutes)
+	event(player, "SessionLength", minutes, which, length, tutorial)
+	event(player, "SessionLeave", minutes, goal, progress, which)
+	-- a first visit ending (or one that never got its save in: those are new players' too, mostly)
+	if which == "Session 1" or (which == "Not loaded" and not player:GetAttribute("TutorialDone")) then
+		event(player, "Bounce", minutes, goal, progress, length)
+	end
+	if minutes < SHORT then
+		event(player, "QuickLeave", minutes, goal, progress, which)
+	end
 end
 
 ---------------------------------------------------------------------------------------
@@ -427,6 +519,7 @@ local function watchProgress(player)
 		weapons = weaponSet(player),
 	}
 	session[player] = s
+	safe("countSession", countSession, player)
 	player:SetAttribute("PlayTime", player:GetAttribute("PlayTime") or 0)
 	safe("goalFunnel", function()
 		AnalyticsService:LogFunnelStepEvent(player, GOAL_FUNNEL, tostring(player.UserId), 1, "Joined game")
@@ -491,6 +584,7 @@ end
 ---------------------------------------------------------------------------------------
 
 local function joined(player)
+	joinedAt[player] = joinedAt[player] or os.clock()
 	-- boss fights: LockedIn is the biome of the fight they're in (Server/Eggs)
 	player:GetAttributeChangedSignal("LockedIn"):Connect(function()
 		safe("lockedIn", function()
@@ -550,19 +644,20 @@ local function left(player)
 		endFight(player, "Quit")
 		endTraining(player)
 		flushEarned(player)
-		local s = session[player]
-		if s then
-			event(player, "SessionEnd", round((os.clock() - s.from) / 60, 0.1), goalText(player), furthest(player), levelText(player))
-		end
 	end)
+	safe("sessionEnd", sessionEnd, player)
 	fights[player], training[player], session[player], pending[player], fightDeath[player] = nil, nil, nil, nil, nil
+	joinedAt[player], sessionNo[player] = nil, nil
 end
 
 function Stats.start(bosses)
 	bosses.killed.Event:Connect(function(kind, winners)
 		safe("won", won, kind, winners)
 	end)
-	Players.PlayerAdded:Connect(joined)
+	Players.PlayerAdded:Connect(function(player)
+		joinedAt[player] = os.clock() -- (straight away: joined's hooks come after)
+		joined(player)
+	end)
 	for _, player in Players:GetPlayers() do
 		task.spawn(joined, player)
 	end
