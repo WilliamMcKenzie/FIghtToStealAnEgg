@@ -3267,6 +3267,14 @@ return {
 	},
 	-- weapons a player owns (Server/Arsenal). No spins, drops or merging any more (QM, Oct
 	-- 27): every weapon but the starting one is bought from Carl (Config.Vendor), once.
+	-- How the HUD sizes to the screen (client/Hud's Root.Fit UIScale; QM, Nov 1: buttons were
+	-- too small on phones). It's laid out at a 1080-tall screen; a screen h px tall shows it at
+	-- (h / 1080) ^ Curve, kept between Min and Max. Curve 1 shrinks it with the screen 1:1 (a
+	-- phone's ~390 px tall screen: 0.36); 0.6 shrinks it less (the phone: 0.54, half as big
+	-- again); 0 never scales it. Elements stay pinned to their screen edge whatever the size.
+	-- Popups that would then be too big for the screen shrink to fit, PopupMargin px clear.
+	HudScale = { Curve = 0.6, Min = 0.45, Max = 1.25, PopupMargin = 12 },
+
 	-- the screen UI's sounds (client/UiFx; QM, Oct 30: "find some UI/UX sfx ... to make it
 	-- better"). Flat 2D, never through Sfx.play. Free Creator Store sounds; swap any id here.
 	-- id, volume, speed (pitch: 1 as recorded), start (seconds in to begin from)

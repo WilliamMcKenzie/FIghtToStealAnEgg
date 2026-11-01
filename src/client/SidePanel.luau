@@ -116,8 +116,9 @@ function SidePanel:open()
 	gui.Position = self.shownAt + UDim2.fromOffset(fig(W) + fig(60), 0)
 	TweenService:Create(gui, SLIDE, { Position = self.shownAt }):Play()
 	local pop = gui:FindFirstChild("Pop") or Ui.make(gui, "Pop", "UIScale")
-	pop.Scale = POP_FROM
-	TweenService:Create(pop, SLIDE, { Scale = 1 }):Play()
+	local rest = UiFx.fitScale(gui)
+	pop.Scale = POP_FROM * rest
+	TweenService:Create(pop, SLIDE, { Scale = rest }):Play()
 	UiFx.play("Open")
 end
 
