@@ -500,20 +500,30 @@ local function perform(body, b, i, a)
 			fire(b.biome, pos + dir * b.c.Radius, dir, a)
 		end
 	elseif a.Kind == "Bombs" then
+		-- (QM, Nov 2: thrown out of its top in a visible arc like the Cactus Boss's Lob, and
+		-- land as the red ring fills: Windup is their time in the air)
+		local throw = table.clone(a)
+		throw.Airtime = a.Windup
+		throw.Height = a.Height or 30
+		local top = body.Position + Vector3.new(0, body.Size.Y * 0.3, 0)
+		local function fling(spot)
+			local dir = flat(spot - pos)
+			local from = top + (if dir.Magnitude > 0.01 then dir.Unit * b.c.Radius * 0.5 else Vector3.zero)
+			lob(b.biome, from, spot, throw)
+		end
 		for _, f in list do
-			circle(b.biome, flat(f.root.Position), a.Radius, a.Windup, a.Damage, nil, a.Style)
+			fling(flat(f.root.Position))
 		end
 		for k = 1, a.Count or 0 do
 			-- (Around: in a ring round itself instead, like a fairy ring; else round you)
 			if a.Around then
 				local angle = k / a.Count * 2 * math.pi + math.random() * 0.3
 				local out = b.c.Radius + a.Radius + math.random() * (a.Scatter or 10)
-				local spot = pos + Vector3.new(math.cos(angle), 0, math.sin(angle)) * out
-				circle(b.biome, spot, a.Radius, a.Windup, a.Damage, nil, a.Style)
+				fling(pos + Vector3.new(math.cos(angle), 0, math.sin(angle)) * out)
 			else
 				local f = list[math.random(1, #list)]
 				local off = Vector3.new(math.random() * 2 - 1, 0, math.random() * 2 - 1) * a.Scatter
-				circle(b.biome, flat(f.root.Position) + off, a.Radius, a.Windup, a.Damage, nil, a.Style)
+				fling(flat(f.root.Position) + off)
 			end
 		end
 	elseif a.Kind == "Lob" then
