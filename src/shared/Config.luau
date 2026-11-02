@@ -2237,6 +2237,12 @@ return {
 	-- Jumping (QM, Oct 31): riding, Space (or the mobile jump button) jumps the same as on
 	-- foot; Height is studs (Roblox's own on-foot default is 7.2; 0 turns jumping off).
 	Jump = { Height = 7.2 },
+	-- Dying (QM, Nov 2: like LassoAPet, you just fall over on the floor, then back to base).
+	-- The character keeps its joints (no falling apart and through the floor): it's frozen
+	-- where it died and you and your pet tip over onto your side, Fall seconds, lie there,
+	-- and Respawn seconds after dying you're back in front of your pen (Server/Death,
+	-- client/Riding).
+	Death = { Fall = 0.45, Respawn = 3 },
 	-- Sprint abilities (QM, Oct 30; client/SprintAbility draws them, Server/SprintAbility
 	-- runs them): these pets' sprint is a special move instead. It starts once, the moment
 	-- you've ridden Sprint.Delay seconds without stopping (whatever your speed), with the

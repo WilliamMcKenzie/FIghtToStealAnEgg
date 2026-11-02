@@ -206,7 +206,9 @@ local function newPet(character, kind, root)
 	weld.Part1 = base
 	weld.Parent = base
 	horse.model.Parent = workspace
-	horse.height = horse.model:GetExtentsSize().Y -- (how deep a burrow has to go)
+	local extents = horse.model:GetExtentsSize()
+	horse.height = extents.Y -- (how deep a burrow has to go)
+	horse.halfWidth = extents.X / 2 -- (the edge it tips over on when you die)
 	return horse, weld
 end
 
@@ -234,6 +236,7 @@ local function mount(character)
 	-- jumping while riding works as on foot (QM, Oct 31: Space / the mobile jump button;
 	-- the server sets JumpHeight from Config.Jump.Height, and the pet's welded on, so it
 	-- goes up with you)
+	humanoid.BreakJointsOnDeath = false -- (Server/Death: no falling apart through the floor)
 	if character == Players.LocalPlayer.Character then
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
 		-- (and never tipped over: QM, Oct 30, a ridden pet ended up upside down and stuck.
@@ -261,6 +264,57 @@ local function dismount(character)
 	end
 end
 
+-- Dying (QM, Nov 2: like LassoAPet, you just fall over on the floor; Server/Death keeps the
+-- character's joints and anchors its HumanoidRootPart where it died). The rider and their
+-- pet tip over together onto one side (the character's FallSide attribute, the same on
+-- every screen), rolling over the pet's edge on the ground so it ends up lying on the
+-- floor, never in it, over Config.Death.Fall seconds with a little bounce at the end.
+-- Returns the tip, in the HumanoidRootPart's frame: put in front of the pet's place.
+-- (forward: tipping onto the front or back instead, round the root's X, half the given
+-- extent along Z)
+local function fallen(character, since, ground, half, forward)
+	local side = character:GetAttribute("FallSide") or 1
+	local t = math.clamp((os.clock() - since) / Config.Death.Fall, 0, 1)
+	local k
+	if t < 0.8 then
+		k = (t / 0.8) ^ 2 -- (gathering speed as it goes over)
+	else
+		local b = (t - 0.8) / 0.2
+		k = 1 - 0.08 * math.sin(b * math.pi) -- (a small bounce off the floor)
+	end
+	local angle = -side * k * math.pi / 2
+	if forward then
+		local pivot = Vector3.new(0, ground, -side * half)
+		return CFrame.new(pivot) * CFrame.Angles(angle, 0, 0) * CFrame.new(-pivot)
+	end
+	local pivot = Vector3.new(side * half, ground, 0)
+	return CFrame.new(pivot) * CFrame.Angles(0, 0, angle) * CFrame.new(-pivot)
+end
+
+-- someone on foot (the tutorial) falls over the same way, by their Root joint
+local onFootDead = {} -- [character] = when it died (os.clock)
+local function fallOnFoot(character, humanoid)
+	local root = character:FindFirstChild("HumanoidRootPart")
+	local lower = character:FindFirstChild("LowerTorso")
+	local joint = lower and lower:FindFirstChild("Root")
+	if not (root and joint and joint:IsA("Motor6D")) then
+		return
+	end
+	if not onFootDead[character] then
+		onFootDead[character] = os.clock()
+		if character == Players.LocalPlayer.Character then
+			root.Anchored = true -- (frozen at once, as the server will)
+		end
+	end
+	local ground = -(root.Size.Y / 2 + humanoid.HipHeight)
+	-- (onto their front or back: a body's narrow side to side)
+	local tip = fallen(character, onFootDead[character], ground, root.Size.Z / 2, true)
+	local frame0, c1 = rest(joint)
+	local standing = frame0 * c1:Inverse()
+	local lying = root.CFrame * tip * root.CFrame:Inverse() * standing
+	joint.Transform = frame0:Inverse() * lying * c1
+end
+
 local function flatYaw(cf)
 	local look = cf.LookVector
 	return math.atan2(-look.X, -look.Z)
@@ -269,17 +323,37 @@ end
 RunService.PreSimulation:Connect(function(dt)
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
-		if character and not mounts[character] and character.Parent and not onFoot(character) then
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		local alive = humanoid ~= nil and humanoid.Health > 0
+		if character and not mounts[character] and character.Parent and alive and not onFoot(character) then
 			mount(character)
+		elseif character and not mounts[character] and humanoid and not alive and character.Parent then
+			fallOnFoot(character, humanoid)
+		end
+	end
+	for character in onFootDead do
+		if not character.Parent then
+			onFootDead[character] = nil
 		end
 	end
 	for character, m in mounts do
-		if not character.Parent or m.humanoid.Health <= 0 or not m.root.Parent or onFoot(character) then
+		if not character.Parent or not m.root.Parent or (onFoot(character) and m.humanoid.Health > 0) then
 			dismount(character)
 			continue
 		end
+		-- dead: frozen where you died (Server/Death), falling over with your pet
+		local dead = m.humanoid.Health <= 0
+		if dead and not m.diedAt then
+			m.diedAt = os.clock()
+			if character == Players.LocalPlayer.Character then
+				m.root.Anchored = true -- (frozen at once, as the server will)
+				m.root.AssemblyLinearVelocity = Vector3.zero
+			end
+		elseif not dead then
+			m.diedAt = nil
+		end
 		local kind = petOf(character)
-		if kind ~= m.kind then
+		if kind ~= m.kind and not dead then
 			-- (a new pet: swapped in under the rider, nothing else changes)
 			m.horse.model:Destroy()
 			m.kind = kind
@@ -288,15 +362,17 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		local root, horse = m.root, m.horse
 		if character == Players.LocalPlayer.Character then
-			keepUpright(root, m.humanoid)
-			keepAboveGround(root, m.humanoid)
-			steer(root, m.humanoid, dt)
+			if not dead then
+				keepUpright(root, m.humanoid)
+				keepAboveGround(root, m.humanoid)
+				steer(root, m.humanoid, dt)
+			end
 			holdCamera(root, m.humanoid, m.lift < -0.5)
 		end
 
 		-- a sprint ability: up in the air, under the floor, or bigger (eased in and out)
 		local owner = Players:GetPlayerFromCharacter(character)
-		local ability = owner and owner:GetAttribute("SprintAbility")
+		local ability = owner and not dead and owner:GetAttribute("SprintAbility") -- (dead: back down on the floor)
 		local abilities = Config.SprintAbility
 		local lift, grow, turn = 0, 1, 0
 		if ability == "Fly" then
@@ -349,14 +425,20 @@ RunService.PreSimulation:Connect(function(dt)
 			turnRate /= math.max(dt, 1e-3)
 		end
 		m.yaw = yaw
-		horse:update(dt, velocity.Magnitude, math.clamp(-turnRate / 4, -1, 1))
+		if not dead then -- (dead: it stops still where it fell)
+			horse:update(dt, velocity.Magnitude, math.clamp(-turnRate / 4, -1, 1))
+		end
 
 		-- the horse at the ground under the character, its seat under the character (in the
 		-- HumanoidRootPart's frame: the weld keeps it there, facing where the character faces)
 		local seat = horse.seat * horse.size * horse.scale
-		local place = CFrame.new(0, -(root.Size.Y / 2 + m.humanoid.HipHeight) + m.lift, 0)
+		local ground = -(root.Size.Y / 2 + m.humanoid.HipHeight)
+		local place = CFrame.new(0, ground + m.lift, 0)
 			* CFrame.Angles(0, m.turn, 0) -- (a Crabwalk's sideways scuttle)
 			* CFrame.new(-seat.X, 0, -seat.Z)
+		if m.diedAt then
+			place = fallen(character, m.diedAt, ground, (horse.halfWidth or 1) * m.grow) * place
+		end
 		if m.weld.C0 ~= place then
 			m.weld.C0 = place
 		end
