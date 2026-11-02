@@ -822,8 +822,8 @@ return {
 			Respawn = 35,
 			Attacks = {
 				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 180, Windup = 1.1, Damage = 285 },
-				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 26, Airtime = 1.4, Height = 48, Damage = 152, Style = "Lava", Cast = 0.8, Anim = "erupt" }, -- (QM, Nov 2: 2x radius)
-				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 18, Windup = 1.4, Damage = 175, Style = "Lava" }, -- (QM, Nov 2: 2x radius)
+				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 13, Airtime = 1.4, Height = 48, Damage = 152, Style = "Lava", Cast = 0.8, Anim = "erupt" },
+				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 175, Style = "Lava" },
 			},
 			Minions = {
 				At = 0.5,
@@ -2403,8 +2403,11 @@ return {
 		Bombs = {
 			Outline = Color3.fromRGB(255, 140, 30),
 			Every = 0.15, -- (it runs about 200 studs/s: one every ~30 studs)
-			Fuse = 0.9,
-			Radius = 8,
+			Fuse = 0.9, -- seconds each is in the air (QM, Nov 2: thrown in an arc, not put down)
+			Height = 14, -- studs up at the top of its flight (the Snowman's, Config.SprintFire)
+			Near = 6, -- it lands this many..
+			Far = 22, -- ..to this many studs from where it was thrown, any way round
+			Radius = 16, -- (QM, Nov 2: 2x)
 			Damage = 1,
 		},
 	},
