@@ -8,8 +8,8 @@
 --   Smash, Crabwalk  here: running into an enemy hits it, knocks it back (Combat.knock)
 --                and ends the sprint (the SprintEnd remote tells the rider's client)
 --   Frost        here: freezes the boss minions round you (Minions.freezeNear)
---   Bombs        here: a bomb every Every seconds, going off Fuse seconds later (every
---                client draws it from the PetBomb remote: client/Bombs)
+--   Bombs        here: a bomb thrown every Every seconds, landing and going off Fuse
+--                seconds later (every client draws it from the PetLob remote: client/Bombs)
 --   Rage         Shared/Pets.rage: bigger, faster attacks and regen the lower your health
 -- On top of that, a pet in Config.SprintFire fires things of its own while it's on (QM,
 -- Nov 2): projectiles (the PetShot remote: every client draws them, client/Shots), bombs
@@ -188,22 +188,33 @@ local function fire(player, root, f)
 	end
 end
 
-local function bomb(player, at)
+-- one bomb thrown up out of its back (QM, Nov 2: visibly flung through the air like the
+-- Cactus Boss's, not just put down): it lands Near..Far studs off where it was thrown from,
+-- any way round, Fuse seconds later, and goes off there (drawn from PetLob: client/Bombs)
+local function bomb(player, root)
 	local cfg = Config.SprintAbility.Bombs
 	local r = riders[player]
 	r.count = (r.count or 0) + 1
-	bombRemote:FireAllClients({
-		at = at,
+	local pos = root.Position
+	local humanoid = root.Parent:FindFirstChildOfClass("Humanoid")
+	local feet = root.Size.Y / 2 + (if humanoid then humanoid.HipHeight else 0)
+	local angle = math.random() * 2 * math.pi
+	local out = cfg.Near + math.random() * (cfg.Far - cfg.Near)
+	local to = Vector3.new(pos.X + math.cos(angle) * out, pos.Y - feet, pos.Z + math.sin(angle) * out)
+	lobRemote:FireAllClients({
+		from = pos + Vector3.new(0, feet * 0.5, 0),
+		to = to,
 		start = workspace:GetServerTimeNow(),
-		fuse = cfg.Fuse,
+		airtime = cfg.Fuse,
 		radius = cfg.Radius,
+		height = cfg.Height,
 		style = if r.count % 2 == 0 then "PetYellow" else "PetOrange",
 	})
 	task.delay(cfg.Fuse, function()
 		if player.Parent == nil then
 			return
 		end
-		for _, t in Combat.touching(at, cfg.Radius, player) do
+		for _, t in Combat.touching(to, cfg.Radius, player) do
 			Combat.hit(player, t.handler, damage(player, cfg.Damage))
 		end
 	end)
@@ -248,8 +259,7 @@ RunService.Heartbeat:Connect(function(dt)
 			r.wait -= dt
 			if r.wait <= 0 then
 				r.wait = cfg.Every
-				local humanoid = root.Parent:FindFirstChildOfClass("Humanoid")
-				bomb(player, pos - Vector3.new(0, root.Size.Y / 2 + (if humanoid then humanoid.HipHeight else 0), 0))
+				bomb(player, root)
 			end
 		end
 	end
