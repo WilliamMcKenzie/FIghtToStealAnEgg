@@ -2115,6 +2115,13 @@ return {
 	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
 	--           (a guess from how fast each ran in LassoAPet)
 	--   Regen   (optional) x its regen (PetStats.Regen)
+	--   Stats   (optional; QM, Nov 2: hand-set numbers) { Health = HP, Regen = HP a second,
+	--           Speed = studs a second, SprintRegen = x its regen while its sprint ability is on }: these replace what PetStats would work out (any
+	--           left out still comes from there)
+	--           The four endgame biomes (QM, Nov 2) use three classes so pets differ (Class is
+	--           just a label for now): Tank (HP 5-20K, regen 10-20, speed 40-80), Survivalist
+	--           (HP 2-5K, regen 20+, speed 80-120), Blitz (HP 0.5-2K, regen 5-20, speed
+	--           120-150; 150+ only for the best: Spirit Deer, Fish School, Royal Eagle)
 	Pets = {
 		Horse = { Rarity = "Common", Cash = 3, Tier = 1, Lean = 0, Speed = 1 },
 		-- Meadow
@@ -2123,59 +2130,59 @@ return {
 		Pinto = { Rarity = "Common", Cash = 10, Tier = 1, Lean = -0.2, Speed = 1.1 },
 		Fish = { Rarity = "Uncommon", Cash = 23, Tier = 1, Lean = 0.6, Speed = 0.6 },
 		Rhino = { Rarity = "Rare", Cash = 77, Tier = 2, Lean = 0.6, Speed = 1.35 },
-		Unicorn = { Rarity = "Epic", Cash = 880, Tier = 2, Lean = -0.4, Speed = 1.8 },
+		Unicorn = { Rarity = "Epic", Cash = 880, Tier = 2, Lean = -0.4, Speed = 1.8, Stats = { Health = 200, Regen = 20, Speed = 60 } }, -- (QM, Nov 2)
 		-- Desert
 		Cactus = { Rarity = "Rare", Cash = 15, Tier = 1, Lean = 0.2, Speed = 1.31 },
 		Scorpion = { Rarity = "Epic", Cash = 51, Tier = 1, Lean = 0, Speed = 1.77 },
-		Sandworm = { Rarity = "Legendary", Cash = 170, Tier = 2, Lean = 0.5, Speed = 1.7 },
-		SpineLizard = { Rarity = "Legendary", Cash = 390, Tier = 2, Lean = -0.5, Speed = 1.97 },
-		Snake = { Rarity = "Mythic", Cash = 3000, Tier = 3, Lean = -0.3, Speed = 2.8 },
+		Sandworm = { Rarity = "Legendary", Cash = 170, Tier = 2, Lean = 0.5, Speed = 1.7, Stats = { Health = 800, Regen = 5, Speed = 60 } }, -- (QM, Nov 2)
+		SpineLizard = { Rarity = "Legendary", Cash = 390, Tier = 2, Lean = -0.5, Speed = 1.97, Stats = { Health = 444, Regen = 15, Speed = 110 } }, -- (QM, Nov 2)
+		Snake = { Rarity = "Mythic", Cash = 3000, Tier = 3, Lean = -0.3, Speed = 2.8, Stats = { Health = 1000, Regen = 10, Speed = 100 } }, -- (QM, Nov 2)
 		-- Tundra
-		Penguin = { Rarity = "Epic", Cash = 34, Tier = 1, Lean = 0.3, Speed = 2.355 },
-		Boar = { Rarity = "Epic", Cash = 120, Tier = 1, Lean = -0.2, Speed = 2.517 },
-		Snowman = { Rarity = "Legendary", Cash = 260, Tier = 1, Lean = 0.4, Speed = 2.678 },
-		IceGolem = { Rarity = "Mythic", Cash = 4400, Tier = 2, Lean = 0.4, Speed = 2.86 },
+		Penguin = { Rarity = "Epic", Cash = 34, Tier = 1, Lean = 0.3, Speed = 2.355 , Stats = { Health = 400, Regen = 6, Speed = 110 } }, -- (QM, Nov 2)
+		Boar = { Rarity = "Epic", Cash = 120, Tier = 1, Lean = -0.2, Speed = 2.517 , Stats = { Health = 1500, Regen = 15, Speed = 60 } }, -- (QM, Nov 2)
+		Snowman = { Rarity = "Legendary", Cash = 260, Tier = 1, Lean = 0.4, Speed = 2.678 , Stats = { Health = 500, Regen = 20, Speed = 111 } }, -- (QM, Nov 2)
+		IceGolem = { Rarity = "Mythic", Cash = 4400, Tier = 2, Lean = 0.4, Speed = 2.86 , Stats = { Health = 3000, Regen = 1, Speed = 50 } }, -- (QM, Nov 2)
 		SnackYak = { Rarity = "Mythic", Cash = 2900000, Tier = 2, Lean = 0.5, Speed = 3 }, -- (a Robux pet in LassoAPet: in no egg)
-		Icebringer = { Rarity = "Divine", Cash = 51000, Tier = 3, Lean = 0.2, Speed = 3.8 },
+		Icebringer = { Rarity = "Divine", Cash = 51000, Tier = 3, Lean = 0.2, Speed = 3.8 , Stats = { Health = 2000, Regen = 25, Speed = 90 } }, -- (QM, Nov 2)
 		-- Lava (LassoAPet's Volcano)
-		Firebird = { Rarity = "Legendary", Cash = 580, Tier = 2, Lean = -0.4, Speed = 5.11 },
-		RockHog = { Rarity = "Mythic", Cash = 1300, Tier = 2, Lean = 0.3, Speed = 6.56 },
-		FireLobster = { Rarity = "Mythic", Cash = 2000, Tier = 2, Lean = 0.4, Speed = 6.43 },
-		VolcanoTortoise = { Rarity = "Mythic", Cash = 6700, Tier = 2, Lean = 0.8, Speed = 6.17 },
-		Rockworm = { Rarity = "Divine", Cash = 22000, Tier = 2, Lean = 0.3, Speed = 7.12 },
-		LavaWhale = { Rarity = "Divine", Cash = 170000, Tier = 4, Lean = 0.7, Speed = 6.83 },
-		Phoenix = { Rarity = "Celestial", Cash = 4400000, Tier = 3, Lean = -0.3, Speed = 7.2 },
+		Firebird = { Rarity = "Legendary", Cash = 580, Tier = 2, Lean = -0.4, Speed = 5.11 , Stats = { Health = 700, Regen = 10, Speed = 150 } }, -- (QM, Nov 2)
+		RockHog = { Rarity = "Mythic", Cash = 1300, Tier = 2, Lean = 0.3, Speed = 6.56 , Stats = { Health = 2000, Regen = 15, Speed = 70 } }, -- (QM, Nov 2)
+		FireLobster = { Rarity = "Mythic", Cash = 2000, Tier = 2, Lean = 0.4, Speed = 6.43 , Stats = { Health = 500, Regen = 100, Speed = 130 } }, -- (QM, Nov 2)
+		VolcanoTortoise = { Rarity = "Mythic", Cash = 6700, Tier = 2, Lean = 0.8, Speed = 6.17 , Stats = { Health = 5000, Regen = 40, Speed = 40 } }, -- (QM, Nov 2)
+		Rockworm = { Rarity = "Divine", Cash = 22000, Tier = 2, Lean = 0.3, Speed = 7.12 , Stats = { Health = 4000, Regen = 24, Speed = 80 } }, -- (QM, Nov 2)
+		LavaWhale = { Rarity = "Divine", Cash = 170000, Tier = 4, Lean = 0.7, Speed = 6.83 , Stats = { Health = 6000, Regen = 20, Speed = 100 } }, -- (QM, Nov 2)
+		Phoenix = { Rarity = "Celestial", Cash = 4400000, Tier = 3, Lean = -0.3, Speed = 7.2 , Stats = { Health = 10000, Regen = 50, Speed = 140, SprintRegen = 2 } }, -- (QM, Nov 2)
 		-- Abandoned Dungeon (tools/later_pets.py; QM, Oct 30: new pets for the later biomes)
-		DungeonRat = { Rarity = "Mythic", Cash = 10000, Tier = 2, Lean = -0.4, Speed = 7.6 },
-		Bat = { Rarity = "Mythic", Cash = 34000, Tier = 1, Lean = -0.6, Speed = 7.8 }, -- (LassoAPet's Halloween Bat, QM Oct 30; its meshes are the Blood Bat boss's, tools/animal_meshes.luau)
-		Slime = { Rarity = "Mythic", Cash = 76000, Tier = 2, Lean = 0.6, Speed = 7.2 },
-		CaveSpider = { Rarity = "Divine", Cash = 260000, Tier = 2, Lean = -0.5, Speed = 8.2 },
-		BoneSteed = { Rarity = "Divine", Cash = 860000, Tier = 2, Lean = -0.2, Speed = 8 },
-		Mimic = { Rarity = "Celestial", Cash = 22000000, Tier = 2, Lean = 0.6, Speed = 7.4 },
-		BoneWyrm = { Rarity = "Cosmic", Cash = 250000000, Tier = 2, Lean = 0.3, Speed = 8.6 },
+		DungeonRat = { Rarity = "Mythic", Cash = 10000, Tier = 2, Lean = -0.4, Speed = 7.6, Stats = { Class = "Blitz", Health = 700, Regen = 10, Speed = 130 } }, -- (QM, Nov 2)
+		Bat = { Rarity = "Mythic", Cash = 34000, Tier = 1, Lean = -0.6, Speed = 7.8, Stats = { Class = "Blitz", Health = 600, Regen = 8, Speed = 140 } }, -- (QM, Nov 2) -- (LassoAPet's Halloween Bat, QM Oct 30; its meshes are the Blood Bat boss's, tools/animal_meshes.luau)
+		Slime = { Rarity = "Mythic", Cash = 76000, Tier = 2, Lean = 0.6, Speed = 7.2, Stats = { Class = "Survivalist", Health = 2000, Regen = 30, Speed = 85 } }, -- (QM, Nov 2)
+		CaveSpider = { Rarity = "Divine", Cash = 260000, Tier = 2, Lean = -0.5, Speed = 8.2, Stats = { Class = "Blitz", Health = 1200, Regen = 15, Speed = 145 } }, -- (QM, Nov 2)
+		BoneSteed = { Rarity = "Divine", Cash = 860000, Tier = 2, Lean = -0.2, Speed = 8, Stats = { Class = "Survivalist", Health = 2800, Regen = 35, Speed = 110 } }, -- (QM, Nov 2)
+		Mimic = { Rarity = "Celestial", Cash = 22000000, Tier = 2, Lean = 0.6, Speed = 7.4, Stats = { Class = "Tank", Health = 9000, Regen = 15, Speed = 55 } }, -- (QM, Nov 2)
+		BoneWyrm = { Rarity = "Cosmic", Cash = 250000000, Tier = 2, Lean = 0.3, Speed = 8.6, Stats = { Class = "Tank", Health = 14000, Regen = 18, Speed = 75 } }, -- (QM, Nov 2)
 		-- Magic Circle
-		Shroom = { Rarity = "Mythic", Cash = 15000, Tier = 2, Lean = 0.4, Speed = 7.2 },
-		SpiritFox = { Rarity = "Mythic", Cash = 110000, Tier = 2, Lean = -0.6, Speed = 8.2 },
-		SpiritDeer = { Rarity = "Divine", Cash = 380000, Tier = 2, Lean = -0.5, Speed = 8.4 },
-		AncientTreant = { Rarity = "Divine", Cash = 580000, Tier = 2, Lean = 0.6, Speed = 7.4 }, -- (LassoAPet's, for the Treant: QM; its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
-		MysticOwl = { Rarity = "Celestial", Cash = 15000000, Tier = 2, Lean = -0.2, Speed = 7.6 },
-		CrystalTortoise = { Rarity = "Celestial", Cash = 33000000, Tier = 2, Lean = 0.8, Speed = 7.2 },
-		SpiritLoong = { Rarity = "Cosmic", Cash = 380000000, Tier = 3, Lean = -0.3, Speed = 8.6 },
+		Shroom = { Rarity = "Mythic", Cash = 15000, Tier = 2, Lean = 0.4, Speed = 7.2, Stats = { Class = "Survivalist", Health = 2000, Regen = 30, Speed = 90 } }, -- (QM, Nov 2)
+		SpiritFox = { Rarity = "Mythic", Cash = 110000, Tier = 2, Lean = -0.6, Speed = 8.2, Stats = { Class = "Blitz", Health = 800, Regen = 12, Speed = 140 } }, -- (QM, Nov 2)
+		SpiritDeer = { Rarity = "Divine", Cash = 380000, Tier = 2, Lean = -0.5, Speed = 8.4, Stats = { Class = "Blitz", Health = 1500, Regen = 15, Speed = 160 } }, -- (QM, Nov 2)
+		AncientTreant = { Rarity = "Divine", Cash = 580000, Tier = 2, Lean = 0.6, Speed = 7.4, Stats = { Class = "Tank", Health = 8000, Regen = 12, Speed = 50 } }, -- (QM, Nov 2) -- (LassoAPet's, for the Treant: QM; its meshes in ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau)
+		MysticOwl = { Rarity = "Celestial", Cash = 15000000, Tier = 2, Lean = -0.2, Speed = 7.6, Stats = { Class = "Survivalist", Health = 3500, Regen = 45, Speed = 105 } }, -- (QM, Nov 2)
+		CrystalTortoise = { Rarity = "Celestial", Cash = 33000000, Tier = 2, Lean = 0.8, Speed = 7.2, Stats = { Class = "Tank", Health = 12000, Regen = 15, Speed = 45 } }, -- (QM, Nov 2)
+		SpiritLoong = { Rarity = "Cosmic", Cash = 380000000, Tier = 3, Lean = -0.3, Speed = 8.6, Stats = { Class = "Survivalist", Health = 1500, Regen = 200, Speed = 120 } }, -- (QM, Nov 2)
 		-- Red Castle
-		WarBoar = { Rarity = "Divine", Cash = 1900000, Tier = 2, Lean = 0.5, Speed = 8.4 },
-		RoyalSteed = { Rarity = "Divine", Cash = 6600000, Tier = 2, Lean = -0.3, Speed = 9.2 },
-		ChessKnight = { Rarity = "Celestial", Cash = 50000000, Tier = 2, Lean = 0.2, Speed = 8.6 },
-		RoyalPeacock = { Rarity = "Celestial", Cash = 110000000, Tier = 2, Lean = -0.4, Speed = 8.8 },
-		LivingArmor = { Rarity = "Cosmic", Cash = 570000000, Tier = 3, Lean = 0.8, Speed = 8.6 },
-		CrimsonDrake = { Rarity = "Cosmic", Cash = 1300000000, Tier = 3, Lean = 0, Speed = 9.4 },
-		RoyalEagle = { Rarity = "Void", Cash = 2900000000, Tier = 3, Lean = -0.4, Speed = 10 },
+		WarBoar = { Rarity = "Divine", Cash = 1900000, Tier = 2, Lean = 0.5, Speed = 8.4, Stats = { Class = "Tank", Health = 7000, Regen = 12, Speed = 65 } }, -- (QM, Nov 2)
+		RoyalSteed = { Rarity = "Divine", Cash = 6600000, Tier = 2, Lean = -0.3, Speed = 9.2, Stats = { Class = "Blitz", Health = 1500, Regen = 14, Speed = 145 } }, -- (QM, Nov 2)
+		ChessKnight = { Rarity = "Celestial", Cash = 50000000, Tier = 2, Lean = 0.2, Speed = 8.6, Stats = { Class = "Survivalist", Health = 4000, Regen = 40, Speed = 100 } }, -- (QM, Nov 2)
+		RoyalPeacock = { Rarity = "Celestial", Cash = 110000000, Tier = 2, Lean = -0.4, Speed = 8.8, Stats = { Class = "Survivalist", Health = 3000, Regen = 60, Speed = 115 } }, -- (QM, Nov 2)
+		LivingArmor = { Rarity = "Cosmic", Cash = 570000000, Tier = 3, Lean = 0.8, Speed = 8.6, Stats = { Class = "Tank", Health = 18000, Regen = 18, Speed = 45 } }, -- (QM, Nov 2)
+		CrimsonDrake = { Rarity = "Cosmic", Cash = 1300000000, Tier = 3, Lean = 0, Speed = 9.4, Stats = { Class = "Survivalist", Health = 5000, Regen = 80, Speed = 115 } }, -- (QM, Nov 2)
+		RoyalEagle = { Rarity = "Void", Cash = 2900000000, Tier = 3, Lean = -0.4, Speed = 10, Stats = { Class = "Blitz", Health = 2000, Regen = 20, Speed = 180 } }, -- (QM, Nov 2)
 		-- Ocean Trench
-		Squid = { Rarity = "Divine", Cash = 1300000, Tier = 2, Lean = 0.2, Speed = 8.4 }, -- (the Squid, Fish School and Whale: LassoAPet's, QM's picks)
-		Seahorse = { Rarity = "Divine", Cash = 9800000, Tier = 2, Lean = -0.3, Speed = 8.8 },
-		KingCrab = { Rarity = "Celestial", Cash = 75000000, Tier = 2, Lean = 0.6, Speed = 8.6 },
-		FishSchool = { Rarity = "Celestial", Cash = 170000000, Tier = 2, Lean = -0.4, Speed = 9.6 },
-		Whale = { Rarity = "Cosmic", Cash = 850000000, Tier = 3, Lean = 0.7, Speed = 9 },
-		AbyssWhale = { Rarity = "Void", Cash = 1900000000, Tier = 4, Lean = 0.7, Speed = 9.4 },
+		Squid = { Rarity = "Divine", Cash = 1300000, Tier = 2, Lean = 0.2, Speed = 8.4, Stats = { Class = "Survivalist", Health = 3000, Regen = 35, Speed = 95 } }, -- (QM, Nov 2) -- (the Squid, Fish School and Whale: LassoAPet's, QM's picks)
+		Seahorse = { Rarity = "Divine", Cash = 9800000, Tier = 2, Lean = -0.3, Speed = 8.8, Stats = { Class = "Blitz", Health = 1400, Regen = 14, Speed = 140 } }, -- (QM, Nov 2)
+		KingCrab = { Rarity = "Celestial", Cash = 75000000, Tier = 2, Lean = 0.6, Speed = 8.6, Stats = { Class = "Tank", Health = 10000, Regen = 15, Speed = 60 } }, -- (QM, Nov 2)
+		FishSchool = { Rarity = "Celestial", Cash = 170000000, Tier = 2, Lean = -0.4, Speed = 9.6, Stats = { Class = "Blitz", Health = 1800, Regen = 18, Speed = 170 } }, -- (QM, Nov 2)
+		Whale = { Rarity = "Cosmic", Cash = 850000000, Tier = 3, Lean = 0.7, Speed = 9, Stats = { Class = "Tank", Health = 15000, Regen = 18, Speed = 70 } }, -- (QM, Nov 2)
+		AbyssWhale = { Rarity = "Void", Cash = 1900000000, Tier = 4, Lean = 0.7, Speed = 9.4, Stats = { Class = "Tank", Health = 20000, Regen = 20, Speed = 80 } }, -- (QM, Nov 2)
 	},
 	-- a pet's health and speed (Shared/Pets): set by its rarity (QM, Oct 25: mostly a status
 	-- signal; since Oct 30 rarity climbs with the biome, so later pets get a little tougher).
@@ -2269,9 +2276,39 @@ return {
 	--           minions out of the sky). Up there it dodges like a flier.
 	--   Glow    LassoAPet's Snake rattle: its horns and spikes glow, and you heal Regen x
 	--           your pet's regen (Server/Regen)
+	--   Grow    Grow x bigger and RegenAdd more health a second (the Spine Lizard, QM Nov 2)
+	--   Rage    the lower your health, the bigger, faster-attacking and faster-healing (the Living Armor)
+	--   Fire    nothing but its SprintFire (below)
+	--   Giant   Grow x bigger and its regen becomes RegenSet a second (the Ice Golem, QM Nov 2)
 	--   Frost   LassoAPet's Icebringer blizzard round it: a boss's minion that comes
 	--           within Radius studs is frozen solid for Freeze seconds (no moving, no
 	--           biting), then can't be frozen again for Again seconds
+	-- Sprint fire (QM, Nov 2; Server/SprintAbility): while its sprint is on, a pet fires
+	-- things of its own every Every seconds, on top of its SprintPets ability. Damage is x
+	-- one hit of your weapon (Combat.damage x its Damage), like the Volcano Tortoise's bombs.
+	--   Shot = a weapon id whose projectile it fires (drawn and flown as that weapon's), at
+	--          each of Angles (degrees off where it aims), or in Directions directions all
+	--          round; Aim: at the nearest enemy within Range (none near: it holds fire),
+	--          otherwise the way you face
+	--   Lob  = a bomb Style flung at the nearest enemy within Range, Radius studs blast
+	--   Blast = a bomb Style going off at once where you are, Radius studs
+	--   Echo  every attack of yours goes again half a swing later (2x damage a second)
+	SprintFire = {
+		Range = 90, -- studs to the nearest enemy for Aim and Lob
+		LobAirtime = 0.6, -- seconds a lobbed bomb's in the air
+		LobHeight = 14, -- studs up at the top of its flight
+		Pets = {
+			AbyssWhale = { Every = 2, Shot = "AbyssStaff", Directions = 8, Damage = 1 },
+			AncientTreant = { Every = 1, Shot = "WindStaff", Aim = true, Angles = { -45, 0, 45 }, Damage = 0.8 },
+			CrimsonDrake = { Every = 0.6, Shot = "FireStaff", Aim = true, Angles = { 0 }, Damage = 1 },
+			BoneWyrm = { Every = 0.5, Shot = "Shortbow", Angles = { -30, -15, 0, 15, 30 }, Damage = 0.5 },
+			Squid = { Every = 1, Lob = "PetInk", Radius = 10, Damage = 1.5 },
+			Slime = { Every = 2, Lob = "PetGreen", Radius = 12, Damage = 3 },
+			Snowman = { Every = 1, Lob = "PetWhite", Radius = 9, Damage = 1.5 },
+			RoyalEagle = { Every = 1.5, Blast = "PetWhite", Radius = 28, Damage = 3 },
+			Mimic = { Echo = true },
+		},
+	},
 	SprintPets = {
 		Sandworm = "Burrow",
 		Rockworm = "Burrow", -- (the Sandworm's recolour)
@@ -2286,6 +2323,15 @@ return {
 		Unicorn = "Leap",
 		BoneSteed = "Leap", -- (its trail in bone and ghost-fire colours)
 		Snake = "Glow",
+		LivingArmor = "Rage", -- (QM, Nov 2)
+		-- (QM, Nov 2: these only fire things while sprinting: SprintFire below)
+		Squid = "Fire",
+		Slime = "Fire",
+		Snowman = "Fire",
+		AncientTreant = "Fire",
+		Mimic = "Fire",
+		SpineLizard = "Grow", -- (QM, Nov 2)
+		IceGolem = "Giant", -- (QM, Nov 2)
 		Icebringer = "Frost",
 		KingCrab = "Crabwalk",
 		Rhino = "Smash",
@@ -2303,7 +2349,18 @@ return {
 			Sand = { Sandworm = Color3.fromRGB(226, 190, 128), Rockworm = Color3.fromRGB(90, 70, 65), BoneWyrm = Color3.fromRGB(110, 100, 95) },
 			Sand2 = { Sandworm = Color3.fromRGB(196, 156, 96), Rockworm = Color3.fromRGB(60, 45, 45), BoneWyrm = Color3.fromRGB(75, 68, 66) },
 			Mound = 1.3, -- x LassoAPet's mounds
+			-- (QM, Nov 2) burrowed you can't attack, but heal RegenAdd more a second
+			NoAttack = true,
+			RegenAdd = 10,
 		},
+		-- (QM, Nov 2: the Spine Lizard) Grow x bigger, and heal RegenAdd more a second
+		Grow = { Grow = 1.1, RegenAdd = 20 },
+		-- (QM, Nov 2: the Ice Golem) Grow x bigger, and its regen becomes RegenSet a second
+		Giant = { Grow = 2, RegenSet = 50 },
+		-- (QM, Nov 2: the Living Armor) the more health you've lost, the bigger the pet and
+		-- the faster you attack and heal: 1x at full health up to Max x at 1 HP
+		Rage = { Max = 2 },
+		Fire = {}, -- (nothing of its own: the pet's SprintFire does it all)
 		Fly = { Height = 10, Rise = 0.4 },
 		Smash = {
 			Grow = 1.2,

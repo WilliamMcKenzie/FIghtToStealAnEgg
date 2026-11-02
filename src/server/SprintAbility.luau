@@ -10,6 +10,12 @@
 --   Frost        here: freezes the boss minions round you (Minions.freezeNear)
 --   Bombs        here: a bomb every Every seconds, going off Fuse seconds later (every
 --                client draws it from the PetBomb remote: client/Bombs)
+--   Rage         Shared/Pets.rage: bigger, faster attacks and regen the lower your health
+-- On top of that, a pet in Config.SprintFire fires things of its own while it's on (QM,
+-- Nov 2): projectiles (the PetShot remote: every client draws them, client/Shots), bombs
+-- lobbed at the nearest enemy (PetLob: client/Bombs), blasts where you are (BossSplash's
+-- look), or an echo of each of your own attacks (Server's Slash and Shoot handlers ask
+-- SprintAbility.echoes).
 -- It's off again whenever the pet changes or the rider dies.
 
 local Players = game:GetService("Players")
@@ -37,7 +43,15 @@ local bombRemote = Instance.new("RemoteEvent")
 bombRemote.Name = "PetBomb" -- (server -> everyone: { at, start, fuse, radius, style })
 bombRemote.Parent = ReplicatedStorage
 
-local riders = {} -- [player] = { kind, wait (seconds to the next bomb), count }
+local shotRemote = Instance.new("RemoteEvent")
+shotRemote.Name = "PetShot" -- (server -> everyone: rider, weapon id, yaw, seed)
+shotRemote.Parent = ReplicatedStorage
+
+local lobRemote = Instance.new("RemoteEvent")
+lobRemote.Name = "PetLob" -- (server -> everyone: { from, to, start, airtime, radius, height, style })
+lobRemote.Parent = ReplicatedStorage
+
+local riders = {} -- [player] = { kind, wait (seconds to the next bomb), count, fire (seconds to the next SprintFire) }
 
 local function abilityOf(player)
 	return Config.SprintPets[player:GetAttribute("Pet") or "Horse"]
@@ -76,6 +90,104 @@ remote.OnServerEvent:Connect(function(player, on)
 	end
 end)
 
+local function fireOf(player)
+	return Config.SprintFire.Pets[player:GetAttribute("Pet") or "Horse"]
+end
+
+-- is this rider's sprint echoing their attacks (the Mimic)?
+function SprintAbility.echoes(player)
+	local f = fireOf(player)
+	return f ~= nil and f.Echo == true and riders[player] ~= nil
+end
+
+-- a volley of weapon id's shots from the rider, drawn by everyone; damage: each shot's
+-- (nil: the weapon's own)
+function SprintAbility.shoot(player, id, yaw, seed, damage)
+	shotRemote:FireAllClients(player, id, yaw, seed)
+	Combat.shoot(player, id, yaw, seed, nil, damage)
+end
+
+local function yawTo(from, to)
+	local v = (to - from) * Vector3.new(1, 0, 1)
+	return math.atan2(-v.X, -v.Z)
+end
+
+local function nearest(player, pos)
+	local best, gap = nil, math.huge
+	for _, t in Combat.touching(pos, Config.SprintFire.Range, player) do
+		local d = ((t.body.Position - pos) * Vector3.new(1, 0, 1)).Magnitude
+		if d < gap then
+			best, gap = t.body, d
+		end
+	end
+	return best
+end
+
+local function blast(player, at, radius, k)
+	for _, t in Combat.touching(at, radius, player) do
+		Combat.hit(player, t.handler, damage(player, k))
+	end
+end
+
+-- one go of the pet's SprintFire (f) from root
+local function fire(player, root, f)
+	local pos = root.Position
+	local k = f.Damage or 1
+	if f.Shot then
+		local yaw
+		if f.Aim then
+			local target = nearest(player, pos)
+			if not target then
+				return
+			end
+			yaw = yawTo(pos, target.Position)
+		else
+			yaw = yawTo(Vector3.zero, root.CFrame.LookVector)
+		end
+		local each = damage(player, k)
+		if f.Directions then
+			for i = 0, f.Directions - 1 do
+				SprintAbility.shoot(player, f.Shot, yaw + i * 2 * math.pi / f.Directions, math.random(0, 2 ^ 30 - 1), each)
+			end
+		else
+			for _, a in f.Angles or { 0 } do
+				SprintAbility.shoot(player, f.Shot, yaw + math.rad(a), math.random(0, 2 ^ 30 - 1), each)
+			end
+		end
+	elseif f.Lob then
+		local target = nearest(player, pos)
+		if not target then
+			return
+		end
+		local cfg = Config.SprintFire
+		local humanoid = root.Parent:FindFirstChildOfClass("Humanoid")
+		local feet = root.Size.Y / 2 + (if humanoid then humanoid.HipHeight else 0)
+		local to = Vector3.new(target.Position.X, pos.Y - feet, target.Position.Z)
+		lobRemote:FireAllClients({
+			from = pos,
+			to = to,
+			start = workspace:GetServerTimeNow(),
+			airtime = cfg.LobAirtime,
+			radius = f.Radius,
+			height = cfg.LobHeight,
+			style = f.Lob,
+		})
+		task.delay(cfg.LobAirtime, function()
+			if player.Parent ~= nil and Combat.alive(player) then
+				blast(player, to, f.Radius, k)
+			end
+		end)
+	elseif f.Blast then
+		local humanoid = root.Parent:FindFirstChildOfClass("Humanoid")
+		local at = pos - Vector3.new(0, root.Size.Y / 2 + (if humanoid then humanoid.HipHeight else 0), 0)
+		local splash = ReplicatedStorage:FindFirstChild("BossSplash")
+		if splash then
+			splash:FireAllClients(at, f.Radius, f.Blast)
+		end
+		blast(player, at, f.Radius, k)
+	end
+end
+
 local function bomb(player, at)
 	local cfg = Config.SprintAbility.Bombs
 	local r = riders[player]
@@ -105,6 +217,14 @@ RunService.Heartbeat:Connect(function(dt)
 			continue
 		end
 		local pos = root.Position
+		local f = fireOf(player)
+		if f and f.Every then
+			r.fire = (r.fire or 0) - dt
+			if r.fire <= 0 then
+				r.fire = f.Every
+				fire(player, root, f)
+			end
+		end
 		if r.kind == "Frost" then
 			local cfg = Config.SprintAbility.Frost
 			Minions.freezeNear(pos, cfg.Radius, cfg.Freeze, cfg.Again)
