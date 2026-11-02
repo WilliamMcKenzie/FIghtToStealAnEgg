@@ -2377,13 +2377,13 @@ return {
 	Regions = {
 		Cost = {
 			Meadow = 0,
-			Desert = 2000, -- (QM, Oct 31: 12K -> 2K, the first gate comes quick)
-			Ice = 300000,
-			Lava = 3000000,
-			Dungeon = 25000000,
-			Forest = 25000000,
-			Castle = 6000000000,
-			Ocean = 6000000000,
+			Desert = 1980, -- (QM, Oct 31: 12K -> 2K, the first gate comes quick)
+			Ice = 106000,
+			Lava = 2340000,
+			Dungeon = 12699999.999999998,
+			Forest = 12699999.999999998,
+			Castle = 33700000000,
+			Ocean = 33700000000,
 		},
 		Names = { Ice = "Tundra", Lava = "Lava Valley", Castle = "Red Castle", Forest = "Magic Circle", Ocean = "Ocean Trench" }, -- (what players see, where it isn't the key)
 		Shadow = 20, -- studs its shadow spreads across the floor before it's gone
