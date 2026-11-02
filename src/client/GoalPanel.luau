@@ -1,9 +1,11 @@
 -- The Goal panel, top left (QM's Figma, Oct 31): a little orange "Goal", the goal's title
 -- under it ("Train Power") and a lime bar towards it with "5.9K/10K" across it. What the
 -- goal is comes from Shared/Goals (Config.Goals.List: train to level 2, steal 2 eggs,
--- unlock the Desert, buy an Uncommon weapon... on through the game). A new goal pops the
--- panel and plays the Claim sound. Hidden during the tutorial (client/Tutorial hides it
--- too, by name), and gone once every goal's done (the last: Collect Pets).
+-- unlock the Desert, buy an Uncommon weapon... on through the game). Finishing a goal
+-- (QM, Nov 2) fills the bar, pulses the panel out with "Done!", swaps to the next goal
+-- while it's big and settles back, with the Claim sound. Hidden during the tutorial
+-- (client/Tutorial hides it too, by name), and gone once every goal's done (the last:
+-- Collect Pets).
 --
 -- Real objects in StarterGui > Hud > Root > Goal for QM to edit (client/Ui): Band, Label,
 -- Title, Track (Clip > Fill, Progress). Laid out in design px (1080 tall: the Root's UIScale).
@@ -28,6 +30,12 @@ local EASE = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out
 local POP_UP = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 local POP_DOWN = TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local POP = 1.15
+-- finishing a goal (QM, Nov 2): fill, pulse out to PULSE, swap to the next goal, settle back
+local DONE_FILL = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local PULSE = 1.25
+local PULSE_OUT = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local PULSE_HOLD = 0.35 -- seconds big with "Done!" before the next goal shows
+local PULSE_BACK = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local EVERY = 0.25 -- seconds between checks
 
 function GoalPanel.init(root)
@@ -115,6 +123,9 @@ function GoalPanel.init(root)
 	local player = Players.LocalPlayer
 	local grow = Ui.make(panel, "Pop", "UIScale")
 	local lastIndex, lastTitle, lastFraction = nil, nil, nil
+	local busy = false -- (mid completion pulse: refresh leaves the panel alone)
+
+	-- a small pop (a goal's title changed without finishing one)
 	local function pop()
 		local up = TweenService:Create(grow, POP_UP, { Scale = POP })
 		up.Completed:Connect(function(how)
@@ -124,8 +135,49 @@ function GoalPanel.init(root)
 		end)
 		up:Play()
 	end
+
+	-- show a goal's title, text and bar (fresh: the bar fills up from empty)
+	local function show(g, fresh)
+		local fraction = if g.need > 0 then math.clamp(g.have / g.need, 0, 1) else 1
+		if g.title ~= lastTitle then
+			title.Text = g.title
+		end
+		progress.Text = g.text
+		if fraction ~= lastFraction or fresh then
+			if fresh then
+				clip.Size = UDim2.fromScale(0, 1)
+			end
+			TweenService:Create(clip, EASE, { Size = UDim2.fromScale(fraction, 1) }):Play()
+		end
+		lastIndex, lastTitle, lastFraction = g.index, g.title, fraction
+	end
+
+	-- a goal's done (QM, Nov 2): the bar fills, the panel pulses out, swaps to the next
+	-- goal while it's big, then settles back to its size
+	local function complete()
+		busy = true
+		local fx = require(script.Parent.UiFx)
+		fx.play("Claim")
+		TweenService:Create(clip, DONE_FILL, { Size = UDim2.fromScale(1, 1) }):Play()
+		progress.Text = "Done!"
+		local out = TweenService:Create(grow, PULSE_OUT, { Scale = PULSE })
+		out:Play()
+		out.Completed:Wait()
+		task.wait(PULSE_HOLD)
+		local g = Goals.current(player)
+		if g then
+			show(g, true)
+		end
+		TweenService:Create(grow, PULSE_BACK, { Scale = 1 }):Play()
+		task.wait(PULSE_BACK.Time)
+		busy = false
+	end
+
 	local shown = nil -- (Visible as last set here: the tutorial's hide is left alone otherwise)
 	local function refresh()
+		if busy then
+			return
+		end
 		local g = Goals.current(player)
 		-- (gone during the tutorial, and for good once every goal's done: QM)
 		local want = player:GetAttribute("Tutorial") ~= true and g ~= nil
@@ -134,24 +186,19 @@ function GoalPanel.init(root)
 			panel.Visible = want
 		end
 		if not g then
+			lastIndex = nil
 			return
 		end
-		local fraction = if g.need > 0 then math.clamp(g.have / g.need, 0, 1) else 1
-		if g.title ~= lastTitle then
-			title.Text = g.title
+		if lastIndex ~= nil and g.index ~= lastIndex and shown then
+			task.spawn(complete)
+			return
 		end
-		progress.Text = g.text
-		if fraction ~= lastFraction then
-			if lastIndex ~= nil and g.index ~= lastIndex then
-				clip.Size = UDim2.fromScale(0, 1) -- (a new goal fills up from empty)
-			end
-			TweenService:Create(clip, EASE, { Size = UDim2.fromScale(fraction, 1) }):Play()
-		end
-		if lastIndex ~= nil and (g.index ~= lastIndex or g.title ~= lastTitle) and shown then
+		local retitled = lastIndex ~= nil and g.title ~= lastTitle and shown
+		show(g, lastIndex ~= nil and g.index ~= lastIndex)
+		if retitled then
 			pop()
 			require(script.Parent.UiFx).play("Claim")
 		end
-		lastIndex, lastTitle, lastFraction = g.index, g.title, fraction
 	end
 	refresh()
 	task.spawn(function()
