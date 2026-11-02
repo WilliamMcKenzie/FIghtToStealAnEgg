@@ -68,9 +68,11 @@
 -- through is never caught. A sprint ability (Server/SprintAbility: the player's
 -- SprintAbility attribute) dodges too: burrowed, nothing hits you; flying (or up on a
 -- Leap), only homing Magic shots do (QM, Oct 30). All of it is server parts in workspace.BossFx.
--- Every hit is forgiving (QM, Oct 31): only the player's middle (their root) counts, never
--- the rider's or pet's edges, and it has to be inside an area Config.EnemyHit.Forgive
--- smaller than what's drawn (forgiving(r)), so a near miss never lands.
+-- Every ground hit is forgiving (QM, Oct 31): only the player's middle (their root) counts,
+-- never the rider's or pet's edges, and it has to be inside an area Config.EnemyHit.Forgive
+-- smaller than what's drawn (forgiving(r)), so a near miss never lands. Magic orbs and boss
+-- shots hit at full size again (QM, Nov 2): the player is Config.EnemyHit.ShotWidth wide
+-- to them, plus a bigger pet's extra hitbox.
 --
 --   BossAttacks.update(body, b, dt, fighters) -> true while it should stand still
 --         (b: { c = { Attacks, Radius }, biome }; Server/Training's mobs use it too, with
@@ -354,7 +356,7 @@ local function cast(body, b, i, a)
 	local origin = Vector3.new(from.X, groundAt(from) + (a.Height or 4), from.Z)
 	local seed = math.random(0, 2 ^ 30 - 1)
 	local s = Projectiles.bossShot(a)
-	for _, shot in Projectiles.forgive(Projectiles.volley(s, true, origin, yaw, seed)) do
+	for _, shot in Projectiles.volley(s, true, origin, yaw, seed) do
 		table.insert(magic, { shot = shot, damage = a.Damage, biome = b.biome })
 	end
 	bossShot:FireAllClients(body, i, yaw, seed, origin)
@@ -798,7 +800,7 @@ RunService.Heartbeat:Connect(function(dt)
 			if not targets then
 				targets = { homing = {}, plain = {} }
 				for _, f in fighters(m.biome) do
-					local t = { body = f.root, pos = f.root.Position, radius = 0, f = f } -- (its middle: Projectiles.forgive)
+					local t = { body = f.root, pos = f.root.Position, radius = Config.EnemyHit.ShotWidth + f.extra, f = f }
 					if not dodges(f, true) then
 						table.insert(targets.homing, t)
 					end
@@ -824,7 +826,7 @@ RunService.Heartbeat:Connect(function(dt)
 		s.travelled += step
 		local hit = false
 		for _, f in fighters(s.biome) do
-			if flat(f.root.Position - ball.Position).Magnitude <= forgiving(s.radius) and not dodges(f) then
+			if flat(f.root.Position - ball.Position).Magnitude <= s.radius + Config.Shots.Slack + Config.EnemyHit.ShotWidth + f.extra and not dodges(f) then
 				Lives.hurt(f.humanoid, s.damage)
 				hit = true
 				break

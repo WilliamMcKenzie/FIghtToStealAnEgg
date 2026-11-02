@@ -27,6 +27,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Projectiles = require(Shared.Projectiles)
 local Weapons = require(Shared.Weapons.Weapons)
+local Pets = require(Shared.Pets)
 local Yards = require(Shared.Yards)
 local Riding = require(script.Parent.Riding)
 local Sfx = require(script.Parent.Sfx)
@@ -39,6 +40,7 @@ folder.Parent = workspace
 
 local WHITE = Color3.new(1, 1, 1)
 local active = {} -- { { shot, model, spin, look, color, biome (a boss's: it flies at players) } }
+local HORSE_HITBOX = Pets.stats("Horse").Hitbox
 
 local function block(model, size, cf, color, props)
 	local p = Instance.new("Part")
@@ -250,7 +252,7 @@ function Shots.boss(body, i, yaw, seed, origin)
 	end
 	local s = Projectiles.bossShot(a)
 	sound(s.FireSound, s.FireVolume, nil, origin)
-	for _, shot in Projectiles.forgive(Projectiles.volley(s, true, origin, yaw, seed)) do
+	for _, shot in Projectiles.volley(s, true, origin, yaw, seed) do
 		local look = s
 		if shot.size ~= (s.Size or 1) then
 			-- (drawn at its own random size: SizeMax)
@@ -273,8 +275,9 @@ local function players(biome, only)
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		if root and humanoid and humanoid.Health > 0 and (only or p:GetAttribute("LockedIn") == biome) then
-			-- (only their middle counts, as on the server: Projectiles.forgive)
-			table.insert(list, { body = root, pos = root.Position, radius = 0 })
+			-- (as wide as on the server: Server/BossAttacks, Config.EnemyHit.ShotWidth)
+			local extra = Pets.stats(p:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
+			table.insert(list, { body = root, pos = root.Position, radius = Config.EnemyHit.ShotWidth + extra })
 		end
 	end
 	return list
