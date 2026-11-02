@@ -37,6 +37,7 @@ require(script.SprintAbility) -- (the SprintPets' sprints: burrowing, flying, sm
 local Training = require(script.Training)
 local Tutorial = require(script.Tutorial)
 local Lives = require(script.Lives)
+local Death = require(script.Death)
 local Store = require(script.Store)
 
 SlashTuning.create() -- workspace.SlashTuning: live slash values to edit during Play
@@ -81,6 +82,7 @@ Regen.start() -- (always healing, at your pet's Regen)
 Data.start() -- (after Training: it loads over the grounds' defaults)
 Store.start() -- (the Shop's Robux buys and game passes; owns ProcessReceipt)
 Lives.start() -- (the Extra Life pass)
+Death.start() -- (falling over where you die, then back to base)
 Arsenal.start() -- (each player's weapon tool, and buying them from Carl)
 FreeGift.start() -- (the free gift by the gateway: its Claim)
 
