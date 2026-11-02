@@ -2302,10 +2302,10 @@ return {
 		Pets = {
 			AbyssWhale = { Every = 2, Shot = "AbyssStaff", Directions = 8, Damage = 1 },
 			AncientTreant = { Every = 1, Shot = "WindStaff", Aim = true, Angles = { -45, 0, 45 }, Damage = 0.8 },
-			CrimsonDrake = { Every = 0.6, Shot = "FireStaff", Aim = true, Angles = { 0 }, Damage = 1 },
+			CrimsonDrake = { Every = 0.6, Shot = "FireStaff", Aim = true, Angles = { 0 }, Damage = 1, Always = true },
 			BoneWyrm = { Every = 0.5, Shot = "Shortbow", Angles = { -30, -15, 0, 15, 30 }, Damage = 0.5 },
-			Squid = { Every = 1, Lob = "PetInk", Radius = 10, Damage = 1.5 },
-			Slime = { Every = 2, Lob = "PetGreen", Radius = 12, Damage = 3 },
+			Squid = { Every = 1, Lob = "PetInk", Radius = 10, Damage = 1.5, Always = true },
+			Slime = { Every = 2, Lob = "PetGreen", Radius = 12, Damage = 3, Always = true },
 			-- (QM, Nov 2: always, not just sprinting, about a Kendo Stick's damage a second)
 			Snowman = { Every = 0.5, Lob = "PetWhite", Radius = 9, Damage = 1, Always = true, Base = true },
 			RoyalEagle = { Every = 1.5, Blast = "PetWhite", Radius = 28, Damage = 3 },
@@ -2328,8 +2328,6 @@ return {
 		Snake = "Glow",
 		LivingArmor = "Rage", -- (QM, Nov 2)
 		-- (QM, Nov 2: these only fire things while sprinting: SprintFire below)
-		Squid = "Fire",
-		Slime = "Fire",
 		AncientTreant = "Fire",
 		Mimic = "Fire",
 		SpineLizard = "Grow", -- (QM, Nov 2)
