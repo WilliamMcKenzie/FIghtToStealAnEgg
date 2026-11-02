@@ -9,8 +9,11 @@
 -- A nest's egg has its name and rarity floating over it (QM, Oct 27: "Rhino Egg" in white,
 -- "Epic" under it in its rarity's colour), there once it's popped in, gone as it vanishes.
 -- (QM, Oct 30: the rarity drawn as the Weapon Shop's, Shared/RarityLook: Mythic and up move.)
+-- In the tutorial every nest's egg is drawn, named and prompted as a Config.Tutorial.Egg,
+-- since that's what you get stealing one (Server/Eggs; QM, Nov 2).
 
 local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -29,6 +32,8 @@ local LABEL_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.Fo
 local LABEL_SIZE = Vector2.new(10, 3.2) -- studs: both lines
 local LABEL_ABOVE = 1.2 -- studs over the egg's top
 local LABEL_RANGE = 90 -- studs it shows within
+
+local player = Players.LocalPlayer
 
 local views = {} -- [box] = { egg, next twitch (clock), scale, popAt, popped, vanish }
 
@@ -100,11 +105,24 @@ local function nestLabel(box, kind)
 	return board
 end
 
+local function inNest(box)
+	return box.Parent ~= nil and CollectionService:HasTag(box.Parent, "Nest")
+end
+
+-- the animal it's drawn as: its own, or in the tutorial a nest's is Config.Tutorial.Egg
+local function kindOf(box)
+	if player:GetAttribute("Tutorial") == true and inNest(box) then
+		return Config.Tutorial.Egg
+	end
+	return box:GetAttribute("EggKind") or "Horse"
+end
+
 local function add(box)
 	if views[box] or not box:IsA("BasePart") then
 		return
 	end
-	local ok, egg = pcall(Egg.new, box:GetAttribute("EggKind") or "Horse", box:GetAttribute("EggScale") or 1)
+	local kind = kindOf(box)
+	local ok, egg = pcall(Egg.new, kind, box:GetAttribute("EggScale") or 1)
 	if not ok then
 		warn("EggView: " .. tostring(egg))
 		return
@@ -124,9 +142,13 @@ local function add(box)
 		egg.model:ScaleTo(view.scale * 0.05)
 	end
 	egg.model.Parent = if view.popAt then nil else workspace
-	if box.Parent and CollectionService:HasTag(box.Parent, "Nest") then
-		view.label = nestLabel(box, box:GetAttribute("EggKind") or "Horse")
+	if inNest(box) then
+		view.label = nestLabel(box, kind)
 		view.label.Enabled = view.popAt == nil and not box:GetAttribute("Vanish")
+		local prompt = box:FindFirstChildOfClass("ProximityPrompt")
+		if prompt then
+			prompt.ObjectText = Pets.name(kind) .. " Egg" -- (here only: the tutorial's)
+		end
 	end
 	views[box] = view
 end
@@ -154,6 +176,20 @@ local function remove(box)
 		model:ScaleTo(math.max(0.02, view.scale * (1 - t) ^ 2))
 	end)
 end
+
+-- the tutorial starting or ending: every nest's egg drawn again as it now is
+player:GetAttributeChangedSignal("Tutorial"):Connect(function()
+	for box, view in views do
+		if inNest(box) and not view.vanish then
+			views[box] = nil
+			view.egg.model:Destroy()
+			if view.label then
+				view.label:Destroy()
+			end
+			add(box)
+		end
+	end
+end)
 
 CollectionService:GetInstanceAddedSignal("Egg"):Connect(add)
 CollectionService:GetInstanceRemovedSignal("Egg"):Connect(remove)

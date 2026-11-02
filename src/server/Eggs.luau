@@ -169,14 +169,16 @@ local function lay(nest, biome, popAt)
 		if not (humanoid and humanoid.Health > 0) then
 			return
 		end
-		if Config.Eggs.Carry and not carry(player, biome, kind) then
+		-- (the tutorial's eggs are all Config.Tutorial.Egg, so the first pet is: QM, Nov 2)
+		local got = if player:GetAttribute("Tutorial") then Config.Tutorial.Egg else kind
+		if Config.Eggs.Carry and not carry(player, biome, got) then
 			return
 		end
 		state.eggs[egg] = nil
 		egg:Destroy()
 		state.taken[player] = true -- (that's your egg from this round: QM, Oct 31)
 		player:SetAttribute(Eggs.takenKey(biome), true)
-		Hatchery.give(player, kind) -- (yours at once: in your hotbar until you die, QM Oct 25)
+		Hatchery.give(player, got) -- (yours at once: in your hotbar until you die, QM Oct 25)
 		-- (counted for the Goal panel's "Steal 2 eggs", saved: Shared/Goals)
 		player:SetAttribute("Stolen", Stacks.format(Stacks.add(Stacks.parse(player:GetAttribute("Stolen")), biome, 1)))
 		if state.boss then

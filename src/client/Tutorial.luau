@@ -5,28 +5,25 @@
 -- button, counter and the hotbar; the boss bar still shows in the fight), and it comes
 -- back piece by piece as it's needed.
 --
---   1. place  you start on foot with no pets (OnFoot), holding a Horse egg (Server/Tutorial),
---             and your pen glows (client/PenGlow): "Place your egg!", the hand and arrows on your pen
---   2. hatch  it's ready at once (Config.Tutorial.HatchTime): "Hatch your egg!", arrows to
---             it; PenEggs' big arrow is over it and its prompt hatches it
---   2b. ride  "Ride your horse!": the hand and arrows on what hatched; its Ride prompt
---             puts you on it (QM, Oct 31: "after hatching they must ride")
---   3. steal  "Steal an egg!", arrows to the Meadow egg in a clear straight line from your
+-- (QM, Nov 2: reworked. No starting egg and no "Buy a bow!": you start on your Horse
+-- with the Shortbow in hand, and every egg you steal is a Rhino: Server/Tutorial.)
+--   1. steal  "Steal an egg!", arrows to the Meadow egg in a clear straight line from your
 --             pen (stealTarget; QM Oct 31), else the nearest one (nests filled at
---             once if they're empty: TutorialEggs)
---   4. fight  its boss (always Config.Tutorial.Boss, all but harmless): "Fight boss!".
---             Dying sends you back to 3
---   4b. egg   the bounty flies into your Cash (now shown: client/BossBounty), and the egg
---             you stole is in your hand (Server/Hatchery): "Place your egg!" again, the
---             hand and arrows on your pen, then "Hatch your egg!" (any egg you put down
---             in the tutorial is ready at once) (QM, Oct 31)
---   5. bow    "Buy a bow!",
---             arrows to Carl and the hand on him, then on the bow's Buy in his shop
---             (buying equips it)
---   6. train  the Weapon Shop shuts and the HUD hides again (Cash too), then "Train with
---             weapons to become stronger!" while the camera pans over to the
---             Meadow training ground and back (QM, Oct 31: no arrows, just show it). Then
---             it's over (TutorialDone), the whole HUD comes back and you're free.
+--             once if they're empty: TutorialEggs). Every nest's egg shows as a Rhino's
+--             (client/EggView)
+--   2. fight  its boss (always Config.Tutorial.Boss, all but harmless): "Fight boss!".
+--             Dying sends you back to 1
+--   3. place  the bounty flies into your Cash (now shown: client/BossBounty), and the egg
+--             you stole is in your hand (Server/Hatchery): "Place your egg!", the hand
+--             and arrows on your pen (your pen glows: client/PenGlow)
+--   4. hatch  it's ready at once (Config.Tutorial.HatchTime): "Hatch your egg!", arrows to
+--             it; PenEggs' big arrow is over it and its prompt hatches it
+--   5. ride   "Ride your rhino!": the hand and arrows on what hatched; its Ride prompt
+--             puts you on it
+--   6. train  the HUD hides again (Cash too), then "Train with weapons to become
+--             stronger!" while the camera pans over to the Meadow training ground and
+--             back (QM, Oct 31: no arrows, just show it). Then it's over (TutorialDone),
+--             the whole HUD comes back and you're free.
 --
 -- Runs whenever your Tutorial attribute is on (a new account, or "/tutorial").
 
@@ -40,8 +37,8 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local MapData = require(Shared.MapData)
 local PenSpawn = require(Shared.PenSpawn)
+local Pets = require(Shared.Pets)
 local Banner = require(script.Parent.Banner)
-local WeaponShop = require(script.Parent.WeaponShop)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -53,19 +50,16 @@ local TAP_TIP = Vector2.new(0.365, 0.03) -- the fingertip, in the picture
 -- (the HUD's pieces it hides, in StarterGui > Hud > Root: client/Hud)
 local HIDE = { "ShopButton", "IndexButton", "EggsButton", "PetsButton", "Power", "Cash", "Hotbar", "OfflineEarn", "PlaceEgg", "Goal" }
 local WORDS = {
-	place = "Place your egg!",
-	hatch = "Hatch your egg!",
-	ride = "Ride your horse!",
 	steal = "Steal an egg!",
 	fight = "Fight boss!",
-	place2 = "Place your egg!",
-	hatch2 = "Hatch your egg!",
-	bow = "Buy a bow!",
+	place = "Place your egg!",
+	hatch = "Hatch your egg!",
+	ride = "Ride your " .. string.lower(Pets.name(T.Egg)) .. "!",
 	train = "Train with weapons to become stronger!",
 }
 local ARROW_UP = 1.5 -- studs the guide arrows float over the ground (QM, Oct 31: raised)
 local PAN = { In = 1.2, Hold = 2.5, Out = 1, Back = 45, Up = 55 } -- the camera's trip to the training grounds: seconds, and studs back and up from their middle
-local AFTER_BOSS = 0.3 -- seconds after the bounty lands till "Buy a bow!" (no Boss Defeated banner in the tutorial: client/BossBounty)
+local AFTER_BOSS = 0.3 -- seconds after the bounty lands till "Place your egg!" (no Boss Defeated banner in the tutorial: client/BossBounty)
 
 local gen = 0 -- bumped by every (re)start ("/tutorial" mid-way starts over)
 local myGen = 0 -- the run going now's
@@ -346,33 +340,12 @@ local function meadowBoss()
 	return nil
 end
 
-local function carl()
-	local map = workspace:FindFirstChild("Map")
-	local vendors = map and map:FindFirstChild("Vendors")
-	for _, stall in if vendors then vendors:GetChildren() else {} do
-		local spot = stall:FindFirstChild("CarlSpot", true)
-		if spot then
-			return spot
-		end
-	end
-	return nil
-end
-
-local function ownsWeapon(id)
-	for owned in string.gmatch(player:GetAttribute("Weapons") or "", "[^,]+") do
-		if owned:match("^[^:]+") == id then
-			return true
-		end
-	end
-	return false
-end
-
--- your pets wandering in your pen (workspace.PenPets, client/PenRide's Ride prompt on each)
-function myPenPets()
+-- your `kind` pets wandering in your pen (workspace.PenPets, client/PenRide's Ride prompt on each)
+function myPenPets(kind)
 	local folder = workspace:FindFirstChild("PenPets")
 	local list = {}
 	for _, body in if folder then folder:GetChildren() else {} do
-		if body:GetAttribute("Owner") == player.UserId then
+		if body:GetAttribute("Owner") == player.UserId and body:GetAttribute("Model") == kind then
 			table.insert(list, body)
 		end
 	end
@@ -476,46 +449,7 @@ local function run(thisGen)
 	end)
 	hideHud()
 
-	-- 1. place your egg
-	till(function()
-		return player:GetAttribute("TutorialPlaced") == true
-	end, function()
-		local area = myArea()
-		if area and player:GetAttribute("Holding") then
-			say("place")
-			local floor = area.Position - Vector3.new(0, area.Size.Y / 2, 0)
-			point(floor + Vector3.new(0, 1, 0), floor)
-		else
-			point(nil, nil)
-		end
-	end)
-
-	-- 2. hatch it
-	local waiting = #penEggs()
-	till(function()
-		return #penEggs() < waiting
-	end, function()
-		say("hatch")
-		point(nil, lastEgg())
-	end)
-	point(nil, nil)
-
-	-- 2b. ride what hatched (you've been on foot till now: OnFoot, Server/Tutorial)
-	task.wait(1.6) -- (the pet jumps out)
-	till(function()
-		return not player:GetAttribute("OnFoot")
-	end, function()
-		local pet = nearest(myPenPets())
-		if pet then
-			say("ride")
-			point(where(pet) + Vector3.new(0, 6, 0), pet)
-		else
-			point(nil, nil)
-		end
-	end)
-	point(nil, nil)
-
-	-- 3. steal an egg, 4. fight its boss (back to 3 if you die)
+	-- 1. steal an egg, 2. fight its boss (back to 1 if you die)
 	local asked = 0
 	while on() do
 		landed = false
@@ -556,9 +490,9 @@ local function run(thisGen)
 	revealHud("Cash")
 	task.wait(AFTER_BOSS)
 
-	-- 4b. put the egg you just stole in your pen and hatch it (QM, Oct 31). It's in your
-	-- hand once the fight's over (Server/Hatchery); put away (the hotbar's hidden), it's
-	-- handed back. No egg at all (lost somehow): on to the bow.
+	-- 3. put the egg you just stole in your pen (QM, Oct 31). It's in your hand once the
+	-- fight's over (Server/Hatchery); put away (the hotbar's hidden), it's handed back. No
+	-- egg at all (lost somehow): on to the training grounds.
 	local before = #penEggs()
 	local held = 0
 	till(function()
@@ -566,7 +500,7 @@ local function run(thisGen)
 	end, function()
 		local area = myArea()
 		if area and player:GetAttribute("Holding") then
-			say("place2")
+			say("place")
 			local floor = area.Position - Vector3.new(0, area.Size.Y / 2, 0)
 			point(floor + Vector3.new(0, 1, 0), floor)
 		else
@@ -580,37 +514,39 @@ local function run(thisGen)
 	end)
 	point(nil, nil)
 	if #penEggs() > before then
+		-- 4. hatch it (ready at once)
 		local waiting = #penEggs()
 		till(function()
 			return #penEggs() < waiting
 		end, function()
-			say("hatch2")
+			say("hatch")
 			point(nil, lastEgg())
 		end)
 		point(nil, nil)
-		task.wait(1.6) -- (the pet jumps out)
-	end
 
-	-- 5. buy a bow from Carl
-	till(function()
-		return ownsWeapon(T.Weapon)
-	end, function()
-		say("bow")
-		local spot = carl()
-		if WeaponShop.isOpen() then
-			point(WeaponShop.buyButton(T.Weapon), nil)
-		elseif spot then
-			point(spot.Position + Vector3.new(0, 4, 0), spot)
-		end
-	end)
-	point(nil, nil)
+		-- 5. ride what hatched
+		task.wait(1.6) -- (the pet jumps out)
+		local seen = os.clock()
+		till(function()
+			-- (riding it, or it's nowhere to be seen for a while: on anyway)
+			return player:GetAttribute("Pet") == T.Egg or (#myPenPets(T.Egg) == 0 and os.clock() - seen > 5)
+		end, function()
+			local pet = nearest(myPenPets(T.Egg))
+			if pet then
+				seen = os.clock()
+				say("ride")
+				point(where(pet) + Vector3.new(0, 6, 0), pet)
+			else
+				point(nil, nil)
+			end
+		end)
+		point(nil, nil)
+	end
 
 	-- 6. the training grounds: the camera pans over to them and back, and that's it (QM,
 	-- Oct 31: "then after that they are free to do what they want")
 	if on() then
-		-- (the bow's bought: its shop shuts and the screen's clear again for the pan, QM Oct 31)
-		WeaponShop.close()
-		hideHud()
+		hideHud() -- (the screen's clear again for the pan, QM Oct 31)
 		say("train")
 		panTo(trainingCentre())
 		task.wait(PAN.In + PAN.Hold + PAN.Out)
