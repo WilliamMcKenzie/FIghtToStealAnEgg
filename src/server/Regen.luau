@@ -46,6 +46,7 @@ function Regen.start()
 				rate = ability and ability.RegenSet or rate -- (set outright: Giant)
 				local set = Config.Pets[kind] and Config.Pets[kind].Stats
 				rate *= ability and set and set.SprintRegen or 1 -- (the pet's own: the Phoenix's 2x)
+				rate *= Pets.rage(player) -- (the Living Armor: faster the lower it is)
 				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + rate * dt)
 			end
 		end

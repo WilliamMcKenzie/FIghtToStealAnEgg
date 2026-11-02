@@ -2267,10 +2267,38 @@ return {
 	--   Glow    LassoAPet's Snake rattle: its horns and spikes glow, and you heal Regen x
 	--           your pet's regen (Server/Regen)
 	--   Grow    Grow x bigger and RegenAdd more health a second (the Spine Lizard, QM Nov 2)
+	--   Rage    the lower your health, the bigger, faster-attacking and faster-healing (the Living Armor)
+	--   Fire    nothing but its SprintFire (below)
 	--   Giant   Grow x bigger and its regen becomes RegenSet a second (the Ice Golem, QM Nov 2)
 	--   Frost   LassoAPet's Icebringer blizzard round it: a boss's minion that comes
 	--           within Radius studs is frozen solid for Freeze seconds (no moving, no
 	--           biting), then can't be frozen again for Again seconds
+	-- Sprint fire (QM, Nov 2; Server/SprintAbility): while its sprint is on, a pet fires
+	-- things of its own every Every seconds, on top of its SprintPets ability. Damage is x
+	-- one hit of your weapon (Combat.damage x its Damage), like the Volcano Tortoise's bombs.
+	--   Shot = a weapon id whose projectile it fires (drawn and flown as that weapon's), at
+	--          each of Angles (degrees off where it aims), or in Directions directions all
+	--          round; Aim: at the nearest enemy within Range (none near: it holds fire),
+	--          otherwise the way you face
+	--   Lob  = a bomb Style flung at the nearest enemy within Range, Radius studs blast
+	--   Blast = a bomb Style going off at once where you are, Radius studs
+	--   Echo  every attack of yours goes again half a swing later (2x damage a second)
+	SprintFire = {
+		Range = 90, -- studs to the nearest enemy for Aim and Lob
+		LobAirtime = 0.6, -- seconds a lobbed bomb's in the air
+		LobHeight = 14, -- studs up at the top of its flight
+		Pets = {
+			AbyssWhale = { Every = 2, Shot = "AbyssStaff", Directions = 8, Damage = 1 },
+			AncientTreant = { Every = 1, Shot = "WindStaff", Aim = true, Angles = { -45, 0, 45 }, Damage = 0.8 },
+			CrimsonDrake = { Every = 0.6, Shot = "FireStaff", Aim = true, Angles = { 0 }, Damage = 1 },
+			BoneWyrm = { Every = 0.5, Shot = "Shortbow", Angles = { -30, -15, 0, 15, 30 }, Damage = 0.5 },
+			Squid = { Every = 1, Lob = "PetInk", Radius = 10, Damage = 1.5 },
+			Slime = { Every = 2, Lob = "PetGreen", Radius = 12, Damage = 3 },
+			Snowman = { Every = 1, Lob = "PetWhite", Radius = 9, Damage = 1.5 },
+			RoyalEagle = { Every = 1.5, Blast = "PetWhite", Radius = 28, Damage = 3 },
+			Mimic = { Echo = true },
+		},
+	},
 	SprintPets = {
 		Sandworm = "Burrow",
 		Rockworm = "Burrow", -- (the Sandworm's recolour)
@@ -2285,6 +2313,13 @@ return {
 		Unicorn = "Leap",
 		BoneSteed = "Leap", -- (its trail in bone and ghost-fire colours)
 		Snake = "Glow",
+		LivingArmor = "Rage", -- (QM, Nov 2)
+		-- (QM, Nov 2: these only fire things while sprinting: SprintFire below)
+		Squid = "Fire",
+		Slime = "Fire",
+		Snowman = "Fire",
+		AncientTreant = "Fire",
+		Mimic = "Fire",
 		SpineLizard = "Grow", -- (QM, Nov 2)
 		IceGolem = "Giant", -- (QM, Nov 2)
 		Icebringer = "Frost",
@@ -2312,6 +2347,10 @@ return {
 		Grow = { Grow = 1.1, RegenAdd = 20 },
 		-- (QM, Nov 2: the Ice Golem) Grow x bigger, and its regen becomes RegenSet a second
 		Giant = { Grow = 2, RegenSet = 50 },
+		-- (QM, Nov 2: the Living Armor) the more health you've lost, the bigger the pet and
+		-- the faster you attack and heal: 1x at full health up to Max x at 1 HP
+		Rage = { Max = 2 },
+		Fire = {}, -- (nothing of its own: the pet's SprintFire does it all)
 		Fly = { Height = 10, Rise = 0.4 },
 		Smash = {
 			Grow = 1.2,

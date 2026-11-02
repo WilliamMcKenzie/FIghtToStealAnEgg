@@ -9,7 +9,8 @@
 --   Combat.add(body, handler)        -- handler(player, damage); body has a Radius attribute
 --   Combat.remove(body)
 --   Combat.slash(player, yaw, c)     -- a player's slash along world yaw `yaw`
---   Combat.shoot(player, id, yaw)    -- a Ranged or Magic weapon's volley (Shared/Projectiles)
+--   Combat.shoot(player, id, yaw, seed, origin?, damage?) -- a Ranged or Magic weapon's volley
+--                                      (Shared/Projectiles); damage: each shot's, if not the weapon's
 --   Combat.train(player, damage, strength) -- a hit for `damage` on an enemy of this
 --                                      Strength: adds Strength (and updates Power)
 --   Combat.refresh(player)           -- updates Power after Strength is set directly
@@ -204,7 +205,7 @@ local MAX_FLYING = 300
 -- (from where the shooter's own screen fired it, when that's close to where the server has
 -- them: a rider moves a few studs in the time the message takes, and shots run from the
 -- server's spot flew a little to the side of the ones drawn, missing what they hit there)
-function Combat.shoot(player, id, yaw, seed, origin)
+function Combat.shoot(player, id, yaw, seed, origin, damage)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if not root or #flying > MAX_FLYING or not Combat.alive(player) then
 		return
@@ -216,7 +217,7 @@ function Combat.shoot(player, id, yaw, seed, origin)
 			from += off
 		end
 	end
-	local damage = Combat.damage(player) * Weapons.get(id).Damage
+	damage = damage or Combat.damage(player) * Weapons.get(id).Damage -- (a pet's own shots set theirs)
 	for _, shot in Projectiles.spawn(id, from, yaw, seed, Projectiles.room(player:GetAttribute("LockedIn"))) do
 		table.insert(flying, { shot = shot, player = player, damage = damage })
 	end

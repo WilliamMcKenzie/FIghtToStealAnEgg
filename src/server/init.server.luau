@@ -33,7 +33,7 @@ local PetIndex = require(script.PetIndex)
 local PetInventory = require(script.PetInventory)
 local Regen = require(script.Regen)
 local Regions = require(script.Regions)
-require(script.SprintAbility) -- (the SprintPets' sprints: burrowing, flying, smashing, bombs)
+local SprintAbility = require(script.SprintAbility) -- (the SprintPets' sprints: burrowing, flying, smashing, bombs)
 local Training = require(script.Training)
 local Tutorial = require(script.Tutorial)
 local Lives = require(script.Lives)
@@ -210,7 +210,7 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 	end
 	local c = Weapons.slash(Config.Slash, id)
 	local now = os.clock()
-	if last[player] and now - last[player] < c.Cooldown / Power.speed(player:GetAttribute("Strength")) * 0.8 then
+	if last[player] and now - last[player] < c.Cooldown / Power.speed(player:GetAttribute("Strength")) / Pets.rage(player) * 0.8 then
 		return
 	end
 	last[player] = now
@@ -221,6 +221,16 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 	end
 	-- the hit lands as the arc sweeps through (wind-up, then half the sweep)
 	task.delay(c.Windup + c.Sweep * 0.5, Combat.slash, player, yaw, c)
+	-- (a sprinting Mimic swings it again half a swing later, QM Nov 2: everyone sees it)
+	if SprintAbility.echoes(player) then
+		local gap = c.Cooldown / Power.speed(player:GetAttribute("Strength")) * 0.5
+		task.delay(gap, function()
+			if Combat.alive(player) and SprintAbility.echoes(player) then
+				remote:FireAllClients(player, -dir, (seed + 1) % 2 ^ 30, yaw)
+				task.delay(c.Windup + c.Sweep * 0.5, Combat.slash, player, yaw, c)
+			end
+		end)
+	end
 end)
 
 -- Ranged and Magic weapons: the client fires (Shoot, with the yaw), the server runs the
@@ -243,7 +253,7 @@ shoot.OnServerEvent:Connect(function(player, yaw, seed, origin)
 		return
 	end
 	local now = os.clock()
-	if lastShot[player] and now - lastShot[player] < Weapons.cooldown(id) / Power.speed(player:GetAttribute("Strength")) * 0.8 then
+	if lastShot[player] and now - lastShot[player] < Weapons.cooldown(id) / Power.speed(player:GetAttribute("Strength")) / Pets.rage(player) * 0.8 then
 		return
 	end
 	lastShot[player] = now
@@ -253,6 +263,15 @@ shoot.OnServerEvent:Connect(function(player, yaw, seed, origin)
 		end
 	end
 	Combat.shoot(player, id, yaw, seed, if typeof(origin) == "Vector3" then origin else nil)
+	-- (a sprinting Mimic fires it again half a shot later, QM Nov 2)
+	if SprintAbility.echoes(player) then
+		local gap = Weapons.cooldown(id) / Power.speed(player:GetAttribute("Strength")) * 0.5
+		task.delay(gap, function()
+			if Combat.alive(player) and SprintAbility.echoes(player) then
+				SprintAbility.shoot(player, id, yaw, (seed + 1) % 2 ^ 30, nil)
+			end
+		end)
+	end
 end)
 
 -- /boss: a chicken boss in front of you. The command is a TextChatCommand; its client

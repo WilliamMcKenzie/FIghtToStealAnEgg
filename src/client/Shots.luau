@@ -221,6 +221,7 @@ function Shots.fire(character, id, yaw, seed)
 	end
 	local hips = Riding.hips(character)
 	local y = (if hips then hips.Y else root.Position.Y) + Config.Shots.Height
+	y -= math.min(Riding.lift(character), 0) -- (burrowed, a Bone Wyrm's arrows come from the surface)
 	local origin = Vector3.new(root.Position.X, y, root.Position.Z)
 	sound(w.Shot.FireSound, w.Shot.FireVolume, root) -- (once a volley, not once a shot)
 	-- (in a boss fight it flies till it leaves the arena, as on the server)

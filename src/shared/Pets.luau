@@ -84,6 +84,20 @@ function Pets.stats(kind)
 	return stats[kind]
 end
 
+-- the Living Armor's Rage sprint (QM, Nov 2): 1 at full health up to SprintAbility.Rage.Max
+-- at 1 HP, while it's on; 1 for everyone else. Its size, attack speed and regen go by it.
+function Pets.rage(player)
+	if not player or player:GetAttribute("SprintAbility") ~= "Rage" then
+		return 1
+	end
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.MaxHealth <= 0 then
+		return 1
+	end
+	local lost = math.clamp(1 - humanoid.Health / humanoid.MaxHealth, 0, 1)
+	return 1 + (Config.SprintAbility.Rage.Max - 1) * lost
+end
+
 function Pets.kinds()
 	local out = {}
 	for kind in Config.Pets do

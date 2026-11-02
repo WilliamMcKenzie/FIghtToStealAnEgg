@@ -15,6 +15,8 @@
 -- A Style is how a bomb looks (STYLES below): its squares' fill and outline colours. Every
 -- other red circle a boss puts down splashes like a landing bomb too (BossSplash).
 --
+-- A sprinting pet's lobbed bombs (PetLob, Config.SprintFire; QM Nov 2) fly the same way
+-- but put no red ring down: they only hurt enemies.
 -- A sprinting Volcano Tortoise's bombs (PetBomb, Server/SprintAbility; QM, Oct 30) are
 -- the same squares, dropped where it went: each sits on the ground ticking (swelling and
 -- shrinking, faster as it nears the end) for its fuse, then splashes. No red ring: they
@@ -65,6 +67,11 @@ local STYLES = {
 	-- (the Volcano Tortoise's sprint, orange and yellow in turn: PetBomb below)
 	PetOrange = { Fill = Color3.fromRGB(255, 140, 30), Outline = Color3.fromRGB(150, 146, 156) },
 	PetYellow = { Fill = Color3.fromRGB(255, 220, 60), Outline = Color3.fromRGB(150, 146, 156) },
+	-- (pets' sprint fire, QM Nov 2: the Squid's ink, the Slime's goo, the Snowman's and
+	-- Royal Eagle's white: Config.SprintFire)
+	PetInk = { Fill = Color3.fromRGB(30, 28, 36), Outline = Color3.fromRGB(150, 146, 156) },
+	PetGreen = { Fill = Color3.fromRGB(110, 230, 80), Outline = Color3.fromRGB(150, 146, 156) },
+	PetWhite = { Fill = Color3.fromRGB(255, 255, 255), Outline = Color3.fromRGB(150, 146, 156) },
 }
 
 local folder = Instance.new("Folder")
@@ -204,12 +211,15 @@ local function splash(at, radius, style)
 	end
 end
 
-ReplicatedStorage:WaitForChild("BossBomb").OnClientEvent:Connect(function(info)
+local function flung(info, ring)
 	local s = STYLES[info.style] or STYLES.Cactus
 	if workspace:GetServerTimeNow() - info.start >= info.airtime then
 		return -- (it's already landed)
 	end
-	local mark, fill, edge, inner = warning(info.to, info.radius)
+	local mark, fill, edge, inner
+	if ring then
+		mark, fill, edge, inner = warning(info.to, info.radius)
+	end
 	local bomb = sprite(s.Fill, s.Outline, SIZE, 0)
 	bomb.att.Position = info.from
 	table.insert(active, {
@@ -229,6 +239,12 @@ ReplicatedStorage:WaitForChild("BossBomb").OnClientEvent:Connect(function(info)
 		dropped = os.clock(),
 		style = s,
 	})
+end
+ReplicatedStorage:WaitForChild("BossBomb").OnClientEvent:Connect(function(info)
+	flung(info, true)
+end)
+ReplicatedStorage:WaitForChild("PetLob").OnClientEvent:Connect(function(info)
+	flung(info, false)
 end)
 
 -- every other red circle (Server/BossAttacks: slams, leap landings, roots, bombs that
@@ -277,7 +293,9 @@ RunService.RenderStepped:Connect(function(dt)
 		if t >= 1 then
 			table.remove(active, i)
 			release(b.sprite)
-			b.mark:Destroy()
+			if b.mark then
+				b.mark:Destroy()
+			end
 			task.spawn(splash, b.ground, b.radius, b.style)
 			continue
 		end
@@ -289,10 +307,12 @@ RunService.RenderStepped:Connect(function(dt)
 			bit(b.style, pos, TRAIL_SIZE, 0)
 		end
 		-- the fill grows out from the middle, reaching the ring as it lands
-		local r = b.inner * t
-		b.fill.Radius = math.max(r, 0.01)
-		b.edge.Radius = math.max(r, 0.01)
-		b.edge.InnerRadius = math.max(r - b.radius * EDGE_WIDTH, 0)
+		if b.mark then
+			local r = b.inner * t
+			b.fill.Radius = math.max(r, 0.01)
+			b.edge.Radius = math.max(r, 0.01)
+			b.edge.InnerRadius = math.max(r - b.radius * EDGE_WIDTH, 0)
+		end
 	end
 	for i = #bits, 1, -1 do
 		local q = bits[i]

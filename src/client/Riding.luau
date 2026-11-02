@@ -314,6 +314,8 @@ RunService.PreSimulation:Connect(function(dt)
 		elseif ability == "Crabwalk" then
 			grow = abilities.Smash.Grow
 			turn = math.rad(abilities.Crabwalk.Turn)
+		elseif ability == "Rage" then
+			grow = Pets.rage(owner) -- (the Living Armor: bigger the lower its health)
 		elseif ability and abilities[ability] and abilities[ability].Grow then
 			grow = abilities[ability].Grow -- (the Spine Lizard's Grow)
 		end

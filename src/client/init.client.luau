@@ -18,6 +18,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Pets = require(Shared.Pets)
 local Power = require(Shared.Power)
 local SlashFx = require(Shared.SlashFx)
 local SlashTuning = require(Shared.SlashTuning)
@@ -194,7 +195,7 @@ local function slash(tool, yaw)
 	if c.Alternate then
 		nextDir = -nextDir
 	end
-	ready = os.clock() + c.Cooldown / Power.speed(player:GetAttribute("Strength")) -- (Strength swings faster)
+	ready = os.clock() + c.Cooldown / Power.speed(player:GetAttribute("Strength")) / Pets.rage(player) -- (Strength swings faster, and the Living Armor's Rage)
 	local seed = math.random(1, 2 ^ 30)
 	play(character, dir, tool, seed, yaw)
 	task.delay(c.Windup, SlashCam.zoom, c) -- the camera feels the strike
@@ -248,7 +249,7 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		-- (shots go straight at it, not along the eased aim)
 		local yaw = yawOf((inRange.Position - root.Position) * Vector3.new(1, 0, 1))
-		local interval = Weapons.cooldown(id, c) / Power.speed(player:GetAttribute("Strength"))
+		local interval = Weapons.cooldown(id, c) / Power.speed(player:GetAttribute("Strength")) / Pets.rage(player)
 		ready = os.clock() + interval
 		local seed = math.random(0, 2 ^ 30 - 1) -- (the same shots here, on the server and for everyone)
 		Shots.fire(character, id, yaw, seed)
@@ -300,6 +301,10 @@ remote.OnClientEvent:Connect(function(other, dir, seed, yaw)
 	if character then
 		play(character, dir, character:FindFirstChildOfClass("Tool"), seed, yaw)
 	end
+end)
+-- a pet's own shots while it sprints, everyone's, yours too (Config.SprintFire, Server/SprintAbility)
+ReplicatedStorage:WaitForChild("PetShot").OnClientEvent:Connect(function(rider, id, yaw, seed)
+	Shots.fire(rider.Character, id, yaw, seed)
 end)
 shootRemote.OnClientEvent:Connect(function(other, id, yaw, seed)
 	Shots.fire(other.Character, id, yaw, seed)
