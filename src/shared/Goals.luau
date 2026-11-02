@@ -7,7 +7,8 @@
 --     goal = its Config.Goals.List entry (client/GoalGuide points the arrows by it),
 --     title = "Train Power" (RichText: a rarity's name is in its colour),
 --     have, need = the bar's numbers (have can pass need),
---     text = "5.9K/10K" (or "$1.2K/$2K" for cash),
+--     text = "5.9K/10K" (or "$1.2K/$2K" for cash; once you can afford it, what to do:
+--            "Buy from Carl!" / "Unlock it!", QM Nov 2: "$5.1K/$1.5K" read as broken),
 --   }
 --   Goals.found(player) -> { [pet] = true } for the pets in your Index
 --   Goals.stolen(player, region) -> eggs stolen there ever (saved attribute Stolen)
@@ -58,7 +59,11 @@ local function ownedWeapons(player)
 	return list
 end
 
-local function cashText(have, need)
+-- (enough cash but not spent yet: say what to do instead of "$5.1K/$1.5K", QM Nov 2)
+local function cashText(have, need, ready)
+	if have >= need then
+		return ready
+	end
 	return "$" .. Abbrev(have) .. "/$" .. Abbrev(need)
 end
 
@@ -104,7 +109,7 @@ local function check(player, g)
 			title = g.Title or ("Unlock " .. regionName(g.Region[1])),
 			have = cash,
 			need = missing,
-			text = cashText(cash, missing),
+			text = cashText(cash, missing, "Unlock it!"),
 		}
 	elseif g.Weapon then
 		local want = rankOf[g.Weapon] or 1
@@ -132,7 +137,7 @@ local function check(player, g)
 				(look and look.text or Color3.new(1, 1, 1)):ToHex(),
 				g.Weapon
 			)
-		return { title = title, have = cash, need = cheapest, text = cashText(cash, cheapest) }
+		return { title = title, have = cash, need = cheapest, text = cashText(cash, cheapest, "Buy from Carl!") }
 	elseif g.Collect then
 		local found = Goals.found(player)
 		local have, need = 0, 0
@@ -155,7 +160,7 @@ local function check(player, g)
 			title = g.Title or ("Unlock " .. regionName(g.Train) .. " Training"),
 			have = cash,
 			need = ground.Cost,
-			text = cashText(cash, ground.Cost),
+			text = cashText(cash, ground.Cost, "Unlock it!"),
 		}
 	end
 	return nil
