@@ -2221,7 +2221,8 @@ return {
 	-- builds up to a sprint, Speed x its speed, over Ramp seconds. Stopping (letting go of
 	-- the controls, or held up against something: under StopAt of your speed) drops you
 	-- straight back. LassoAPet's sprint is 2x; this game's is 1.3x (QM).
-	Sprint = { On = true, Speed = 1.3, Delay = 1.5, Ramp = 1.2, StopAt = 0.4 },
+	-- Roam (QM, Nov 2): x your pet's speed out of combat (not in a boss fight or a training ground).
+	Sprint = { On = true, Speed = 1.3, Delay = 1.5, Ramp = 1.2, StopAt = 0.4, Roam = 1.6 },
 	-- Steering (QM, Oct 30: riding felt drifty; client/Riding): on the ground you go exactly
 	-- where you push at full speed and stop dead, turning to face it at Turn (a rate: 30 is
 	-- all but instant, lower is smoother).

@@ -15,6 +15,10 @@
 -- which runs it till you stop, or ends it (SprintEnd: a Smash ran into something) and
 -- you ride on another Sprint.Delay to start it again. client/SprintAbility draws it.
 --
+-- Out of combat (QM, Nov 2: QoL riding around the map) your pet goes Config.Sprint.Roam x
+-- faster: not locked into a boss fight (LockedIn) and not inside a training ground (the
+-- Base area's Training bounds in Shared/MapData).
+--
 --   Sprint.sprinting() -> true while you sprint (from the build-up on)
 
 local Players = game:GetService("Players")
@@ -24,6 +28,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Pets = require(Shared.Pets)
+local MapData = require(Shared.MapData)
 local Liquid = require(script.Parent.Liquid)
 local RideSounds = require(script.Parent.RideSounds)
 local SkyFlash = require(script.Parent.SkyFlash)
@@ -59,6 +64,31 @@ ReplicatedStorage:WaitForChild("SprintEnd").OnClientEvent:Connect(function()
 	abilityOn = false
 end)
 
+-- the training grounds' bounds, { x0, z0, x1, z1 }
+local grounds = {}
+for _, a in MapData.Areas do
+	if a.Name == "Base" then
+		for _, t in a.Training or {} do
+			if #t >= 5 then
+				table.insert(grounds, { math.min(t[2], t[4]), math.min(t[3], t[5]), math.max(t[2], t[4]), math.max(t[3], t[5]) })
+			end
+		end
+	end
+end
+
+local function inCombat(root)
+	if player:GetAttribute("LockedIn") then
+		return true
+	end
+	local p = root.Position
+	for _, b in grounds do
+		if p.X >= b[1] and p.X <= b[3] and p.Z >= b[2] and p.Z <= b[4] then
+			return true
+		end
+	end
+	return false
+end
+
 function Sprint.sprinting()
 	return sprinting
 end
@@ -75,6 +105,9 @@ RunService:BindToRenderStep("Sprint", Enum.RenderPriority.Camera.Value + 3, func
 	local alive = root ~= nil and humanoid ~= nil and humanoid.Health > 0
 	local onFoot = player:GetAttribute("OnFoot") == true -- (the tutorial before its first ride: no sprinting)
 	local base = (if onFoot then Config.Tutorial.WalkSpeed else Pets.stats(player:GetAttribute("Pet") or "Horse").Speed) * Liquid.slow()
+	if alive and not onFoot and not inCombat(root) then
+		base *= cfg.Roam or 1
+	end
 	local speed = if alive then (root.AssemblyLinearVelocity * Vector3.new(1, 0, 1)).Magnitude else 0
 
 	-- the build-up: riding on (pushing, and going at least StopAt of your speed) counts up;
