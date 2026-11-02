@@ -132,7 +132,8 @@ end
 -- one go of the pet's SprintFire (f) from root
 local function fire(player, root, f)
 	local pos = root.Position
-	local k = f.Damage or 1
+	-- (Base: x a bare Kendo Stick hit, whatever's held)
+	local k = (f.Damage or 1) / (if f.Base then Weapons.get(player:GetAttribute("Weapon")).Damage else 1)
 	if f.Shot then
 		local yaw
 		if f.Aim then
@@ -209,6 +210,24 @@ local function bomb(player, at)
 	end)
 end
 
+-- pets that fire whenever they're ridden (SprintFire's Always: the Snowman's snowballs)
+local always = {} -- [player] = seconds to the next
+RunService.Heartbeat:Connect(function(dt)
+	for _, player in Players:GetPlayers() do
+		local f = fireOf(player)
+		local root = f and f.Always and rootOf(player)
+		if root then
+			always[player] = (always[player] or 0) - dt
+			if always[player] <= 0 then
+				always[player] = f.Every
+				fire(player, root, f)
+			end
+		else
+			always[player] = nil
+		end
+	end
+end)
+
 RunService.Heartbeat:Connect(function(dt)
 	for player, r in riders do
 		local root = rootOf(player)
@@ -218,7 +237,7 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		local pos = root.Position
 		local f = fireOf(player)
-		if f and f.Every then
+		if f and f.Every and not f.Always then
 			r.fire = (r.fire or 0) - dt
 			if r.fire <= 0 then
 				r.fire = f.Every
@@ -257,6 +276,7 @@ end)
 
 Players.PlayerRemoving:Connect(function(player)
 	riders[player] = nil
+	always[player] = nil
 end)
 
 return SprintAbility

@@ -2283,6 +2283,8 @@ return {
 	--   Lob  = a bomb Style flung at the nearest enemy within Range, Radius studs blast
 	--   Blast = a bomb Style going off at once where you are, Radius studs
 	--   Echo  every attack of yours goes again half a swing later (2x damage a second)
+	--   Always  fires whenever you ride it, sprinting or not
+	--   Base    Damage is x one Kendo Stick hit (Combat.damage), whatever weapon you hold
 	SprintFire = {
 		Range = 90, -- studs to the nearest enemy for Aim and Lob
 		LobAirtime = 0.6, -- seconds a lobbed bomb's in the air
@@ -2294,7 +2296,8 @@ return {
 			BoneWyrm = { Every = 0.5, Shot = "Shortbow", Angles = { -30, -15, 0, 15, 30 }, Damage = 0.5 },
 			Squid = { Every = 1, Lob = "PetInk", Radius = 10, Damage = 1.5 },
 			Slime = { Every = 2, Lob = "PetGreen", Radius = 12, Damage = 3 },
-			Snowman = { Every = 1, Lob = "PetWhite", Radius = 9, Damage = 1.5 },
+			-- (QM, Nov 2: always, not just sprinting, about a Kendo Stick's damage a second)
+			Snowman = { Every = 0.5, Lob = "PetWhite", Radius = 9, Damage = 1, Always = true, Base = true },
 			RoyalEagle = { Every = 1.5, Blast = "PetWhite", Radius = 28, Damage = 3 },
 			Mimic = { Echo = true },
 		},
@@ -2317,7 +2320,6 @@ return {
 		-- (QM, Nov 2: these only fire things while sprinting: SprintFire below)
 		Squid = "Fire",
 		Slime = "Fire",
-		Snowman = "Fire",
 		AncientTreant = "Fire",
 		Mimic = "Fire",
 		SpineLizard = "Grow", -- (QM, Nov 2)
