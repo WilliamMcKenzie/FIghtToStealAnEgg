@@ -1326,14 +1326,17 @@ return {
 		TurnRate = 120,
 	},
 	-- how forgiving every enemy attack is (QM, Oct 31: never unfair; a lucky miss is fine).
-	-- Every hit on a player (swipes, red circles, bombs, rows, charges, magic orbs and boss
-	-- shots, from bosses, minions and training mobs alike: Server/BossAttacks) tests only
-	-- the player's middle (their HumanoidRootPart; not the rider's or pet's edges, and a big
-	-- pet is no easier to hit), against an area Forgive studs smaller all round than what's
-	-- drawn. Small things (a shot, a tiny circle) shrink to at most half their size instead.
-	-- (Shared/Projectiles.forgiving; client/Shots pops boss shots on the same rule.)
+	-- Every ground hit on a player (swipes, red circles, bombs, rows and charges, from bosses,
+	-- minions and training mobs alike: Server/BossAttacks) tests only the player's middle
+	-- (their HumanoidRootPart; not the rider's or pet's edges), against an area Forgive studs
+	-- smaller all round than what's drawn. Small circles shrink to at most half their size.
+	-- (Shared/Projectiles.forgiving.)
+	-- Projectiles are NOT shrunk (QM, Nov 2: magic orbs and boss shots became near
+	-- impossible to get hit by): they hit the player's width (ShotWidth, plus a bigger pet's
+	-- extra hitbox) plus the orb's own size and Config.Shots.Slack, as before Oct 31.
 	EnemyHit = {
 		Forgive = 1.5, -- studs the real damage area sits inside its telegraph
+		ShotWidth = 1, -- studs: how wide a player is to a magic orb or boss shot
 	},
 	-- every enemy's melee (QM, Oct 30): a swipe like the player's, after a red telegraph in
 	-- its shape fills on the ground for Windup seconds, so you can step out of it. Each
