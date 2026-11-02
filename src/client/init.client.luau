@@ -26,6 +26,7 @@ local WorldColors = require(Shared.WorldColors)
 local Weapons = require(Shared.Weapons.Weapons)
 local Projectiles = require(Shared.Projectiles)
 local Yards = require(Shared.Yards)
+local Footprint = require(Shared.Footprint)
 local Riding = require(script.Riding)
 local Sfx = require(script.Sfx)
 local Shots = require(script.Shots)
@@ -173,8 +174,7 @@ local function nearestBoss(root, range, room)
 					or (body.Position.X >= room[1] and body.Position.Z >= room[2] and body.Position.X <= room[3] and body.Position.Z <= room[4])
 				)
 			then
-				local d = ((body.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude
-					- (body:GetAttribute("Radius") or 0)
+				local d = Footprint.gap(body, root.Position) -- (to the edge of the box it's drawn filling)
 				if d < bestDist then
 					best, bestDist = body, d
 				end
@@ -225,7 +225,16 @@ RunService.Heartbeat:Connect(function(dt)
 	local facing = yawOf(root.CFrame.LookVector)
 	local target = nearestBoss(root, math.max(c.AimRange, range + 8), room)
 	TargetRing.set(target) -- (the red ring under what you're aiming at)
-	local want = if target then yawOf((target.Position - root.Position) * Vector3.new(1, 0, 1)) else facing
+	-- (a slash aims at the nearest bit of it, so beside a long boss you swing at its flank,
+	-- not at its far-off middle; straight at its middle when you're on top of it)
+	local want = facing
+	if target then
+		local toward = (Footprint.closest(target, root.Position) - root.Position) * Vector3.new(1, 0, 1)
+		if toward.Magnitude < 1.5 or (id and Weapons.get(id).Shot) then
+			toward = (target.Position - root.Position) * Vector3.new(1, 0, 1)
+		end
+		want = yawOf(toward)
+	end
 	aimYaw = want
 	SwingPose.aim(character, math.clamp(wrap(aimYaw - facing), -math.rad(c.AimTwist), math.rad(c.AimTwist)))
 

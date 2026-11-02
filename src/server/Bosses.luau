@@ -52,6 +52,8 @@ local BossAttacks = require(script.Parent.BossAttacks)
 local Combat = require(script.Parent.Combat)
 local Passes = require(Shared:WaitForChild("Passes"))
 local Pets = require(Shared:WaitForChild("Pets"))
+local Footprint = require(Shared:WaitForChild("Footprint"))
+local PetScale = require(Shared:WaitForChild("PetScale"))
 local Minions = require(script.Parent.Minions)
 local Stats = require(script.Parent.Stats)
 
@@ -194,6 +196,9 @@ local function make(kind, at, yaw, health)
 	body:SetAttribute("Health", health)
 	body:SetAttribute("MaxHealth", health)
 	body:SetAttribute("Radius", c.Radius)
+	-- (what the player's hits land on: the box it's drawn filling, x its PetScale as
+	-- client/BossView draws it; QM Nov 2, Shared/Footprint)
+	Footprint.set(body, require(Shared.Animals:FindFirstChild(model .. "Model")), modelSize * PetScale.of(model))
 	local b = { kind = kind, c = c, yaw = yaw, home = at, calm = 0, hitters = {} }
 	if c.Burrow then
 		-- (it arrives already up, and spits once the intro's over)

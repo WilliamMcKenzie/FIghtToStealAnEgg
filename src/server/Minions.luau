@@ -22,6 +22,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Horse = require(Shared.Animals.Horse)
 local Pets = require(Shared.Pets)
+local Footprint = require(Shared.Footprint)
 local BossAttacks = require(script.Parent.BossAttacks)
 local Combat = require(script.Parent.Combat)
 
@@ -90,6 +91,10 @@ local function spawnOne(m, biome, bounds, at, yaw, boss)
 	body:SetAttribute("Health", m.Health)
 	body:SetAttribute("MaxHealth", m.Health)
 	body:SetAttribute("Radius", radius)
+	-- (what the player's hits land on, the box it's drawn filling: the model client/BossView
+	-- draws it as, at this size; Shared/Footprint)
+	local drawn = Shared.Animals:FindFirstChild(model .. "Model")
+	Footprint.set(body, if drawn then require(drawn) else data, size)
 	body:SetAttribute("Biome", biome)
 	body:SetAttribute("Minion", true)
 	local drop = m.Drop or 0.8

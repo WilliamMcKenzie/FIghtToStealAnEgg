@@ -7,7 +7,8 @@
 -- hit as many targets as it may (1 + Pierce). A Magic shot with Homing bends toward the
 -- nearest target ahead of it (within its HomingCone) by up to Homing degrees a
 -- second: enough to curve onto a target that's moving, not enough to turn round. Targets
--- are flat circles: { body, pos, radius } (a boss's or mob's body and its Radius), so a
+-- are flat circles: { body, pos, radius } (a boss's or mob's body and its Radius; or the
+-- box its drawing fills when its body has one, Shared/Footprint), so a
 -- shot hits whatever height it flies at; Config.Shots.Slack widens every one a little.
 --
 --   Projectiles.spawn(id, origin, yaw, seed, room) -> { shot, ... } -- a weapon's volley
@@ -29,6 +30,7 @@
 local Config = require(script.Parent.Config)
 local Weapons = require(script.Parent.Weapons.Weapons)
 local MapData = require(script.Parent.MapData)
+local Footprint = require(script.Parent.Footprint)
 
 local Projectiles = {}
 
@@ -185,7 +187,9 @@ function Projectiles.step(shot, dt, targets)
 		if not shot.hit[t.body] then
 			local p = flat(t.pos)
 			local c = closest(flat(from), flat(to), p)
-			if (c - p).Magnitude <= t.radius + shot.radius + shot.slack then
+			-- (a boss's, minion's or mob's own box, Shared/Footprint; else its circle)
+			local gap = if t.body and t.body:IsA("BasePart") then Footprint.segmentGap(t.body, from, to) else nil
+			if (gap or ((c - p).Magnitude - t.radius)) <= shot.radius + shot.slack then
 				table.insert(hits, { t = t, d = (c - flat(from)).Magnitude, at = Vector3.new(c.X, from.Y, c.Z) })
 			end
 		end

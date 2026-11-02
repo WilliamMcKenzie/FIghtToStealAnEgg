@@ -7,6 +7,7 @@
 -- the player's Power attribute (the HUD's counter) shows their Strength.
 --
 --   Combat.add(body, handler)        -- handler(player, damage); body has a Radius attribute
+--                                      (and FootMid/FootHalf: the box it's hit on, Shared/Footprint)
 --   Combat.remove(body)
 --   Combat.slash(player, yaw, c)     -- a player's slash along world yaw `yaw`
 --   Combat.shoot(player, id, yaw)    -- a Ranged or Magic weapon's volley (Shared/Projectiles)
@@ -47,6 +48,7 @@ local Power = require(Shared:WaitForChild("Power"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Weapons = require(Shared:WaitForChild("Weapons"):WaitForChild("Weapons"))
 local Yards = require(Shared:WaitForChild("Yards"))
+local Footprint = require(Shared:WaitForChild("Footprint"))
 
 local Combat = {}
 
@@ -111,8 +113,9 @@ function Combat.join(player)
 end
 
 -- it catches every target whose body is within the arc's reach (Forward + Radius, plus
--- the target's own radius and a little slack) and inside its sweep (half the Arc either
--- side, plus slack for the target's width)
+-- a little slack) of its nearest edge and whose nearest edge is inside its sweep (half the
+-- Arc either side, plus slack). Its edge is the box its drawing fills (Shared/Footprint,
+-- QM Nov 2: a big boss is hit at the edge you see, not only near its middle)
 function Combat.slash(player, yaw, c)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if not root or not Combat.alive(player) then -- (died during the wind-up)
@@ -128,14 +131,14 @@ function Combat.slash(player, yaw, c)
 		elseif not Yards.inside(body, root.Position) then
 			continue -- (a training yard's, and you're outside it)
 		elseif body.Parent then
-			local radius = body:GetAttribute("Radius") or 0
-			local offset = (body.Position - root.Position) * Vector3.new(1, 0, 1)
+			local offset = (Footprint.closest(body, root.Position) - root.Position) * Vector3.new(1, 0, 1)
 			local distance = offset.Magnitude
-			if distance - radius <= reach then
-				local angle = if distance > 1e-3
+			if distance <= reach then
+				-- (standing on it or right against it, any slash catches it)
+				local angle = if distance > 1.5
 					then math.deg(math.acos(math.clamp(offset.Unit:Dot(look), -1, 1)))
 					else 0
-				local slack = math.deg(math.atan2(radius, math.max(distance, 1)))
+				local slack = math.deg(math.atan2(1.5, math.max(distance, 1)))
 				if angle <= c.Arc / 2 + slack + 10 then
 					table.insert(hits, handler)
 				end
@@ -161,7 +164,7 @@ function Combat.touching(position, reach, player)
 	local out = {}
 	for body, handler in targets do
 		if hittable(body) and (not player or (root and Yards.inside(body, root.Position))) then
-			local gap = ((body.Position - position) * Vector3.new(1, 0, 1)).Magnitude - (body:GetAttribute("Radius") or 0)
+			local gap = Footprint.gap(body, position) -- (its edge: Shared/Footprint)
 			if gap <= reach then
 				table.insert(out, { body = body, handler = handler })
 			end
@@ -259,7 +262,7 @@ RunService.Heartbeat:Connect(function(dt)
 			-- a splash also hits everything else that close to where it struck
 			if f.shot.splash then
 				for _, other in mine do
-					if other ~= t and ((other.pos - t.pos) * Vector3.new(1, 0, 1)).Magnitude - other.radius <= f.shot.splash then
+					if other ~= t and Footprint.gap(other.body, t.pos) <= f.shot.splash then
 						task.spawn(other.handler, f.player, roll(f.damage))
 					end
 				end
