@@ -2131,12 +2131,12 @@ return {
 		SpineLizard = { Rarity = "Legendary", Cash = 390, Tier = 2, Lean = -0.5, Speed = 1.97, Stats = { Health = 444, Regen = 15, Speed = 110 } }, -- (QM, Nov 2)
 		Snake = { Rarity = "Mythic", Cash = 3000, Tier = 3, Lean = -0.3, Speed = 2.8, Stats = { Health = 1000, Regen = 10, Speed = 100 } }, -- (QM, Nov 2)
 		-- Tundra
-		Penguin = { Rarity = "Epic", Cash = 34, Tier = 1, Lean = 0.3, Speed = 2.355 },
-		Boar = { Rarity = "Epic", Cash = 120, Tier = 1, Lean = -0.2, Speed = 2.517 },
-		Snowman = { Rarity = "Legendary", Cash = 260, Tier = 1, Lean = 0.4, Speed = 2.678 },
-		IceGolem = { Rarity = "Mythic", Cash = 4400, Tier = 2, Lean = 0.4, Speed = 2.86 },
+		Penguin = { Rarity = "Epic", Cash = 34, Tier = 1, Lean = 0.3, Speed = 2.355 , Stats = { Health = 400, Regen = 6, Speed = 110 } }, -- (QM, Nov 2)
+		Boar = { Rarity = "Epic", Cash = 120, Tier = 1, Lean = -0.2, Speed = 2.517 , Stats = { Health = 1500, Regen = 15, Speed = 60 } }, -- (QM, Nov 2)
+		Snowman = { Rarity = "Legendary", Cash = 260, Tier = 1, Lean = 0.4, Speed = 2.678 , Stats = { Health = 500, Regen = 20, Speed = 111 } }, -- (QM, Nov 2)
+		IceGolem = { Rarity = "Mythic", Cash = 4400, Tier = 2, Lean = 0.4, Speed = 2.86 , Stats = { Health = 3000, Regen = 1, Speed = 50 } }, -- (QM, Nov 2)
 		SnackYak = { Rarity = "Mythic", Cash = 2900000, Tier = 2, Lean = 0.5, Speed = 3 }, -- (a Robux pet in LassoAPet: in no egg)
-		Icebringer = { Rarity = "Divine", Cash = 51000, Tier = 3, Lean = 0.2, Speed = 3.8 },
+		Icebringer = { Rarity = "Divine", Cash = 51000, Tier = 3, Lean = 0.2, Speed = 3.8 , Stats = { Health = 2000, Regen = 25, Speed = 90 } }, -- (QM, Nov 2)
 		-- Lava (LassoAPet's Volcano)
 		Firebird = { Rarity = "Legendary", Cash = 580, Tier = 2, Lean = -0.4, Speed = 5.11 },
 		RockHog = { Rarity = "Mythic", Cash = 1300, Tier = 2, Lean = 0.3, Speed = 6.56 },
@@ -2263,6 +2263,7 @@ return {
 	--   Glow    LassoAPet's Snake rattle: its horns and spikes glow, and you heal Regen x
 	--           your pet's regen (Server/Regen)
 	--   Grow    Grow x bigger and RegenAdd more health a second (the Spine Lizard, QM Nov 2)
+	--   Giant   Grow x bigger and its regen becomes RegenSet a second (the Ice Golem, QM Nov 2)
 	--   Frost   LassoAPet's Icebringer blizzard round it: a boss's minion that comes
 	--           within Radius studs is frozen solid for Freeze seconds (no moving, no
 	--           biting), then can't be frozen again for Again seconds
@@ -2281,6 +2282,7 @@ return {
 		BoneSteed = "Leap", -- (its trail in bone and ghost-fire colours)
 		Snake = "Glow",
 		SpineLizard = "Grow", -- (QM, Nov 2)
+		IceGolem = "Giant", -- (QM, Nov 2)
 		Icebringer = "Frost",
 		KingCrab = "Crabwalk",
 		Rhino = "Smash",
@@ -2304,6 +2306,8 @@ return {
 		},
 		-- (QM, Nov 2: the Spine Lizard) Grow x bigger, and heal RegenAdd more a second
 		Grow = { Grow = 1.1, RegenAdd = 20 },
+		-- (QM, Nov 2: the Ice Golem) Grow x bigger, and its regen becomes RegenSet a second
+		Giant = { Grow = 2, RegenSet = 50 },
 		Fly = { Height = 10, Rise = 0.4 },
 		Smash = {
 			Grow = 1.2,

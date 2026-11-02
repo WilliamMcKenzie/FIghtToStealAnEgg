@@ -42,6 +42,7 @@ function Regen.start()
 				local ability = Config.SprintAbility[player:GetAttribute("SprintAbility") or ""]
 				rate *= ability and ability.Regen or 1
 				rate += ability and ability.RegenAdd or 0 -- (a flat bonus: Burrow, Grow)
+				rate = ability and ability.RegenSet or rate -- (set outright: Giant)
 				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + rate * dt)
 			end
 		end
