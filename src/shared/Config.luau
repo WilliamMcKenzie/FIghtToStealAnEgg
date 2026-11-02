@@ -822,8 +822,8 @@ return {
 			Respawn = 35,
 			Attacks = {
 				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 180, Windup = 1.1, Damage = 285 },
-				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 13, Airtime = 1.4, Height = 48, Damage = 152, Style = "Lava", Cast = 0.8, Anim = "erupt" },
-				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 9, Windup = 1.4, Damage = 175 },
+				{ Kind = "Lob", Every = 4, Count = 4, Scatter = 41.5, Radius = 26, Airtime = 1.4, Height = 48, Damage = 152, Style = "Lava", Cast = 0.8, Anim = "erupt" }, -- (QM, Nov 2: 2x radius)
+				{ Kind = "Bombs", Every = 7, Count = 3, Scatter = 20, Radius = 18, Windup = 1.4, Damage = 175, Style = "Lava" }, -- (QM, Nov 2: 2x radius)
 			},
 			Minions = {
 				At = 0.5,
@@ -1141,7 +1141,7 @@ return {
 			Attacks = {
 				{ Kind = "Swipe", Every = 2.8, Reach = 22, Arc = 270, Windup = 1.1, Damage = 496 },
 				{ Kind = "Leap", Every = 5, Range = 90, Windup = 0.6, Airtime = 1, Height = 28, Radius = 17, Damage = 347, Anim = "leap", Then = 3 },
-				{ Kind = "Bombs", Linked = true, Every = 5, Count = 8, Around = true, Scatter = 8, Radius = 8, Windup = 1.2, Damage = 297, Cast = 0.5, Anim = "puff" },
+				{ Kind = "Bombs", Linked = true, Every = 5, Count = 8, Around = true, Scatter = 8, Radius = 8, Windup = 1.2, Damage = 297, Style = "Spore", Cast = 0.5, Anim = "puff" },
 				{
 					Kind = "Magic",
 					Every = 3,
