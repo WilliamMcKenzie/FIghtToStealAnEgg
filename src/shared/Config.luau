@@ -1278,23 +1278,25 @@ return {
 		Last = 10,
 	},
 
-	-- the new player tutorial (QM, Oct 31; client/Tutorial, Server/Tutorial): a new player
-	-- starts on foot with no pets (OnFoot: WalkSpeed, FootHealth), Egg in hand and no UI,
-	-- places it in their pen, hatches it (ready in HatchTime seconds), rides what hatched
-	-- (QM, Oct 31: "after hatching they must ride"), steals a Meadow egg, beats its boss (always Boss in the tutorial;
-	-- every hit they take is x Damage, so they out-heal it), gets at least BossCash for it,
-	-- buys Weapon from Carl and buys Ground's training ground for free. Their first hit on a
-	-- mob there ends it (TutorialDone, saved: a returning player never sees it again).
+	-- the new player tutorial (QM, Oct 31; reworked Nov 2; client/Tutorial, Server/Tutorial):
+	-- a new player starts on their starter Horse holding Weapon (owned and equipped; the
+	-- Kendo Stick's still theirs) with no UI, steals a Meadow egg (every egg they steal is an
+	-- Egg), beats its boss (always Boss in the tutorial; every hit they take is x Damage,
+	-- so they out-heal it; it pays at least BossCash), puts the egg in their pen, hatches it
+	-- (ready in HatchTime seconds) and rides what hatched, then the camera shows them Ground's
+	-- training ground. That ends it (TutorialDone, saved: a returning player never sees it
+	-- again), as does a first hit on a mob there. (WalkSpeed and FootHealth: riding nothing,
+	-- OnFoot, which the tutorial no longer uses.)
 	-- Owner/Studio chat commands: /tutorial (run it again), /skiptutorial.
 	Tutorial = {
 		On = true,
-		Egg = "Horse",
+		Egg = "Rhino", -- every egg stolen in it (QM, Nov 2: the first pet's always a Rhino)
 		HatchTime = 0,
 		Boss = "MotherHen",
 		BossHealth = 200, -- (its health in the tutorial: the Meadow bosses' old 200, QM Oct 31)
 		Damage = 0.02,
-		BossCash = 500, -- (the Shortbow's price)
-		Weapon = "Shortbow",
+		BossCash = 500, -- (the Shortbow's price: from before it was given)
+		Weapon = "Shortbow", -- a new player starts with it (QM, Nov 2)
 		Ground = "Meadow",
 		WalkSpeed = 16, -- on foot, before the first ride
 		FootHealth = 100,

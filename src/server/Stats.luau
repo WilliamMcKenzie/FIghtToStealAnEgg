@@ -35,7 +35,7 @@
 --   Bounce             session minutes;    Goal, Progress, Length       -- a first session ending
 --   QuickLeave         session minutes;    Goal, Progress, Session      -- under Config.Sessions.Short
 --     Goal is the Goal panel goal they were on ("2. Steal 3 Meadow eggs"), or in the
---     tutorial its last step done ("Tutorial 4/10: Rode pet"); Progress is the bar ("1/3"
+--     tutorial its last step done ("Tutorial 6/7: Rode pet"); Progress is the bar ("1/3"
 --     for small counts, else "50-75%"). "Not loaded" = left before their save came in.
 --   How to read them (Custom Events, pick the event, value = average):
 --     p1 / p2 / p3 avg  SessionLength split by Session (filter one to see it alone)

@@ -2,18 +2,16 @@
 -- Funnels. Every funnel's first step is "Joined game" (QM). Logged here, on the server,
 -- through Roblox's AnalyticsService, each step once per player.
 --
--- Tutorial (Roblox's onboarding funnel: once per player, for good):
+-- Tutorial (Roblox's onboarding funnel: once per player, for good; QM, Nov 2: the new
+-- tutorial's steps, which replaced Oct 31's ten):
 --    1 Joined game        a brand new account starts the tutorial (Server/Tutorial.begin)
---    2 Placed egg         the starting Horse egg down in the pen
---    3 Hatched egg
---    4 Rode pet
---    5 Stole egg          locked in with the Meadow boss
---    6 Beat boss
---    7 Placed boss egg    the egg they stole, down in the pen
---    8 Hatched boss egg
---    9 Bought bow
---   10 Tutorial complete
--- (Steps 2-10 are only counted while the tutorial's on; a step skipped, say by
+--    2 Stole egg          locked in with the Meadow boss
+--    3 Beat boss
+--    4 Placed egg         the egg they stole, down in the pen
+--    5 Hatched egg
+--    6 Rode pet           on what hatched (Config.Tutorial.Egg)
+--    7 Tutorial complete
+-- (Steps 2-7 are only counted while the tutorial's on; a step skipped, say by
 -- /skiptutorial, is just missing.)
 --
 -- Biome progress (a funnel named "BiomeProgress", one session per player, by UserId):
@@ -41,14 +39,11 @@ local Funnels = {}
 
 local TUTORIAL = {
 	"Joined game",
+	"Stole egg",
+	"Beat boss",
 	"Placed egg",
 	"Hatched egg",
 	"Rode pet",
-	"Stole egg",
-	"Beat boss",
-	"Placed boss egg",
-	"Hatched boss egg",
-	"Bought bow",
 	"Tutorial complete",
 }
 Funnels.TUTORIAL = TUTORIAL
@@ -75,7 +70,7 @@ local function tutorialStep(player, step)
 		return
 	end
 	mine[step] = true
-	-- (Server/Stats names where a player in the tutorial left: "Tutorial 3/10: Hatched egg")
+	-- (Server/Stats names where a player in the tutorial left: "Tutorial 5/7: Hatched egg")
 	pcall(player.SetAttribute, player, "TutorialStepAt", step)
 	pcall(AnalyticsService.LogOnboardingFunnelStepEvent, AnalyticsService, player, step, TUTORIAL[step])
 end
@@ -115,35 +110,26 @@ local function watch(player)
 		local now = eggCount()
 		if inTutorial() then
 			if now > eggs then
-				tutorialStep(player, if done(player, 6) then 7 else 2)
+				tutorialStep(player, 4)
 			elseif now < eggs then
-				tutorialStep(player, if done(player, 6) then 8 else 3)
+				tutorialStep(player, 5)
 			end
 		end
 		eggs = now
 	end)
-	player:GetAttributeChangedSignal("OnFoot"):Connect(function()
-		if inTutorial() and not player:GetAttribute("OnFoot") then
-			tutorialStep(player, 4)
-		end
-	end)
 	player:GetAttributeChangedSignal("LockedIn"):Connect(function()
 		if inTutorial() and player:GetAttribute("LockedIn") then
-			tutorialStep(player, 5)
+			tutorialStep(player, 2)
 		end
 	end)
-	player:GetAttributeChangedSignal("Weapons"):Connect(function()
-		if inTutorial() then
-			for owned in string.gmatch(player:GetAttribute("Weapons") or "", "[^,]+") do
-				if owned:match("^[^:]+") == Config.Tutorial.Weapon then
-					tutorialStep(player, 9)
-				end
-			end
+	player:GetAttributeChangedSignal("Pet"):Connect(function()
+		if inTutorial() and done(player, 5) and player:GetAttribute("Pet") == Config.Tutorial.Egg then
+			tutorialStep(player, 6)
 		end
 	end)
 	player:GetAttributeChangedSignal("TutorialDone"):Connect(function()
 		if player:GetAttribute("TutorialDone") and done(player, 1) then
-			tutorialStep(player, 10)
+			tutorialStep(player, #TUTORIAL)
 		end
 	end)
 end
@@ -152,7 +138,7 @@ function Funnels.start(bosses)
 	bosses.killed.Event:Connect(function(_, winners)
 		for _, player in winners do
 			if player:GetAttribute("Tutorial") then
-				tutorialStep(player, 6)
+				tutorialStep(player, 3)
 			end
 		end
 	end)
