@@ -67,15 +67,16 @@ function Pets.stats(kind)
 		local base = tune.Rarity[pet.Rarity] or tune.Rarity.Common
 		local lean = math.clamp(pet.Lean or 0, -1, 1) * tune.Lean
 		local box = hitbox(Pets.class(kind))
+		local set = pet.Stats or {} -- (hand-set numbers: QM, Nov 2)
 		stats[kind] = {
 			Kind = kind,
 			Name = Pets.name(kind),
 			Rarity = pet.Rarity,
 			Cash = pet.Cash or 0,
-			Health = math.round(base.Health * (1 + lean) * (box / HORSE_HITBOX) ^ tune.Hitbox),
-			Speed = math.round((if pet.Speed then rideSpeed(pet.Speed) else base.Speed * (1 - lean)) * 10) / 10, -- (LassoAPet's speeds, on a log curve: QM, Oct 26/30)
+			Health = set.Health or math.round(base.Health * (1 + lean) * (box / HORSE_HITBOX) ^ tune.Hitbox),
+			Speed = set.Speed or math.round((if pet.Speed then rideSpeed(pet.Speed) else base.Speed * (1 - lean)) * 10) / 10, -- (LassoAPet's speeds, on a log curve: QM, Oct 26/30)
 			Hitbox = math.round(box * 10) / 10,
-			Regen = math.round(
+			Regen = set.Regen or math.round(
 				base.Health * tune.Regen.Rate * (1 - (pet.Lean or 0) * tune.Regen.RegenLean) * (pet.Regen or 1) * 10
 			) / 10,
 		}

@@ -1,7 +1,7 @@
 -- Healing (QM, Oct 30: a constant thing, set by your pet): every living player heals their
 -- pet's Regen (health a second: Shared/Pets, Config.PetStats.Regen) all the time, in a
 -- fight or not, up to full. A sprint ability can speed it up (the player's SprintAbility
--- attribute: Config.SprintAbility[it].Regen, the Snake's 2x). Roblox's default Health
+-- attribute: Config.SprintAbility[it].Regen, the Snake's 2x; RegenAdd adds a flat amount). Roblox's default Health
 -- script (its slow regen) is removed from every character.
 --
 --   Regen.start()   -- once
@@ -41,6 +41,7 @@ function Regen.start()
 				local rate = Pets.stats(player:GetAttribute("Pet") or "Horse").Regen
 				local ability = Config.SprintAbility[player:GetAttribute("SprintAbility") or ""]
 				rate *= ability and ability.Regen or 1
+				rate += ability and ability.RegenAdd or 0 -- (a flat bonus: Burrow, Grow)
 				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + rate * dt)
 			end
 		end

@@ -186,6 +186,12 @@ for _, player in Players:GetPlayers() do
 	joined(player)
 end
 
+-- (some sprint abilities can't attack: burrowed underground, QM Nov 2)
+local function noAttack(player)
+	local ability = Config.SprintAbility[player:GetAttribute("SprintAbility") or ""]
+	return ability ~= nil and ability.NoAttack == true
+end
+
 local last = {}
 remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 	if (dir ~= 1 and dir ~= -1) or typeof(seed) ~= "number" or seed ~= seed then
@@ -195,7 +201,7 @@ remote.OnServerEvent:Connect(function(player, dir, seed, yaw)
 		return
 	end
 	-- (only with a melee weapon equipped, at most as often as it swings, and only alive)
-	if not Combat.alive(player) then
+	if not Combat.alive(player) or noAttack(player) then
 		return
 	end
 	local id = player:GetAttribute("Weapon")
@@ -228,8 +234,8 @@ shoot.OnServerEvent:Connect(function(player, yaw, seed, origin)
 		return
 	end
 	seed = if typeof(seed) == "number" and seed == seed then math.floor(seed) % 2 ^ 30 else 0
-	if not Combat.alive(player) then
-		return -- (no shooting from beyond the grave)
+	if not Combat.alive(player) or noAttack(player) then
+		return -- (no shooting from beyond the grave, or burrowed)
 	end
 	local id = player:GetAttribute("Weapon")
 	local w = Weapons.get(id)

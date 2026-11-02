@@ -232,6 +232,11 @@ RunService.Heartbeat:Connect(function(dt)
 	if not id or os.clock() < ready then
 		return
 	end
+	-- (some sprint abilities can't attack: burrowed underground, QM Nov 2)
+	local ability = Config.SprintAbility[player:GetAttribute("SprintAbility") or ""]
+	if ability and ability.NoAttack then
+		return
+	end
 	local inRange = nearestBoss(root, range, room)
 	if not inRange then
 		return

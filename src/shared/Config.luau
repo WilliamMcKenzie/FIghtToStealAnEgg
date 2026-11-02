@@ -2112,6 +2112,9 @@ return {
 	--   Lean    -1 (quick and fragile) to 1 (slow and tough), traded at PetStats.Lean
 	--           (a guess from how fast each ran in LassoAPet)
 	--   Regen   (optional) x its regen (PetStats.Regen)
+	--   Stats   (optional; QM, Nov 2: hand-set numbers) { Health = HP, Regen = HP a second,
+	--           Speed = studs a second }: these replace what PetStats would work out (any
+	--           left out still comes from there)
 	Pets = {
 		Horse = { Rarity = "Common", Cash = 3, Tier = 1, Lean = 0, Speed = 1 },
 		-- Meadow
@@ -2120,13 +2123,13 @@ return {
 		Pinto = { Rarity = "Common", Cash = 10, Tier = 1, Lean = -0.2, Speed = 1.1 },
 		Fish = { Rarity = "Uncommon", Cash = 23, Tier = 1, Lean = 0.6, Speed = 0.6 },
 		Rhino = { Rarity = "Rare", Cash = 77, Tier = 2, Lean = 0.6, Speed = 1.35 },
-		Unicorn = { Rarity = "Epic", Cash = 880, Tier = 2, Lean = -0.4, Speed = 1.8 },
+		Unicorn = { Rarity = "Epic", Cash = 880, Tier = 2, Lean = -0.4, Speed = 1.8, Stats = { Health = 200, Regen = 20, Speed = 60 } }, -- (QM, Nov 2)
 		-- Desert
 		Cactus = { Rarity = "Rare", Cash = 15, Tier = 1, Lean = 0.2, Speed = 1.31 },
 		Scorpion = { Rarity = "Epic", Cash = 51, Tier = 1, Lean = 0, Speed = 1.77 },
-		Sandworm = { Rarity = "Legendary", Cash = 170, Tier = 2, Lean = 0.5, Speed = 1.7 },
-		SpineLizard = { Rarity = "Legendary", Cash = 390, Tier = 2, Lean = -0.5, Speed = 1.97 },
-		Snake = { Rarity = "Mythic", Cash = 3000, Tier = 3, Lean = -0.3, Speed = 2.8 },
+		Sandworm = { Rarity = "Legendary", Cash = 170, Tier = 2, Lean = 0.5, Speed = 1.7, Stats = { Health = 800, Regen = 5, Speed = 60 } }, -- (QM, Nov 2)
+		SpineLizard = { Rarity = "Legendary", Cash = 390, Tier = 2, Lean = -0.5, Speed = 1.97, Stats = { Health = 444, Regen = 15, Speed = 110 } }, -- (QM, Nov 2)
+		Snake = { Rarity = "Mythic", Cash = 3000, Tier = 3, Lean = -0.3, Speed = 2.8, Stats = { Health = 1000, Regen = 10, Speed = 100 } }, -- (QM, Nov 2)
 		-- Tundra
 		Penguin = { Rarity = "Epic", Cash = 34, Tier = 1, Lean = 0.3, Speed = 2.355 },
 		Boar = { Rarity = "Epic", Cash = 120, Tier = 1, Lean = -0.2, Speed = 2.517 },
@@ -2259,6 +2262,7 @@ return {
 	--           minions out of the sky). Up there it dodges like a flier.
 	--   Glow    LassoAPet's Snake rattle: its horns and spikes glow, and you heal Regen x
 	--           your pet's regen (Server/Regen)
+	--   Grow    Grow x bigger and RegenAdd more health a second (the Spine Lizard, QM Nov 2)
 	--   Frost   LassoAPet's Icebringer blizzard round it: a boss's minion that comes
 	--           within Radius studs is frozen solid for Freeze seconds (no moving, no
 	--           biting), then can't be frozen again for Again seconds
@@ -2276,6 +2280,7 @@ return {
 		Unicorn = "Leap",
 		BoneSteed = "Leap", -- (its trail in bone and ghost-fire colours)
 		Snake = "Glow",
+		SpineLizard = "Grow", -- (QM, Nov 2)
 		Icebringer = "Frost",
 		KingCrab = "Crabwalk",
 		Rhino = "Smash",
@@ -2293,7 +2298,12 @@ return {
 			Sand = { Sandworm = Color3.fromRGB(226, 190, 128), Rockworm = Color3.fromRGB(90, 70, 65), BoneWyrm = Color3.fromRGB(110, 100, 95) },
 			Sand2 = { Sandworm = Color3.fromRGB(196, 156, 96), Rockworm = Color3.fromRGB(60, 45, 45), BoneWyrm = Color3.fromRGB(75, 68, 66) },
 			Mound = 1.3, -- x LassoAPet's mounds
+			-- (QM, Nov 2) burrowed you can't attack, but heal RegenAdd more a second
+			NoAttack = true,
+			RegenAdd = 10,
 		},
+		-- (QM, Nov 2: the Spine Lizard) Grow x bigger, and heal RegenAdd more a second
+		Grow = { Grow = 1.1, RegenAdd = 20 },
 		Fly = { Height = 10, Rise = 0.4 },
 		Smash = {
 			Grow = 1.2,
