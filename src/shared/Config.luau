@@ -2113,7 +2113,7 @@ return {
 	--           (a guess from how fast each ran in LassoAPet)
 	--   Regen   (optional) x its regen (PetStats.Regen)
 	--   Stats   (optional; QM, Nov 2: hand-set numbers) { Health = HP, Regen = HP a second,
-	--           Speed = studs a second }: these replace what PetStats would work out (any
+	--           Speed = studs a second, SprintRegen = x its regen while its sprint ability is on }: these replace what PetStats would work out (any
 	--           left out still comes from there)
 	Pets = {
 		Horse = { Rarity = "Common", Cash = 3, Tier = 1, Lean = 0, Speed = 1 },
@@ -2138,13 +2138,13 @@ return {
 		SnackYak = { Rarity = "Mythic", Cash = 2900000, Tier = 2, Lean = 0.5, Speed = 3 }, -- (a Robux pet in LassoAPet: in no egg)
 		Icebringer = { Rarity = "Divine", Cash = 51000, Tier = 3, Lean = 0.2, Speed = 3.8 , Stats = { Health = 2000, Regen = 25, Speed = 90 } }, -- (QM, Nov 2)
 		-- Lava (LassoAPet's Volcano)
-		Firebird = { Rarity = "Legendary", Cash = 580, Tier = 2, Lean = -0.4, Speed = 5.11 },
-		RockHog = { Rarity = "Mythic", Cash = 1300, Tier = 2, Lean = 0.3, Speed = 6.56 },
-		FireLobster = { Rarity = "Mythic", Cash = 2000, Tier = 2, Lean = 0.4, Speed = 6.43 },
-		VolcanoTortoise = { Rarity = "Mythic", Cash = 6700, Tier = 2, Lean = 0.8, Speed = 6.17 },
-		Rockworm = { Rarity = "Divine", Cash = 22000, Tier = 2, Lean = 0.3, Speed = 7.12 },
-		LavaWhale = { Rarity = "Divine", Cash = 170000, Tier = 4, Lean = 0.7, Speed = 6.83 },
-		Phoenix = { Rarity = "Celestial", Cash = 4400000, Tier = 3, Lean = -0.3, Speed = 7.2 },
+		Firebird = { Rarity = "Legendary", Cash = 580, Tier = 2, Lean = -0.4, Speed = 5.11 , Stats = { Health = 700, Regen = 10, Speed = 150 } }, -- (QM, Nov 2)
+		RockHog = { Rarity = "Mythic", Cash = 1300, Tier = 2, Lean = 0.3, Speed = 6.56 , Stats = { Health = 2000, Regen = 15, Speed = 70 } }, -- (QM, Nov 2)
+		FireLobster = { Rarity = "Mythic", Cash = 2000, Tier = 2, Lean = 0.4, Speed = 6.43 , Stats = { Health = 500, Regen = 100, Speed = 130 } }, -- (QM, Nov 2)
+		VolcanoTortoise = { Rarity = "Mythic", Cash = 6700, Tier = 2, Lean = 0.8, Speed = 6.17 , Stats = { Health = 5000, Regen = 40, Speed = 40 } }, -- (QM, Nov 2)
+		Rockworm = { Rarity = "Divine", Cash = 22000, Tier = 2, Lean = 0.3, Speed = 7.12 , Stats = { Health = 4000, Regen = 24, Speed = 80 } }, -- (QM, Nov 2)
+		LavaWhale = { Rarity = "Divine", Cash = 170000, Tier = 4, Lean = 0.7, Speed = 6.83 , Stats = { Health = 6000, Regen = 20, Speed = 100 } }, -- (QM, Nov 2)
+		Phoenix = { Rarity = "Celestial", Cash = 4400000, Tier = 3, Lean = -0.3, Speed = 7.2 , Stats = { Health = 10000, Regen = 50, Speed = 140, SprintRegen = 2 } }, -- (QM, Nov 2)
 		-- Abandoned Dungeon (tools/later_pets.py; QM, Oct 30: new pets for the later biomes)
 		DungeonRat = { Rarity = "Mythic", Cash = 10000, Tier = 2, Lean = -0.4, Speed = 7.6 },
 		Bat = { Rarity = "Mythic", Cash = 34000, Tier = 1, Lean = -0.6, Speed = 7.8 }, -- (LassoAPet's Halloween Bat, QM Oct 30; its meshes are the Blood Bat boss's, tools/animal_meshes.luau)

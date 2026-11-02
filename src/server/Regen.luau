@@ -38,11 +38,14 @@ function Regen.start()
 		for _, player in Players:GetPlayers() do
 			local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 			if humanoid and humanoid.Health > 0 and humanoid.Health < humanoid.MaxHealth then
-				local rate = Pets.stats(player:GetAttribute("Pet") or "Horse").Regen
+				local kind = player:GetAttribute("Pet") or "Horse"
+				local rate = Pets.stats(kind).Regen
 				local ability = Config.SprintAbility[player:GetAttribute("SprintAbility") or ""]
 				rate *= ability and ability.Regen or 1
 				rate += ability and ability.RegenAdd or 0 -- (a flat bonus: Burrow, Grow)
 				rate = ability and ability.RegenSet or rate -- (set outright: Giant)
+				local set = Config.Pets[kind] and Config.Pets[kind].Stats
+				rate *= ability and set and set.SprintRegen or 1 -- (the pet's own: the Phoenix's 2x)
 				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + rate * dt)
 			end
 		end
