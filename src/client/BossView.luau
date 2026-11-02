@@ -45,11 +45,10 @@ local function kindOf(body)
 	if not model then
 		return nil
 	end
-	-- (a boss's ModelSize is its Config Size, x its PetScale here as it always was; a pen pet's,
-	-- mob's or minion's is its riding size already, PetScale and all, so it's drawn at just that:
-	-- x PetScale again drew a Volcano Tortoise 6.25x its drawing, QM Nov 2)
-	local boss = body.Parent and body.Parent.Name == "Bosses" and body.Parent.Parent == workspace
-	if boss then
+	-- (ModelSize is the size it's drawn at: a pen pet's, mob's or minion's riding size has its
+	-- PetScale in it already, and a boss's is its Config Size. x PetScale again drew pen
+	-- Volcano Tortoises 6.25x, QM Nov 2)
+	if body.Parent and body.Parent.Name == "Bosses" and body.Parent.Parent == workspace then
 		size *= BossTuning.scale() -- (workspace.BossTuning's BossScale: Shared/BossTuning)
 	end
 	local key = model .. " " .. size .. " " .. tostring(tint)
@@ -69,7 +68,7 @@ local function kindOf(body)
 			tinted.parts = parts
 			data = tinted
 		end
-		kinds[key] = if data then Horse.variant(model, data, "Boss", { size = size, scaled = not boss }) else false
+		kinds[key] = if data then Horse.variant(model, data, "Boss", { size = size, scaled = true }) else false
 	end
 	return kinds[key] or nil
 end

@@ -6,7 +6,9 @@ return {
 	-- Rig.luau / Studs.luau: studs as stud Textures for now (no stud MaterialVariants yet)
 	StudMaterial = false,
 	FineStuds = {},
-	AnimalScale = { RockHog = 1.5, VolcanoTortoise = 2.5, LavaWhale = 2.5, Phoenix = 2 }, -- (LassoAPet's)
+	-- (QM Nov 2: LassoAPet's RockHog 1.5, VolcanoTortoise 2.5, LavaWhale 2.5 and Phoenix 2 went,
+	-- on top of the tier sizing they made those pets 1.5-2.5x too big: the tortoise was 39 studs tall)
+	AnimalScale = {},
 	-- (the place's workspace.PetScale wins over AnimalScale, which only seeds it: Shared/PetScale.
 	-- Size them in Studio with the pet lineup, then tick PetScale.CopyValues and paste its line here)
 	StudTransparency = 0.5, -- every stud Texture (floor, walls, sword, horse): 0.5 = half strength (QM, Oct 24)
@@ -812,7 +814,7 @@ return {
 		VolcanoTortoise = {
 			Name = "Volcano Tortoise",
 			Model = "VolcanoTortoise",
-			Size = 3, -- (QM Oct 30: x0.6)
+			Size = 7.5, -- (QM Oct 30: x0.6; was 3 x the pet's old 2.5 AnimalScale)
 			Health = 100000,
 			Speed = 5,
 			StopAt = 1,
@@ -830,7 +832,7 @@ return {
 				Count = 3,
 				Model = "VolcanoTortoise", -- (QM Nov 1: mini Volcano Tortoises, not rock hogs)
 				Name = "Mini Tortoise",
-				Scale = 0.5, -- (x the pet's 2.5 riding size: about 40% of the boss)
+				Scale = 1.75, -- (x the pet's riding size: about 40% of the boss)
 				Health = 40000,
 				Speed = 15,
 				Strength = 20,
