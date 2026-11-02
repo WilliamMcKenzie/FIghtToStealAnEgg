@@ -1,5 +1,7 @@
 -- The marker under whatever your auto-attack is aiming at (a boss's body, or a training
--- mob's or dummy's), flat on the floor round its Radius. QM's reference (Oct 26): three
+-- mob's or dummy's), flat on the floor round its Radius, or round the box its drawing fills
+-- when it has one (Shared/Footprint, what your hits land on; QM Nov 2: the Tortoise's
+-- ring sat hidden inside its body). QM's reference (Oct 26): three
 -- lighter curved dashes round the outside, slowly turning, and inside them a thin ring
 -- whose red fades inward to clear at the middle. (Handle adornments, like LassoAPet's
 -- selection ring, so moving it costs next to nothing; the fade is a stack of thin bands.)
@@ -22,7 +24,7 @@ local FADE_EDGE = 0.45 -- transparency of the band against the inner ring
 local FADE_DEPTH = 0.7 -- how far in it fades out, as a share of the inner ring's radius
 local SPIN = 0.6 -- radians a second (the dashes)
 local LIFT = 0.2 -- studs above the bottom of the body (its feet)
-local PAD = 2 -- studs past the body's Radius
+local PAD = 2 -- studs past the body's Radius (or its footprint)
 
 local function band(color, transparency, angle)
 	local a = Instance.new("CylinderHandleAdornment")
@@ -53,6 +55,33 @@ table.move(fade, 1, #fade, #all + 1, all)
 
 local target = nil
 local spin = 0
+local radius = nil -- what the bands are sized to now
+
+-- (the larger half of its footprint box, so the ring reaches its long sides and
+-- shows round the body; its Radius when it has no box)
+local function reach(body)
+	local half = body:GetAttribute("FootHalf")
+	if typeof(half) == "Vector3" then
+		return math.max(half.X, half.Z)
+	end
+	return body:GetAttribute("Radius") or 0.5 * math.max(body.Size.X, body.Size.Z)
+end
+
+local function size(r)
+	radius = r
+	for _, dash in dashes do
+		dash.Radius = r
+		dash.InnerRadius = r * (1 - DASH_WIDTH)
+	end
+	local inner = r * RING_AT
+	ring.Radius = inner
+	ring.InnerRadius = inner * (1 - RING_WIDTH / RING_AT)
+	local step = ring.InnerRadius * FADE_DEPTH / FADE_BANDS
+	for k, a in fade do
+		a.Radius = ring.InnerRadius - (k - 1) * step
+		a.InnerRadius = ring.InnerRadius - k * step
+	end
+end
 
 local TargetRing = {}
 
@@ -68,19 +97,7 @@ function TargetRing.set(body)
 	if not body then
 		return
 	end
-	local r = (body:GetAttribute("Radius") or 0.5 * math.max(body.Size.X, body.Size.Z)) + PAD
-	for _, dash in dashes do
-		dash.Radius = r
-		dash.InnerRadius = r * (1 - DASH_WIDTH)
-	end
-	local inner = r * RING_AT
-	ring.Radius = inner
-	ring.InnerRadius = inner * (1 - RING_WIDTH / RING_AT)
-	local step = ring.InnerRadius * FADE_DEPTH / FADE_BANDS
-	for k, a in fade do
-		a.Radius = ring.InnerRadius - (k - 1) * step
-		a.InnerRadius = ring.InnerRadius - k * step
-	end
+	size(reach(body) + PAD)
 end
 
 RunService.RenderStepped:Connect(function(dt)
@@ -92,8 +109,15 @@ RunService.RenderStepped:Connect(function(dt)
 		TargetRing.set(nil)
 		return
 	end
-	-- (a cylinder adornment runs along its Z axis: turned to lie flat, on the body's floor)
-	local base = CFrame.new(0, -target.Size.Y / 2 + LIFT, 0) * CFrame.Angles(math.pi / 2, 0, 0)
+	local r = reach(target) + PAD -- (it grows, and its box can arrive after it does)
+	if math.abs(r - radius) > 0.05 then
+		size(r)
+	end
+	-- (a cylinder adornment runs along its Z axis: turned to lie flat, on the body's floor,
+	-- under its footprint's middle; FootMid is in the body's frame, its front -Z)
+	local mid = target:GetAttribute("FootMid")
+	mid = if typeof(mid) == "Vector3" then mid else Vector3.zero
+	local base = CFrame.new(mid.X, -target.Size.Y / 2 + LIFT, mid.Z) * CFrame.Angles(math.pi / 2, 0, 0)
 	ring.CFrame = base
 	for _, a in fade do
 		a.CFrame = base
