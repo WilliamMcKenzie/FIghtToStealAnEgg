@@ -369,6 +369,18 @@ function Bosses.wake(biome)
 	end
 end
 
+-- is anyone in this biome's fight lying knocked down on the death screen (Server/Death)?
+local function downedIn(biome)
+	for _, player in Players:GetPlayers() do
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if humanoid and humanoid.Health > 0 and character:GetAttribute("Downed") and player:GetAttribute("LockedIn") == biome then
+			return true
+		end
+	end
+	return false
+end
+
 -- the nearest living player in this biome's fight (or, for /boss bosses, anyone)
 local function nearestPlayer(position, biome)
 	local best, bestDist = nil, math.huge
@@ -486,7 +498,7 @@ local function burrowStep(body, b, dt, target, pos)
 	local w = b.burrow
 	w.t += dt
 	-- (nobody left in the fight: it goes back down its hole and leaves)
-	if target then
+	if target or (b.biome and downedIn(b.biome)) then -- (waiting for a Revive, as above)
 		b.calm = 0
 	elseif b.biome then
 		b.calm += dt
@@ -618,6 +630,10 @@ RunService.Heartbeat:Connect(function(dt)
 				-- (it walks where it faces, so it curves round rather than sliding sideways)
 				pos += CFrame.Angles(0, b.yaw, 0).LookVector * step
 			end
+		elseif b.biome and downedIn(b.biome) then
+			-- (only knocked-down players left, on the death screen: it waits for them, so a
+			-- Revive comes back to the same fight, QM Nov 3. Continue ends it as a death.)
+			b.calm = 0
 		elseif b.biome then
 			-- nobody left in the fight: wait, then walk home and leave (till its next egg's
 			-- stolen)
