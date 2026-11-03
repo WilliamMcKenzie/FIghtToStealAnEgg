@@ -52,6 +52,7 @@ local BossAttacks = require(script.Parent.BossAttacks)
 local Combat = require(script.Parent.Combat)
 local Passes = require(Shared:WaitForChild("Passes"))
 local Pets = require(Shared:WaitForChild("Pets"))
+local Alive = require(Shared:WaitForChild("Alive")) -- (knocked down on the death screen: not a target)
 local Footprint = require(Shared:WaitForChild("Footprint"))
 local PetScale = require(Shared:WaitForChild("PetScale"))
 local Minions = require(script.Parent.Minions)
@@ -376,7 +377,7 @@ local function nearestPlayer(position, biome)
 			local character = player.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart")
 			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-			if root and humanoid and humanoid.Health > 0 then
+			if root and Alive(humanoid) then
 				local d = ((root.Position - position) * Vector3.new(1, 0, 1)).Magnitude
 				if d < bestDist then
 					best, bestDist = root, d

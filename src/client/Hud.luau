@@ -372,6 +372,7 @@ function Hud.start()
 	require(script.Parent.EggsPanel).init(root, root:FindFirstChild("EggsButton")) -- (the egg button's)
 	require(script.Parent.IndexPanel).init(root, root:FindFirstChild("IndexButton")) -- (the Index button's)
 	require(script.Parent.OfflineCash).init(root) -- (what came in while you were away: pops up on joining)
+	require(script.Parent.DeathScreen).init(Hud.scaleFor) -- (its own ScreenGui: You Died!, Revive or Continue)
 
 	-- "You earn $1.2B/Day offline! 😈" (QM, Oct 27: LassoAPet's, 1:1), top centre: the most a
 	-- day offline pays (Server/Data: Config.Data.OfflineRate of your pen's income, the Income

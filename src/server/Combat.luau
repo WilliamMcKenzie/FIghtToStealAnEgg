@@ -50,6 +50,7 @@ local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Weapons = require(Shared:WaitForChild("Weapons"):WaitForChild("Weapons"))
 local Yards = require(Shared:WaitForChild("Yards"))
 local Footprint = require(Shared:WaitForChild("Footprint"))
+local Alive = require(Shared:WaitForChild("Alive"))
 
 local Combat = {}
 
@@ -68,7 +69,7 @@ end
 -- lands) that puts Health back above 0 brings attacking back with it.
 function Combat.alive(player)
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-	return humanoid ~= nil and humanoid.Health > 0
+	return Alive(humanoid) -- (and not knocked down on the death screen: Server/Death)
 end
 
 -- (x2 with the x2 Damage pass: Shared/Passes)

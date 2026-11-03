@@ -29,6 +29,7 @@ local Projectiles = require(Shared.Projectiles)
 local Weapons = require(Shared.Weapons.Weapons)
 local Pets = require(Shared.Pets)
 local Yards = require(Shared.Yards)
+local Alive = require(Shared.Alive)
 local Riding = require(script.Parent.Riding)
 local Sfx = require(script.Parent.Sfx)
 
@@ -275,7 +276,7 @@ local function players(biome, only)
 		local character = p.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if root and humanoid and humanoid.Health > 0 and (only or p:GetAttribute("LockedIn") == biome) then
+		if root and Alive(humanoid) and (only or p:GetAttribute("LockedIn") == biome) then
 			-- (as wide as on the server: Server/BossAttacks, Config.EnemyHit.ShotWidth)
 			local extra = Pets.stats(p:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
 			table.insert(list, { body = root, pos = root.Position, radius = Config.EnemyHit.ShotWidth + extra })
