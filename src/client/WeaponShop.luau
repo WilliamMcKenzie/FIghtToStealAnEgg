@@ -16,6 +16,7 @@
 -- In Studio: StarterGui > Hud > Root > WeaponShop (tick its Visible to see it). Cards are
 -- copies of Panel > Cards > CardTemplate, edit that one.
 
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -258,6 +259,13 @@ local function fill(card, id)
 	card.Picture.Image = ItemIcons.Weapons[id] or ""
 end
 
+-- each weapon's Robux price as this player pays it: the product's own from Roblox (regional
+-- pricing gives each country its own, QM Nov 3), Config.Vendor.Robux by rarity till it loads
+local localPrice = {} -- [weapon id] = PriceInRobux
+local function robux(id)
+	return localPrice[id] or Weapons.robux(id)
+end
+
 local function refresh(card, id, mine)
 	local dps = Weapons.dps(id, player:GetAttribute("Strength") or 0)
 	card.ShopDps.Dps.Text = string.format('<font color="%s">%s</font> DPS', DPS_COLOR, Abbrev(math.round(dps)))
@@ -266,12 +274,12 @@ local function refresh(card, id, mine)
 	card.ShopEquip.Visible = mine[id] == true
 	card.ShopEquip.Text.Text = if equipped then "Equipped" else "Equip"
 	card.ShopBuy.Visible = not mine[id]
-	card.ShopRobux.Visible = not mine[id] and Weapons.robux(id) ~= nil
+	card.ShopRobux.Visible = not mine[id] and robux(id) ~= nil
 	if not mine[id] then
 		if not card.ShopBuy:GetAttribute("Failing") then
 			card.ShopBuy.Text.Text = price(w.Price)
 		end
-		card.ShopRobux.Text.Text = if Weapons.robux(id) then Abbrev(Weapons.robux(id)) else ""
+		card.ShopRobux.Text.Text = if robux(id) then Abbrev(robux(id)) else ""
 		if not card.ShopRobux.Visible then
 			-- (no Robux price: the cash one takes the whole width, on the Equip button's back)
 			card.ShopBuy.Position, card.ShopBuy.Size = card.ShopEquip.Position, card.ShopEquip.Size
@@ -371,6 +379,19 @@ function WeaponShop.init(root)
 		end
 	end
 	refreshAll()
+	-- the real prices, one product at a time (GetProductInfo yields), then the cards again
+	task.spawn(function()
+		for _, m in made do
+			local product = Config.Vendor.Products[m[2]]
+			if product and Weapons.robux(m[2]) then
+				local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, product, Enum.InfoType.Product)
+				if ok and info and info.PriceInRobux then
+					localPrice[m[2]] = info.PriceInRobux
+				end
+			end
+		end
+		refreshAll()
+	end)
 	for _, name in { "Weapon", "Weapons", "Strength" } do
 		player:GetAttributeChangedSignal(name):Connect(refreshAll)
 	end

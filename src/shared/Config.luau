@@ -314,13 +314,16 @@ return {
 		RingRadius = 12, -- studs
 		RingAhead = 5, -- its centre, this far in front of the stall's middle
 		-- every weapon he sells can also be bought with Robux (QM's Weapon Shop design, Oct
-		-- 27): one Roblox developer product per weapon. Robux is the price shown, by rarity
-		-- (placeholders; a weapon's own Robux in Config.Weapons goes over it). Products =
-		-- [weapon id] = its developer product id from the Creator Dashboard; a weapon without
-		-- one can't be bought with Robux yet (Server/Arsenal's ProcessReceipt hands it over).
+		-- 27): one Roblox developer product per weapon. Robux is its price by rarity (QM, Nov 3;
+		-- Common wasn't in QM's list, 5 is my pick); a weapon's own Robux in Config.Weapons goes
+		-- over it. Each product's price on the Creator Dashboard must match (it's what Roblox
+		-- charges), and they have regional pricing on (QM, Nov 3), so the shop shows each
+		-- player's own price from GetProductInfo once it loads and this number until then.
+		-- Products = [weapon id] = its developer product id from the Creator Dashboard; a weapon
+		-- without one can't be bought with Robux yet (Server/Arsenal's ProcessReceipt hands it over).
 		Robux = {
-			Common = 30, Uncommon = 75, Rare = 150, Epic = 400, Legendary = 700, Mythic = 1000,
-			Divine = 1500, Celestial = 2000, Cosmic = 2500, Void = 3000, Omega = 3500,
+			Common = 5, Uncommon = 9, Rare = 19, Epic = 59, Legendary = 129, Mythic = 199,
+			Divine = 299, Celestial = 399, Cosmic = 599, Void = 799, Omega = 999,
 		},
 		Products = {
 			Shortbow = 3724544244,
