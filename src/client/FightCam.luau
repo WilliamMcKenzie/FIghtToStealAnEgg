@@ -114,6 +114,18 @@ function FightCam.snap()
 	w = 1
 end
 
+-- a new life (respawned at your pen): the fight camera's gone at once, no easing back out
+-- from the fight you died in (QM, Nov 3: Continue on the death screen is an instant cut home;
+-- client/SpawnCam then turns the camera to your pen)
+player.CharacterAdded:Connect(function()
+	if w > 0 then
+		camera.FieldOfView -= addedFov
+		addedFov = 0
+		w = 0
+		before = nil
+	end
+end)
+
 RunService:BindToRenderStep("FightCam", Enum.RenderPriority.Camera.Value + 1, function(dt)
 	local cfg = BossTuning.camera() -- (Config.FightCam, with workspace.BossTuning's live values)
 	local character = player.Character

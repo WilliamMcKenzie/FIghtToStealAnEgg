@@ -100,11 +100,17 @@ local function goHome(player)
 	if humanoid.Parent then
 		humanoid.Health = 0 -- (Died: the egg, the fight, the stats all go as any death)
 	end
-	task.delay(REVIVE.ContinueRespawn, function()
-		if player.Parent and player.Character == character then
-			player:LoadCharacter()
-		end
-	end)
+	-- (out of the fight while still dead, so Server/Stats logs it as a death)
+	player:SetAttribute("LockedIn", nil)
+	if REVIVE.ContinueRespawn > 0 then
+		task.delay(REVIVE.ContinueRespawn, function()
+			if player.Parent and player.Character == character then
+				player:LoadCharacter()
+			end
+		end)
+	elseif player.Character == character then
+		player:LoadCharacter() -- (straight home: QM, Nov 3)
+	end
 end
 
 -- Revive: up where you fell, full HP, a moment of shield
