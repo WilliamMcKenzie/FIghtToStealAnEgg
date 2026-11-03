@@ -91,6 +91,7 @@ local Pets = require(Shared:WaitForChild("Pets"))
 local SlashFx = require(Shared:WaitForChild("SlashFx"))
 local Projectiles = require(Shared:WaitForChild("Projectiles"))
 local Config = require(Shared:WaitForChild("Config"))
+local Alive = require(Shared:WaitForChild("Alive")) -- (knocked down on the death screen: left alone)
 local Lives = require(script.Parent.Lives) -- (every hit on a player: the Extra Life pass)
 local HORSE_HITBOX = Pets.stats("Horse").Hitbox
 
@@ -142,7 +143,7 @@ local function fighter(player)
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if root and humanoid and humanoid.Health > 0 then
+	if root and Alive(humanoid) then
 		local extra = Pets.stats(player:GetAttribute("Pet") or "Horse").Hitbox - HORSE_HITBOX
 		return { root = root, humanoid = humanoid, extra = extra, player = player }
 	end

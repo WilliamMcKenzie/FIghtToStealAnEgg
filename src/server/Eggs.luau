@@ -38,6 +38,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local Pets = require(ReplicatedStorage.Shared:WaitForChild("Pets"))
 local Passes = require(ReplicatedStorage.Shared:WaitForChild("Passes"))
 local Stacks = require(ReplicatedStorage.Shared:WaitForChild("Stacks"))
+local Alive = require(ReplicatedStorage.Shared:WaitForChild("Alive"))
 local Bosses = require(script.Parent.Bosses)
 local Map = require(script.Parent.Map)
 local Hatchery = require(script.Parent.Hatchery)
@@ -166,7 +167,7 @@ local function lay(nest, biome, popAt)
 			return
 		end
 		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if not (humanoid and humanoid.Health > 0) then
+		if not Alive(humanoid) then
 			return
 		end
 		-- (the tutorial's eggs are all Config.Tutorial.Egg, so the first pet is: QM, Nov 2)

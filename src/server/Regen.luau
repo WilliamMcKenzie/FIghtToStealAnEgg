@@ -13,6 +13,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Pets = require(Shared:WaitForChild("Pets"))
+local Alive = require(Shared:WaitForChild("Alive")) -- (knocked down on the death screen: no healing)
 
 local Regen = {}
 
@@ -37,7 +38,7 @@ function Regen.start()
 	RunService.Heartbeat:Connect(function(dt)
 		for _, player in Players:GetPlayers() do
 			local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-			if humanoid and humanoid.Health > 0 and humanoid.Health < humanoid.MaxHealth then
+			if Alive(humanoid) and humanoid.Health < humanoid.MaxHealth then
 				local kind = player:GetAttribute("Pet") or "Horse"
 				local rate = Pets.stats(kind).Regen
 				local ability = Config.SprintAbility[player:GetAttribute("SprintAbility") or ""]

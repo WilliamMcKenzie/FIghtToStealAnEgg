@@ -2252,7 +2252,21 @@ return {
 	-- where it died and you and your pet tip over onto your side, Fall seconds, lie there,
 	-- and Respawn seconds after dying you're back in front of your pen (Server/Death,
 	-- client/Riding).
-	Death = { Fall = 0.45, Respawn = 3 },
+	-- The death screen (QM, Nov 3: like LassoAPet's crash screen; client/DeathScreen, Server/
+	-- Death): a hit that would kill you knocks you down instead, lying where you fell, and
+	-- "You Died!" pops up with Revive (Robux) and Continue under it. Continue: you die for
+	-- real and you're back at your pen ContinueRespawn seconds later, as before. Revive: up
+	-- again right there at full HP, with your egg and still in the fight, and Shield seconds
+	-- nothing can hurt you. Nothing chosen in Decide seconds is a Continue (the prompt being
+	-- up holds it). Not in the tutorial (you just die).
+	--   Product  the Revive developer product's id (Creator Hub); till it has one, Studio
+	--            revives for free and live games don't offer Revive. Robux: the price shown
+	--            till the product's own is read.
+	Death = {
+		Fall = 0.45,
+		Respawn = 3,
+		Revive = { On = true, Product = 3728020176, Robux = 29, Shield = 2, Decide = 30, ContinueRespawn = 0.4, ScreenDelay = 0.45 },
+	},
 	-- Sprint abilities (QM, Oct 30; client/SprintAbility draws them, Server/SprintAbility
 	-- runs them): these pets' sprint is a special move instead. It starts once, the moment
 	-- you've ridden Sprint.Delay seconds without stopping (whatever your speed), with the

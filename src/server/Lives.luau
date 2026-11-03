@@ -1,7 +1,9 @@
 -- The Extra Life game pass (QM, Oct 30; Config.Shop.Passes): a hit that would kill you
 -- brings you back at full HP instead, once a life (and once a fight: it's ready again
 -- when the fight ends), with Config.Shop.LifeShield seconds of a force field after.
--- Every hit a player takes goes through Lives.hurt (Server/BossAttacks).
+-- Every hit a player takes goes through Lives.hurt (Server/BossAttacks). A hit that would
+-- still kill you knocks you down onto the death screen instead (Server/Death.down), and
+-- nothing hurts you while you're down.
 --
 --   Lives.hurt(humanoid, damage)
 --   Lives.start()  -- once
@@ -15,10 +17,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Passes = require(Shared.Passes)
+local Death = require(script.Parent.Death)
 
 local Lives = {}
 
 function Lives.hurt(humanoid, damage)
+	if humanoid.Parent and humanoid.Parent:GetAttribute("Downed") then
+		return -- (lying on the death screen: Server/Death)
+	end
 	local player = Players:GetPlayerFromCharacter(humanoid.Parent)
 	if player and player:GetAttribute("Tutorial") then
 		damage *= Config.Tutorial.Damage -- (the tutorial's boss barely scratches you: QM, Oct 31)
@@ -39,6 +45,15 @@ function Lives.hurt(humanoid, damage)
 			shield:Destroy()
 		end)
 		player:SetAttribute("LifeSaved", workspace:GetServerTimeNow())
+		return
+	end
+	if
+		player
+		and humanoid.Health > 0
+		and humanoid.Health - damage <= 0
+		and not humanoid.Parent:FindFirstChildOfClass("ForceField")
+		and Death.down(player, humanoid)
+	then
 		return
 	end
 	humanoid:TakeDamage(damage)

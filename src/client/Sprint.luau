@@ -29,6 +29,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Pets = require(Shared.Pets)
 local MapData = require(Shared.MapData)
+local Alive = require(Shared.Alive)
 local Liquid = require(script.Parent.Liquid)
 local RideSounds = require(script.Parent.RideSounds)
 local SkyFlash = require(script.Parent.SkyFlash)
@@ -102,7 +103,7 @@ RunService:BindToRenderStep("Sprint", Enum.RenderPriority.Camera.Value + 3, func
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local alive = root ~= nil and humanoid ~= nil and humanoid.Health > 0
+	local alive = root ~= nil and Alive(humanoid)
 	local onFoot = player:GetAttribute("OnFoot") == true -- (the tutorial before its first ride: no sprinting)
 	local base = (if onFoot then Config.Tutorial.WalkSpeed else Pets.stats(player:GetAttribute("Pet") or "Horse").Speed) * Liquid.slow()
 	if alive and not onFoot and not inCombat(root) then

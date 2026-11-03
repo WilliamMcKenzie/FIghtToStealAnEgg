@@ -37,6 +37,7 @@ local TextChatService = game:GetService("TextChatService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Pets = require(Shared.Pets)
+local Alive = require(Shared.Alive) -- (knocked down on the death screen lies there like dead)
 
 local Riding = {}
 
@@ -324,7 +325,10 @@ RunService.PreSimulation:Connect(function(dt)
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		local alive = humanoid ~= nil and humanoid.Health > 0
+		local alive = Alive(humanoid)
+		if alive and character then
+			onFootDead[character] = nil -- (revived: Server/Death)
+		end
 		if character and not mounts[character] and character.Parent and alive and not onFoot(character) then
 			mount(character)
 		elseif character and not mounts[character] and humanoid and not alive and character.Parent then
@@ -337,20 +341,23 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 	end
 	for character, m in mounts do
-		if not character.Parent or not m.root.Parent or (onFoot(character) and m.humanoid.Health > 0) then
+		if not character.Parent or not m.root.Parent or (onFoot(character) and Alive(m.humanoid)) then
 			dismount(character)
 			continue
 		end
 		-- dead: frozen where you died (Server/Death), falling over with your pet
-		local dead = m.humanoid.Health <= 0
+		local dead = not Alive(m.humanoid)
 		if dead and not m.diedAt then
 			m.diedAt = os.clock()
 			if character == Players.LocalPlayer.Character then
 				m.root.Anchored = true -- (frozen at once, as the server will)
 				m.root.AssemblyLinearVelocity = Vector3.zero
 			end
-		elseif not dead then
+		elseif not dead and m.diedAt then
 			m.diedAt = nil
+			if character == Players.LocalPlayer.Character then
+				m.root.Anchored = false -- (revived where you fell: Server/Death)
+			end
 		end
 		local kind = petOf(character)
 		if kind ~= m.kind and not dead then

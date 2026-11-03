@@ -28,6 +28,7 @@ local Weapons = require(Shared.Weapons.Weapons)
 local Projectiles = require(Shared.Projectiles)
 local Yards = require(Shared.Yards)
 local Footprint = require(Shared.Footprint)
+local Alive = require(Shared.Alive)
 local Riding = require(script.Riding)
 local Sfx = require(script.Sfx)
 local Shots = require(script.Shots)
@@ -206,9 +207,9 @@ RunService.Heartbeat:Connect(function(dt)
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	-- (dead, Health 0: no aiming and no attacks until you respawn, or a revive puts
-	-- Health back, QM Oct 30)
+	-- Health back, QM Oct 30; nor knocked down on the death screen: Server/Death)
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if not root or not humanoid or humanoid.Health <= 0 then
+	if not root or not Alive(humanoid) then
 		TargetRing.set(nil)
 		return
 	end
