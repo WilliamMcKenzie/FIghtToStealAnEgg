@@ -2262,7 +2262,7 @@ return {
 	Death = {
 		Fall = 0.45,
 		Respawn = 3,
-		Revive = { On = true, Product = 3728020176, Robux = 29, Shield = 2, Decide = 30, ContinueRespawn = 0, ScreenDelay = 0.45 },
+		Revive = { On = true, Product = 3728020176, Robux = 29, Shield = 5, Decide = 30, ContinueRespawn = 0, ScreenDelay = 0.45 },
 	},
 	-- Sprint abilities (QM, Oct 30; client/SprintAbility draws them, Server/SprintAbility
 	-- runs them): these pets' sprint is a special move instead. It starts once, the moment
